@@ -205,7 +205,6 @@ Please ensure your code follows the project’s coding standards and includes ap
 
 - **Email**: `zimmermanmb99@gmail.com`
 - **Website**: `www.versoindustries.com` (currently not live)
-- **Issues**: [GitHub Issues](https://github.com/versoindustries/HighNoonLLM/issues)
 - **Commercial Licensing**: See `COMMERCIAL-LICENSE.md`
 
 ## Discord Server
