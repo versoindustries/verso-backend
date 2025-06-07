@@ -1,11 +1,37 @@
 {% extends "base.html" %}
 
+{% block title %}Build Powerful Web Applications with Flask{% endblock %}
+
+{% block description %}
+Verso Backend is a robust Flask template that simplifies creating scalable and secure web applications. Leverage Flask's lightweight framework to build feature-rich backends with ease.
+{% endblock %}
+
 {% block additional_css %}
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/home.css') }}">
 {% endblock %}
 
 {% block head %}
-
+<meta name="description" content="{{ description |e }}">
+<meta name="keywords" content="Flask, Verso Backend, web development, Python, scalable applications, secure backend">
+<meta property="og:title" content="{{ title |e }}">
+<meta property="og:description" content="{{ description |e }}">
+<meta property="og:image" content="{{ url_for('static', filename='images/logo.png') }}">
+<meta property="og:url" content="{{ request.url }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ title |e }}">
+<meta name="twitter:description" content="{{ description |e }}">
+<meta name="twitter:image" content="{{ url_for('static', filename='images/logo.png') }}">
+<link rel="canonical" href="{{ request.url }}">
+<meta name="robots" content="index, follow">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "{{ title |e }}",
+  "description": "{{ description |e }}",
+  "url": "{{ request.url }}"
+}
+</script>
 {% endblock %}
 
 {% block scripts %}
@@ -15,34 +41,29 @@
       const lightboxImg = document.getElementById('lightbox-img');
       const lightboxClose = document.querySelector('.lightbox-close');
 
-      // Function to attach lightbox event listeners to anchor tags
       function attachLightboxListeners(links) {
           links.forEach(link => {
               link.addEventListener('click', function (event) {
-                  event.preventDefault(); // Prevent default link behavior
-                  lightbox.style.display = 'flex'; // Show the lightbox
-                  lightboxImg.src = this.href; // Set the image in the lightbox
+                  event.preventDefault();
+                  lightbox.style.display = 'flex';
+                  lightboxImg.src = this.href;
               });
           });
       }
 
-      // Initial attachment of lightbox event listeners
       const initialLinks = document.querySelectorAll('.gallery-container a');
       attachLightboxListeners(initialLinks);
 
-      // Close the lightbox when clicking on the close button
       lightboxClose.addEventListener('click', function () {
           lightbox.style.display = 'none';
       });
 
-      // Close the lightbox when clicking outside the image
       lightbox.addEventListener('click', function (event) {
           if (event.target !== lightboxImg) {
               lightbox.style.display = 'none';
           }
       });
 
-      // Lazy loading images
       const lazyLoad = (image) => {
           image.src = image.dataset.src;
           image.onload = () => {
@@ -63,7 +84,6 @@
           observer.observe(image);
       });
 
-      // Load more functionality
       const loadMoreButton = document.getElementById('load-more');
       if (loadMoreButton) {
           loadMoreButton.addEventListener('click', function () {
@@ -82,7 +102,6 @@
                           observer.observe(img);
                       });
 
-                      // Attach lightbox listeners to new links
                       attachLightboxListeners(newLinks);
 
                       if (hasMore) {
@@ -97,16 +116,12 @@
 </script>
 {% endblock %}
 
-{% block title %}{% endblock %}
-
-{% block description %}  {% endblock %}
-
 {% block content %}
 <div class="section-spacer"></div>
 
-<section id="hero-image">
+<section id="hero-image" class="hero-section" role="banner">
   <div class="image-container">
-    <img src="{{ url_for('static', filename='images/hero-bg.jpg') }}" alt="Custom Business Website">
+    <img src="{{ url_for('static', filename='images/hero-bg.jpg') }}" alt="Hero Background">
     <div class="image-overlay"></div>
     <div class="hero-content">
       <h1>Build Powerful Web Applications with Flask</h1>
@@ -117,8 +132,164 @@
 
 <div class="small-spacer"></div>
 
+<section class="versatile-apps-section">
+  <div class="versatile-container">
+    <div class="versatile-text">
+      <h2>Versatile Applications with Flask</h2>
+      <p>Flask's lightweight and modular nature makes it perfect for a variety of applications, from community-driven platforms to business tools and beyond.</p>
+      <ul class="versatile-list">
+        <li><i class="fas fa-users"></i> Social Apps: Create platforms with user profiles, messaging, and real-time interactions.</li>
+        <li><i class="fas fa-home"></i> Rental Apps: Build marketplaces for property or equipment rentals with booking systems.</li>
+        <li><i class="fas fa-calendar"></i> Service Appointment Apps: Develop scheduling tools for businesses with calendar integration.</li>
+        <li><i class="fas fa-globe"></i> General Websites: Design dynamic sites with custom content management.</li>
+        <li><i class="fas fa-car"></i> Auto Inventory Management: Leverage GPT-4 powered sales descriptors for dynamic vehicle listings.</li>
+        <li><i class="fas fa-plus"></i> And Much More: Tailor Flask to niche projects with its extensible architecture.</li>
+      </ul>
+    </div>
+    <div class="versatile-icons">
+      <i class="fas fa-users icon-social"></i>
+      <i class="fas fa-home icon-rental"></i>
+      <i class="fas fa-calendar icon-appointment"></i>
+      <i class="fas fa-globe icon-website"></i>
+      <i class="fas fa-car icon-auto"></i>
+      <i class="fas fa-plus icon-more"></i>
+    </div>
+  </div>
+</section>
 
+<section class="gallery-section">
+  <h2>Gallery</h2>
+  <div class="gallery-container" id="gallery-container">
+    <a href="{{ url_for('static', filename='images/gallery/VersoIndustries-Social-Dashboard.jpg') }}">
+      <img class="lazy" data-src="{{ url_for('static', filename='images/gallery/VersoIndustries-Social-Dashboard.jpg') }}" alt="Social App Screenshot">
+    </a>
+    <a href="{{ url_for('static', filename='images/gallery/DumpsterDudes.jpg') }}">
+      <img class="lazy" data-src="{{ url_for('static', filename='images/gallery/DumpsterDudes.jpg') }}" alt="Rental App Screenshot">
+    </a>
+    <a href="{{ url_for('static', filename='images/gallery/ZNH-Mockup.jpg') }}">
+      <img class="lazy" data-src="{{ url_for('static', filename='images/gallery/ZNH-Mockup.jpg') }}" alt="Appointment App Screenshot">
+    </a>
+    <a href="{{ url_for('static', filename='images/gallery/nwauto.jpg') }}">
+      <img class="lazy" data-src="{{ url_for('static', filename='images/gallery/nwauto.jpg') }}" alt="Website Screenshot">
+    </a>
+    <a href="{{ url_for('static', filename='images/gallery/Notus-Auto-Sales-Mockup.jpg') }}">
+      <img class="lazy" data-src="{{ url_for('static', filename='images/gallery/Notus-Auto-Sales-Mockup.jpg') }}" alt="Website Screenshot">
+    </a>
+    <a href="{{ url_for('static', filename='images/gallery/cprism.jpg') }}">
+      <img class="lazy" data-src="{{ url_for('static', filename='images/gallery/cprism.jpg') }}" alt="Website Screenshot">
+    </a>
+    <a href="{{ url_for('static', filename='images/gallery/GarageCafe-Mockup.jpg') }}">
+      <img class="lazy" data-src="{{ url_for('static', filename='images/gallery/GarageCafe-Mockup.jpg') }}" alt="Website Screenshot">
+    </a>
+    <a href="{{ url_for('static', filename='images/gallery/rockymtnburial.jpg') }}">
+      <img class="lazy" data-src="{{ url_for('static', filename='images/gallery/rockymtnburial.jpg') }}" alt="Website Screenshot">
+    </a>
+  </div>
+  <button id="load-more" data-page="2">Load More</button>
+  <div id="lightbox" class="lightbox">
+    <span class="lightbox-close">&times;</span>
+    <img id="lightbox-img" class="lightbox-img" alt="Gallery Image">
+  </div>
+</section>
 
-<div class="section-spacer"></div>
+<section class="features-section">
+  <div class="features-container">
+    <h2>What You Can Do with Flask</h2>
+    <p>Flask empowers developers with its simplicity and flexibility. Verso Backend showcases this by offering:</p>
+    <div class="features-grid">
+      <div class="feature-item">
+        <i class="fas fa-lock"></i>
+        <h3>User Authentication</h3>
+        <p>Implement secure user registration, login, and password resets with role-based access control.</p>
+      </div>
+      <div class="feature-item">
+        <i class="fas fa-database"></i>
+        <h3>Database Integration</h3>
+        <p>Use SQLAlchemy with Flask to manage predefined models for users, roles, and appointments.</p>
+      </div>
+      <div class="feature-item">
+        <i class="fas fa-file-alt"></i>
+        <h3>Form Handling</h3>
+        <p>Process user input seamlessly with WTForms for robust validation and security.</p>
+      </div>
+      <div class="feature-item">
+        <i class="fas fa-envelope"></i>
+        <h3>Email Functionality</h3>
+        <p>Send notifications or password resets using Flask-Mail with minimal setup.</p>
+      </div>
+      <div class="feature-item">
+        <i class="fas fa-tachometer-alt"></i>
+        <h3>Admin Interface</h3>
+        <p>Create a dashboard to manage users and appointments quickly.</p>
+      </div>
+      <div class="feature-item">
+        <i class="fas fa-rocket"></i>
+        <h3>Easy Deployment</h3>
+        <p>Deploy to Heroku effortlessly with Verso’s pre-configured setup.</p>
+      </div>
+      <div class="feature-item">
+        <i class="fas fa-puzzle-piece"></i>
+        <h3>Modular Design</h3>
+        <p>Extend your application with custom routes and features.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
+<section class="get-started-section">
+  <div class="get-started-container">
+    <h2>Get Started</h2>
+    <p>Experience Flask’s ease of use by setting up Verso Backend locally:</p>
+    <ol class="steps-list">
+      <li>Clone the repository from GitHub.</li>
+      <li>Set up a virtual environment and install dependencies.</li>
+      <li>Configure environment variables and initialize the database with Flask commands.</li>
+      <li>Run the app and explore Flask’s development server.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="deploy-section">
+  <div class="deploy-container">
+    <h2>Deploy with Flask</h2>
+    <p>Flask makes deployment straightforward. With Verso Backend, deploy to Heroku by:</p>
+    <ol class="steps-list">
+      <li>Creating a Heroku app.</li>
+      <li>Setting environment variables.</li>
+      <li>Pushing your code and running migrations.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="frontend-section">
+  <div class="frontend-container">
+    <div class="frontend-text">
+      <h2>Connect Any Frontend</h2>
+      <p>Flask’s versatility shines with Verso Backend. Pair it with:</p>
+      <ul class="frontend-list">
+        <li>Jinja2 for server-side rendering.</li>
+        <li>Modern frameworks like React or Vue via API endpoints.</li>
+        <li>Design tools like Figma and Webflow for a custom UI.</li>
+      </ul>
+      <p>Adapt Flask to your preferred frontend workflow effortlessly.</p>
+    </div>
+    <div class="frontend-icons">
+      <i class="fab fa-html5 icon-jinja"></i>
+      <i class="fab fa-react icon-react"></i>
+      <i class="fab fa-vuejs icon-vue"></i>
+    </div>
+  </div>
+</section>
+
+<section class="community-section">
+  <div class="community-container">
+    <h2>Join the Flask Community</h2>
+    <p>Contribute to Verso Backend and enhance your Flask skills:</p>
+    <ol class="steps-list">
+      <li>Fork the repository.</li>
+      <li>Add your improvements.</li>
+      <li>Submit a pull request.</li>
+    </ol>
+  </div>
+</section>
 {% endblock %}
