@@ -218,6 +218,81 @@ Ensure your code adheres to the project’s coding standards and includes tests 
 - **Sponsor**: Support development via GitHub Sponsors or Patreon.
 - **Share**: Spread the word on social media, forums, or X to boost visibility.
 
+# Sponsorship Tiers for Verso Backend
+
+Support the development of **Verso Backend**, a Flask-based open-source CMS backend with secure authentication, appointment booking, and AI-driven extensibility via Grok3. Your sponsorship fuels innovation, community growth, and scalable solutions for businesses. Choose a tier below to contribute via GitHub Sponsors or Stripe.
+
+## Community Supporter
+- **Monthly Amount**: $5
+- **Benefits**:
+  - Name listed on the GitHub Sponsors page and README.md.
+  - Access to a supporters-only Discord channel.
+- **Description**:
+  - Perfect for individuals passionate about open-source CMS development.
+- **Sponsor Link**: [Sponsor Now](https://buy.stripe.com/fZu14nfiYgTYelU6Cygfu0J)
+
+## Developer Advocate
+- **Monthly Amount**: $15
+- **Benefits**:
+  - All Community Supporter benefits.
+  - Early access to development updates and beta features via email or private repository.
+- **Description**:
+  - Ideal for developers or small teams wanting to stay in the loop on Verso Backend’s progress.
+- **Sponsor Link**: [Sponsor Now](https://buy.stripe.com/cNi9AT6Ms8nsb9I7GCgfu0K)
+
+## Project Patron
+- **Monthly Amount**: $50
+- **Benefits**:
+  - All Developer Advocate benefits.
+  - Personal thank-you via email or X post from @bigmikez99z.
+  - Acknowledgment in project documentation or blog posts.
+- **Description**:
+  - For dedicated supporters who want to make a meaningful impact on the project.
+- **Sponsor Link**: [Sponsor Now](https://buy.stripe.com/14A3cv0o49rwb9I1iegfu0L)
+
+## Corporate Sponsor
+- **Monthly Amount**: $6,000
+- **Benefits**:
+  - All Project Patron benefits.
+  - Company logo on the project’s GitHub README and website (when live).
+  - Priority Que for feature requests or bug fixes.
+- **Description**:
+  - Designed for businesses leveraging Verso Backend for web applications or CMS solutions.
+- **Sponsor Link**: [Sponsor Now](https://buy.stripe.com/3cIaEX4Ek9rw6Ts6Cygfu0M)
+
+## Strategic Partner
+- **Annual Amount**: $150,000
+- **Benefits**:
+  - All Corporate Sponsor benefits.
+  - Quarterly virtual meetings with maintainers to discuss roadmap and priorities.
+  - Ability to propose features or integrations (e.g., API endpoints, Grok3 enhancements).
+  - Early access to new modules or AI-driven features.
+- **Description**:
+  - For organizations seeking a collaborative role in shaping Verso Backend’s future.
+- **Sponsor Link**: [Sponsor Now](https://buy.stripe.com/6oUcN51s88nsdhQ5yugfu0N)
+
+## Premier Sponsor
+- **Annual Amount**: $300,000
+- **Benefits**:
+  - All Strategic Partner benefits.
+  - Co-branding opportunities (e.g., “Verso Backend, Powered by [Sponsor Name]”).
+  - Dedicated development sprint for one sponsor-requested feature per year (subject to feasibility).
+  - Dedicated support channel for technical queries or customizations.
+  - Naming rights for a module, feature, or release (e.g., “SponsorName Authentication Module”).
+- **Description**:
+  - For major stakeholders integrating Verso Backend into enterprise solutions or AI-driven platforms.
+- **Sponsor Link**: [Sponsor Now](https://buy.stripe.com/fZu4gz6Ms1Z45Po1iegfu0O)
+
+---
+
+## Why Sponsor Verso Backend?
+- **Innovative Technology**: Support a Flask-based CMS with Grok3 integration for AI-driven development, ideal for scalable web applications.
+- **Business Value**: Benefit from a Heroku-ready backend with authentication, appointment booking, and modular design, reducing development costs.
+- **Community Impact**: Help build a community-driven open-source project, positioning your brand as a leader in web and AI technologies.
+- **Influence and Visibility**: Higher tiers offer roadmap input, co-branding, and feature prioritization, aligning the project with your business needs.
+
+---
+
 ## Contributors
 
 - **Michael Zimmerman**: Founder and CEO of Verso Industries, creator of HighNoon LLM and HSMN architecture, and Lead Developer.
