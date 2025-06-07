@@ -29,7 +29,9 @@
 
     <!-- Dashboard Statistics -->
     <div class="dashboard-stats">
-        <p>Total users: {{ total_users }}</p>
+        <p>Total Users: {{ total_users }}</p>
+        <a href="{{ url_for('admin.list_users') }}">Manage Users</a>
+        <a href="{{ url_for('admin.list_roles') }}">Manage Roles</a>
     </div>
 
     <!-- Upcoming Appointments Section -->

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block additional_css %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/admindash.css') }}">
+{% endblock %}
+
+{% block title %}
+User Management
+{% endblock %}
+
+{% block description %}
+Manage user accounts, including viewing, editing, and deleting users, as well as assigning roles.
+{% endblock %}
+
+{% block head %}
+<meta name="description" content="{{ description | e }}">
+<meta property="og:title" content="{{ title | e }}">
+<meta property="og:description" content="{{ description | e }}">
+<meta property="og:image" content="{{ url_for('static', filename='images/logo.png') }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ title | e }}">
+<meta name="twitter:description" content="{{ description | e }}">
+<meta name="twitter:image" content="{{ url_for('static', filename='images/logo.png') }}">
+<link rel="canonical" href="{{ request.url }}">
+<meta name="robots" content="noindex, nofollow">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "{{ title | e }}",
+  "description": "{{ description | e }}"
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="user-management-section">
+  <div class="container">
+    <header class="section-header">
+      <h1 class="section-title"><i class="fas fa-users"></i> User Management</h1>
+      <p class="section-subtitle">View, edit, delete, and create user accounts with assigned roles.</p>
+    </header>
+
+    <div class="action-buttons">
+      <a href="{{ url_for('admin.new_user') }}" class="btn btn-primary"><i class="fas fa-user-plus"></i> Create New User</a>
+      <a href="{{ url_for('admin.list_roles') }}" class="btn btn-secondary"><i class="fas fa-shield-alt"></i> Manage Roles</a>
+    </div>
+
+    {% if users %}
+    <div class="table-responsive">
+      <table class="user-table">
+        <thead>
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Username</th>
+            <th scope="col">Email</th>
+            <th scope="col">Roles</th>
+            <th scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td data-label="ID">{{ user.id }}</td>
+            <td data-label="Username">
+              <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="user-link">{{ user.username | e }}</a>
+            </td>
+            <td data-label="Email">{{ user.email | e }}</td>
+            <td data-label="Roles">{{ user.roles | map(attribute='name') | join(', ') | e }}</td>
+            <td data-label="Actions">
+              <form method="POST" action="{{ url_for('admin.delete_user', user_id=user.id) }}" class="delete-form" onsubmit="return confirm('Are you sure you want to delete {{ user.username | e }}?');">
+                {{ form.csrf_token }}
+                <button type="submit" class="btn btn-danger" aria-label="Delete user {{ user.username | e }}">
+                  <i class="fas fa-trash-alt"></i> Delete
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="no-users">No users found.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Ensure delete confirmation is accessible and functional
+  document.querySelectorAll('.delete-form').forEach(form => {
+    form.addEventListener('submit', (e) => {
+      if (!confirm(form.getAttribute('onsubmit').replace('return confirm(\'', '').replace('\');', ''))) {
+        e.preventDefault();
+      }
+    });
+  });
+</script>
+{% endblock %}
