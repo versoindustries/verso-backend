@@ -190,6 +190,28 @@ Contributions are welcome! To contribute:
 
 Please ensure your code follows the project’s coding standards and includes appropriate tests.
 
+## Support the Project
+
+- **Contribute**: Submit pull requests or report issues on GitHub Issues.
+- **Sponsor**: Support development via GitHub Sponsors or Patreon.
+- **Share**: Promote Verso Backend on social media, forums, or X to increase visibility.
+
+## Contributors
+
+- **Michael Zimmerman**: Founder and CEO of Verso Industries, creator of HighNoon LLM and the HSMN architecture, and Lead Developer for the project.
+- **Jacob Godina**: President and Co-Founder of Verso Industries, contributor to code, design, and marketing.
+
+## Contact
+
+- **Email**: `zimmermanmb99@gmail.com`
+- **Website**: `www.versoindustries.com` (currently not live)
+- **Issues**: [GitHub Issues](https://github.com/versoindustries/HighNoonLLM/issues)
+- **Commercial Licensing**: See `COMMERCIAL-LICENSE.md`
+
+## Discord Server
+
+https://discord.gg/pBrSPbaMnM
+
 ## License
 
 This project is licensed under the [Apache License 2.0](LICENSE).

@@ -48,8 +48,8 @@ To set up the development environment:
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/yourusername/flask-template-repo.git
-   cd flask-template-repo
+   git clone https://github.com/yourusername/verso-backend.git
+   cd verso-backend
    ```
 
 2. **Install Dependencies**:
