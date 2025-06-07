@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Add Service Option{% endblock %}
+{% block description %}Create a new service option or manage existing ones below.{% endblock %}
+
+{% block additional_css %}
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/service_admin.css') }}">
+{% endblock %}
+
+{% block head %}
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="{{ description }}">
+  <meta property="og:title" content="{{ title }}">
+  <meta property="og:description" content="{{ description }}">
+  <meta property="og:image" content="{{ url_for('static', filename='images/logo.png') }}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ title }}">
+  <meta name="twitter:description" content="{{ description }}">
+  <meta name="twitter:image" content="{{ url_for('static', filename='images/logo.png') }}">
+  <link rel="canonical" href="{{ request.url }}">
+  <meta name="robots" content="index, follow">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "{{ title }}",
+    "description": "{{ description }}"
+  }
+  </script>
+{% endblock %}
+
+{% block content %}
+  <!-- Header Section -->
+  <section class="service-header">
+    <div class="header-container">
+      <h1><i class="fas fa-plus-circle"></i> Add Service Option</h1>
+      <p>Create a new service option or manage existing ones below.</p>
+    </div>
+  </section>
+
+  <!-- Form Section -->
+  <section class="service-form">
+    <div class="form-container">
+      <form method="POST">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+          <label for="{{ form.name.id }}"><i class="fas fa-tag"></i> {{ form.name.label.text }}</label>
+          {{ form.name(class="form-input") }}
+          {% if form.name.errors %}
+            {% for error in form.name.errors %}
+              <span class="form-error">{{ error }}</span>
+            {% endfor %}
+          {% endif %}
+        </div>
+        <div class="form-group">
+          <label for="{{ form.description.id }}"><i class="fas fa-info-circle"></i> {{ form.description.label.text }}</label>
+          {{ form.description(class="form-input") }}
+          {% if form.description.errors %}
+            {% for error in form.description.errors %}
+              <span class="form-error">{{ error }}</span>
+            {% endfor %}
+          {% endif %}
+        </div>
+        <div class="form-group">
+          <label for="{{ form.display_order.id }}"><i class="fas fa-sort-numeric-up"></i> {{ form.display_order.label.text }}</label>
+          {{ form.display_order(class="form-input") }}
+          {% if form.display_order.errors %}
+            {% for error in form.display_order.errors %}
+              <span class="form-error">{{ error }}</span>
+            {% endfor %}
+          {% endif %}
+        </div>
+        <button type="submit" class="form-submit"><i class="fas fa-check"></i> {{ form.submit.label.text }}</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Existing Services Section -->
+  <section class="service-list">
+    <div class="list-container">
+      <h2><i class="fas fa-list"></i> Existing Service Options</h2>
+      <ul class="service-items">
+        {% for service_option in services %}
+          <li class="service-item">
+            <span class="service-icon"><i class="fas fa-cog"></i></span>
+            <span class="service-name">{{ service_option.name | e }}</span>
+            <span class="service-order">Order: {{ service_option.display_order }}</span>
+            <form method="POST" action="{{ url_for('admin.delete_service', service_id=service_option.id) }}" class="delete-form">
+              {{ form.hidden_tag() }} <!-- Include CSRF token -->
+              <button type="submit" class="delete-button" onclick="return confirm('Are you sure you want to delete {{ service_option.name | e }}?');">
+                <i class="fas fa-trash-alt"></i> Delete
+              </button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </section>
+
+  <!-- Footer Section -->
+  <footer class="service-footer">
+    <div class="footer-container">
+      <p><a href="{{ url_for('admin.admin_dashboard') }}"><i class="fas fa-home"></i> Back to Dashboard</a></p>
+    </div>
+  </footer>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    // Add hover effect for service items
+    document.addEventListener('DOMContentLoaded', () => {
+      const serviceItems = document.querySelectorAll('.service-item');
+      serviceItems.forEach(item => {
+        item.addEventListener('mouseenter', () => {
+          item.classList.add('hovered');
+        });
+        item.addEventListener('mouseleave', () => {
+          item.classList.remove('hovered');
+        });
+      });
+    });
+  </script>
+{% endblock %}
