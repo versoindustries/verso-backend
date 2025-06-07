@@ -2,7 +2,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, make_response, jsonify
 from flask_login import login_required, current_user
 from app.modules.auth_manager import admin_required  # Assuming you have an admin_required decorator
-from app.models import User, Estimator, Service, Appointment, ContactFormSubmission
+from app.models import User, Estimator, Service, Appointment, ContactFormSubmission, Role
 from app.forms import ManageRolesForm, EditUserForm, EstimatorForm, EstimateRequestForm, ServiceOptionForm, CSRFTokenForm
 from app.database import db
 from werkzeug.utils import secure_filename
@@ -17,7 +17,6 @@ admin = Blueprint('admin', __name__, template_folder='templates')
 
 @admin.context_processor
 def combined_context_processor():
-    locations = get_locations()
     erf_form = EstimateRequestForm()
     return dict(erf_form=erf_form, hide_estimate_form=True)
 
@@ -71,13 +70,6 @@ def admin_dashboard():
         form=form
     )
 
-@admin.route('/user-management')
-@login_required
-@admin_required
-def user_management():
-    users = User.query.all()
-    return render_template('admin/user_management.html', users=users)
-
 @admin.route('/manage-roles/<int:user_id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -93,36 +85,47 @@ def manage_roles(user_id):
 
     return render_template('manage_roles.html', form=form, user=user)
 
-@admin.route('/edit-user/<int:user_id>', methods=['GET', 'POST'])
-@login_required
-@admin_required
-def edit_user(user_id):
-    user = User.query.get_or_404(user_id)
-    form = EditUserForm(obj=user)  # Pre-populate form with user data
-
-    if form.validate_on_submit():
-        user.username = form.username.data
-        user.email = form.email.data
-        # Update other fields as necessary
-        db.session.commit()
-        flash('User updated successfully.', 'success')
-        return redirect(url_for('admin.user_management'))
-
-    return render_template('admin/edit_user.html', form=form, user=user)
-
 @admin.route('/estimator', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def admin_estimator():
     form = EstimatorForm()
     if form.validate_on_submit():
-        
         estimator = Estimator(name=form.name.data)
         db.session.add(estimator)
         db.session.commit()
+        return redirect(url_for('admin.admin_dashboard'))  # Redirect to admin dashboard
+
+    # Query all estimators
+    estimators = Estimator.query.all()
+    
+    return render_template('admin/estimator_form.html', hide_estimate_form=True, form=form, estimators=estimators)
+
+@admin.route('/estimator/delete/<int:estimator_id>', methods=['POST'])
+@login_required
+@admin_required
+def delete_estimator(estimator_id):
+    """Delete an estimator record by ID."""
+    current_app.logger.debug(f'Attempting to delete estimator with ID: {estimator_id}')
+    
+    estimator = Estimator.query.get_or_404(estimator_id)
+    
+    try:
+        # Check if the estimator is associated with any appointments
+        if estimator.appointments:
+            flash('Cannot delete estimator because they are assigned to appointments.', 'error')
+            return redirect(url_for('admin.admin_estimator'))
         
-        return redirect(url_for('admin.admin_dashboard'))  # Redirect to admin dashboard or appropriate page
-    return render_template('admin/estimator_form.html', hide_estimate_form=True, form=form)
+        db.session.delete(estimator)
+        db.session.commit()
+        current_app.logger.info(f'Estimator ID {estimator_id} deleted successfully.')
+        flash('Estimator deleted successfully.', 'success')
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        current_app.logger.error(f'Error deleting estimator ID {estimator_id}: {e}')
+        flash('Error deleting estimator. Please try again.', 'error')
+    
+    return redirect(url_for('admin.admin_estimator'))
 
 @admin.route('/service', methods=['GET', 'POST'])
 @login_required
@@ -164,8 +167,34 @@ def services():
     services = Service.query.order_by(Service.display_order).all()
     current_app.logger.debug(f'Loaded {len(services)} Services for display.')
 
-    # Render the 'admin/floorplan.html' template
-    return render_template('admin/floorplan.html', hide_estimate_form=True, form=form, services=services)
+    # Render the 'admin/service.html' template
+    return render_template('admin/service.html', hide_estimate_form=True, form=form, services=services)
+
+@admin.route('/service/delete/<int:service_id>', methods=['POST'])
+@login_required
+@admin_required
+def delete_service(service_id):
+    """Delete a service record by ID."""
+    current_app.logger.debug(f'Attempting to delete service with ID: {service_id}')
+    
+    service = Service.query.get_or_404(service_id)
+    
+    try:
+        # Check if the service is associated with any appointments
+        if service.appointments:
+            flash('Cannot delete service because it is associated with appointments.', 'error')
+            return redirect(url_for('admin.services'))
+        
+        db.session.delete(service)
+        db.session.commit()
+        current_app.logger.info(f'Service ID {service_id} deleted successfully.')
+        flash('Service deleted successfully.', 'success')
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        current_app.logger.error(f'Error deleting service ID {service_id}: {e}')
+        flash('Error deleting service. Please try again.', 'error')
+    
+    return redirect(url_for('admin.services'))
 
 @admin.route('/generate-sitemap', methods=['GET'])
 @login_required
@@ -227,3 +256,91 @@ def delete_appointment(appointment_id):
     db.session.commit()
     flash('Appointment deleted successfully.', 'success')
     return redirect(url_for('admin.admin_dashboard'))
+
+@admin.route('/user-management', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def user_management():
+    """Manage users with filtering, sorting, and bulk actions."""
+    current_app.logger.debug('Accessing user management route')
+    
+    form = CSRFTokenForm()
+    
+    # Handle filtering and sorting
+    search_query = request.args.get('search', '', type=str).strip()
+    sort_by = request.args.get('sort', 'username', type=str)
+    sort_order = request.args.get('order', 'asc', type=str)
+    
+    # Build query
+    query = User.query
+    
+    if search_query:
+        query = query.filter(
+            (User.username.ilike(f'%{search_query}%')) |
+            (User.email.ilike(f'%{search_query}%')) |
+            (User.first_name.ilike(f'%{search_query}%')) |
+            (User.last_name.ilike(f'%{search_query}%'))
+        )
+    
+    # Apply sorting
+    if sort_by == 'email':
+        query = query.order_by(User.email.asc() if sort_order == 'asc' else User.email.desc())
+    elif sort_by == 'name':
+        query = query.order_by(User.last_name.asc() if sort_order == 'asc' else User.last_name.desc())
+    else:
+        query = query.order_by(User.username.asc() if sort_order == 'asc' else User.username.desc())
+    
+    # Handle bulk actions (POST request)
+    if request.method == 'POST' and form.validate_on_submit():
+        action = request.form.get('action')
+        user_ids = request.form.getlist('selected_users')
+        
+        try:
+            if action == 'assign_role' and user_ids:
+                role_id = request.form.get('role_id')
+                role = Role.query.get_or_404(role_id)
+                for user_id in user_ids:
+                    user = User.query.get_or_404(user_id)
+                    if not user.has_role(role.name):
+                        user.add_role(role)
+                db.session.commit()
+                flash(f'Role "{role.name}" assigned to selected users.', 'success')
+                current_app.logger.info(f'Bulk role assignment: Role {role.name} to users {user_ids}')
+            
+            elif action == 'remove_role' and user_ids:
+                role_id = request.form.get('role_id')
+                role = Role.query.get_or_404(role_id)
+                for user_id in user_ids:
+                    user = User.query.get_or_404(user_id)
+                    if user.has_role(role.name):
+                        user.remove_role(role)
+                db.session.commit()
+                flash(f'Role "{role.name}" removed from selected users.', 'success')
+                current_app.logger.info(f'Bulk role removal: Role {role.name} from users {user_ids}')
+            
+            elif action == 'delete' and user_ids:
+                for user_id in user_ids:
+                    user = User.query.get_or_404(user_id)
+                    if user.id != current_user.id:  # Prevent self-deletion
+                        db.session.delete(user)
+                db.session.commit()
+                flash('Selected users deleted successfully.', 'success')
+                current_app.logger.info(f'Bulk user deletion: Users {user_ids}')
+            
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            flash('Error performing bulk action. Please try again.', 'error')
+            current_app.logger.error(f'Bulk action error: {e}')
+    
+    users = query.all()
+    roles = Role.query.all()
+    
+    return render_template(
+        'admin/user_management.html',
+        users=users,
+        roles=roles,
+        form=form,
+        search_query=search_query,
+        sort_by=sort_by,
+        sort_order=sort_order
+    )

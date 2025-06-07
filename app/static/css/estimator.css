@@ -1,0 +1,520 @@
+/* Estimator Header Section */
+.estimator-header {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    padding: 40px 20px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-light);
+    border-radius: 12px;
+    margin: 20px;
+    text-align: center;
+    z-index: 600;
+}
+
+.estimator-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: var(--pulse-effect);
+    opacity: 0.3;
+    z-index: 0;
+    animation: pulse 15s infinite ease-in-out;
+}
+
+.header-container {
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+.header-container h1 {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 2rem;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    text-shadow: 0 0 10px rgba(82, 80, 194, 0.6);
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: transform 0.3s ease;
+}
+
+.header-container h1:hover {
+    transform: translateY(-3px);
+}
+
+.header-container h1 i {
+    font-size: 1.8rem;
+    color: var(--accent-blue);
+}
+
+.header-container p {
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+/* Estimator Form Section */
+.estimator-form {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    padding: 40px 20px;
+    margin: 20px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-light);
+    position: relative;
+    z-index: 600;
+}
+
+.form-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 1rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.form-group label i {
+    font-size: 1.2rem;
+    color: var(--accent-blue);
+}
+
+.form-input {
+    width: 100%;
+    padding: 10px;
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 1rem;
+    color: var(--text-primary);
+    background: rgba(42, 42, 42, 0.9);
+    border: 1px solid var(--accent-blue);
+    border-radius: 6px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #F4C430;
+    box-shadow: 0 0 8px rgba(244, 196, 48, 0.4);
+}
+
+.form-error {
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 0.9rem;
+    color: #ff4d4d;
+    display: block;
+    margin-top: 5px;
+}
+
+.form-submit {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 1rem;
+    color: var(--text-primary);
+    background: var(--accent-blue);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.form-submit:hover {
+    background: #F4C430;
+    transform: translateY(-2px);
+}
+
+.form-submit i {
+    font-size: 1.2rem;
+}
+
+/* Estimator List Section */
+.estimator-list {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    padding: 40px 20px;
+    margin: 20px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-light);
+    position: relative;
+    z-index: 600;
+}
+
+.list-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.list-container h2 {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 1.8rem;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    text-shadow: 0 0 10px rgba(82, 80, 194, 0.6);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: transform 0.3s ease;
+}
+
+.list-container h2:hover {
+    transform: translateY(-3px);
+}
+
+.list-container h2 i {
+    font-size: 1.6rem;
+    color: var(--accent-blue);
+}
+
+.estimator-items {
+    list-style: none;
+    padding: 0;
+}
+
+.estimator-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: rgba(42, 42, 42, 0.9);
+    border-radius: 8px;
+    margin-bottom: 15px;
+    box-shadow: var(--shadow-light);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.estimator-item.hovered {
+    transform: translateX(5px);
+    box-shadow: var(--shadow-hover);
+}
+
+.estimator-icon i {
+    font-size: 1.5rem;
+    color: var(--accent-blue);
+    transition: color 0.3s ease;
+}
+
+.estimator-item.hovered .estimator-icon i {
+    color: #F4C430;
+}
+
+.estimator-name {
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    flex: 1;
+}
+
+/* Estimator Footer Section */
+.estimator-footer {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    margin: 20px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-light);
+    text-align: center;
+    z-index: 600;
+}
+
+.footer-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.footer-container p {
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 1rem;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.footer-container a {
+    color: var(--accent-blue);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: color 0.3s ease;
+}
+
+.footer-container a:hover {
+    color: #F4C430;
+}
+
+.footer-container a i {
+    font-size: 1.2rem;
+}
+
+/* Medium screens (768px and up) */
+@media (min-width: 768px) {
+    .estimator-header {
+        padding: 60px 30px;
+        margin: 30px;
+    }
+
+    .header-container h1 {
+        font-size: 2.5rem;
+    }
+
+    .header-container p {
+        font-size: 1.2rem;
+    }
+
+    .estimator-form {
+        padding: 60px 30px;
+        margin: 30px;
+    }
+
+    .form-submit {
+        padding: 14px 24px;
+        font-size: 1.1rem;
+    }
+
+    .estimator-list {
+        padding: 60px 30px;
+        margin: 30px;
+    }
+
+    .list-container h2 {
+        font-size: 2rem;
+    }
+
+    .estimator-item {
+        padding: 20px;
+    }
+
+    .estimator-footer {
+        padding: 30px;
+        margin: 30px;
+    }
+}
+
+/* Small screens (480px and below) */
+@media (max-width: 480px) {
+    .estimator-header {
+        padding: 30px 15px;
+        margin: 10px;
+    }
+
+    .header-container h1 {
+        font-size: 1.6rem;
+    }
+
+    .header-container h1 i {
+        font-size: 1.4rem;
+    }
+
+    .header-container p {
+        font-size: 0.9rem;
+    }
+
+    .estimator-form {
+        padding: 30px 15px;
+        margin: 10px;
+    }
+
+    .form-group label {
+        font-size: 0.9rem;
+    }
+
+    .form-input {
+        padding: 8px;
+        font-size: 0.9rem;
+    }
+
+    .form-submit {
+        padding: 10px 16px;
+        font-size: 0.9rem;
+    }
+
+    .form-submit i {
+        font-size: 1rem;
+    }
+
+    .estimator-list {
+        padding: 30px 15px;
+        margin: 10px;
+    }
+
+    .list-container h2 {
+        font-size: 1.5rem;
+    }
+
+    .list-container h2 i {
+        font-size: 1.3rem;
+    }
+
+    .estimator-item {
+        padding: 12px;
+        gap: 10px;
+    }
+
+    .estimator-icon i {
+        font-size: 1.3rem;
+    }
+
+    .estimator-name {
+        font-size: 0.9rem;
+    }
+
+    .estimator-footer {
+        padding: 15px;
+        margin: 10px;
+    }
+
+    .footer-container p {
+        font-size: 0.9rem;
+    }
+
+    .footer-container a i {
+        font-size: 1rem;
+    }
+}
+
+/* Reusing pulse animation */
+@keyframes pulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.3;
+    }
+    50% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(0.8);
+        opacity: 0.3;
+    }
+}
+
+/* Delete Form and Button */
+.delete-form {
+  display: inline-block;
+  margin-left: 10px;
+}
+
+.delete-button {
+  background-color: #dc3545; /* Bootstrap-style danger red */
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.delete-button:hover {
+  background-color: #c82333; /* Darker red on hover */
+}
+
+.delete-button i {
+  font-size: 14px;
+}
+
+/* Estimator Item Layout */
+.estimator-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.estimator-name {
+  flex-grow: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .delete-button {
+    padding: 4px 8px;
+  }
+  .delete-button i {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .estimator-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .delete-form {
+    margin-left: 0;
+    margin-top: 5px;
+  }
+}
+
+/* Delete Button Styles */
+.delete-form {
+  display: inline-block;
+  margin-left: 10px;
+}
+
+.delete-button {
+  background-color: #dc3545;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.delete-button:hover {
+  background-color: #c82333;
+}
+
+.delete-button i {
+  margin-right: 5px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .delete-button {
+    padding: 5px 10px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .delete-form {
+    margin-left: 5px;
+  }
+  .delete-button {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+  .service-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .service-name, .service-order {
+    margin-bottom: 5px;
+  }
+}
