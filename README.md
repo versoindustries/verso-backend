@@ -2,7 +2,7 @@
 
 ![ZNH Mockup](app/static/images/gallery/ZNH-Mockup.jpg)
 
-**Verso Backend** is a Flask-based backend template designed for easy deployment on Heroku. It provides a robust foundation for building scalable and secure web applications with features like user authentication, database models, forms, and email support. This template is highly extensible and can integrate with various frontend frameworks or templating engines, such as Jinja2, Tailwind CSS, or Figma-to-Webflow pages.
+**Verso Backend** is a Flask-based backend template designed for easy deployment on Heroku(https://www.heroku.com/). It provides a robust foundation for building scalable and secure web applications with features like user authentication, database models, forms, and email support. This template is highly extensible and can integrate with various frontend frameworks or templating engines, such as Jinja2, Tailwind CSS, or Figma-to-Webflow pages.
 
 ## Features
 
@@ -189,7 +189,7 @@ To integrate a custom frontend:
 ## Notes
 
 - **`docs.md`**: Provides a detailed breakdown of the backend structure and components.
-- **Grok3 Documentation**: Located in the `docs` folder, it explains how to extend the backend using XAi’s Grok3.
+- **Grok3 Documentation**: Located in the `docs` folder, it explains how to extend the backend using XAi’s Grok3(https://grok.com/).
   - **WARNING**: These docs and system instructions are tailored for XAi Grok3 only. Compatibility with other LLMs is untested, and results cannot be guaranteed. We recommend using Grok3 from XAi for optimal development.
 
 ## Still In The Works
