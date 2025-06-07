@@ -1,0 +1,131 @@
+/* Blog Specific Styles */
+
+.breadcrumb-nav {
+    margin: 20px 0;
+    padding-left: 0;
+    list-style: none;
+}
+
+.breadcrumb-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    font-family: 'Neon-Regular', sans-serif;
+    color: #E2BB90;
+}
+
+.breadcrumb-item a {
+    color: #E2BB90;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.breadcrumb-item a:hover {
+    color: #ffffff;
+}
+
+.custom-home-guide {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.5); /* Dark translucent background */
+    backdrop-filter: blur(5px);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.guide-intro {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.5); /* Dark translucent background */
+    backdrop-filter: blur(5px);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.guide-intro h1 {
+    font-family: 'Neon-Heavy', sans-serif;
+    color: #E2BB90;
+    text-align: center;
+}
+
+.custom-home-building-image {
+    width: 100%;
+    height: auto;
+    margin-top: 20px;
+    border-radius: 5px;
+}
+
+
+.guide-header h1 {
+    font-family: 'Neon-Heavy', sans-serif;
+    color: #E2BB90;
+    text-align: center;
+}
+
+.custom-home-building-image {
+    width: 100%;
+    height: auto;
+    margin-top: 20px;
+    border-radius: 5px;
+}
+
+.guide-introduction, .timeline-overview, .factors-influencing {
+    color: #ffffff;
+    font-family: 'Neon-Regular', sans-serif;
+    margin-top: 20px;
+}
+
+.timeline-overview h2, .factors-influencing h2 {
+    font-family: 'Neon-Heavy', sans-serif;
+    color: #E2BB90;
+}
+
+.timeline-overview h3, .factors-influencing ul li strong {
+    font-family: 'Neon-Heavy', sans-serif;
+    color: #E2BB90;
+}
+
+.factors-influencing ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.factors-influencing ul li::before {
+    content: "•";
+    color: #E2BB90; /* Bullet color */
+    display: inline-block; 
+    width: 1em;
+    margin-left: -1em;
+}
+
+.guide-footer {
+    font-family: 'Neon-Regular', sans-serif;
+    color: #ffffff;
+    margin-top: 20px;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.5); /* Dark translucent background */
+    backdrop-filter: blur(5px);
+    border-radius: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 768px) {
+    .custom-home-guide {
+        padding: 10px;
+    }
+}
+
+/* Enhancements for readability and mobile responsiveness */
+@media (max-width: 480px) {
+    .breadcrumb-list {
+        flex-direction: column;
+        align-items: start;
+    }
+
+    .guide-header h1, .timeline-overview h2, .factors-influencing h2 {
+        font-size: 1.5rem; /* Adjust font size for smaller screens */
+    }
+}

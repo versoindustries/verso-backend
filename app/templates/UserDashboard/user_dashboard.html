@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block additional_css %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/cdash.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Spacer to ensure content doesn't hide behind the fixed header -->
+<div class="section-spacer"></div>
+
+
+<div class="section-spacer"></div>
+{% endblock content %}
+
+{% block scripts %}
+<!-- Include any JavaScript files here -->
+{% endblock scripts %}

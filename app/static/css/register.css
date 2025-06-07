@@ -1,0 +1,77 @@
+/* Registration Page Specific Styles */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: rgba(51, 51, 51, 0.8); /* Dark background for contrast */
+    backdrop-filter: blur(5px);
+}
+
+.login-box {
+    background: rgba(0, 0, 0, 0.75); /* Dark translucent background */
+    padding: 40px;
+    border-radius: 15px;
+    width: 100%;
+    max-width: 400px; /* Ensures the form is not too wide on larger screens */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); /* Adds depth with a shadow */
+    color: #ffffff; /* White text color for readability */
+}
+
+.login-box h2 {
+    font-family: 'Neon-Heavy', sans-serif;
+    text-align: center;
+    margin-bottom: 30px;
+    color: #E2BB90; /* Gold color for headings */
+}
+
+.form-group {
+    margin-bottom: 20px; /* Adds space between form fields */
+}
+
+.form-control {
+    background-color: #282a36; /* Dark background for form fields */
+    color: #ffffff; /* White text color for contrast */
+    border: 1px solid #E2BB90; /* Gold border for elegance */
+    border-radius: 5px; /* Rounded corners for modern look */
+    padding: 10px; /* Spacious padding for ease of typing */
+}
+
+.form-control-label {
+    color: #E2BB90; /* Gold color for labels */
+    font-family: 'Neon-Regular', sans-serif;
+}
+
+.btn-primary {
+    background-color: #E2BB90; /* Gold background for primary button */
+    border-color: #E2BB90; /* Consistent border color */
+    font-family: 'Neon-Heavy', sans-serif;
+}
+
+.btn-primary:hover {
+    background-color: #e0b17f; /* Slightly lighter gold on hover */
+    border-color: #e0b17f;
+}
+
+.alert-danger {
+    background-color: #ff4d4d; /* Red background for errors */
+    color: #ffffff; /* White text for readability */
+    padding: 10px;
+    margin-top: -15px; /* Positions the alert closer to the input field */
+    margin-bottom: 20px; /* Ensures space between the alert and the next field */
+    border-radius: 5px; /* Rounded corners for a softer look */
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+    .login-box {
+        padding: 20px;
+        max-width: 90%; /* Allows more space for the form on smaller screens */
+    }
+}
+
+@media (max-width: 480px) {
+    .login-box {
+        max-width: 100%; /* Utilizes full width for very small screens */
+    }
+}

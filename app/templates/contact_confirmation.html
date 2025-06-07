@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block additional_css %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/cconfirm.css') }}">
+{% endblock %}
+
+{% block title %}
+Contact Confirmation | Verso Industries
+{% endblock %}
+
+{% block head %}
+<!-- Additional head content can go here -->
+{% endblock %}
+
+{% block content %}
+<div class="section-spacer"></div>
+
+<div class="container">
+    <h1>Thank you for your message!</h1>
+    <p>We have received your message and will get back to you shortly.</p>
+    <p>You will be redirected to the homepage in 8 seconds.</p>
+</div>
+
+<div class="section-spacer"></div>
+
+<!-- Meta refresh to redirect after 8 seconds -->
+<meta http-equiv="refresh" content="8;url={{ url_for('main_routes.index') }}">
+{% endblock %}

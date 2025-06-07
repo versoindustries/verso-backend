@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block additional_css %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/community.css') }}">
+{% endblock %}
+
+{% block scripts %} 
+{% endblock %}
+
+{% block title %}Z&H Homes - Communities{% endblock %}
+
+{% block content %}
+<div class="section-spacer"></div>
+
+<div class="community-cards">
+    <!-- Card 1 -->
+    <div class="card">
+        <div class="card-image">
+            <img src="{{ url_for('static', filename='images/payette-county.jpg') }}" alt="Payette Idaho New Homes">
+        </div>
+        <div class="card-content">
+            <h2>Piper Glen</h2>
+            <a href="{{ url_for('main_routes.piperglen') }}" class="cta-link">View Project</a>
+        </div>
+    </div>
+    <!-- Additional cards can be added here -->
+</div>
+{% endblock %}

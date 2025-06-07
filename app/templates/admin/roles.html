@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Manage Roles for {{ user.username }}</h2>
+<form method="post">
+    {{ form.hidden_tag() }}
+    <div>
+        {{ form.roles.label }}
+        {{ form.roles(size=10, multiple=true) }}  <!-- Adjust size and style as needed -->
+        {% for error in form.roles.errors %}
+            <span style="color: red;">{{ error }}</span>
+        {% endfor %}
+    </div>
+    <div>
+        {{ form.submit() }}
+    </div>
+</form>
+{% endblock %}

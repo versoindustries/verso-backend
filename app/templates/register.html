@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block additional_css %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/register.css') }}">
+{% endblock %}
+
+{% block title %}
+Register
+{% endblock %}
+
+{% block content %}
+<!-- Flash Messages Display -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+<div class="login-container">
+    <div class="login-box">
+        <h2>Register</h2>
+        <form action="{{ url_for('auth.register') }}" method="post" class="register-form">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.username.label }}
+                {{ form.username(class="form-control") }}
+                {% if form.username.errors %}
+                    <div class="alert alert-danger">
+                        {{ form.username.errors[0] }}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.email.label }}
+                {{ form.email(class="form-control") }}
+                {% if form.email.errors %}
+                    <div class="alert alert-danger">
+                        {{ form.email.errors[0] }}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.password.label }}
+                {{ form.password(class="form-control") }}
+                {% if form.password.errors %}
+                    <div class="alert alert-danger">
+                        {{ form.password.errors[0] }}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.confirm_password.label }}
+                {{ form.confirm_password(class="form-control") }}
+                {% if form.confirm_password.errors %}
+                    <div class="alert alert-danger">
+                        {{ form.confirm_password.errors[0] }}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.role.label(class="form-control-label") }}
+                {{ form.role(class="form-control") }}
+                {% if form.role.errors %}
+                    <div class="alert alert-danger">
+                        {{ form.role.errors[0] }}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.accept_tos() }}
+                <label for="accept_tos">I agree to the <a href="{{ url_for('main_routes.index') }}" target="_blank">Terms and Conditions</a></label>
+                {% if form.accept_tos.errors %}
+                    <div class="alert alert-danger">
+                        {{ form.accept_tos.errors[0] }}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,93 @@
+/* Contact Us Page Styles */
+.contactus {
+    padding: 4rem 2rem;
+    background-color: #202020;
+    color: #ffffff;
+    text-align: center;
+}
+
+.contactus h1 {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+}
+
+.contactus .form-group {
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+.contactus .form-label {
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    display: block;
+    color: #ffffff;
+}
+
+.contactus .form-control {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1.2rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #333333;
+    color: #ffffff;
+}
+
+.contactus .form-control::placeholder {
+    color: #cccccc;
+}
+
+.contactus .text-danger {
+    color: #ff4d4d;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.contactus .btn-primary {
+    background-color: #e2ba90;
+    border-color: #e2ba90;
+    color: #ffffff;
+    font-family: 'Neon-Heavy', sans-serif;
+    padding: 0.75rem 1.5rem;
+    font-size: 1.2rem;
+    border-radius: 5px;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 1rem;
+}
+
+.contactus .btn-primary:hover {
+    background-color: #e2ba90;
+    border-color: #e2ba90;
+    transform: scale(1.05);
+}
+
+/* Mobile Optimizations for screens 480px or less */
+@media screen and (max-width: 480px) {
+    .contactus {
+        padding: 2rem 1rem;
+    }
+
+    .contactus h1 {
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .contactus .form-label {
+        font-size: 1rem;
+    }
+
+    .contactus .form-control {
+        padding: 0.6rem;
+        font-size: 1rem;
+    }
+
+    .contactus .btn-primary {
+        font-size: 1rem;
+        padding: 0.6rem 1.2rem;
+    }
+}

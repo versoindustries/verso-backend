@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block additional_css %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/home.css') }}">
+{% endblock %}
+
+{% block head %}
+  
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+      const lightbox = document.getElementById('lightbox');
+      const lightboxImg = document.getElementById('lightbox-img');
+      const lightboxClose = document.querySelector('.lightbox-close');
+
+      // Function to attach lightbox event listeners to anchor tags
+      function attachLightboxListeners(links) {
+          links.forEach(link => {
+              link.addEventListener('click', function (event) {
+                  event.preventDefault(); // Prevent default link behavior
+                  lightbox.style.display = 'flex'; // Show the lightbox
+                  lightboxImg.src = this.href; // Set the image in the lightbox
+              });
+          });
+      }
+
+      // Initial attachment of lightbox event listeners
+      const initialLinks = document.querySelectorAll('.gallery-container a');
+      attachLightboxListeners(initialLinks);
+
+      // Close the lightbox when clicking on the close button
+      lightboxClose.addEventListener('click', function () {
+          lightbox.style.display = 'none';
+      });
+
+      // Close the lightbox when clicking outside the image
+      lightbox.addEventListener('click', function (event) {
+          if (event.target !== lightboxImg) {
+              lightbox.style.display = 'none';
+          }
+      });
+
+      // Lazy loading images
+      const lazyLoad = (image) => {
+          image.src = image.dataset.src;
+          image.onload = () => {
+              image.classList.add('lazy-loaded');
+          };
+      };
+
+      const observer = new IntersectionObserver((entries, observer) => {
+          entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                  lazyLoad(entry.target);
+                  observer.unobserve(entry.target);
+              }
+          });
+      });
+
+      document.querySelectorAll('img.lazy').forEach(image => {
+          observer.observe(image);
+      });
+
+      // Load more functionality
+      const loadMoreButton = document.getElementById('load-more');
+      if (loadMoreButton) {
+          loadMoreButton.addEventListener('click', function () {
+              const page = this.getAttribute('data-page');
+              fetch(`{{ url_for('main_routes.index') }}?page=${page}`)
+                  .then(response => response.text())
+                  .then(data => {
+                      const parser = new DOMParser();
+                      const doc = parser.parseFromString(data, 'text/html');
+                      const newLinks = doc.querySelectorAll('#gallery-container a');
+                      const hasMore = doc.querySelector('#load-more');
+
+                      newLinks.forEach(link => {
+                          document.getElementById('gallery-container').appendChild(link);
+                          const img = link.querySelector('img.lazy');
+                          observer.observe(img);
+                      });
+
+                      // Attach lightbox listeners to new links
+                      attachLightboxListeners(newLinks);
+
+                      if (hasMore) {
+                          this.setAttribute('data-page', parseInt(page) + 1);
+                      } else {
+                          this.remove();
+                      }
+                  });
+          });
+      }
+  });
+</script>
+{% endblock %}
+
+{% block title %}{% endblock %}
+
+{% block description %}  {% endblock %}
+
+{% block content %}
+<div class="section-spacer"></div>
+
+<section id="hero-image">
+  <div class="image-container">
+    <img src="{{ url_for('static', filename='images/hero-bg.jpg') }}" alt="Custom Business Website">
+    <div class="image-overlay"></div>
+    <div class="hero-content">
+      <h1></h1>
+      <p></p>
+    </div>
+  </div>
+</section>
+
+<div class="small-spacer"></div>
+
+
+
+<div class="section-spacer"></div>
+
+{% endblock %}

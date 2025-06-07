@@ -1,0 +1,70 @@
+{% if not hide_estimate_form %}
+<div class="container">
+    <!-- Left Container for Form and Google Maps -->
+    <div class="left-container">
+        <form id="estimate-request-form" class="form-container" action="{{ url_for('main_routes.request_estimate') }}" method="post">
+            {{ erf_form.hidden_tag() }}
+
+            <!-- Personal Information Section -->
+            <fieldset class="fieldset">
+                <legend class="legend">Personal Information:</legend>
+                <div class="form-group">
+                    {{ erf_form.first_name.label(class="form-label") }}
+                    {{ erf_form.first_name(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ erf_form.last_name.label(class="form-label") }}
+                    {{ erf_form.last_name(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ erf_form.phone.label(class="form-label") }}
+                    {{ erf_form.phone(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ erf_form.email.label(class="form-label") }}
+                    {{ erf_form.email(class="form-control") }}
+                </div>
+            </fieldset>
+
+            <!-- Appointment Information Section -->
+            <fieldset class="fieldset">
+                <legend class="legend">Appointment Information:</legend>
+                <div class="form-group location-group">
+                    {{ erf_form.location.label(class="form-label") }}
+                    {{ erf_form.location(class="form-control") }}
+                    <button id="confirm-location" type="button" class="btn btn-info">Confirm Location</button>
+                </div>
+                <!-- Estimator Selection Section -->
+                <div class="form-group">
+                    <label for="estimator" class="form-label">Select Estimator</label>
+                    {{ erf_form.estimator(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ erf_form.preferred_date.label(class="form-label") }}
+                    {{ erf_form.preferred_date(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ erf_form.preferred_time.label(class="form-label") }}
+                    {{ erf_form.preferred_time(class="form-control") }}
+                </div>
+            </fieldset>
+
+            <!-- Google reCAPTCHA Widget -->
+            <div class="g-recaptcha" data-sitekey="6LdrGq4pAAAAAEIyITrA-BIp91IAxgPGu1Kfpntt"></div>
+            
+            <!-- Submit Button -->
+            <div class="form-group">
+                {{ erf_form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+        
+        <!-- Google Maps Container -->
+        <div id="map" class="map-container"></div>
+    </div>
+
+    <!-- Right Container for Calendar -->
+    <div class="right-container">
+        <div id="calendar" class="calendar-container"></div>
+    </div>
+</div>
+{% endif %}
