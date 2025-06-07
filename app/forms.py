@@ -113,3 +113,27 @@ class ContactForm(FlaskForm):
 
 class CSRFTokenForm(FlaskForm):
     csrf_token = HiddenField()
+
+class EditUserForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    first_name = StringField('First Name')
+    last_name = StringField('Last Name')
+    phone = StringField('Phone')
+    password = PasswordField('New Password')
+    roles = SelectMultipleField('Roles', coerce=int)
+    submit = SubmitField('Update User')
+
+class CreateUserForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    first_name = StringField('First Name')
+    last_name = StringField('Last Name')
+    phone = StringField('Phone')
+    roles = SelectMultipleField('Roles', coerce=int)
+    submit = SubmitField('Create User')
+
+class RoleForm(FlaskForm):
+    name = StringField('Role Name', validators=[DataRequired()])
+    submit = SubmitField('Save')

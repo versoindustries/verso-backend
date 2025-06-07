@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Roles</h1>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Users</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for role in roles %}
+        <tr>
+            <td>{{ role.id }}</td>
+            <td>{{ role.name }}</td>
+            <td>{{ role.users|length }}</td>
+            <td>
+                <a href="{{ url_for('admin.edit_role', role_id=role.id) }}">Edit</a>
+                {% if not role.users %}
+                <form method="post" action="{{ url_for('admin.delete_role', role_id=role.id) }}">
+                    {{ form.csrf_token }}
+                    <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{{ url_for('admin.new_role') }}">Create New Role</a>
+{% endblock %}
