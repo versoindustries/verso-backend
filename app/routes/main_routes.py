@@ -8,7 +8,6 @@ from flask import (Blueprint, Response, current_app, flash, jsonify,
                    redirect, render_template, request, session,
                    url_for)
 from flask_login import current_user, login_required
-from google_auth_oauthlib.flow import Flow
 from markupsafe import Markup
 from pytz import UTC
 
@@ -285,23 +284,6 @@ def estimate_submitted():
                            date=date,
                            time=formatted_time,
                            hide_estimate_form=True)
-
-@main.route('/oauth2callback')
-def oauth2callback():
-    credentials_path = os.path.join(current_app.root_path, 'modules','credentials.json')
-    print(f"Final path to credentials.json: {credentials_path}")
-    flow = Flow.from_client_secrets_file(
-        credentials_path,
-        scopes=['https://www.googleapis.com/auth/gmail.send'],
-        redirect_uri='https://www.ajtreepruning.com/oauth2callback')
-
-    authorization_response = request.url
-    flow.fetch_token(authorization_response=authorization_response)
-
-    credentials = flow.credentials
-    session['credentials'] = credentials_to_dict(credentials)
-
-    return redirect('/')
 
 def credentials_to_dict(credentials):
     return {'token': credentials.token,
