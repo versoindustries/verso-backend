@@ -1,0 +1,17 @@
+# Ignore virtual environment directory
+venv/
+
+# Ignore Python bytecode files
+*.pyc
+
+# Ignore Photoshop files
+*.psd
+
+# Ignore instance directory
+/instance
+
+# Ignore migrations directory
+/migrations
+
+# Ignore virtual environment directory (redundant entry removed)
+/venv

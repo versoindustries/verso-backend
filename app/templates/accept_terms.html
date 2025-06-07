@@ -1,0 +1,25 @@
+<!-- app/templates/accept_terms.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1>Terms of Service</h1>
+    <p>Please read and accept the terms of service to continue using the platform.</p>
+
+    <!-- Display the terms of service text here -->
+    <div class="tos-text">
+        <!-- Include your terms of service text here -->
+        <p>Your terms of service content goes here...</p>
+    </div>
+
+    <form method="post">
+        {{ form.hidden_tag() }}
+        {{ form.accept_tos.label }} {{ form.accept_tos() }}
+        {% for error in form.accept_tos.errors %}
+            <span class="text-danger">{{ error }}</span>
+        {% endfor %}
+        {{ form.submit() }}
+    </form>
+</div>
+{% endblock %}

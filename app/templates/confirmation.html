@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1>Booking Confirmation</h1>
+    <div class="confirmation-details">
+        <h2>Booking Details</h2>
+        <p><strong>Booking ID:</strong> {{ booking.id }}</p>
+        <p><strong>Dumpster Size:</strong> {{ booking.dumpster.size }}</p>
+        <p><strong>Start Date:</strong> {{ booking.start_date | dateformat }}</p>
+        <p><strong>End Date:</strong> {{ booking.end_date | dateformat }}</p>
+        <p><strong>Total Price:</strong> {{ booking.total_price | currencyformat }}</p>
+
+        <h2>Payment Confirmation</h2>
+        <p><strong>Payment Status:</strong> {{ payment_status }}</p>
+        {% if payment_status == 'succeeded' %}
+        <p>Your payment has been processed successfully.</p>
+        {% else %}
+        <p>There was an issue with your payment. Please contact support.</p>
+        {% endif %}
+    </div>
+    <a href="{{ url_for('main_routes.index') }}" class="btn btn-primary">Return to Home</a>
+</div>
+{% endblock %}
