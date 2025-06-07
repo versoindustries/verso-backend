@@ -12,7 +12,6 @@ Werkzeug
 pytz
 icalendar
 requests
-google-auth-oauthlib
 python-dotenv
 click
 SQLAlchemy
