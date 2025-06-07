@@ -11,6 +11,7 @@
 - **Admin Interface**: Basic admin dashboard for managing users and appointments.
 - **Heroku Ready**: Pre-configured for deployment on Heroku.
 - **Modular Design**: Easily extendable with additional routes, models, and features.
+- **ApointQix**: A Verso Industries native appointments integrated directly in.
 
 ## Prerequisites
 
@@ -160,6 +161,13 @@ This backend template is designed to work with any frontend framework or templat
 To integrate with a custom frontend:
 - Update routes and templates as needed.
 - Expose API endpoints for a headless setup if preferred.
+
+## Notes
+
+Docs.md is a breakdown and explanation of the backend. 
+
+In the docs folder, we will have documentation on how to effectively build this out using Grok3. 
+   - **WARNING**: LLM docs and system instructions are specifically tailored to work with XAi Grok3 only. It is untested with any other LLM provider, thus we cannot guarentee results. We strongly reccomend utilizing Grok3 from XAi to build this out. Refer to the docs for the rest.
 
 ## Contributing
 
