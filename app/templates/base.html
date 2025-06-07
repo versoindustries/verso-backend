@@ -97,7 +97,6 @@
                                 {% if current_user.has_role('admin') %}
                                     <div class="divider"></div>
                                     <a href="{{ url_for('admin.admin_dashboard') }}">Admin Dashboard</a>
-                                    <a href="{{ url_for('admin.user_management') }}">User Management</a>
                                 {% endif %}
                             </div>
                         </li>
