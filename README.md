@@ -67,19 +67,19 @@ Follow these steps to set up the project locally:
 
 7. **Run Database Migrations**
    ```bash
-   flask db init
-   flask db migrate
-   flask db upgrade
+   python -m flask db init
+   python -m flask db migrate
+   python -m flask db upgrade
    ```
 
 8. **Create Default Roles**
    ```bash
-   flask create-roles
+   python -m flask create-roles
    ```
 
 9. **Run the Application**
    ```bash
-   flask run --host=0.0.0.0 --debug
+   python -m flask run --host=0.0.0.0 --debug
    ```
    - **Note**: The `--host=0.0.0.0` flag allows LAN connections for local development only. Use with caution and never in production.
 
