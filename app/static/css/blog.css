@@ -1,98 +1,141 @@
-/* blog.css */
-
+/* Blog Posts Section */
 .blog-posts {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    margin-top: 30px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 15px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+    box-shadow: var(--shadow-light);
+    position: relative;
+}
+
+.blog-posts::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: var(--pulse-effect);
+    opacity: 0.3;
+    z-index: 0;
+    animation: pulse 15s infinite ease-in-out;
 }
 
 .post {
-    background: rgba(0, 0, 0, 0.6); /* Semi-transparent background */
-    color: #fff; /* White text color */
-    margin-bottom: 30px;
-    padding: 20px;
-    border-radius: 10px;
-    width: 80%; /* Responsive width */
-    max-width: 800px; /* Maximum width */
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Subtle shadow for depth */
-    backdrop-filter: blur(5px); /* Frosted glass effect */
-    border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
+    background: rgba(42, 42, 42, 0.9);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: var(--shadow-light);
+    position: relative;
+    z-index: 1;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.post:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
 }
 
 .post h2 {
     font-family: 'Neon-Heavy', sans-serif;
-    color: #E2BB90; /* Vibrant yellow for headings */
-    margin-bottom: 15px;
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin-bottom: 10px;
 }
 
 .post .date {
-    font-family: 'Neon-Regular', sans-serif;
-    color: #CCCCCC; /* Lighter text color for date */
-    margin-bottom: 20px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
 }
 
 .post p {
     font-family: 'Neon-Regular', sans-serif;
-    line-height: 1.6;
-    margin-bottom: 20px;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    line-height: 1.4;
+    margin-bottom: 15px;
 }
 
 .post a {
-    font-family: 'Neon-Heavy', sans-serif;
-    color: #E2BB90; /* Vibrant yellow for links */
+    display: inline-block;
+    padding: 8px 12px;
+    background: var(--accent-blue);
+    color: #fff;
     text-decoration: none;
-    background-color: rgba(226, 186, 144, 0.815); /* Translucent background */
-    padding: 10px 15px;
     border-radius: 5px;
-    transition: background-color 0.3s, color 0.3s;
+    font-size: 0.9rem;
+    transition: background 0.3s ease;
 }
 
 .post a:hover {
-    background-color: #E2BB90; /* Darker background on hover */
-    color: #333; /* Dark text color on hover */
+    background: var(--accent-blue-dark);
 }
 
-@media (max-width: 768px) {
-    .post {
-        width: 90%; /* Slightly wider on smaller screens */
-    }
+.post a::after {
+    content: '\f061'; /* fa-arrow-right */
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    margin-left: 5px;
 }
 
-@media (max-width: 480px) {
+/* Medium screens (768px and up) */
+@media (min-width: 768px) {
     .blog-posts {
-        padding: 10px; /* Reduced padding for more screen space */
-        margin-top: 20px; /* Reduced margin-top for tighter layout */
+        grid-template-columns: repeat(2, 1fr);
+        padding: 30px;
     }
 
     .post {
-        width: 100%; /* Full width for maximum content display */
-        padding: 15px; /* Adjusted padding for content breathing space */
-        margin-bottom: 20px; /* Reduced margin-bottom to decrease space between posts */
-        border-radius: 5px; /* Smaller border-radius for a softer look */
+        padding: 20px;
     }
 
     .post h2 {
-        font-size: 18px; /* Smaller font size for headings */
-        margin-bottom: 10px; /* Reduced margin-bottom for tighter heading to content */
+        font-size: 2rem;
     }
 
     .post .date {
-        font-size: 14px; /* Smaller font size for date */
-        margin-bottom: 15px; /* Adjusted margin-bottom for date to content spacing */
+        font-size: 1rem;
     }
 
     .post p {
-        font-size: 16px; /* Adjusted font size for readability */
-        line-height: 1.4; /* Adjusted line-height for better text flow */
-        margin-bottom: 15px; /* Adjusted margin-bottom for paragraph spacing */
+        font-size: 1rem;
+        line-height: 1.5;
     }
 
     .post a {
-        font-size: 16px; /* Consistent font size for links */
-        padding: 8px 12px; /* Adjusted padding for smaller touch targets */
-        border-radius: 4px; /* Smaller border-radius for buttons */
+        padding: 10px 15px;
+        font-size: 1rem;
     }
 }
 
+/* Small screens (480px and below) */
+@media (max-width: 480px) {
+    .blog-posts {
+        padding: 10px;
+    }
+
+    .post {
+        padding: 10px;
+    }
+
+    .post h2 {
+        font-size: 1.2rem;
+    }
+
+    .post .date {
+        font-size: 0.7rem;
+    }
+
+    .post p {
+        font-size: 0.8rem;
+    }
+
+    .post a {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+    }
+}
