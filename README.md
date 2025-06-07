@@ -2,7 +2,7 @@
 
 ![ZNH Mockup](app/static/images/gallery/ZNH-Mockup.jpg)
 
-**Verso Backend** is a Flask-based backend template designed for easy deployment on Heroku(https://www.heroku.com/). It provides a robust foundation for building scalable and secure web applications with features like user authentication, database models, forms, and email support. This template is highly extensible and can integrate with various frontend frameworks or templating engines, such as Jinja2, Tailwind CSS, or Figma-to-Webflow pages.
+**Verso Backend** is a Flask-based backend template designed for easy deployment on Heroku for as low as $7/month(https://www.heroku.com/). It provides a robust foundation for building scalable and secure web applications with features like user authentication, database models, forms, and email support. This template is highly extensible and can integrate with various frontend frameworks or templating engines, such as Jinja2, Tailwind CSS, or Figma-to-Webflow pages.
 
 ## Features
 
