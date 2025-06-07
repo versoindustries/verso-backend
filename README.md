@@ -11,7 +11,7 @@
 - **Admin Interface**: Basic admin dashboard for managing users and appointments.
 - **Heroku Ready**: Pre-configured for deployment on Heroku.
 - **Modular Design**: Easily extendable with additional routes, models, and features.
-- **ApointQix**: A Verso Industries native appointments integrated directly in.
+- **AppointQix**: A Verso Industries native appointments integrated directly in.
 
 ## Prerequisites
 
