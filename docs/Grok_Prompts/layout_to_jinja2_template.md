@@ -1,4 +1,6 @@
 Prompt for Generating Jinja2 Template from Written Layout Description
+
+
 Objective: Generate a Jinja2 template that extends base.html based on a provided written layout description, implementing a modern, responsive, and SEO-friendly web page layout for use in a web application.
 Instructions:
 
@@ -20,7 +22,7 @@ Applies custom CSS classes reflecting the design elements (e.g., introduction-se
 Ensures responsiveness using flexible layouts (e.g., flexbox, grid) that adapt to different screen sizes.
 Includes placeholders for images, icons, or visuals (e.g., {{ url_for('static', filename='images/placeholder.jpg') }}) as described, assuming they reside in the static/images folder.
 Implements interactive elements (e.g., galleries, forms) with necessary HTML and JavaScript, using placeholders where applicable.
-Use fontawesome icons, it's included in the base.html already
+Use fontawesome icons, it's included in the base.html
 
 
 SEO Implementation:
