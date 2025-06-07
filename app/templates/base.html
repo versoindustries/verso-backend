@@ -146,6 +146,9 @@
             <!-- Main content will be overridden in child templates -->
         {% endblock %}
     </div>
+
+<div class="section-spacer"></div>
+
 {% if not hide_estimate_form %}
 <div class="wrapper" id="appointment-form">
     <div class="form-heading">
@@ -295,10 +298,13 @@
     <div class="right-container" style="display: none;" id="calendar-container">
         <div id="calendar" class="calendar-box"></div>
     </div>
+    <div class="small-spacer"></div>
 </div>                 
 {% endif %}
 
 {% block scripts %}{% endblock %}
+
+<div class="section-spacer"></div>
 
 <footer>
     <p>&copy; <span id="current-year"></span> Verso Industries. All rights reserved.</p>

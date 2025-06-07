@@ -1,9 +1,157 @@
 {% extends 'base.html' %}
 
+{% block title %}Verso Industries: Revolutionizing the American Industrial Landscape{% endblock %}
+{% block description %}
+Discover how Verso Industries is reshaping the landscape of American industry with a commitment to innovation, quality, and a unified digital ecosystem designed to propel the U.S. economy forward. Meet the visionary team behind our mission and explore our strategic approach to integrating advanced technology for sustainable growth and unparalleled efficiency.
+{% endblock %}
+
 {% block additional_css %}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/about.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/about.css') }}">
+{% endblock %}
+
+{% block head %}
+    <meta name="description" content="{{ description|e }}">
+    <meta property="og:title" content="{{ title|e }}">
+    <meta property="og:description" content="{{ description|e }}">
+    <meta property="og:image" content="{{ url_for('static', filename='images/logo.png') }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ title|e }}">
+    <meta name="twitter:description" content="{{ description|e }}">
+    <meta name="twitter:image" content="{{ url_for('static', filename='images/logo.png') }}">
+    <link rel="canonical" href="{{ request.url }}">
+    <meta name="robots" content="index, follow">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "{{ title|e }}",
+      "description": "{{ description|e }}"
+    }
+    </script>
+{% endblock %}
+
+{% block scripts %}
 {% endblock %}
 
 {% block content %}
+<div class="section-spacer"></div>
 
+<!-- Hero Section -->
+<section id="hero-image" class="hero-section">
+    <div class="image-container">
+        <img src="{{ url_for('static', filename='images/hero-about.jpg') }}" alt="Custom Business Website">
+        <div class="image-overlay"></div>
+        <div class="hero-content">
+            <h1>About Us</h1>
+            <p>At Verso Industries, we are not just another technology and software development company—we are the visionaries driving a new era of American industrial, service, and consumer synergy. Our platform is more than a tool; it’s a dynamic force for economic revitalization and technological advancement, designed to reshape the U.S. economy for sustained growth and resilience.</p>
+        </div>
+    </div>
+</section>
+
+<div class="small-spacer"></div>
+
+<!-- Our Vision Section -->
+<section id="our-vision" class="vision">
+    <div class="container">
+        <div class="row vision-row">
+            <div class="col-md-6 vision-text">
+                <h2>Our Vision: Unifying America's Economy</h2>
+                <p>Verso Industries is on a mission to transform the manufacturing landscape by creating a cohesive ecosystem that connects industrial, service, and consumer sectors into a unified, dynamic environment. We empower businesses of all sizes with state-of-the-art tools and technologies, paving the way for next-generation startups and innovative solutions. Our suite of offerings goes beyond digital transformation, integrating advanced manufacturing machinery and proprietary software that seamlessly align with the Verso network, setting a new standard for excellence in American industry.</p>
+            </div>
+            <div class="col-md-6 vision-image">
+                <div class="image-set">
+                    <img src="{{ url_for('static', filename='images/vision-image1.jpg') }}" alt="Connected Ecosystem">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="small-spacer"></div>
+
+<!-- Meet Our Team Section -->
+<section id="team" class="team">
+    <div class="container">
+        <h2>Meet Our Team – The Innovators Behind Verso Industries</h2>
+        <p>Our team is dedicated to leading the charge in economic revitalization and industrial innovation.</p>
+        <div class="row team-row">
+            <div class="col-md-6">
+                <article class="team-card">
+                    <img src="{{ url_for('static', filename='images/Michael-CEO.jpg') }}" alt="Michael Zimmerman">
+                    <h3>Michael Zimmerman</h3>
+                    <h4>Chief Executive Officer</h4>
+                    <p>Michael Zimmerman, the driving force behind Verso Industries, brings together extensive expertise in information technology, software development, and product design. As CEO, Michael leads with a passion for innovation and a commitment to transforming bold ideas into impactful solutions. His approach is defined by a rigorous work ethic, integrity, and a relentless pursuit of excellence, ensuring that Verso Industries remains at the forefront of technological advancement. Michael is a strong advocate for lifelong learning and community engagement, actively contributing to the evolving tech and manufacturing sectors. Partnering with him means embarking on a journey of exceptional results, marked by strategic thinking, swift execution, and transparent communication.</p>
+                </article>
+            </div>
+            <div class="small-spacer"></div>
+            <div class="col-md-6">
+                <article class="team-card">
+                    <img src="{{ url_for('static', filename='images/jacob.jpg') }}" alt="Jacob Godina">
+                    <h3>Jacob Godina</h3>
+                    <h4>Developer/Videographer</h4>
+                    <p>Jacob Godina is a multifaceted developer, videographer, and visionary entrepreneur with a knack for innovation. At Verso Industries, he oversees operational strategies, ensuring both efficiency and scalability. Jacob's background in AI and multimedia design, combined with his experience as the founder of Fruity Friends, brings invaluable business insights to our team. He is known for his forward-thinking approach, setting industry trends, and fostering a culture of creativity and integrity. Under his leadership, Verso Industries delivers cutting-edge solutions that promise remarkable outcomes through meticulous execution and clear communication.</p>
+                </article>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="small-spacer"></div>
+
+<!-- Our Mission Section -->
+<section id="mission" class="mission">
+    <div class="mission-background">
+        <img src="{{ url_for('static', filename='images/mission-background.jpg') }}" alt="Digital and Physical Transformation">
+    </div>
+    <div class="mission-content">
+        <h2>Our Mission</h2>
+        <p>At Verso Industries, our mission is to revolutionize American trade and services through a fusion of digital and physical transformation. We are committed to dismantling the barriers imposed by offshore production and burdensome regulations, leveraging relentless technological innovation. We aim to cultivate an evolved economy where experimentation and innovation are not only encouraged but also accessible and affordable for all. Our vision is a future where American businesses are global leaders in quality, efficiency, and innovation.</p>
+    </div>
+</section>
+
+<div class="small-spacer"></div>
+
+<!-- Commitment to Quality and Innovation Section -->
+<section id="commitment" class="commitment">
+    <div class="container">
+        <h2>Commitment to Quality and Innovation</h2>
+        <p>Quality and innovation are the bedrock of everything we do at Verso Industries. Utilizing sophisticated machine learning algorithms and AI, we continually refine our processes to deliver only the highest standards to our clients. Our commitment extends beyond American borders, setting new global benchmarks for quality, sustainability, and ethical standards in both manufacturing and technology.</p>
+        <div class="row commitment-row">
+            <div class="col-md-4">
+                <article class="commitment-item">
+                    <i class="fas fa-lightbulb fa-2x"></i>
+                    <h3>Innovation</h3>
+                    <p>We continuously push the boundaries of what's possible in technology and industry.</p>
+                </article>
+            </div>
+            <div class="col-md-4">
+                <article class="commitment-item">
+                    <i class="fas fa-check-circle fa-2x"></i>
+                    <h3>Quality Standards</h3>
+                    <p>Our processes are designed to ensure the highest level of quality in everything we do.</p>
+                </article>
+            </div>
+            <div class="col-md-4">
+                <article class="commitment-item">
+                    <i class="fas fa-leaf fa-2x"></i>
+                    <h3>Sustainability</h3>
+                    <p>We are committed to sustainable practices that benefit both industry and the environment.</p>
+                </article>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="small-spacer"></div>
+
+<!-- Vision for the Future Section -->
+<section id="future-vision" class="future-vision">
+    <div class="future-vision-content">
+        <h2>A Vision for the Future</h2>
+        <p>Verso Industries is more than a business—it is a movement dedicated to creating a smarter, more interconnected economy. We are committed to fostering an environment where American industries thrive through advanced technology and strategic partnerships. Our focus is on sustainable growth, job creation, and building a robust economy that benefits all, ensuring a prosperous future for generations to come.</p>
+        <p>By choosing Verso Industries, you are joining a visionary company determined to challenge the status quo and drive meaningful change in the U.S. economy. Together, we will build a future defined by innovation, resilience, and economic self-reliance.</p>
+    </div>
+</section>
+
+<div class="small-spacer"></div>
 {% endblock %}

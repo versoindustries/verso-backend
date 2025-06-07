@@ -636,39 +636,62 @@ footer p a:hover {
     flex-direction: column;
     align-items: center;
     padding: 40px 20px;
-    background-color: #f9f9f9;
-    color: #333;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    color: var(--text-primary);
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-light);
     max-width: 800px;
     margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+}
+
+.wrapper::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: var(--pulse-effect);
+    opacity: 0.3;
+    z-index: 0;
+    animation: pulse 15s infinite ease-in-out;
 }
 
 .form-heading {
     text-align: center;
     margin-bottom: 30px;
+    position: relative;
+    z-index: 1;
 }
 
 .form-heading h2 {
     font-family: 'Neon-Heavy', sans-serif;
     font-size: 2.5rem;
-    color: #333;
+    color: var(--text-primary);
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
     margin-bottom: 10px;
 }
 
 .form-heading p {
     font-family: 'Neon-Regular', sans-serif;
     font-size: 1.2rem;
-    color: #666;
+    color: var(--text-primary);
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
 }
 
 .form-box {
     width: 100%;
     max-width: 600px;
-    background-color: #fff;
+    background: rgba(42, 42, 42, 0.9);
+    backdrop-filter: blur(8px);
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-light);
+    position: relative;
+    z-index: 1;
 }
 
 .fieldset {
@@ -679,7 +702,8 @@ footer p a:hover {
 .legend {
     font-family: 'Neon-Heavy', sans-serif;
     font-size: 1.5rem;
-    color: #333;
+    color: var(--text-primary);
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
     margin-bottom: 10px;
 }
 
@@ -691,7 +715,7 @@ footer p a:hover {
     display: block;
     font-family: 'Neon-Regular', sans-serif;
     font-size: 1rem;
-    color: #333;
+    color: var(--text-primary);
     margin-bottom: 5px;
 }
 
@@ -700,16 +724,18 @@ footer p a:hover {
     padding: 10px;
     font-family: 'Neon-Regular', sans-serif;
     font-size: 1rem;
-    color: #333;
-    border: 1px solid #ccc;
+    color: var(--text-primary);
+    background: rgba(31, 31, 31, 0.8);
+    border: 1px solid rgba(65, 105, 225, 0.3);
     border-radius: 5px;
     box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .form-control:focus {
-    border-color: #e2bb90;
+    border-color: var(--accent-blue);
     outline: none;
-    box-shadow: 0 0 5px rgba(226, 186, 144, 0.5);
+    box-shadow: 0 0 5px rgba(65, 105, 225, 0.5);
 }
 
 .form-error {
@@ -719,6 +745,7 @@ footer p a:hover {
 .text-danger {
     color: #e74c3c;
     font-size: 0.9rem;
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
 }
 
 .btn-primary {
@@ -726,22 +753,25 @@ footer p a:hover {
     padding: 10px 20px;
     font-family: 'Neon-Heavy', sans-serif;
     font-size: 1rem;
-    color: #fff;
-    background-color: #e2bb90;
+    color: var(--text-primary);
+    background: var(--btn-gradient);
     border: none;
     border-radius: 5px;
     text-decoration: none;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease;
+    box-shadow: var(--shadow-light);
+    transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .btn-primary:hover {
-    background-color: #bf9a6a;
+    background: linear-gradient(90deg, var(--accent-blue-dark), var(--accent-blue));
     transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
 }
 
 .btn-primary:active {
     transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(65, 105, 225, 0.3);
 }
 
 .left-container {
@@ -756,26 +786,28 @@ footer p a:hover {
 
 .calendar-box {
     width: 100%;
-    background-color: #fff;
+    background: rgba(42, 42, 42, 0.9);
+    backdrop-filter: blur(8px);
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-light);
 }
 
 .fc-daygrid-day[data-date].selected-date {
-    background-color: #e2bb90; /* Adjust highlight color as needed */
-    border: 1px solid #bf9a6a;
+    background: var(--btn-gradient);
+    border: 1px solid var(--accent-blue-dark);
 }
 
 #calendar-container {
     flex-grow: 1;
-  }
+}
 
-/* Mobile Optimizations for Small Screens (Max 768px) */
-@media (max-width: 768px) {
-    h2 {
-        font-size: 2rem;
+/* Medium screens (768px and up) */
+@media (min-width: 768px) {
+    .wrapper {
+        padding: 40px;
     }
+
     .form-heading h2 {
         font-size: 2rem;
     }
@@ -802,7 +834,7 @@ footer p a:hover {
     }
 }
 
-/* Mobile Optimizations for Very Small Screens (Max 480px) */
+/* Small screens (480px and below) */
 @media (max-width: 480px) {
     .wrapper {
         padding: 20px 10px;
@@ -840,10 +872,5 @@ footer p a:hover {
 
     .calendar-box {
         padding: 15px;
-        width: 100%;
-    }
-
-    p {
-        font-size: 1rem;
     }
 }
