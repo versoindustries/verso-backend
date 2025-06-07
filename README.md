@@ -169,6 +169,17 @@ Docs.md is a breakdown and explanation of the backend.
 In the docs folder, we will have documentation on how to effectively build this out using Grok3. 
    - **WARNING**: LLM docs and system instructions are specifically tailored to work with XAi Grok3 only. It is untested with any other LLM provider, thus we cannot guarentee results. We strongly reccomend utilizing Grok3 from XAi to build this out. Refer to the docs for the rest.
 
+## Still In The Works
+
+- **Flask Mail**: Not a great solution and was removed sometime in use last year. Integrations would be better served under specific provider APIs.
+
+## Future Plans
+
+The goal with the Verso Backend is to open community support to actively build with our founder, Michael B. Zimmerman, and create a new Python based cms for businesses. 
+
+- 
+- **Marketplace**: The ability to buil
+
 ## Contributing
 
 Contributions are welcome! To contribute:

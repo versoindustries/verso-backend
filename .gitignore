@@ -1,9 +1,9 @@
-venv/
+env/
 *.pyc
 *.pyc
 .pyc
 *.psd
 /instance
 /migrations
-/venv
+/env
 

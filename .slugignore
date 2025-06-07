@@ -1,5 +1,5 @@
 # Ignore virtual environment directory
-venv/
+env/
 
 # Ignore Python bytecode files
 *.pyc
@@ -14,4 +14,4 @@ venv/
 /migrations
 
 # Ignore virtual environment directory (redundant entry removed)
-/venv
+/env
