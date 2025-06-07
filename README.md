@@ -9,6 +9,7 @@
 - **Forms**: WTForms for handling user input and validation.
 - **Email Support**: Configured with Flask-Mail for sending emails (e.g., password resets).
 - **Admin Interface**: Basic admin dashboard for managing users and appointments.
+- **User Dashboard**: User dashboard that replaces the homepage once logged in. Once someone has registered, the homepage (index.html) serves no purpose to the end user. As long as the user is logged in, the 
 - **Heroku Ready**: Pre-configured for deployment on Heroku.
 - **Modular Design**: Easily extendable with additional routes, models, and features.
 - **AppointQix**: A Verso Industries native appointments integrated directly in.
@@ -175,10 +176,7 @@ In the docs folder, we will have documentation on how to effectively build this 
 
 ## Future Plans
 
-The goal with the Verso Backend is to open community support to actively build with our founder, Michael B. Zimmerman, and create a new Python based cms for businesses. 
-
-- 
-- **Marketplace**: The ability to buil
+The goal with the Verso Backend is to open community support to actively build with our founder, Michael B. Zimmerman, and create a new Python based cms for businesses. We are still working out the architecture and structure, we will be sharing a more solid vision here in the next few days. Documentation needs to be parsed through, still a few decisions to make. This already breaks down quite a few barriers and offers a faster website option, on heroku it's only $7/month. 
 
 ## Contributing
 
