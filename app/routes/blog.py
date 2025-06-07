@@ -13,19 +13,16 @@ updates_blueprint = Blueprint('updates', __name__, template_folder='templates')
 
 @blog_blueprint.context_processor
 def combined_context_processor():
-    locations = get_locations()
     erf_form = EstimateRequestForm()
     return dict(erf_form=erf_form, hide_estimate_form=True)
 
 @news_update.context_processor
 def combined_context_processor():
-    locations = get_locations()
     erf_form = EstimateRequestForm()
     return dict(erf_form=erf_form, hide_estimate_form=True)
 
 @updates_blueprint.context_processor
 def combined_context_processor():
-    locations = get_locations()
     erf_form = EstimateRequestForm()
     return dict(erf_form=erf_form, hide_estimate_form=True)
 
