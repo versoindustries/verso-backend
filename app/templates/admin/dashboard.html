@@ -30,8 +30,6 @@
     <!-- Dashboard Statistics -->
     <div class="dashboard-stats">
         <p>Total Users: {{ total_users }}</p>
-        <a href="{{ url_for('admin.list_users') }}">Manage Users</a>
-        <a href="{{ url_for('admin.list_roles') }}">Manage Roles</a>
     </div>
 
     <!-- Upcoming Appointments Section -->
@@ -90,6 +88,8 @@
             <li><a href="{{ url_for('admin.admin_estimator') }}">Estimator Management</a></li>
             <li><a href="{{ url_for('admin.services') }}">Service Management</a></li>
             <li><a href="{{ url_for('admin.generate_sitemap_route') }}">Generate Sitemap</a></li>
+            <li><a href="{{ url_for('admin.list_users') }}">Manage Users</a></li>
+            <li><a href="{{ url_for('admin.list_roles') }}">Manage Roles</a></li>
         </ul>
     </div>
 </div>

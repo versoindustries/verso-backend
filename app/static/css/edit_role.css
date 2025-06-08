@@ -1,0 +1,216 @@
+/* Edit Role Section */
+.edit-role-section {
+    background: var(--glass-bg);
+    padding: 30px 15px;
+    position: relative;
+    overflow: visible;
+    box-shadow: var(--shadow-light);
+    border-radius: 8px;
+    margin: 0 auto;
+    max-width: 1200px;
+    z-index: 10;
+}
+
+.edit-role-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: var(--pulse-effect);
+    opacity: 0.2;
+    z-index: -1;
+    animation: pulse 12s infinite ease-in-out;
+}
+
+.container {
+    max-width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+}
+
+/* Header */
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 2rem;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 0 0 10px rgba(65, 105, 225, 0.6);
+    transition: transform 0.3s ease;
+}
+
+header h1:hover {
+    transform: translateY(-2px);
+}
+
+header p {
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 1rem;
+    color: var(--text-primary);
+    line-height: 1.5;
+    opacity: 0.9;
+}
+
+/* Form Container */
+.form-container {
+    max-width: 100%;
+    background: rgba(42, 42, 42, 0.9);
+    padding: 20px;
+    border-radius: 6px;
+    box-shadow: var(--shadow-light);
+    position: relative;
+    z-index: 2;
+}
+
+/* Form Group */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.form-group input {
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 0.9rem;
+    padding: 8px 12px;
+    border: 1px solid rgba(65, 105, 225, 0.3);
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    z-index: 3;
+}
+
+.form-group input:focus {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 8px rgba(65, 105, 225, 0.4);
+    outline: none;
+}
+
+.form-group input.border-red-500 {
+    border-color: #dc3545;
+}
+
+/* Submit Button */
+.form-group input[type="submit"] {
+    background: var(--accent-blue);
+    color: var(--text-primary);
+    border: none;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    z-index: 3;
+}
+
+.form-group input[type="submit"]:hover {
+    background: #2f5496;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+/* Medium screens (768px and up) */
+@media (min-width: 768px) {
+    .edit-role-section {
+        padding: 40px 20px;
+    }
+
+    header h1 {
+        font-size: 2.5rem;
+    }
+
+    header p {
+        font-size: 1.2rem;
+    }
+
+    .form-container {
+        padding: 24px;
+        max-width: 450px;
+    }
+
+    .form-group label {
+        font-size: 1rem;
+    }
+
+    .form-group input {
+        font-size: 1rem;
+        padding: 10px 14px;
+    }
+
+    .form-group input[type="submit"] {
+        font-size: 1rem;
+        padding: 12px;
+    }
+}
+
+/* Small screens (480px and below) */
+@media (max-width: 480px) {
+    .edit-role-section {
+        padding: 20px 10px;
+        margin: 0 8px;
+    }
+
+    header h1 {
+        font-size: 1.8rem;
+    }
+
+    header p {
+        font-size: 0.9rem;
+    }
+
+    .form-container {
+        padding: 16px;
+    }
+
+    .form-group label {
+        font-size: 0.8rem;
+    }
+
+    .form-group input {
+        font-size: 0.8rem;
+        padding: 6px 10px;
+    }
+
+    .form-group input[type="submit"] {
+        font-size: 0.8rem;
+        padding: 8px;
+    }
+}
+
+/* Pulse animation */
+@keyframes pulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.2;
+    }
+    50% {
+        transform: scale(1);
+        opacity: 0.4;
+    }
+    100% {
+        transform: scale(0.8);
+        opacity: 0.2;
+    }
+}

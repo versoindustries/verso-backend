@@ -1,0 +1,339 @@
+/* User Management Section */
+.user-management-section {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    padding: 60px 20px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-light);
+    border-radius: 12px;
+    margin: 0 auto;
+    max-width: 1200px;
+    z-index: 600;
+}
+
+.user-management-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: var(--pulse-effect);
+    opacity: 0.2;
+    z-index: 0;
+    animation: pulse 12s infinite ease-in-out;
+}
+
+.container {
+    max-width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+}
+
+/* Section Header */
+.section-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.section-title {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 2.5rem;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    text-shadow: 0 0 12px rgba(65, 105, 225, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: transform 0.3s ease;
+}
+
+.section-title:hover {
+    transform: translateY(-3px);
+}
+
+.section-title i {
+    font-size: 2rem;
+    color: var(--accent-blue);
+}
+
+.section-subtitle {
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    max-width: 800px;
+    line-height: 1.6;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.btn {
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 1rem;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: var(--accent-blue);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-light);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+    background: #2f5496;
+}
+
+.btn-secondary {
+    background: rgba(42, 42, 42, 0.9);
+    color: var(--text-primary);
+    border: 1px solid var(--accent-blue);
+    box-shadow: var(--shadow-light);
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+    background: rgba(65, 105, 225, 0.2);
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: var(--text-primary);
+    border: none;
+    box-shadow: var(--shadow-light);
+}
+
+.btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+    background: #c82333;
+}
+
+.btn i {
+    font-size: 1.2rem;
+}
+
+/* Table Responsive */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 8px;
+    background: rgba(42, 42, 42, 0.9);
+    box-shadow: var(--shadow-light);
+}
+
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Neon-Regular', sans-serif;
+    color: var(--text-primary);
+}
+
+.user-table th,
+.user-table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid rgba(65, 105, 225, 0.2);
+}
+
+.user-table th {
+    background: var(--accent-blue);
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.user-table td {
+    font-size: 1rem;
+}
+
+.user-table tr:hover {
+    background: rgba(65, 105, 225, 0.1);
+}
+
+.user-link {
+    color: var(--accent-blue);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.user-link:hover {
+    color: #F4C430;
+    text-decoration: underline;
+}
+
+/* No Users Message */
+.no-users {
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    text-align: center;
+    padding: 20px;
+    background: rgba(42, 42, 42, 0.9);
+    border-radius: 8px;
+    box-shadow: var(--shadow-light);
+}
+
+/* Medium screens (768px and up) */
+@media (min-width: 768px) {
+    .user-management-section {
+        padding: 80px 30px;
+    }
+
+    .section-title {
+        font-size: 3rem;
+    }
+
+    .section-title i {
+        font-size: 2.5rem;
+    }
+
+    .section-subtitle {
+        font-size: 1.3rem;
+    }
+
+    .btn {
+        font-size: 1.1rem;
+        padding: 14px 28px;
+    }
+
+    .user-table th,
+    .user-table td {
+        padding: 20px;
+    }
+
+    .user-table th {
+        font-size: 1.2rem;
+    }
+
+    .user-table td {
+        font-size: 1.1rem;
+    }
+}
+
+/* Small screens (480px and below) */
+@media (max-width: 480px) {
+    .user-management-section {
+        padding: 40px 15px;
+        margin: 0 10px;
+    }
+
+    .section-title {
+        font-size: 2rem;
+    }
+
+    .section-title i {
+        font-size: 1.8rem;
+    }
+
+    .section-subtitle {
+        font-size: 1rem;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .btn {
+        font-size: 0.9rem;
+        padding: 10px 20px;
+        width: 100%;
+        max-width: 250px;
+        text-align: center;
+    }
+
+    .user-table th,
+    .user-table td {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+
+    .user-table th {
+        font-size: 1rem;
+    }
+
+    .table-responsive {
+        font-size: 0.85rem;
+    }
+
+    .no-users {
+        font-size: 1rem;
+        padding: 15px;
+    }
+
+    /* Stack table for small screens */
+    .user-table {
+        display: block;
+    }
+
+    .user-table thead {
+        display: none;
+    }
+
+    .user-table tbody,
+    .user-table tr {
+        display: block;
+    }
+
+    .user-table td {
+        display: block;
+        text-align: right;
+        position: relative;
+        padding-left: 50%;
+        border-bottom: none;
+    }
+
+    .user-table td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        width: 45%;
+        font-weight: bold;
+        text-align: left;
+        color: var(--accent-blue);
+    }
+
+    .user-table td:last-child {
+        border-bottom: 1px solid rgba(65, 105, 225, 0.2);
+    }
+}
+
+/* Reusing pulse animation */
+@keyframes pulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.2;
+    }
+    50% {
+        transform: scale(1);
+        opacity: 0.4;
+    }
+    100% {
+        transform: scale(0.8);
+        opacity: 0.2;
+    }
+}

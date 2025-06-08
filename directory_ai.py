@@ -157,7 +157,7 @@ def main():
         'tests', 'migrations', 'flask_stripe', '.git', 'fullcalendar',
     }
     ignore_extensions = {
-        '.txt', '.css', '.gitattributes', '.md', '.pyc'
+        '.txt', '.css', '.gitattributes', '.md', '.pyc', '.html'
     }
     
     try:

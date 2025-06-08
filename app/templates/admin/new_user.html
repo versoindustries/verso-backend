@@ -1,15 +1,103 @@
 {% extends "base.html" %}
+
+{% block additional_css %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/new_user.css') }}">
+{% endblock %}
+
+{% block title %}
+Create New User
+{% endblock %}
+
+{% block description %}
+Create a new user account by filling out the registration form with details such as username, email, password, and roles.
+{% endblock %}
+
+{% block head %}
+<meta name="description" content="{{ description | e }}">
+<meta property="og:title" content="{{ title | e }}">
+<meta property="og:description" content="{{ description | e }}">
+<meta property="og:image" content="{{ url_for('static', filename='images/logo.png') }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ title | e }}">
+<meta name="twitter:description" content="{{ description | e }}">
+<meta name="twitter:image" content="{{ url_for('static', filename='images/logo.png') }}">
+<link rel="canonical" href="{{ request.url }}">
+<meta name="robots" content="index, follow">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "{{ title | e }}",
+  "description": "{{ description | e }}"
+}
+</script>
+{% endblock %}
+
 {% block content %}
-<h1>Create New User</h1>
-<form method="post">
-    {{ form.hidden_tag() }}
-    <p>{{ form.username.label }} {{ form.username() }}</p>
-    <p>{{ form.email.label }} {{ form.email() }}</p>
-    <p>{{ form.password.label }} {{ form.password() }}</p>
-    <p>{{ form.first_name.label }} {{ form.first_name() }}</p>
-    <p>{{ form.last_name.label }} {{ form.last_name() }}</p>
-    <p>{{ form.phone.label }} {{ form.phone() }}</p>
-    <p>{{ form.roles.label }} {{ form.roles(multiple=True) }}</p>
-    <p>{{ form.submit() }}</p>
-</form>
+<section class="user-create-section container mx-auto py-8">
+    <header class="text-center mb-8">
+        <h1 class="text-3xl font-bold">Create New User</h1>
+        <p class="text-lg text-gray-600 mt-2">Fill out the form below to register a new user account.</p>
+    </header>
+    <article class="form-container max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
+        <form method="post" class="flex flex-col gap-4">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                <label for="{{ form.username.id }}" class="block text-sm font-medium text-gray-700">{{ form.username.label.text }}</label>
+                {{ form.username(class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500") }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.email.id }}" class="block text-sm font-medium text-gray-700">{{ form.email.label.text }}</label>
+                {{ form.email(class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500") }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.password.id }}" class="block text-sm font-medium text-gray-700">{{ form.password.label.text }}</label>
+                {{ form.password(class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500") }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.first_name.id }}" class="block text-sm font-medium text-gray-700">{{ form.first_name.label.text }}</label>
+                {{ form.first_name(class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500") }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.last_name.id }}" class="block text-sm font-medium text-gray-700">{{ form.last_name.label.text }}</label>
+                {{ form.last_name(class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500") }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.phone.id }}" class="block text-sm font-medium text-gray-700">{{ form.phone.label.text }}</label>
+                {{ form.phone(class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500") }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.roles.id }}" class="block text-sm font-medium text-gray-700">{{ form.roles.label.text }}</label>
+                {{ form.roles(class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500", multiple=True) }}
+            </div>
+            <div class="form-group">
+                {{ form.submit(class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500") }}
+            </div>
+        </form>
+    </article>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(event) {
+            const inputs = form.querySelectorAll('input, select');
+            let isValid = true;
+            inputs.forEach(input => {
+                if (!input.value && input.required) {
+                    isValid = false;
+                    input.classList.add('border-red-500');
+                } else {
+                    input.classList.remove('border-red-500');
+                }
+            });
+            if (!isValid) {
+                event.preventDefault();
+                alert('Please fill out all required fields.');
+            }
+        });
+    });
+</script>
 {% endblock %}
