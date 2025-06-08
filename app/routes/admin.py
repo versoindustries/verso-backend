@@ -129,7 +129,8 @@ def delete_user(user_id):
 @admin_required
 def list_roles():
     roles = Role.query.all()
-    return render_template('admin/list_roles.html', roles=roles)
+    form = CSRFTokenForm()  # Initialize the CSRF form
+    return render_template('admin/list_roles.html', roles=roles, form=form)
 
 @admin.route('/role/new', methods=['GET', 'POST'])
 @login_required

@@ -1,0 +1,224 @@
+/* User Create Section */
+.user-create-section {
+    padding: 40px 20px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border-radius: 12px;
+    box-shadow: var(--shadow-light);
+    margin: 0 auto;
+    max-width: 1200px;
+    position: relative;
+    overflow: hidden;
+    z-index: 600;
+}
+
+.user-create-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: var(--pulse-effect);
+    opacity: 0.2;
+    z-index: 0;
+    animation: pulse 12s infinite ease-in-out;
+}
+
+/* Header */
+.user-create-section header {
+    position: relative;
+    z-index: 1;
+}
+
+.user-create-section h1 {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 2.5rem;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    text-shadow: 0 0 12px rgba(65, 105, 225, 0.6);
+    transition: transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.user-create-section h1:hover {
+    transform: translateY(-3px);
+}
+
+.user-create-section h1 i {
+    font-size: 2rem;
+    color: var(--accent-blue);
+}
+
+.user-create-section p {
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    max-width: 800px;
+    line-height: 1.6;
+    margin: 0 auto;
+}
+
+/* Form Container */
+.form-container {
+    background: rgba(42, 42, 42, 0.9);
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: var(--shadow-light);
+    position: relative;
+    z-index: 1;
+}
+
+/* Form Group */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.form-group input,
+.form-group select {
+    padding: 10px;
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(65, 105, 225, 0.3);
+    border-radius: 6px;
+    color: var(--text-primary);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 8px rgba(65, 105, 225, 0.4);
+}
+
+/* Submit Button */
+.form-group input[type="submit"] {
+    background: var(--accent-blue);
+    border: none;
+    padding: 12px;
+    font-size: 1rem;
+    color: var(--text-primary);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.form-group input[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+    background: #2f5496;
+}
+
+/* Error State */
+.form-group input.border-red-500,
+.form-group select.border-red-500 {
+    border-color: #dc3545;
+    box-shadow: 0 0 8px rgba(220, 53, 69, 0.4);
+}
+
+/* Medium screens (768px and up) */
+@media (min-width: 768px) {
+    .user-create-section {
+        padding: 60px 30px;
+    }
+
+    .user-create-section h1 {
+        font-size: 3rem;
+    }
+
+    .user-create-section h1 i {
+        font-size: 2.5rem;
+    }
+
+    .user-create-section p {
+        font-size: 1.3rem;
+    }
+
+    .form-container {
+        padding: 32px;
+    }
+
+    .form-group label {
+        font-size: 1.1rem;
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: 12px;
+        font-size: 1.1rem;
+    }
+
+    .form-group input[type="submit"] {
+        padding: 14px;
+        font-size: 1.1rem;
+    }
+}
+
+/* Small screens (480px and below) */
+@media (max-width: 480px) {
+    .user-create-section {
+        padding: 30px 15px;
+        margin: 0 10px;
+    }
+
+    .user-create-section h1 {
+        font-size: 2rem;
+    }
+
+    .user-create-section h1 i {
+        font-size: 1.8rem;
+    }
+
+    .user-create-section p {
+        font-size: 1rem;
+    }
+
+    .form-container {
+        padding: 16px;
+    }
+
+    .form-group label {
+        font-size: 0.9rem;
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: 8px;
+        font-size: 0.9rem;
+    }
+
+    .form-group input[type="submit"] {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Reusing pulse animation */
+@keyframes pulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.2;
+    }
+    50% {
+        transform: scale(1);
+        opacity: 0.4;
+    }
+    100% {
+        transform: scale(0.8);
+        opacity: 0.2;
+    }
+}
