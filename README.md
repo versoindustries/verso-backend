@@ -200,6 +200,8 @@ To integrate a custom frontend:
 
 Our vision is to evolve Verso Backend into a community-supported, Python-based CMS for businesses, led by founder Michael B. Zimmerman. We’re refining the architecture and will share a detailed roadmap soon. This template already offers a cost-effective, fast website solution—deployable on Heroku for just $7/month.
 
+Next roadmap item will be creating a windows executable to clone this template repository and launch the dev instances. The goal is for it to execute all the python commands that setup the environment, create roles, etc so devs can focus on the building end of it. 
+
 ## Contributing
 
 We welcome contributions! To get started:

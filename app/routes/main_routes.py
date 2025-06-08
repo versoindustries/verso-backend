@@ -110,7 +110,6 @@ def contact():
 def contact_confirmation():
     return render_template('contact_confirmation.html')   
 
-
 @main.route('/request_estimate', methods=['POST'])
 def request_estimate():
     form = EstimateRequestForm()
@@ -271,19 +270,42 @@ def get_available_time_slots():
 @main.route('/estimate_submitted')
 def estimate_submitted():
     referrer = request.args.get('referrer', url_for('main_routes.index'))
-    estimator = request.args.get('estimator')
+    estimator_id = request.args.get('estimator')
     date = request.args.get('date')
     time = request.args.get('time')
 
-    time_obj = datetime.strptime(time, '%H:%M')
-    formatted_time = time_obj.strftime('%I:%M %p')
+    # Query the Estimator model to get the name based on the ID
+    estimator = None
+    if estimator_id:
+        try:
+            estimator_obj = Estimator.query.get(int(estimator_id))
+            if estimator_obj:
+                estimator = estimator_obj.name
+            else:
+                current_app.logger.error(f"Estimator with ID {estimator_id} not found.")
+                estimator = "Unknown Estimator"  # Fallback for invalid ID
+        except ValueError:
+            current_app.logger.error(f"Invalid estimator ID format: {estimator_id}")
+            estimator = "Unknown Estimator"  # Fallback for non-integer ID
+    else:
+        current_app.logger.error("No estimator ID provided in request.")
+        estimator = "Unknown Estimator"  # Fallback if no ID is provided
 
-    return render_template('estimate_submitted.html',
-                           referrer=referrer,
-                           estimator=estimator,
-                           date=date,
-                           time=formatted_time,
-                           hide_estimate_form=True)
+    try:
+        time_obj = datetime.strptime(time, '%H:%M')
+        formatted_time = time_obj.strftime('%I:%M %p')
+    except ValueError as e:
+        current_app.logger.error(f"Error parsing time: {e}")
+        formatted_time = time  # Fallback to raw time if parsing fails
+
+    return render_template(
+        'estimate_submitted.html',
+        referrer=referrer,
+        estimator=estimator, 
+        date=date,
+        time=formatted_time,
+        hide_estimate_form=True
+    )
 
 def credentials_to_dict(credentials):
     return {'token': credentials.token,
