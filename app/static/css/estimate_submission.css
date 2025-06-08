@@ -1,0 +1,486 @@
+/* Confirmation Header Section */
+.confirmation-header-section {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    padding: 40px 20px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-light);
+    border-radius: 12px;
+    margin: 20px;
+    z-index: 600;
+}
+
+.confirmation-header-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: var(--pulse-effect);
+    opacity: 0.2;
+    z-index: 0;
+    animation: pulse 12s infinite ease-in-out;
+}
+
+.confirmation-header-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+    text-align: center;
+}
+
+.confirmation-heading {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 2.2rem;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    text-shadow: 0 0 12px rgba(65, 105, 225, 0.6);
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: transform 0.3s ease;
+}
+
+.confirmation-heading:hover {
+    transform: translateY(-3px);
+}
+
+.confirmation-heading i {
+    font-size: 2rem;
+    color: #4169e1;
+    transition: color 0.3s ease;
+}
+
+.confirmation-heading:hover i {
+    color: #F4C430;
+}
+
+.confirmation-text {
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    max-width: 800px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.confirmation-divider {
+    width: 100px;
+    border: 0;
+    height: 2px;
+    background: #F4C430;
+    margin: 20px auto;
+}
+
+/* Appointment Details Section */
+.appointment-details-section {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    padding: 40px 20px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-light);
+    border-radius: 12px;
+    margin: 20px;
+    z-index: 600;
+}
+
+.appointment-details-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: var(--pulse-effect);
+    opacity: 0.2;
+    z-index: 0;
+    animation: pulse 12s infinite ease-in-out;
+}
+
+.appointment-details-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+.appointment-details-list {
+    list-style: none;
+    padding: 0;
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.appointment-detail-item {
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    padding: 15px 20px;
+    background: rgba(42, 42, 42, 0.9);
+    border-radius: 8px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: var(--shadow-light);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-left: 4px solid #F4C430;
+}
+
+.appointment-detail-item:hover {
+    transform: translateX(5px);
+    box-shadow: var(--shadow-hover);
+}
+
+.detail-label {
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.detail-label i {
+    font-size: 1.3rem;
+    color: #4169e1;
+    transition: color 0.3s ease;
+}
+
+.appointment-detail-item:hover .detail-label i {
+    color: #F4C430;
+}
+
+.detail-value {
+    flex: 1;
+    text-align: right;
+}
+
+/* Calendar Integration Section */
+.calendar-integration-section {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    padding: 40px 20px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-light);
+    border-radius: 12px;
+    margin: 20px;
+    z-index: 600;
+}
+
+.calendar-integration-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: var(--pulse-effect);
+    opacity: 0.2;
+    z-index: 0;
+    animation: pulse 12s infinite ease-in-out;
+}
+
+.calendar-integration-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+    text-align: center;
+}
+
+.calendar-integration-title {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 2rem;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    text-shadow: 0 0 12px rgba(65, 105, 225, 0.6);
+    margin-bottom: 20px;
+    transition: transform 0.3s ease;
+}
+
+.calendar-integration-title:hover {
+    transform: translateY(-3px);
+}
+
+.calendar-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+}
+
+.calendar-button {
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 1rem;
+    color: var(--text-primary);
+    background: rgba(65, 105, 225, 0.2);
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: var(--shadow-light);
+    transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.calendar-button:hover {
+    transform: translateY(-3px);
+    background: rgba(65, 105, 225, 0.3);
+    box-shadow: var(--shadow-hover);
+}
+
+.calendar-button i {
+    font-size: 1.2rem;
+    color: #4169e1;
+    transition: color 0.3s ease;
+}
+
+.calendar-button:hover i {
+    color: #F4C430;
+}
+
+/* Redirect Section */
+.redirect-section {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    padding: 40px 20px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-light);
+    border-radius: 12px;
+    margin: 20px;
+    z-index: 600;
+}
+
+.redirect-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: var(--pulse-effect);
+    opacity: 0.2;
+    z-index: 0;
+    animation: pulse 12s infinite ease-in-out;
+}
+
+.redirect-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+    text-align: center;
+}
+
+.redirect-text {
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    max-width: 800px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.countdown-timer {
+    width: 100%;
+    max-width: 300px;
+    height: 10px;
+    background: rgba(42, 42, 42, 0.9);
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: var(--shadow-light);
+    margin-bottom: 20px;
+}
+
+.timer-progress {
+    width: 100%;
+    height: 100%;
+    background: #F4C430;
+    transition: width 1s linear;
+}
+
+.return-home-button {
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 1rem;
+    color: var(--text-primary);
+    background: rgba(65, 105, 225, 0.2);
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: var(--shadow-light);
+    transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.return-home-button:hover {
+    transform: translateY(-3px);
+    background: rgba(65, 105, 225, 0.3);
+    box-shadow: var(--shadow-hover);
+}
+
+.return-home-button i {
+    font-size: 1.2rem;
+    color: #4169e1;
+    transition: color 0.3s ease;
+}
+
+.return-home-button:hover i {
+    color: #F4C430;
+}
+
+/* Medium screens (768px and up) */
+@media (min-width: 768px) {
+    .confirmation-header-section,
+    .appointment-details-section,
+    .calendar-integration-section,
+    .redirect-section {
+        padding: 60px 30px;
+        margin: 30px;
+    }
+
+    .confirmation-heading {
+        font-size: 2.8rem;
+    }
+
+    .confirmation-text {
+        font-size: 1.2rem;
+    }
+
+    .appointment-detail-item {
+        font-size: 1.2rem;
+        padding: 20px 25px;
+    }
+
+    .detail-label i {
+        font-size: 1.5rem;
+    }
+
+    .calendar-integration-title {
+        font-size: 2.5rem;
+    }
+
+    .calendar-button {
+        font-size: 1.1rem;
+        padding: 15px 25px;
+    }
+
+    .calendar-button i {
+        font-size: 1.4rem;
+    }
+
+    .redirect-text {
+        font-size: 1.2rem;
+    }
+
+    .return-home-button {
+        font-size: 1.1rem;
+        padding: 15px 25px;
+    }
+
+    .return-home-button i {
+        font-size: 1.4rem;
+    }
+}
+
+/* Small screens (480px and below) */
+@media (max-width: 480px) {
+    .confirmation-header-section,
+    .appointment-details-section,
+    .calendar-integration-section,
+    .redirect-section {
+        padding: 30px 15px;
+        margin: 15px;
+    }
+
+    .confirmation-heading {
+        font-size: 1.8rem;
+        gap: 8px;
+    }
+
+    .confirmation-heading i {
+        font-size: 1.6rem;
+    }
+
+    .confirmation-text {
+        font-size: 0.9rem;
+    }
+
+    .appointment-detail-item {
+        font-size: 0.9rem;
+        padding: 12px 15px;
+        gap: 10px;
+    }
+
+    .detail-label i {
+        font-size: 1.1rem;
+    }
+
+    .calendar-integration-title {
+        font-size: 1.6rem;
+    }
+
+    .calendar-button {
+        font-size: 0.9rem;
+        padding: 10px 15px;
+        gap: 8px;
+    }
+
+    .calendar-button i {
+        font-size: 1rem;
+    }
+
+    .redirect-text {
+        font-size: 0.9rem;
+    }
+
+    .countdown-timer {
+        max-width: 200px;
+    }
+
+    .return-home-button {
+        font-size: 0.9rem;
+        padding: 10px 15px;
+        gap: 8px;
+    }
+
+    .return-home-button i {
+        font-size: 1rem;
+    }
+}
+
+/* Reusing pulse animation */
+@keyframes pulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.2;
+    }
+    50% {
+        transform: scale(1);
+        opacity: 0.4;
+    }
+    100% {
+        transform: scale(0.8);
+        opacity: 0.2;
+    }
+}

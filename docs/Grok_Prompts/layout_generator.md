@@ -42,4 +42,4 @@
 
 {Replace with your written copy and any upfront design choices or options, can be labeled in the written copy if you have a vision}
 
-- **Delete This Too, User Note**: When using this, feed it written copy that you are planning to have on page. ensure think mode is enabled. U
+- **Delete This Too, User Note**: When using this, feed it written copy that you are planning to have on page. ensure think mode is enabled. 
