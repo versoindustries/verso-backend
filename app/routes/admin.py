@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, make_response, jsonify
 from flask_login import login_required, current_user
 from app.modules.auth_manager import admin_required
-from app.models import User, Estimator, Service, Appointment, ContactFormSubmission, Role
-from app.forms import ManageRolesForm, EditUserForm, EstimatorForm, EstimateRequestForm, ServiceOptionForm, CSRFTokenForm, CreateUserForm, RoleForm
+from app.models import User, Estimator, Service, Appointment, ContactFormSubmission, Role, BusinessConfig
+from app.forms import ManageRolesForm, EditUserForm, EstimatorForm, EstimateRequestForm, ServiceOptionForm, CSRFTokenForm, CreateUserForm, RoleForm, BusinessConfigForm
 from app.database import db
 from werkzeug.utils import secure_filename
 import os
@@ -315,3 +315,44 @@ def delete_appointment(appointment_id):
     db.session.commit()
     flash('Appointment deleted successfully.', 'success')
     return redirect(url_for('admin.admin_dashboard'))
+
+@admin.route('/business_config', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def business_config():
+    form = BusinessConfigForm()
+    if form.validate_on_submit():
+        try:
+            # Update or create settings
+            settings = {
+                'business_start_time': form.business_start_time.data,
+                'business_end_time': form.business_end_time.data,
+                'buffer_time_minutes': str(form.buffer_time_minutes.data),
+                'company_timezone': form.company_timezone.data
+            }
+            for name, value in settings.items():
+                config = BusinessConfig.query.filter_by(setting_name=name).first()
+                if config:
+                    config.setting_value = value
+                else:
+                    config = BusinessConfig(setting_name=name, setting_value=value)
+                    db.session.add(config)
+            db.session.commit()
+            current_app.logger.info('Business configuration updated successfully.')
+            flash('Business settings updated successfully.', 'success')
+            return redirect(url_for('admin.business_config'))
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            current_app.logger.error(f'Error updating business configuration: {e}')
+            flash('Error updating settings. Please try again.', 'error')
+
+    # Load existing settings
+    configs = BusinessConfig.query.all()
+    config_dict = {config.setting_name: config.setting_value for config in configs}
+    if config_dict:
+        form.business_start_time.data = config_dict.get('business_start_time', '08:00')
+        form.business_end_time.data = config_dict.get('business_end_time', '17:00')
+        form.buffer_time_minutes.data = int(config_dict.get('buffer_time_minutes', 30))
+        form.company_timezone.data = config_dict.get('company_timezone', 'America/Denver')
+
+    return render_template('admin/business_config.html', form=form, hide_estimate_form=True)

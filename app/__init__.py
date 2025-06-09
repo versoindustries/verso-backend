@@ -9,7 +9,7 @@ from flask.cli import with_appcontext, AppGroup
 from app.config import Config
 from app.modules.role_setup import create_roles
 from app.database import db
-from app.models import User, Role
+from app.models import User, Role, BusinessConfig
 from dotenv import load_dotenv
 import os
 import logging
@@ -44,6 +44,23 @@ def create_roles_command():
     """Create default user roles."""
     create_roles()
     click.echo('Default roles have been created.')
+
+@click.command('seed-business-config')
+@with_appcontext
+def seed_business_config_command():
+    """Seed default business configuration."""
+    default_configs = [
+        {'setting_name': 'business_start_time', 'setting_value': '08:00'},
+        {'setting_name': 'business_end_time', 'setting_value': '17:00'},
+        {'setting_name': 'buffer_time_minutes', 'setting_value': '30'},
+        {'setting_name': 'company_timezone', 'setting_value': 'America/Denver'}
+    ]
+    for config in default_configs:
+        if not BusinessConfig.query.filter_by(setting_name=config['setting_name']).first():
+            new_config = BusinessConfig(**config)
+            db.session.add(new_config)
+    db.session.commit()
+    click.echo('Default business configuration seeded.')
 
 # Application factory
 def create_app(config_class=Config):
@@ -82,6 +99,7 @@ def create_app(config_class=Config):
     # Register CLI commands
     app.cli.add_command(create_roles_command)
     app.cli.add_command(debug_cli)
+    app.cli.add_command(seed_business_config_command)
 
     # CLI command to set admin role
     @app.cli.command('set-admin')

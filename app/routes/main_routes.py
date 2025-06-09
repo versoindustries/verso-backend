@@ -13,7 +13,7 @@ from pytz import UTC
 
 from app import csrf, db, mail
 from app.forms import AcceptTOSForm, EstimateRequestForm, ContactForm
-from app.models import Appointment, Estimator, Service, User, ContactFormSubmission
+from app.models import Appointment, Estimator, Service, User, ContactFormSubmission, BusinessConfig
 from app.modules.locations import get_locations
 import random
 
@@ -233,14 +233,27 @@ def get_available_time_slots():
         user_timezone_str = data['timezone']
         user_timezone = pytz.timezone(user_timezone_str)
         current_app.logger.info(f"User's timezone: {user_timezone_str}")
-
     except (ValueError, pytz.UnknownTimeZoneError) as e:
         current_app.logger.error(f"Error parsing date or timezone: {e}")
         return jsonify({'error': 'Invalid date or timezone format'}), 400
 
-    company_timezone = pytz.timezone('America/Denver')
-    business_start_time = time(8, 0)
-    business_end_time = time(17, 0)
+    # Load business configuration
+    configs = BusinessConfig.query.all()
+    config_dict = {config.setting_name: config.setting_value for config in configs}
+    
+    # Default values if not set
+    business_start_time_str = config_dict.get('business_start_time', '08:00')
+    business_end_time_str = config_dict.get('business_end_time', '17:00')
+    buffer_time_minutes = int(config_dict.get('buffer_time_minutes', 30))
+    company_timezone_str = config_dict.get('company_timezone', 'America/Denver')
+
+    try:
+        company_timezone = pytz.timezone(company_timezone_str)
+        business_start_time = datetime.strptime(business_start_time_str, '%H:%M').time()
+        business_end_time = datetime.strptime(business_end_time_str, '%H:%M').time()
+    except (ValueError, pytz.UnknownTimeZoneError) as e:
+        current_app.logger.error(f"Error parsing business config: {e}")
+        return jsonify({'error': 'Invalid business configuration'}), 500
 
     start_time_local = datetime.combine(selected_date, business_start_time)
     end_time_local = datetime.combine(selected_date, business_end_time)
@@ -261,7 +274,7 @@ def get_available_time_slots():
             user_time_slot = current_time_utc.astimezone(user_timezone)
             time_slots.append(user_time_slot.isoformat())
         
-        current_time_utc += timedelta(minutes=30)
+        current_time_utc += timedelta(minutes=buffer_time_minutes)
 
     current_app.logger.info(f"Generated time slots in ISO format (UTC): {time_slots}")
     
@@ -337,3 +350,22 @@ def generate_ics():
     response = Response(ics_content, mimetype='text/calendar')
     response.headers['Content-Disposition'] = 'attachment; filename=appointment.ics'
     return response
+
+@main.route('/api/business_config', methods=['GET'])
+@csrf.exempt
+def get_business_config():
+    try:
+        configs = BusinessConfig.query.all()
+        config_dict = {config.setting_name: config.setting_value for config in configs}
+        # Ensure all required settings are included, with defaults
+        response = {
+            'company_timezone': config_dict.get('company_timezone', 'America/Denver'),
+            'business_start_time': config_dict.get('business_start_time', '08:00'),
+            'business_end_time': config_dict.get('business_end_time', '17:00'),
+            'buffer_time_minutes': int(config_dict.get('buffer_time_minutes', 30))
+        }
+        current_app.logger.debug(f"Business config retrieved: {response}")
+        return jsonify(response), 200
+    except Exception as e:
+        current_app.logger.error(f"Error fetching business config: {e}")
+        return jsonify({'error': 'Failed to fetch business configuration'}), 500

@@ -1,100 +1,123 @@
+// app/static/js/calendar.js
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOMContentLoaded event fired.');
+    console.debug('DOMContentLoaded event fired.');
 
-    var calendarEl = document.getElementById('calendar');
-    console.log('Calendar element:', calendarEl);
+    const calendarEl = document.getElementById('calendar');
+    console.debug('Calendar element:', calendarEl);
     
-    var calendarContainer = document.getElementById('calendar-container');
-    console.log('Calendar container element:', calendarContainer);
+    const calendarContainer = document.getElementById('calendar-container');
+    console.debug('Calendar container element:', calendarContainer);
     
-    var step1 = document.getElementById('step-1');
-    console.log('Step 1 element:', step1);
+    const step1 = document.getElementById('step-1');
+    console.debug('Step 1 element:', step1);
     
-    var step2 = document.getElementById('step-2');
-    console.log('Step 2 element:', step2);
+    const step2 = document.getElementById('step-2');
+    console.debug('Step 2 element:', step2);
     
-    var nextButton = document.getElementById('next-button');
-    console.log('Next button element:', nextButton);
+    const nextButton = document.getElementById('next-button');
+    console.debug('Next button element:', nextButton);
     
-    var userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    console.log('User Timezone detected:', userTimezone);
+    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    console.debug('User Timezone detected:', userTimezone);
     
-    var csrfToken = getCsrfToken();
-    console.log('CSRF Token fetched:', csrfToken);
-    
-    let calendar; // Declare calendar variable to be accessible throughout
+    const csrfToken = getCsrfToken();
+    console.debug('CSRF Token fetched:', csrfToken);
 
-    if (typeof FullCalendar !== 'undefined') {
-        try {
-            // Initialize the calendar
-            calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                selectable: true, // Enable date selection
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,listMonth'
-                },
-                events: '/api/upcoming_appointments',
-                eventColor: '#378006',
-                timeZone: 'local',  // Ensure FullCalendar uses the local time zone
+    let companyConfig = null; // Store business configuration
+    let calendar; // Declare calendar variable
 
-                select: function(info) {
-                    console.log('Date selected:', info.startStr);
-
-                    // Highlight the selected date
-                    highlightDate(info.startStr);
-
-                    // Handle date selection
-                    handleDateSelection(info.startStr);
-                },
-
-                dateClick: function(info) {
-                    console.log('Date clicked:', info.dateStr);
-
-                    // Highlight the clicked date
-                    highlightDate(info.dateStr);
-
-                    // Handle date click
-                    handleDateSelection(info.dateStr);
-                }
-            });
-
-            console.log('Calendar initialized successfully.');
-
-            // Render the calendar
-            calendar.render();
-            console.log('Calendar rendered.');
-        } catch (error) {
-            console.error('Error initializing or rendering FullCalendar:', error);
+    // Fetch business configuration
+    fetch('/api/business_config', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
         }
-    } else {
-        console.error('FullCalendar is not defined.');
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to fetch business configuration');
+        }
+        return response.json();
+    })
+    .then(data => {
+        companyConfig = data;
+        console.debug('Business configuration loaded:', companyConfig);
+        initializeCalendar();
+    })
+    .catch(error => {
+        console.error('Error fetching business configuration:', error);
+        // Fallback to defaults
+        companyConfig = {
+            company_timezone: 'America/Denver',
+            business_start_time: '08:00',
+            business_end_time: '17:00',
+            buffer_time_minutes: 30
+        };
+        initializeCalendar();
+    });
+
+    function initializeCalendar() {
+        if (typeof FullCalendar !== 'undefined') {
+            try {
+                calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    selectable: true,
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,listMonth'
+                    },
+                    events: '/api/upcoming_appointments',
+                    eventColor: '#378006',
+                    timeZone: companyConfig.company_timezone, // Use company timezone
+
+                    select: function(info) {
+                        console.debug('Date selected:', info.startStr);
+                        highlightDate(info.startStr);
+                        handleDateSelection(info.startStr);
+                    },
+
+                    dateClick: function(info) {
+                        console.debug('Date clicked:', info.dateStr);
+                        highlightDate(info.dateStr);
+                        handleDateSelection(info.dateStr);
+                    }
+                });
+
+                console.debug('Calendar initialized successfully.');
+                calendar.render();
+                console.debug('Calendar rendered.');
+            } catch (error) {
+                console.error('Error initializing or rendering FullCalendar:', error);
+            }
+        } else {
+            console.error('FullCalendar is not defined.');
+        }
     }
 
-    // Add touch event listener for date selection on touch devices
+    // Touch event listener for date selection on mobile
     calendarEl.addEventListener('touchstart', function(event) {
-        console.log('Touchstart event detected:', event);
-        var touch = event.touches[0];
-        var targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
-        console.log('Touch event detected on element:', targetElement);
+        console.debug('Touchstart event detected:', event);
+        const touch = event.touches[0];
+        const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+        console.debug('Touch event detected on element:', targetElement);
         if (targetElement && targetElement.hasAttribute('data-date')) {
-            var dateStr = targetElement.getAttribute('data-date');
-            console.log('Date string from touch event:', dateStr);
+            const dateStr = targetElement.getAttribute('data-date');
+            console.debug('Date string from touch event:', dateStr);
             if (dateStr) {
                 highlightDate(dateStr);
                 handleDateSelection(dateStr);
             }
         }
-    });
+    }, { passive: true });
 
-    // Add event listener to the date input field
+    // Date input listener
     addDateInputListener();
 
     function addDateInputListener() {
-        var dateInput = document.getElementById('preferred_date');
+        const dateInput = document.getElementById('preferred_date');
         dateInput.addEventListener('change', function() {
-            var selectedDate = this.value;
+            const selectedDate = this.value;
             if (selectedDate) {
                 handleDateInputChange(selectedDate);
             }
@@ -102,37 +125,27 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function handleDateInputChange(dateStr) {
-        console.log('Date input changed:', dateStr);
-
-        // Select the date in the calendar
-        var date = new Date(dateStr + 'T00:00:00'); // Ensure time component is set to midnight
+        console.debug('Date input changed:', dateStr);
+        const date = new Date(dateStr + 'T00:00:00');
         calendar.select(date);
-
-        // Highlight the date
         highlightDate(dateStr);
-
-        // Fetch available time slots
         handleDateSelection(dateStr);
     }
 
     function highlightDate(dateStr) {
-        // Remove highlight from previously selected date
-        document.querySelectorAll('.selected-date').forEach(function(cell) {
+        document.querySelectorAll('.selected-date').forEach(cell => {
             cell.classList.remove('selected-date');
         });
-
-        // Add highlight to the selected date
-        var selectedCell = document.querySelector('[data-date="' + dateStr + '"]');
+        const selectedCell = document.querySelector(`[data-date="${dateStr}"]`);
         if (selectedCell) {
             selectedCell.classList.add('selected-date');
         }
     }
 
     function handleDateSelection(dateStr) {
-        console.log('Handling date selection:', dateStr);
-
+        console.debug('Handling date selection:', dateStr);
         document.getElementById('preferred_date').value = dateStr;
-        console.log('Preferred date set to:', dateStr);
+        console.debug('Preferred date set to:', dateStr);
 
         fetch('/get_available_time_slots', {
             method: 'POST',
@@ -146,45 +159,40 @@ document.addEventListener('DOMContentLoaded', function() {
             })
         })
         .then(response => {
-            console.log('Fetch response:', response);
+            console.debug('Fetch response:', response);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
             return response.json();
         })
         .then(data => {
-            console.log('Time slots data received:', data);
-            populateTimeSlots(data, userTimezone);
+            console.debug('Time slots data received:', data);
+            populateTimeSlots(data, userTimezone, companyConfig.company_timezone);
         })
         .catch(error => {
             console.error('Error fetching time slots:', error);
+            const timeDropdown = document.getElementById('preferred_time');
+            timeDropdown.innerHTML = '<option disabled>Error loading time slots</option>';
         });
     }
 
     nextButton.addEventListener('click', handleNextButtonClick);
-    nextButton.addEventListener('touchstart', handleNextButtonClick);
+    nextButton.addEventListener('touchstart', handleNextButtonClick, { passive: true });
 
     function handleNextButtonClick(event) {
         event.preventDefault();
-        console.log('"Next" button clicked.');
-
-        var form = document.getElementById('personal-info-form');
-        console.log('Personal info form element:', form);
+        console.debug('"Next" button clicked.');
+        const form = document.getElementById('personal-info-form');
+        console.debug('Personal info form element:', form);
 
         if (form.checkValidity()) {
-            console.log('Personal info form validation successful.');
-
+            console.debug('Personal info form validation successful.');
             copyPersonalInfoToStep2();
-
             step1.style.display = 'none';
             step2.style.display = 'block';
             calendarContainer.style.display = 'block';
-            console.log('Navigating to Step 2 and showing the calendar.');
-
-            // Force a reflow and repaint of the calendar container
-            calendarContainer.offsetHeight;
-
-            // Re-render the calendar to ensure it displays correctly
+            console.debug('Navigating to Step 2 and showing the calendar.');
+            calendarContainer.offsetHeight; // Force reflow
             calendar.render();
         } else {
             console.warn('Personal info form validation failed.');
@@ -194,39 +202,48 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function copyPersonalInfoToStep2() {
-    var form = document.getElementById('personal-info-form');
-    console.log('Copying personal info from form:', form);
-
+    const form = document.getElementById('personal-info-form');
+    console.debug('Copying personal info from form:', form);
     document.getElementById('hidden_first_name').value = form.querySelector('[name="first_name"]').value;
     document.getElementById('hidden_last_name').value = form.querySelector('[name="last_name"]').value;
     document.getElementById('hidden_phone').value = form.querySelector('[name="phone"]').value;
     document.getElementById('hidden_email').value = form.querySelector('[name="email"]').value;
-    console.log('Personal info copied to Step 2.');
+    console.debug('Personal info copied to Step 2.');
 }
 
-function convertUTCToLocal(utcTimeStr, userTimezone) {
-    console.log('Converting UTC time to local time:', utcTimeStr, 'for timezone:', userTimezone);
+function convertUTCToLocal(utcTimeStr, targetTimezone, showUserTimezone = false, userTimezone = null) {
+    console.debug('Converting UTC time:', utcTimeStr, 'to timezone:', targetTimezone);
     const utcDateTime = new Date(utcTimeStr);
-
     if (isNaN(utcDateTime)) {
         console.error('Invalid UTC Date string:', utcTimeStr);
         return 'Invalid Date';
     }
 
-    const localTimeFormatter = new Intl.DateTimeFormat('en-US', {
-        timeZone: userTimezone,
+    const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: targetTimezone,
         hour: '2-digit',
         minute: '2-digit',
         hour12: true
     });
 
-    const localTime = localTimeFormatter.format(utcDateTime);
-    console.log('Converted UTC to local time:', utcTimeStr, '->', localTime);
+    let localTime = formatter.format(utcDateTime);
+    if (showUserTimezone && userTimezone && userTimezone !== targetTimezone) {
+        const userFormatter = new Intl.DateTimeFormat('en-US', {
+            timeZone: userTimezone,
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+        const userTime = userFormatter.format(utcDateTime);
+        localTime += ` (${userTime})`;
+    }
+
+    console.debug('Converted UTC to local time:', utcTimeStr, '->', localTime);
     return localTime;
 }
 
-function populateTimeSlots(data, userTimezone) {
-    console.log('Populating time slots with data:', data, 'and timezone:', userTimezone);
+function populateTimeSlots(data, userTimezone, companyTimezone) {
+    console.debug('Populating time slots with data:', data, 'company timezone:', companyTimezone);
     const timeDropdown = document.getElementById('preferred_time');
     timeDropdown.innerHTML = '';
 
@@ -238,12 +255,13 @@ function populateTimeSlots(data, userTimezone) {
         console.warn('No available time slots for the selected date.');
     } else {
         data.timeSlots.forEach(slot => {
-            const localTime = convertUTCToLocal(slot, userTimezone);
+            // Display time in company timezone, with user timezone in parentheses
+            const localTime = convertUTCToLocal(slot, companyTimezone, true, userTimezone);
             const option = document.createElement('option');
             option.value = slot;
             option.textContent = localTime;
             timeDropdown.appendChild(option);
         });
-        console.log('Time slots populated in dropdown.');
+        console.debug('Time slots populated in dropdown.');
     }
 }

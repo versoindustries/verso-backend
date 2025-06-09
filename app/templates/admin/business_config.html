@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}
+Business Configuration
+{% endblock %}
+
+{% block description %}
+Configure your business settings, including operating hours, buffer time, and timezone, to optimize scheduling and operations.
+{% endblock %}
+
+{% block head %}
+<meta name="description" content="{{ description }}">
+<meta property="og:title" content="{{ title }}">
+<meta property="og:description" content="{{ description }}">
+<meta property="og:image" content="{{ url_for('static', filename='images/logo.png') }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ title }}">
+<meta name="twitter:description" content="{{ description }}">
+<meta name="twitter:image" content="{{ url_for('static', filename='images/logo.png') }}">
+<link rel="canonical" href="{{ request.url }}">
+<meta name="robots" content="noindex, nofollow"> <!-- Admin page, not for public indexing -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "{{ title }}",
+  "description": "{{ description }}"
+}
+</script>
+{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="business-config-section">
+    <header class="section-header">
+        <h1>Business Configuration</h1>
+        <p>Configure your business settings, including operating hours, buffer time, and timezone, to optimize scheduling and operations.</p>
+    </header>
+    <article class="config-form-container">
+        <form method="POST" class="business-config-form">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                <label for="{{ form.business_start_time.id }}">
+                    {{ form.business_start_time.label.text }}
+                    <i class="fas fa-clock"></i>
+                </label>
+                {{ form.business_start_time(class="form-control", type="time") }}
+                {% for error in form.business_start_time.errors %}
+                    <span class="error-message">{{ error|e }}</span>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.business_end_time.id }}">
+                    {{ form.business_end_time.label.text }}
+                    <i class="fas fa-clock"></i>
+                </label>
+                {{ form.business_end_time(class="form-control", type="time") }}
+                {% for error in form.business_end_time.errors %}
+                    <span class="error-message">{{ error|e }}</span>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.buffer_time_minutes.id }}">
+                    {{ form.buffer_time_minutes.label.text }}
+                    <i class="fas fa-hourglass-half"></i>
+                </label>
+                {{ form.buffer_time_minutes(class="form-control", type="number", min="0") }}
+                {% for error in form.buffer_time_minutes.errors %}
+                    <span class="error-message">{{ error|e }}</span>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.company_timezone.id }}">
+                    {{ form.company_timezone.label.text }}
+                    <i class="fas fa-globe"></i>
+                </label>
+                {{ form.company_timezone(class="form-control custom-select") }}
+                {% for error in form.company_timezone.errors %}
+                    <span class="error-message">{{ error|e }}</span>
+                {% endfor %}
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Settings
+            </button>
+        </form>
+    </article>
+</section>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
