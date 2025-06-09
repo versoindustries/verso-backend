@@ -10,6 +10,8 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import DataRequired, Email, Length, EqualTo
 from app.models import Role, Service, Estimator
+import pytz
+from datetime import datetime, timedelta
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(min=3, max=100)])
@@ -24,7 +26,6 @@ class RegistrationForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(RegistrationForm, self).__init__(*args, **kwargs)
         self.role.choices = [(role.id, role.name) for role in Role.query.filter(Role.name != 'admin').all()]
-
 
 class AcceptTOSForm(FlaskForm):
     accept_tos = BooleanField('I agree to the Terms and Conditions', validators=[DataRequired()])
@@ -137,3 +138,41 @@ class CreateUserForm(FlaskForm):
 class RoleForm(FlaskForm):
     name = StringField('Role Name', validators=[DataRequired()])
     submit = SubmitField('Save')
+
+def generate_time_choices(start_hour=0, end_hour=23, interval_minutes=30):
+    """Generate time choices in HH:MM format for a given interval."""
+    choices = []
+    current_time = datetime.strptime("00:00", "%H:%M")
+    end_time = datetime.strptime("23:59", "%H:%M")
+    delta = timedelta(minutes=interval_minutes)
+    
+    while current_time <= end_time:
+        time_str = current_time.strftime("%H:%M")
+        choices.append((time_str, time_str))
+        current_time += delta
+    
+    return choices
+
+class BusinessConfigForm(FlaskForm):
+    business_start_time = SelectField(
+        'Business Start Time (HH:MM, 24-hour format)',
+        choices=generate_time_choices(),
+        validators=[DataRequired()]
+    )
+    business_end_time = SelectField(
+        'Business End Time (HH:MM, 24-hour format)',
+        choices=generate_time_choices(),
+        validators=[DataRequired()]
+    )
+    buffer_time_minutes = SelectField(
+        'Buffer Time Between Appointments (Minutes)',
+        choices=[(15, '15'), (30, '30'), (45, '45'), (60, '60'), (90, '90'), (120, '120')],
+        coerce=int,
+        validators=[DataRequired()]
+    )
+    company_timezone = SelectField(
+        'Company Timezone',
+        choices=[(tz, tz) for tz in pytz.all_timezones],
+        validators=[DataRequired()]
+    )
+    submit = SubmitField('Save Settings')

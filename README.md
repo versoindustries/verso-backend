@@ -196,6 +196,8 @@ To integrate a custom frontend:
 
 - **Flask-Mail**: Previously removed due to limitations. Future integrations will favor specific provider APIs (e.g., SendGrid, Mailgun) for robust email handling.
 
+
+
 ## Future Plans
 
 Our vision is to evolve Verso Backend into a community-supported, Python-based CMS for businesses, led by founder Michael B. Zimmerman. We’re refining the architecture and will share a detailed roadmap soon. This template already offers a cost-effective, fast website solution—deployable on Heroku for just $7/month.

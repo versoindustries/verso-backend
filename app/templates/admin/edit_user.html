@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block additional_css %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/edit_user.css') }}">
+{% endblock %}
+
 {% block title %}Edit User{% endblock %}
 
 {% block description %}Edit user details including username, email, name, phone, password, and roles for secure account management.{% endblock %}
