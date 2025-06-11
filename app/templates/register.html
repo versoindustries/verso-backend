@@ -1,90 +1,130 @@
 {% extends "base.html" %}
 
+{% block title %}Register{% endblock %}
+
+{% block description %}Create your account to get started with Verso Industries{% endblock %}
+
 {% block additional_css %}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/register.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
 {% endblock %}
 
-{% block title %}
-Register
+{% block head %}
+<meta name="description" content="{{ description | e }}">
+<meta property="og:title" content="{{ title | e }}">
+<meta property="og:description" content="{{ description | e }}">
+<meta property="og:image" content="{{ url_for('static', filename='images/logo.png') }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ title | e }}">
+<meta name="twitter:description" content="{{ description | e }}">
+<meta name="twitter:image" content="{{ url_for('static', filename='images/logo.png') }}">
+<link rel="canonical" href="{{ request.url }}">
+<meta name="robots" content="index, follow">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "{{ title | e }}",
+  "description": "{{ description | e }}"
+}
+</script>
 {% endblock %}
 
 {% block content %}
-<!-- Flash Messages Display -->
+<section class="header-section">
+  <div class="header-container">
+    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Verso Industries Logo" class="header-logo">
+    <h1 class="header-title">Register</h1>
+    <p class="header-subtitle">Create your account to get started</p>
+  </div>
+</section>
+
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
-    {% for category, message in messages %}
-      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-        {{ message }}
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+    <section class="flash-message-section">
+      <div class="flash-message-container">
+        {% for category, message in messages %}
+          <div class="flash-message flash-{{ category }}">
+            <i class="fas fa-exclamation-circle flash-icon"></i>
+            <span class="flash-text">{{ message | e }}</span>
+          </div>
+        {% endfor %}
       </div>
-    {% endfor %}
+    </section>
   {% endif %}
 {% endwith %}
-<div class="login-container">
-    <div class="login-box">
-        <h2>Register</h2>
-        <form action="{{ url_for('auth.register') }}" method="post" class="register-form">
-            {{ form.hidden_tag() }}
-            <div class="form-group">
-                {{ form.username.label }}
-                {{ form.username(class="form-control") }}
-                {% if form.username.errors %}
-                    <div class="alert alert-danger">
-                        {{ form.username.errors[0] }}
-                    </div>
-                {% endif %}
-            </div>
-            <div class="form-group">
-                {{ form.email.label }}
-                {{ form.email(class="form-control") }}
-                {% if form.email.errors %}
-                    <div class="alert alert-danger">
-                        {{ form.email.errors[0] }}
-                    </div>
-                {% endif %}
-            </div>
-            <div class="form-group">
-                {{ form.password.label }}
-                {{ form.password(class="form-control") }}
-                {% if form.password.errors %}
-                    <div class="alert alert-danger">
-                        {{ form.password.errors[0] }}
-                    </div>
-                {% endif %}
-            </div>
-            <div class="form-group">
-                {{ form.confirm_password.label }}
-                {{ form.confirm_password(class="form-control") }}
-                {% if form.confirm_password.errors %}
-                    <div class="alert alert-danger">
-                        {{ form.confirm_password.errors[0] }}
-                    </div>
-                {% endif %}
-            </div>
-            <div class="form-group">
-                {{ form.role.label(class="form-control-label") }}
-                {{ form.role(class="form-control") }}
-                {% if form.role.errors %}
-                    <div class="alert alert-danger">
-                        {{ form.role.errors[0] }}
-                    </div>
-                {% endif %}
-            </div>
-            <div class="form-group">
-                {{ form.accept_tos() }}
-                <label for="accept_tos">I agree to the <a href="{{ url_for('main_routes.index') }}" target="_blank">Terms and Conditions</a></label>
-                {% if form.accept_tos.errors %}
-                    <div class="alert alert-danger">
-                        {{ form.accept_tos.errors[0] }}
-                    </div>
-                {% endif %}
-            </div>
-            <div class="form-group">
-                {{ form.submit(class="btn btn-primary") }}
-            </div>
-        </form>
-    </div>
-</div>
+
+<section class="form-section">
+  <div class="form-container">
+    <form method="POST" action="{{ url_for('auth.register') }}" class="registration-form">
+      {{ form.hidden_tag() }}
+      <div class="form-group">
+        <label for="{{ form.username.id }}" class="form-label">Username</label>
+        {{ form.username(class="form-input", placeholder="Choose a username") }}
+        {% if form.username.errors %}
+          <span class="form-error">{{ form.username.errors[0] | e }}</span>
+        {% endif %}
+      </div>
+      <div class="form-group">
+        <label for="{{ form.first_name.id }}" class="form-label">First Name</label>
+        {{ form.first_name(class="form-input", placeholder="Enter your first name") }}
+        {% if form.first_name.errors %}
+          <span class="form-error">{{ form.first_name.errors[0] | e }}</span>
+        {% endif %}
+      </div>
+      <div class="form-group">
+        <label for="{{ form.last_name.id }}" class="form-label">Last Name</label>
+        {{ form.last_name(class="form-input", placeholder="Enter your last name") }}
+        {% if form.last_name.errors %}
+          <span class="form-error">{{ form.last_name.errors[0] | e }}</span>
+        {% endif %}
+      </div>
+      <div class="form-group">
+        <label for="{{ form.email.id }}" class="form-label">Email</label>
+        {{ form.email(class="form-input", placeholder="Enter your email") }}
+        {% if form.email.errors %}
+          <span class="form-error">{{ form.email.errors[0] | e }}</span>
+        {% endif %}
+      </div>
+      <div class="form-group">
+        <label for="{{ form.password.id }}" class="form-label">Password</label>
+        {{ form.password(class="form-input", placeholder="Enter your password") }}
+        {% if form.password.errors %}
+          <span class="form-error">{{ form.password.errors[0] | e }}</span>
+        {% endif %}
+      </div>
+      <div class="form-group">
+        <label for="{{ form.confirm_password.id }}" class="form-label">Confirm Password</label>
+        {{ form.confirm_password(class="form-input", placeholder="Confirm your password") }}
+        {% if form.confirm_password.errors %}
+          <span class="form-error">{{ form.confirm_password.errors[0] | e }}</span>
+        {% endif %}
+      </div>
+      <div class="form-group">
+        <label for="{{ form.role.id }}" class="form-label">Role</label>
+        <div class="select-wrapper">
+          {{ form.role(class="form-select") }}
+          <i class="fas fa-chevron-down select-icon"></i>
+        </div>
+        {% if form.role.errors %}
+          <span class="form-error">{{ form.role.errors[0] | e }}</span>
+        {% endif %}
+      </div>
+      <div class="form-group form-checkbox">
+        {{ form.accept_tos(class="form-checkbox-input") }}
+        <label for="{{ form.accept_tos.id }}" class="checkbox-label">
+          I agree to the <a href="{{ url_for('main_routes.accept_terms') }}" class="terms-link">Terms and Conditions</a>
+        </label>
+        {% if form.accept_tos.errors %}
+          <span class="form-error">{{ form.accept_tos.errors[0] | e }}</span>
+        {% endif %}
+      </div>
+      {{ form.submit(class="submit-button") }}
+      <span class="button-text">Register</span>
+      <i class="fas fa-spinner fa-spin button-spinner hidden"></i>
+    </form>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
 {% endblock %}

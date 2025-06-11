@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy_utils import ChoiceType
 import json
-from sqlalchemy import JSON, event
+from sqlalchemy import JSON, event, Index
 from sqlalchemy.sql import func
 from sqlalchemy.ext.mutable import MutableList
 import pytz
@@ -167,3 +167,37 @@ class BusinessConfig(db.Model):
 
     def __repr__(self):
         return f'<BusinessConfig {self.setting_name}={self.setting_value}>'
+    
+class Post(db.Model):
+    __tablename__ = 'post'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    slug = db.Column(db.String(200), unique=True, nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    category = db.Column(db.String(100), nullable=True)
+    author_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    is_published = db.Column(db.Boolean, default=False, nullable=False)
+    image = db.Column(db.LargeBinary, nullable=True)  # Store image as BLOB
+    image_mime_type = db.Column(db.String(50), nullable=True)  # Store MIME type (e.g., image/png)
+
+    # Relationships
+    author = db.relationship('User', backref=db.backref('posts', lazy=True))
+
+    __table_args__ = (
+        Index('idx_post_slug', 'slug'),  # Index for faster slug lookups
+    )
+
+    def __repr__(self):
+        return f'<Post title={self.title} slug={self.slug}>'
+
+@event.listens_for(Post, "before_insert")
+def post_before_insert(mapper, connection, target):
+    # Ensure created_at is always UTC
+    target.created_at = datetime.utcnow()
+
+@event.listens_for(Post, "before_update")
+def post_before_update(mapper, connection, target):
+    # Ensure updated_at is always UTC
+    target.updated_at = datetime.utcnow()

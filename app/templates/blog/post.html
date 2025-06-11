@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ post.title | e }}
+{% endblock %}
+
+{% block description %}
+{{ post.content | truncate(160) | e }}
+{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/post.css') }}">
+{% endblock %}
+
+{% block head %}
+<meta name="description" content="{{ description | e }}">
+<meta property="og:title" content="{{ title | e }}">
+<meta property="og:description" content="{{ description | e }}">
+{% if post.image and post.image_mime_type %}
+<meta property="og:image" content="{{ url_for('blog.serve_image', post_id=post.id, _external=True) }}">
+<meta name="twitter:image" content="{{ url_for('blog.serve_image', post_id=post.id, _external=True) }}">
+{% else %}
+<meta property="og:image" content="{{ url_for('static', filename='images/logo.png') }}">
+<meta name="twitter:image" content="{{ url_for('static', filename='images/logo.png') }}">
+{% endif %}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ title | e }}">
+<meta name="twitter:description" content="{{ description | e }}">
+<link rel="canonical" href="{{ request.url }}">
+<meta name="robots" content="index, follow">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "{{ title | e }}",
+  "description": "{{ description | e }}",
+  "datePublished": "{{ post.created_at.isoformat() }}"
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="spacer"></div>
+
+<section class="hero-section" role="banner">
+  <div class="hero-image-container">
+    {% if post.image and post.image_mime_type %}
+    <img src="{{ url_for('blog.serve_image', post_id=post.id) }}" alt="{{ post.title | e }} hero image" class="hero-image">
+    {% else %}
+    <img src="{{ url_for('static', filename='images/hero-bg.jpg') }}" alt="Default hero background" class="hero-image">
+    {% endif %}
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1>{{ post.title | e }}</h1>
+    </div>
+  </div>
+</section>
+
+<div class="spacer"></div>
+
+<section class="post-meta-section">
+  <div class="meta-container">
+    <span class="meta-item meta-author"><i class="fas fa-user"></i> {{ post.author.username | e }}</span>
+    <span class="meta-item meta-date"><i class="fas fa-calendar-alt"></i> {{ post.created_at.strftime('%B %d, %Y') }}</span>
+    {% if post.category %}
+    <span class="meta-item meta-category"><i class="fas fa-tag"></i> {{ post.category | e }}</span>
+    {% endif %}
+  </div>
+</section>
+
+<div class="spacer"></div>
+
+<article class="content-section">
+  <div class="content-body">
+    {{ post.content | safe }}
+  </div>
+</article>
+
+<div class="spacer"></div>
+
+<section class="share-section">
+  <h2 class="share-title">Share This Post</h2>
+  <div class="social-links">
+    <a href="https://x.com/intent/tweet?url={{ request.url | urlencode }}&text={{ post.title | urlencode }}" class="social-link" aria-label="Share on X"><i class="fab fa-x"></i></a>
+    <a href="mailto:?subject={{ post.title | urlencode }}&body={{ request.url }}" class="social-link" aria-label="Share via Email"><i class="fas fa-envelope"></i></a>
+    <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.url | urlencode }}" class="social-link" aria-label="Share on LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+    <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url | urlencode }}" class="social-link" aria-label="Share on Facebook"><i class="fab fa-facebook-f"></i></a>
+  </div>
+</section>
+
+<div class="spacer"></div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <section class="notification-section">
+      {% for category, message in messages %}
+        <div class="notification {{ category }}">
+          <i class="fas fa-bell"></i>
+          <span class="notification-text">{{ message | e }}</span>
+          <button class="notification-close" aria-label="Dismiss notification">Close</button>
+        </div>
+      {% endfor %}
+    </section>
+  {% endif %}
+{% endwith %}
+
+<div class="spacer"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Fade-in animation for hero content
+    const heroContent = document.querySelector('.hero-content');
+    if (heroContent) {
+      heroContent.style.opacity = '0';
+      heroContent.style.transition = 'opacity 1s ease';
+      setTimeout(() => {
+        heroContent.style.opacity = '1';
+      }, 100);
+    }
+
+    // Copy button for code snippets
+    document.querySelectorAll('pre').forEach((pre) => {
+      const code = pre.querySelector('code');
+      if (code) {
+        const button = document.createElement('button');
+        button.className = 'copy-button';
+        button.innerHTML = '<i class="fas fa-copy"></i>';
+        button.setAttribute('aria-label', 'Copy code');
+        pre.style.position = 'relative';
+        pre.appendChild(button);
+        button.addEventListener('click', () => {
+          navigator.clipboard.writeText(code.textContent).then(() => {
+            button.innerHTML = '<i class="fas fa-check"></i>';
+            setTimeout(() => {
+              button.innerHTML = '<i class="fas fa-copy"></i>';
+            }, 2000);
+          });
+        });
+      }
+    });
+
+    // Dismiss notifications
+    document.querySelectorAll('.notification-close').forEach(button => {
+      button.addEventListener('click', () => {
+        button.parentElement.style.display = 'none';
+      });
+    });
+  });
+</script>
+{% endblock %}

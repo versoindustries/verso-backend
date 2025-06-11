@@ -3,12 +3,12 @@
     background: var(--glass-bg);
     backdrop-filter: blur(12px);
     padding: 40px 15px;
-    margin: 0 auto;
-    max-width: 1200px;
-    box-shadow: var(--shadow-light);
-    border-radius: 12px;
     position: relative;
     overflow: hidden;
+    box-shadow: var(--shadow-light);
+    border-radius: 12px;
+    margin: 0 auto;
+    max-width: 100%;
     z-index: 600;
 }
 
@@ -25,51 +25,47 @@
     animation: pulse 12s infinite ease-in-out;
 }
 
-/* Container */
-.container {
-    max-width: 100%;
-    margin: 0 auto;
+.edit-user-section header {
     position: relative;
     z-index: 1;
 }
 
-/* Header */
-header {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-header h1 {
+.edit-user-section h1 {
     font-family: 'Neon-Heavy', sans-serif;
-    font-size: 2.5rem;
+    font-size: 2rem;
     color: var(--text-primary);
     text-transform: uppercase;
-    letter-spacing: 1.5px;
-    text-shadow: 0 0 12px rgba(65, 105, 225, 0.6);
+    letter-spacing: 1.2px;
+    text-shadow: 0 0 10px rgba(65, 105, 225, 0.5);
     transition: transform 0.3s ease;
 }
 
-header h1:hover {
+.edit-user-section h1:hover {
     transform: translateY(-3px);
 }
 
-header p {
+.edit-user-section p {
     font-family: 'Neon-Regular', sans-serif;
-    font-size: 1.2rem;
+    font-size: 1rem;
     color: var(--text-primary);
-    line-height: 1.6;
+    line-height: 1.5;
 }
 
-/* Form Container */
 .form-container {
     background: rgba(42, 42, 42, 0.9);
-    padding: 24px;
-    border-radius: 8px;
+    border-radius: 10px;
+    padding: 20px;
     box-shadow: var(--shadow-light);
-    max-width: 100%;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    z-index: 1;
 }
 
-/* Form Group */
+.form-container:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+}
+
 .form-group {
     display: flex;
     flex-direction: column;
@@ -78,32 +74,32 @@ header p {
 
 .form-group label {
     font-family: 'Neon-Regular', sans-serif;
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: var(--text-primary);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 5px;
 }
 
 .form-group label i {
     font-size: 1rem;
     color: var(--accent-blue);
-    transition: transform 0.3s ease;
+    transition: color 0.3s ease;
 }
 
 .form-group label:hover i {
-    transform: scale(1.1);
+    color: var(--accent-blue-dark);
 }
 
 .form-group input,
 .form-group select {
     font-family: 'Neon-Regular', sans-serif;
-    font-size: 1rem;
-    padding: 10px;
-    border: 1px solid rgba(65, 105, 225, 0.3);
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.05);
+    font-size: 0.9rem;
     color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    padding: 10px;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -111,33 +107,36 @@ header p {
 .form-group select:focus {
     outline: none;
     border-color: var(--accent-blue);
-    box-shadow: 0 0 8px rgba(65, 105, 225, 0.4);
+    box-shadow: 0 0 8px rgba(65, 105, 225, 0.3);
 }
 
 .form-group input.border-red-500 {
-    border-color: #dc3545;
+    border-color: #ef4444;
 }
 
 .form-group input.border-yellow-500 {
-    border-color: #ffc107;
+    border-color: #f4c430;
 }
 
-/* Submit Button */
-.form-group input[type="submit"] {
-    background: var(--accent-blue);
-    color: var(--text-primary);
+.form-group select[multiple] {
+    height: 100px;
+}
+
+.form-group button[type="submit"] {
+    font-family: 'Neon-Heavy', sans-serif;
     font-size: 1rem;
-    padding: 12px;
+    color: var(--text-primary);
+    background: var(--accent-blue);
     border: none;
     border-radius: 6px;
+    padding: 12px;
     cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    transition: background 0.3s ease, transform 0.3s ease;
 }
 
-.form-group input[type="submit"]:hover {
+.form-group button[type="submit"]:hover {
+    background: var(--accent-blue-dark);
     transform: translateY(-2px);
-    box-shadow: var(--shadow-hover);
-    background: #2f5496;
 }
 
 /* Medium screens (768px and up) */
@@ -146,29 +145,29 @@ header p {
         padding: 60px 30px;
     }
 
-    header h1 {
-        font-size: 3rem;
+    .edit-user-section h1 {
+        font-size: 2.5rem;
     }
 
-    header p {
-        font-size: 1.3rem;
+    .edit-user-section p {
+        font-size: 1.2rem;
     }
 
     .form-container {
-        padding: 32px;
+        padding: 30px;
     }
 
     .form-group label {
-        font-size: 1.1rem;
+        font-size: 1rem;
     }
 
     .form-group input,
     .form-group select {
-        font-size: 1.1rem;
+        font-size: 1rem;
         padding: 12px;
     }
 
-    .form-group input[type="submit"] {
+    .form-group button[type="submit"] {
         font-size: 1.1rem;
         padding: 14px;
     }
@@ -178,32 +177,32 @@ header p {
 @media (max-width: 480px) {
     .edit-user-section {
         padding: 30px 10px;
-        margin: 0 8px;
+        margin: 0 10px;
     }
 
-    header h1 {
-        font-size: 2rem;
+    .edit-user-section h1 {
+        font-size: 1.8rem;
     }
 
-    header p {
-        font-size: 1rem;
+    .edit-user-section p {
+        font-size: 0.9rem;
     }
 
     .form-container {
-        padding: 16px;
+        padding: 15px;
     }
 
     .form-group label {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
     }
 
     .form-group input,
     .form-group select {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
         padding: 8px;
     }
 
-    .form-group input[type="submit"] {
+    .form-group button[type="submit"] {
         font-size: 0.9rem;
         padding: 10px;
     }

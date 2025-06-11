@@ -1,0 +1,551 @@
+/* Header Section */
+.header-section {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    padding: 30px 15px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-light);
+    border-radius: 12px;
+    margin: 0 10px;
+    max-width: 100%;
+    z-index: 600;
+}
+
+.header-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: var(--pulse-effect);
+    opacity: 0.2;
+    z-index: 0;
+    animation: pulse 12s infinite ease-in-out;
+}
+
+.header-container {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header-title {
+    font-family: 'Arial', sans-serif;
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    text-shadow: 0 0 12px rgba(65, 105, 225, 0.6);
+    transition: transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-title:hover {
+    transform: translateY(-3px);
+}
+
+.header-title i {
+    color: var(--primary-blue);
+    transition: color 0.3s ease;
+}
+
+.header-title:hover i {
+    color: var(--accent-yellow);
+}
+
+.header-subtitle {
+    font-family: 'Arial', sans-serif;
+    font-size: 1rem;
+    color: var(--text-primary);
+    line-height: 1.6;
+    margin: 10px 0;
+}
+
+.header-breadcrumb {
+    font-family: 'Arial', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    opacity: 0.8;
+}
+
+.breadcrumb-link {
+    color: var(--primary-blue);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.breadcrumb-link:hover {
+    color: var(--accent-yellow);
+}
+
+.breadcrumb-current {
+    color: var(--text-primary);
+}
+
+.header-divider {
+    border-color: rgba(255, 255, 255, 0.2);
+    margin: 15px 0;
+    transition: width 0.3s ease;
+}
+
+.header-section:hover .header-divider {
+    width: 100px;
+}
+
+/* Feedback Section */
+.feedback-section {
+    padding: 15px;
+    position: relative;
+    z-index: 600;
+}
+
+.feedback-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.feedback-message {
+    background: rgba(42, 42, 42, 0.9);
+    backdrop-filter: blur(8px);
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: var(--shadow-light);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    margin-bottom: 10px;
+}
+
+.feedback-success {
+    background: rgba(40, 167, 69, 0.9);
+}
+
+.feedback-danger {
+    background: rgba(239, 68, 68, 0.9);
+}
+
+.feedback-icon {
+    font-size: 1.3rem;
+    color: var(--text-primary);
+}
+
+.feedback-message span {
+    font-family: 'Arial', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    flex-grow: 1;
+}
+
+.feedback-dismiss {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--text-primary);
+    transition: transform 0.3s ease;
+}
+
+.feedback-dismiss:hover {
+    transform: scale(1.1);
+}
+
+/* Form Section */
+.form-section {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    padding: 30px 15px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-light);
+    border-radius: 12px;
+    margin: 0 10px;
+    max-width: 100%;
+    z-index: 600;
+}
+
+.form-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: var(--pulse-effect);
+    opacity: 0.2;
+    z-index: 0;
+    animation: pulse 12s infinite ease-in-out;
+}
+
+.form-container {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.post-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-label {
+    font-family: 'Arial', sans-serif;
+    font-size: 1rem;
+    color: var(--text-primary);
+    font-weight: bold;
+}
+
+.form-input,
+.form-textarea,
+.form-select,
+.form-file-input {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 10px;
+    font-family: 'Arial', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus,
+.form-file-input:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 8px rgba(65, 105, 225, 0.5);
+}
+
+.form-group.focused .form-input,
+.form-group.focused .form-textarea,
+.form-group.focused .form-select,
+.form-group.focused .form-file-input {
+    border-color: var(--primary-blue);
+}
+
+.form-textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+.select-wrapper {
+    position: relative;
+}
+
+.form-select {
+    appearance: none;
+    padding-right: 30px;
+}
+
+.select-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-primary);
+    pointer-events: none;
+}
+
+.form-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-checkbox-input {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.form-checkbox-input:checked {
+    background: var(--primary-blue);
+    border-color: var(--primary-blue);
+}
+
+.form-checkbox-input:checked::after {
+    content: '\f00c';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    color: var(--text-primary);
+    font-size: 12px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.form-label-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-family: 'Arial', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.form-error {
+    font-family: 'Arial', sans-serif;
+    font-size: 0.8rem;
+    color: #EF4444;
+}
+
+.form-submit {
+    display: flex;
+    gap: 15px;
+}
+
+.form-submit-button,
+.form-cancel-button {
+    background: var(--primary-blue);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-family: 'Arial', sans-serif;
+    font-size: 1rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-cancel-button {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.form-submit-button:hover,
+.form-cancel-button:hover {
+    transform: translateY(-2px);
+}
+
+.form-submit-button:hover {
+    background: #1E3A8A;
+}
+
+.form-cancel-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.image-preview {
+    border-radius: 8px;
+    box-shadow: var(--shadow-light);
+}
+
+/* Footer Section */
+.footer-section {
+    padding: 20px 15px;
+    position: relative;
+    z-index: 600;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.footer-back-button {
+    font-family: 'Arial', sans-serif;
+    font-size: 0.9rem;
+    color: var(--primary-blue);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.3s ease;
+}
+
+.footer-back-button:hover {
+    color: var(--accent-yellow);
+}
+
+.footer-icon {
+    font-size: 0.9rem;
+}
+
+.footer-note {
+    font-family: 'Arial', sans-serif;
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    opacity: 0.7;
+}
+
+/* Small screens (480px and below) */
+@media (max-width: 480px) {
+    .header-section {
+        padding: 20px 10px;
+        margin: 0 5px;
+    }
+
+    .header-title {
+        font-size: 1.8rem;
+    }
+
+    .header-subtitle {
+        font-size: 0.9rem;
+    }
+
+    .header-breadcrumb {
+        font-size: 0.8rem;
+    }
+
+    .feedback-section {
+        padding: 10px;
+    }
+
+    .feedback-message {
+        padding: 10px;
+    }
+
+    .feedback-icon {
+        font-size: 1.2rem;
+    }
+
+    .feedback-message span {
+        font-size: 0.8rem;
+    }
+
+    .form-section {
+        padding: 20px 10px;
+        margin: 0 5px;
+    }
+
+    .form-label {
+        font-size: 0.9rem;
+    }
+
+    .form-input,
+    .form-textarea,
+    .form-select,
+    .form-file-input {
+        font-size: 0.8rem;
+    }
+
+    .form-submit-button,
+    .form-cancel-button {
+        font-size: 0.9rem;
+        padding: 8px 15px;
+    }
+
+    .footer-section {
+        padding: 15px 10px;
+    }
+
+    .footer-back-button {
+        font-size: 0.8rem;
+    }
+
+    .footer-note {
+        font-size: 0.7rem;
+    }
+}
+
+/* Medium screens (768px and up) */
+@media (min-width: 768px) {
+    .header-section {
+        padding: 40px 20px;
+        margin: 0 15px;
+    }
+
+    .header-title {
+        font-size: 2.5rem;
+    }
+
+    .header-subtitle {
+        font-size: 1.2rem;
+    }
+
+    .header-breadcrumb {
+        font-size: 1rem;
+    }
+
+    .feedback-section {
+        padding: 20px;
+    }
+
+    .feedback-message {
+        padding: 15px;
+    }
+
+    .feedback-message span {
+        font-size: 1rem;
+    }
+
+    .form-section {
+        padding: 40px 20px;
+        margin: 0 15px;
+    }
+
+    .form-label {
+        font-size: 1.1rem;
+    }
+
+    .form-input,
+    .form-textarea,
+    .form-select,
+    .form-file-input {
+        font-size: 1rem;
+        padding: 12px;
+    }
+
+    .form-submit-button,
+    .form-cancel-button {
+        font-size: 1.1rem;
+        padding: 12px 25px;
+    }
+
+    .footer-section {
+        padding: 25px 20px;
+    }
+
+    .footer-back-button {
+        font-size: 1rem;
+    }
+
+    .footer-note {
+        font-size: 0.9rem;
+    }
+}
+
+/* Pulse animation */
+@keyframes pulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.2;
+    }
+    50% {
+        transform: scale(1);
+        opacity: 0.4;
+    }
+    100% {
+        transform: scale(0.8);
+        opacity: 0.2;
+    }
+}

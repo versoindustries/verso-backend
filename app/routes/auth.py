@@ -17,8 +17,6 @@ def combined_context_processor():
 @auth.route("/register", methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
-    form.role.choices = [(role.id, role.name) for role in Role.query.filter(Role.name != 'admin').all()]
-
     if form.validate_on_submit():
         if not form.accept_tos.data:
             flash('You must agree to the Terms and Conditions to register.', 'warning')
@@ -52,11 +50,12 @@ def user_exists(email, username):
 def create_new_user(form):
     """Create a new user instance from the registration form."""
     new_user = User(username=form.username.data, email=form.email.data, password=form.password.data)
+    new_user.first_name = form.first_name.data
+    new_user.last_name = form.last_name.data
     role = Role.query.get(form.role.data)
     if role:
         new_user.roles.append(role)
     return new_user
-
 
 def handle_post_registration_redirect():
     """Handle redirection after successful registration."""
