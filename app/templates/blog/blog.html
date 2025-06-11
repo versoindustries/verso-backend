@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block additional_css %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/blog.css') }}">
+{% endblock %}
+
+{% block title %}Our Blog{% endblock %}
+
+{% block description %}Explore our latest insights and updates{% endblock %}
+
+{% block head %}
+<meta name="description" content="{{ description|e }}">
+<meta property="og:title" content="{{ title|e }}">
+<meta property="og:description" content="{{ description|e }}">
+<meta property="og:image" content="{{ url_for('static', filename='images/logo.png') }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ title|e }}">
+<meta name="twitter:description" content="{{ description|e }}">
+<meta name="twitter:image" content="{{ url_for('static', filename='images/logo.png') }}">
+<link rel="canonical" href="{{ request.url }}">
+<meta name="robots" content="index, follow">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  "name": "{{ title|e }}",
+  "description": "{{ description|e }}",
+  "url": "{{ request.url }}",
+  "inLanguage": "en"
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="header-section">
+  <div class="container text-center py-10">
+    <h1 class="text-4xl md:text-5xl font-bold mb-4">
+      <i class="fas fa-blog mr-2"></i>Our Blog
+    </h1>
+    <p class="text-lg md:text-xl font-light text-gray-600">Explore our latest insights and updates</p>
+    <hr class="w-24 mx-auto mt-6 border-gray-300">
+  </div>
+</section>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <section class="flash-section">
+      <div class="container py-5">
+        {% for category, message in messages %}
+          {% if category == 'danger' %}
+            <div class="alert bg-red-500 text-white p-4 rounded-lg shadow-md flex items-center justify-between">
+              <div class="flex items-center">
+                <i class="fas fa-times-circle mr-2"></i>
+                <span>{{ message|e }}</span>
+              </div>
+              <button class="close-alert text-white hover:text-gray-200" aria-label="Close alert">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+{% endwith %}
+
+<section class="blog-grid-section">
+  <div class="container py-8">
+    {% if posts and posts.items %}
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {% for post in posts.items %}
+          <article itemscope itemtype="https://schema.org/BlogPosting" class="blog-card bg-white rounded-lg shadow-md hover:shadow-lg transition-transform duration-200 hover:scale-105">
+            <img 
+              itemprop="image" 
+              src="{{ url_for('blog.serve_image', post_id=post.id) if post.image else url_for('static', filename='images/placeholder.jpg') }}" 
+              alt="{{ post.title|e }} thumbnail" 
+              class="blog-card-img w-full h-48 object-cover rounded-t-lg"
+            >
+            <div class="p-4">
+              <h2 itemprop="headline" class="text-xl font-bold mb-2 hover:text-blue-600 transition-colors">
+                <a href="{{ url_for('blog.show_post', slug=post.slug) }}">{{ post.title|e }}</a>
+              </h2>
+              <p itemprop="description" class="text-gray-600 text-base line-clamp-3 mb-3">{{ post.excerpt|e }}</p>
+              <time itemprop="datePublished" class="text-sm text-gray-500" datetime="{{ post.created_at.isoformat() }}">
+                {{ post.created_at.strftime('%B %d, %Y') }}
+              </time>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="text-center py-10">
+        <i class="fas fa-exclamation-triangle text-4xl text-yellow-500 mb-4"></i>
+        <p class="text-lg text-gray-600">No posts available at this time.</p>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+{% if posts and posts.items %}
+  <section class="pagination-section">
+    <div class="container py-8 text-center">
+      <nav class="flex justify-center space-x-2">
+        {% if posts.has_prev %}
+          <a 
+            href="{{ url_for('blog.show_blog', page=posts.prev_num) }}" 
+            class="pagination-btn px-4 py-2 border rounded-md hover:bg-blue-500 hover:text-white transition-colors"
+          >
+            <i class="fas fa-chevron-left mr-1"></i> Previous
+          </a>
+        {% else %}
+          <span class="pagination-btn px-4 py-2 border rounded-md text-gray-400 cursor-not-allowed">
+            <i class="fas fa-chevron-left mr-1"></i> Previous
+          </span>
+        {% endif %}
+
+        {% for page_num in posts.iter_pages(left_edge=1, left_current=1, right_current=2, right_edge=1) %}
+          {% if page_num %}
+            {% if page_num == posts.page %}
+              <span class="pagination-btn px-4 py-2 border rounded-md bg-blue-500 text-white font-bold">
+                {{ page_num }}
+              </span>
+            {% else %}
+              <a 
+                href="{{ url_for('blog.show_blog', page=page_num) }}" 
+                class="pagination-btn px-4 py-2 border rounded-md hover:bg-blue-500 hover:text-white transition-colors"
+              >
+                {{ page_num }}
+              </a>
+            {% endif %}
+          {% else %}
+            <span class="px-4 py-2 text-gray-500">...</span>
+          {% endif %}
+        {% endfor %}
+
+        {% if posts.has_next %}
+          <a 
+            href="{{ url_for('blog.show_blog', page=posts.next_num) }}" 
+            class="pagination-btn px-4 py-2 border rounded-md hover:bg-blue-500 hover:text-white transition-colors"
+          >
+            Next <i class="fas fa-chevron-right ml-1"></i>
+          </a>
+        {% else %}
+          <span class="pagination-btn px-4 py-2 border rounded-md text-gray-400 cursor-not-allowed">
+            Next <i class="fas fa-chevron-right ml-1"></i>
+          </span>
+        {% endif %}
+      </nav>
+    </div>
+  </section>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.querySelectorAll('.close-alert').forEach(button => {
+    button.addEventListener('click', () => {
+      button.closest('.alert').remove();
+    });
+  });
+</script>
+{% endblock %}

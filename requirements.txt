@@ -23,3 +23,5 @@ geopy
 Pillow
 dnspython
 email-validator
+flask-ckeditor 
+bleach

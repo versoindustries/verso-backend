@@ -88,6 +88,19 @@
                     
                     <li><a href="{{ url_for('main_routes.contact') }}">Contact</a></li>
                     
+                    <!-- Blog Management Dropdown (Visible to Bloggers/Admins) -->
+                    {% if current_user.is_authenticated and current_user.has_role('blogger') %}
+                        <li class="dropdown blog-management-dropdown">
+                            <a href="#" class="dropbtn" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-blog"></i> Blog Management
+                            </a>
+                            <div class="dropdown-content">
+                                <a href="{{ url_for('blog.manage_posts') }}"><i class="fas fa-list"></i> Manage Posts</a>
+                                <a href="{{ url_for('blog.new_post') }}"><i class="fas fa-plus"></i> Create New Post</a>
+                            </div>
+                        </li>
+                    {% endif %}
+                    
                     {% if current_user.is_authenticated %}
                         <!-- User Dropdown -->
                         <li class="dropdown">
@@ -100,7 +113,6 @@
                                 {% endif %}
                             </div>
                         </li>
-    
                     {% else %}
                         <li><a href="{{ url_for('auth.login') }}">Login</a></li>
                         <li><a href="{{ url_for('auth.register') }}">Register</a></li>

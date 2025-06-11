@@ -16,6 +16,7 @@ import logging
 import click
 import pytz
 from datetime import datetime
+from flask_ckeditor import CKEditor
 
 # Load environment variables
 load_dotenv()
@@ -26,6 +27,7 @@ csrf = CSRFProtect()
 mail = Mail()
 bcrypt = Bcrypt()
 migrate = Migrate()
+ckeditor = CKEditor()
 
 # CLI group for debugging
 debug_cli = AppGroup('debug')
@@ -126,6 +128,8 @@ def create_app(config_class=Config):
     login_manager.login_view = 'auth.login'
     login_manager.init_app(app)
     mail.init_app(app)
+    ckeditor = CKEditor(app)
+    
 
     # User loader for Flask-Login
     @login_manager.user_loader

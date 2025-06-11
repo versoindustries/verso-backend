@@ -1,0 +1,566 @@
+/* CSS Variables for Reusability (Unchanged) */
+:root {
+  --glass-bg: rgba(31, 31, 31, 0.7);
+  --text-primary: #ffffff;
+  --accent-blue: #4169e1;
+  --accent-blue-dark: #2f4ca6;
+  --accent-highlight: #F4C430;
+  --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --pulse-effect: radial-gradient(circle, rgba(82, 80, 194, 0.2) 0%, transparent 70%);
+}
+
+/* Header Section (Unchanged) */
+.header-section {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  padding: 40px 20px;
+  margin: 20px auto;
+  max-width: 1000px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-light);
+  position: relative;
+  overflow: hidden;
+}
+
+.header-section::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: var(--pulse-effect);
+  opacity: 0.2;
+  z-index: 0;
+  animation: pulse 12s infinite ease-in-out;
+}
+
+.header-container {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+
+.header-title {
+  font-family: 'Neon-Heavy', sans-serif;
+  font-size: 2.5rem;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  text-shadow: 0 0 12px rgba(82, 80, 194, 0.6);
+  margin-bottom: 15px;
+}
+
+.header-subtitle {
+  font-family: 'Neon-Regular', sans-serif;
+  font-size: 1.2rem;
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.header-divider {
+  border: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--accent-blue), transparent);
+  margin: 20px auto;
+  width: 80%;
+}
+
+/* Feedback Section (Unchanged) */
+.feedback-section {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.feedback-message {
+  background: rgba(42, 42, 42, 0.9);
+  padding: 15px 20px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  box-shadow: var(--shadow-light);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feedback-message.success {
+  border-left: 4px solid #28a745;
+}
+
+.feedback-message.success .feedback-icon {
+  color: #28a745;
+}
+
+.feedback-message.danger {
+  border-left: 4px solid #dc3545;
+}
+
+.feedback-message.danger .feedback-icon {
+  color: #dc3545;
+}
+
+.feedback-message:hover {
+  transform: translateX(5px);
+  box-shadow: var(--shadow-hover);
+}
+
+.feedback-icon {
+  font-size: 1.5rem;
+}
+
+.feedback-message span {
+  font-family: 'Neon-Regular', sans-serif;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+}
+
+/* Form Section (Unchanged Base Styles) */
+.form-section {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  padding: 40px 20px;
+  margin: 20px auto;
+  max-width: 1000px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-light);
+  position: relative;
+  overflow: hidden;
+}
+
+.form-section::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: var(--pulse-effect);
+  opacity: 0.2;
+  z-index: 0;
+  animation: pulse 12s infinite ease-in-out;
+}
+
+.form-container {
+  position: relative;
+  z-index: 1;
+}
+
+.post-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  font-family: 'Neon-Regular', sans-serif;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  text-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+.form-input,
+.form-select,
+.form-file-input {
+  background: rgba(42, 42, 42, 0.9);
+  border: 1px solid var(--accent-blue);
+  border-radius: 8px;
+  padding: 12px;
+  font-family: 'Neon-Regular', sans-serif;
+  font-size: 1rem;
+  color: var(--text-primary);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-file-input:focus {
+  outline: none;
+  border-color: var(--accent-blue-dark);
+  box-shadow: 0 0 8px rgba(65, 105, 225, 0.5);
+}
+
+.form-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* CKEditor Specific Styles (Updated) */
+.form-textarea {
+  display: none; /* Hide the original textarea; CKEditor replaces it */
+}
+
+.ck-editor {
+  max-width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow-light);
+}
+
+.ck-editor__top .ck-toolbar {
+  background: rgba(31, 31, 31, 0.95) !important;
+  border-bottom: 1px solid var(--accent-blue) !important;
+  padding: 8px 12px !important;
+  border-radius: 8px 8px 0 0 !important;
+  display: flex;
+  flex-wrap: wrap; /* Allow toolbar buttons to wrap on smaller screens */
+  gap: 4px;
+}
+
+.ck-toolbar__items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.ck-button,
+.ck-dropdown__button,
+.ck-button__label {
+  background: var(--accent-blue) !important;
+  border-radius: 4px !important;
+  color: var(--text-primary) !important;
+  font-family: 'Neon-Regular', sans-serif !important;
+  font-size: 0.9rem !important;
+  padding: 6px 10px !important;
+  transition: background 0.3s ease !important;
+}
+
+.ck-button:hover,
+.ck-dropdown__button:hover,
+.ck-button__label:hover {
+  background: var(--accent-blue-dark) !important;
+}
+
+.ck-editor__editable_inline {
+  background: rgba(42, 42, 42, 0.95) !important;
+  color: var(--text-primary) !important;
+  font-family: 'Neon-Regular', sans-serif !important;
+  font-size: 1rem !important;
+  min-height: 300px !important;
+  max-height: 600px !important; /* Prevent excessive growth */
+  overflow-y: auto !important; /* Enable scrolling for long content */
+  padding: 16px !important;
+  border: 1px solid var(--accent-blue) !important;
+  border-top: none !important;
+  border-radius: 0 0 8px 8px !important;
+  line-height: 1.6 !important;
+}
+
+.ck-editor__editable_inline:focus {
+  outline: none !important;
+  border-color: var(--accent-blue-dark) !important;
+  box-shadow: 0 0 8px rgba(65, 105, 225, 0.5) !important;
+}
+
+.ck-content p,
+.ck-content ul,
+.ck-content ol,
+.ck-content blockquote {
+  margin-bottom: 16px !important;
+  color: var(--text-primary) !important;
+}
+
+.ck-content a {
+  color: var(--accent-blue) !important;
+  text-decoration: underline !important;
+}
+
+.ck-content a:hover {
+  color: var(--accent-blue-dark) !important;
+}
+
+/* Placeholder Styling for CKEditor */
+.ck-editor__editable_inline .ck-placeholder::before {
+  color: rgba(255, 255, 255, 0.5) !important;
+  font-family: 'Neon-Regular', sans-serif !important;
+}
+
+/* Select Wrapper for Category Dropdown (Unchanged) */
+.select-wrapper {
+  position: relative;
+}
+
+.select-icon {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  color: var(--accent-blue);
+  font-size: 1rem;
+  pointer-events: none;
+}
+
+.form-select {
+  appearance: none;
+  padding-right: 40px;
+}
+
+/* File Input (Unchanged) */
+.form-file-input {
+  padding: 8px;
+}
+
+/* Checkbox (Unchanged) */
+.form-checkbox {
+  display: flex;
+  align-items: center;
+}
+
+.form-label-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Neon-Regular', sans-serif;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.form-checkbox-input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent-blue);
+  cursor: pointer;
+}
+
+.form-checkbox-input:checked + .checkbox-label {
+  color: var(--accent-blue-dark);
+}
+
+/* Submit Button (Unchanged) */
+.form-submit-button {
+  background: var(--accent-blue);
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-family: 'Neon-Heavy', sans-serif;
+  font-size: 1.2rem;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-submit-button:hover {
+  background: var(--accent-blue-dark);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* Form Error Messages (Unchanged) */
+.form-error {
+  font-family: 'Neon-Regular', sans-serif;
+  font-size: 0.9rem;
+  color: #dc3545;
+  margin-top: 4px;
+}
+
+/* Image Preview (Unchanged) */
+.image-preview {
+  max-width: 200px;
+  margin-top: 10px;
+  border-radius: 8px;
+  box-shadow: var(--shadow-light);
+}
+
+/* Footer Section (Unchanged) */
+.footer-section {
+  max-width: 1000px;
+  margin: 20px auto;
+  padding: 20px;
+  text-align: center;
+}
+
+.footer-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-back-button {
+  font-family: 'Neon-Regular', sans-serif;
+  font-size: 1.1rem;
+  color: var(--accent-blue);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 15px;
+  border-radius: 8px;
+  background: rgba(42, 42, 42, 0.9);
+  box-shadow: var(--shadow-light);
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.footer-back-button:hover {
+  background: rgba(65, 105, 225, 0.2);
+  transform: translateX(-3px);
+}
+
+.footer-icon {
+  font-size: 1.2rem;
+}
+
+.footer-note {
+  font-family: 'Neon-Regular', sans-serif;
+  font-size: 1rem;
+  color: var(--text-primary);
+  opacity: 0.8;
+}
+
+/* Pulse Animation (Unchanged) */
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.2;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0.2;
+  }
+}
+
+/* Responsive Design (Updated for CKEditor) */
+@media (min-width: 768px) {
+  .header-section {
+    padding: 60px 30px;
+  }
+
+  .header-title {
+    font-size: 3rem;
+  }
+
+  .header-subtitle {
+    font-size: 1.4rem;
+  }
+
+  .form-section {
+    padding: 60px 30px;
+  }
+
+  .form-label {
+    font-size: 1.2rem;
+  }
+
+  .form-input,
+  .form-select,
+  .form-file-input {
+    padding: 14px;
+    font-size: 1.1rem;
+  }
+
+  .ck-editor__editable_inline {
+    min-height: 400px !important;
+    max-height: 800px !important;
+  }
+
+  .form-submit-button {
+    padding: 14px 30px;
+    font-size: 1.3rem;
+  }
+
+  .footer-back-button {
+    font-size: 1.2rem;
+    padding: 12px 20px;
+  }
+
+  .footer-note {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-section {
+    padding: 30px 15px;
+    margin: 10px;
+  }
+
+  .header-title {
+    font-size: 2rem;
+  }
+
+  .header-subtitle {
+    font-size: 1rem;
+  }
+
+  .feedback-section {
+    padding: 15px;
+  }
+
+  .feedback-message {
+    padding: 12px 15px;
+  }
+
+  .feedback-icon {
+    font-size: 1.3rem;
+  }
+
+  .feedback-message span {
+    font-size: 0.9rem;
+  }
+
+  .form-section {
+    padding: 30px 15px;
+    margin: 10px;
+  }
+
+  .form-label {
+    font-size: 1rem;
+  }
+
+  .form-input,
+  .form-select,
+  .form-file-input {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+
+  .ck-editor__editable_inline {
+    min-height: 200px !important;
+    max-height: 400px !important;
+  }
+
+  .ck-editor__top .ck-toolbar {
+    padding: 6px 8px !important;
+  }
+
+  .ck-button,
+  .ck-dropdown__button,
+  .ck-button__label {
+    padding: 4px 8px !important;
+    font-size: 0.8rem !important;
+  }
+
+  .form-submit-button {
+    padding: 10px 20px;
+    font-size: 1.1rem;
+  }
+
+  .form-error {
+    font-size: 0.8rem;
+  }
+
+  .image-preview {
+    max-width: 150px;
+  }
+
+  .footer-back-button {
+    font-size: 1rem;
+    padding: 8px 12px;
+  }
+
+  .footer-note {
+    font-size: 0.9rem;
+  }
+}

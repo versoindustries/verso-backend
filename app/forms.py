@@ -12,20 +12,23 @@ from wtforms.validators import DataRequired, Email, Length, EqualTo
 from app.models import Role, Service, Estimator
 import pytz
 from datetime import datetime, timedelta
+from flask_ckeditor import CKEditorField
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(min=3, max=100)])
+    first_name = StringField('First Name', validators=[DataRequired(), Length(min=1, max=100)])
+    last_name = StringField('Last Name', validators=[DataRequired(), Length(min=1, max=100)])
     email = StringField('Email', validators=[DataRequired(), Email()])
-    role = SelectField('Role', coerce=int, validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired(), Length(min=6, max=100)])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
-    accept_tos = BooleanField('I accept the Terms and Conditions', validators=[DataRequired()])
     role = SelectField('Role', coerce=int, validators=[DataRequired()])
+    accept_tos = BooleanField('I accept the Terms and Conditions', validators=[DataRequired()])
     submit = SubmitField('Sign Up')
 
     def __init__(self, *args, **kwargs):
         super(RegistrationForm, self).__init__(*args, **kwargs)
-        self.role.choices = [(role.id, role.name) for role in Role.query.filter(Role.name != 'admin').all()]
+        # Exclude 'admin' and 'blogger' roles from the choices
+        self.role.choices = [(role.id, role.name) for role in Role.query.filter(~Role.name.in_(['admin', 'blogger'])).all()]
 
 class AcceptTOSForm(FlaskForm):
     accept_tos = BooleanField('I agree to the Terms and Conditions', validators=[DataRequired()])
@@ -176,3 +179,60 @@ class BusinessConfigForm(FlaskForm):
         validators=[DataRequired()]
     )
     submit = SubmitField('Save Settings')
+
+class CreatePostForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired(), Length(max=200)])
+    content = CKEditorField('Content', validators=[DataRequired()])  # Changed to CKEditorField
+    category = StringField('Category', validators=[Optional(), Length(max=100)])
+    is_published = BooleanField('Publish Post', default=False)
+    image = FileField('Post Image', validators=[Optional()])
+    submit = SubmitField('Create Post')
+
+    def validate_title(self, title):
+        """Ensure title is not empty after stripping whitespace."""
+        if not title.data.strip():
+            raise ValidationError('Title cannot be empty.')
+
+    def validate_image(self, image):
+        """Validate image file type and size."""
+        if image.data:
+            allowed_extensions = {'png', 'jpg', 'jpeg'}
+            max_size = 5 * 1024 * 1024  # 5MB
+            filename = image.data.filename
+            extension = os.path.splitext(filename)[1].lower().lstrip('.')
+            if extension not in allowed_extensions:
+                raise ValidationError('Only PNG, JPG, and JPEG files are allowed.')
+            # Check file size
+            image.data.seek(0, os.SEEK_END)
+            file_size = image.data.tell()
+            if file_size > max_size:
+                raise ValidationError('Image file size must be less than 5MB.')
+            image.data.seek(0)  # Reset file pointer
+
+class EditPostForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired(), Length(max=200)])
+    content = CKEditorField('Content', validators=[DataRequired()])  # Replace TextAreaField
+    category = StringField('Category', validators=[Optional(), Length(max=100)])
+    is_published = BooleanField('Publish Post')
+    image = FileField('Post Image', validators=[Optional()])
+    submit = SubmitField('Update Post')
+
+    def validate_title(self, title):
+        """Ensure title is not empty after stripping whitespace."""
+        if not title.data.strip():
+            raise ValidationError('Title cannot be empty.')
+
+    def validate_image(self, image):
+        """Validate image file type and size."""
+        if image.data:
+            allowed_extensions = {'png', 'jpg', 'jpeg'}
+            max_size = 5 * 1024 * 1024  # 5MB
+            filename = image.data.filename
+            extension = os.path.splitext(filename)[1].lower().lstrip('.')
+            if extension not in allowed_extensions:
+                raise ValidationError('Only PNG, JPG, and JPEG files are allowed.')
+            image.data.seek(0, os.SEEK_END)
+            file_size = image.data.tell()
+            if file_size > max_size:
+                raise ValidationError('Image file size must be less than 5MB.')
+            image.data.seek(0)  # Reset file pointer
