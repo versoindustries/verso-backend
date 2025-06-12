@@ -29,10 +29,10 @@ def generate_sitemap(app):
         tree.write(sitemap_path, encoding='utf-8', xml_declaration=True)
 
     # Submit to Bing
-    submit_sitemap_to_bing('http://www.znhhomebuilders.com/static/sitemap.xml')
+    submit_sitemap_to_bing('http://www.xxx.com/static/sitemap.xml')
 
 def submit_sitemap_to_bing(sitemap_url):
-    api_key = 'f00ed402512c4d4b929fec116ad623d3'  # Store this in a secure place
+    api_key = 'xxxxxx'  # Store this in a secure place
     submit_url = f'https://www.bing.com/indexnow?url={sitemap_url}&key={api_key}'
     response = requests.get(submit_url)
     if response.status_code == 200:
