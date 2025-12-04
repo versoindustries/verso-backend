@@ -1,288 +1,89 @@
-# Verso Backend Template Repository Documentation
+# Verso-Backend Operations Manual
 
-Welcome to the Flask Template Repository! This document is designed for first-time users to help you understand, set up, and customize this Flask-based web application template. Whether you're building a simple site or a complex application with user authentication and appointment booking, this guide will get you started.
+**Protocol:** Sovereign Monolith • **Mission:** End the Complexity Tax • **Stack:** Flask + SQLAlchemy + Jinja2
 
-## Overview
+This document is written for high-agency operators who want a fixed-cost, causally consistent web platform. It reframes the codebase as a set of **modules of sovereignty**, not a pile of features.
 
-This Flask template provides a robust starting point for web applications. Key features include:
+## Who This Selects
+- Founders/CTOs done paying rent to Auth0/Contentful/Clerk/Vercel.
+- Teams that prefer Python/SQL truth over hydration roulette.
+- Builders who need linear operating costs on commodity VPS hardware.
 
-- **User Authentication**: Login, registration, and password reset functionality.
-- **Role-Based Access Control**: Different permissions for `admin`, `user`, `commercial`, and `blogger` roles.
-- **Appointment Booking**: Schedule appointments with timezone support using FullCalendar.
-- **Blog System**: Create and manage blog posts with image support.
-- **Modular Design**: Organized with blueprints for easy extension.
-- **Heroku Deployment**: Ready-to-deploy configuration.
+## Modules of Sovereignty
+- **Identity & Access Core (IAC)** — Flask-Login, RBAC decorators in `app/modules/auth_manager.py`; owns users/roles in SQL.
+- **Sovereign Narrative Engine** — Blog/CMS via `app/routes/blog.py` + CKEditor + `Post` model. No headless CMS bills.
+- **Temporal Logistics Module** — Appointment booking with FullCalendar, UTC normalization in `Appointment` model.
+- **Bounded Contexts** — Blueprints (`auth.py`, `admin.py`, `blog.py`, `main_routes.py`, `user.py`) give service clarity without the microservice tax.
+- **Asset & File Pipeline** — `app/modules/file_manager.py` for uploads/compression; swap to S3 later if you choose.
+- **Indexing & SEO** — `app/modules/indexing.py` builds sitemaps/JSON-LD.
 
-The template uses Flask, SQLAlchemy, Flask-Login, Flask-WTF, and other libraries to provide a secure and scalable foundation.
+## Directory Signal
+- `app/` — core application
+  - `routes/` — blueprints listed above
+  - `templates/` — server-rendered pages (index, about, dashboards, blog)
+  - `static/` — JS (`calendar.js`, `slider.js`), CSS, images
+  - `models.py` — `User`, `Role`, `Appointment`, `Service`, `Estimator`, `Post`, `ContactFormSubmission`
+  - `forms.py` — WTForms for auth, estimate requests, posts
+  - `modules/` — auth decorators, indexing, file pipeline, role bootstrap, locations
+  - `config.py`, `database.py`, `extensions.py`, `__init__.py`
+- `dbl.py` — SQLite bootstrap helper
+- `Procfile` — Heroku/Dokku entrypoint
+- `run.py` — dev server entry
 
-## Directory Structure
+## Environment Contract (`.env` minimum)
+```
+FLASK_APP=app
+SECRET_KEY=generate_a_secure_key
+DATABASE_URL=sqlite:///verso.sqlite
+MAIL_SERVER=smtp.example.com
+MAIL_PORT=587
+MAIL_USE_TLS=True
+MAIL_USERNAME=you@example.com
+MAIL_PASSWORD=your_password
+MAIL_DEFAULT_SENDER=you@example.com
+```
 
-Here's how the repository is organized:
-
-- **`app/`**: Core application directory
-  - **`static/`**: Static assets
-    - `js/`: JavaScript files (e.g., `calendar.js` for appointments, `slider.js` for carousels)
-    - `css/`: Stylesheets
-    - `images/`: Image assets (e.g., gallery images)
-  - **`templates/`**: Jinja2 HTML templates (e.g., `index.html`, `admin/dashboard.html`)
-  - **`models.py`**: Database models (e.g., `User`, `Appointment`, `Post`)
-  - **`forms.py`**: Form definitions (e.g., `RegistrationForm`, `EstimateRequestForm`)
-  - **`routes/`**: Blueprint-based routing
-    - `main_routes.py`: Homepage, contact, and estimate requests
-    - `admin.py`: Admin dashboard and management
-    - `auth.py`: Authentication endpoints
-    - `user.py`: User dashboards
-    - `blog.py`: Blog functionality
-  - **`modules/`**: Utility scripts
-    - `role_setup.py`: Sets up default roles
-    - `file_manager.py`: File handling utilities
-    - `locations.py`: Geographic data
-    - `indexing.py`: Sitemap generation
-    - `auth_manager.py`: Role-based decorators
-  - **`config.py`**: Configuration settings
-  - **`database.py`**: SQLAlchemy initialization
-  - **`extensions.py`**: Flask extension setup
-  - **`__init__.py`**: Application factory
-
-- **`directory_ai.py`**: Script to generate directory documentation
-- **`.gitattributes`, `.gitignore`, `.slugignore`**: Git and deployment configs
-- **`LICENSE`**: Apache License 2.0
-- **`Procfile`**: Heroku process definition
-- **`run.py`**: Local run script
-- **`.env`**: Environment variables (not in Git)
-
-## Setup
-
-Follow these steps to get the application running locally:
-
-1. **Clone the Repository**
+## Boot Sequence (Local Independence)
+1. Clone & enter
    ```bash
-   git clone https://github.com/yourusername/flask-template-repo.git
-   cd flask-template-repo
+   git clone https://github.com/versoindustries/verso-backend.git
+   cd verso-backend
    ```
-
-2. **Install Python and Dependencies**
-   - Ensure Python 3.8+ is installed.
-   - Install required packages:
-     ```bash
-     pip install -r requirements.txt
-     ```
-   *Note*: If `requirements.txt` is missing, install core dependencies like `flask`, `flask-sqlalchemy`, `flask-login`, `flask-wtf`, `flask-bcrypt`, `flask-migrate`, `python-dotenv`, and `gunicorn`.
-
-3. **Configure Environment Variables**
-   - Create a `.env` file in the root directory:
-     ```
-     FLASK_APP=app
-     SECRET_KEY=your_random_secure_key_here
-     DATABASE_URL=sqlite:///mydatabase.sqlite
-     MAIL_SERVER=smtp.yourmailserver.com
-     MAIL_PORT=587
-     MAIL_USE_TLS=True
-     MAIL_USERNAME=your_email@example.com
-     MAIL_PASSWORD=your_email_password
-     MAIL_DEFAULT_SENDER=your_email@example.com
-     ```
-   - Replace values with your own (e.g., generate a secure `SECRET_KEY` using `os.urandom(24).hex()` in Python).
-
-4. **Initialize the Database**
-   - Run these commands to set up the database:
-     ```bash
-     flask db init
-     flask db migrate
-     flask db upgrade
-     ```
-
-5. **Set Up Default Roles**
-   - Create default roles (`admin`, `user`, `commercial`, `blogger`):
-     ```bash
-     flask create-roles
-     ```
-
-6. **Seed Business Configuration (Optional)**
-   - Add default business settings (e.g., timezone, hours):
-     ```bash
-     flask seed-business-config
-     ```
-
-7. **Run the Application**
-   - Start the development server:
-     ```bash
-     python run.py
-     ```
-   - Open `http://localhost:5000` in your browser.
-
-## Key Components
-
-### Database Models (`app/models.py`)
-
-- **`User`**: Stores user info (`username`, `email`, `password_hash`) and links to roles.
-- **`Role`**: Defines roles for access control.
-- **`Appointment`**: Manages bookings with UTC timestamps.
-- **`Service`**: Lists available services.
-- **`Estimator`**: Tracks staff handling appointments.
-- **`Post`**: Blog post data with images.
-- **`ContactFormSubmission`**: Stores contact form entries.
-
-### Forms (`app/forms.py`)
-
-- **`RegistrationForm`**: Sign-up with role selection.
-- **`LoginForm`**: User login.
-- **`EstimateRequestForm`**: Book appointments.
-- **`CreatePostForm`**: Add blog posts with CKEditor.
-
-### Routes (`app/routes/`)
-
-- **Main (`main_routes.py`)**: Homepage, contact, and estimate requests.
-- **Auth (`auth.py`)**: Login, registration, logout.
-- **User (`user.py`)**: User and commercial dashboards.
-- **Admin (`admin.py`)**: Management interface for users, roles, and settings.
-- **Blog (`blog.py`)**: Blog post creation and display.
-
-### Templates (`app/templates/`)
-
-- Organized by blueprint (e.g., `auth/login.html`, `blog/post.html`).
-- Use Jinja2 for dynamic content: `{{ variable }}`.
-
-### Static Files (`app/static/`)
-
-- **`js/calendar.js`**: Powers the appointment calendar with FullCalendar.
-- **`js/slider.js`**: Runs the homepage image carousel.
-- **`css/`**: Custom styles.
-- **`images/`**: Static assets.
-
-## Making Changes
-
-### Adding a New Route
-
-1. Open `app/routes/main_routes.py` (or another blueprint).
-2. Add a route:
-   ```python
-   @main.route('/hello')
-   def hello():
-       return render_template('hello.html', message='Hello, World!')
-   ```
-3. Create `app/templates/hello.html`:
-   ```html
-   <h1>{{ message }}</h1>
-   ```
-
-### Adding a New Model
-
-1. Edit `app/models.py`:
-   ```python
-   class Note(db.Model):
-       id = db.Column(db.Integer, primary_key=True)
-       content = db.Column(db.String(255), nullable=False)
-   ```
-2. Update the database:
+2. Virtualenv + deps
    ```bash
-   flask db migrate -m "Added Note model"
+   python3 -m venv env
+   source env/bin/activate
+   pip install -r requirements.txt
+   ```
+3. Initialize database + roles
+   ```bash
+   python dbl.py               # optional SQLite scaffold
+   flask db init
+   flask db migrate
    flask db upgrade
+   flask create-roles          # admin, user, commercial, blogger
+   flask seed-business-config  # timezone/hours defaults
    ```
-
-### Adding a New Form
-
-1. Edit `app/forms.py`:
-   ```python
-   class NoteForm(FlaskForm):
-       content = StringField('Note', validators=[DataRequired()])
-       submit = SubmitField('Save')
-   ```
-2. Use it in a route (`app/routes/main_routes.py`):
-   ```python
-   @main.route('/add-note', methods=['GET', 'POST'])
-   def add_note():
-       form = NoteForm()
-       if form.validate_on_submit():
-           note = Note(content=form.content.data)
-           db.session.add(note)
-           db.session.commit()
-           return redirect(url_for('main_routes.index'))
-       return render_template('add_note.html', form=form)
-   ```
-
-### Modifying Templates
-
-- Edit `app/templates/index.html`:
-  ```html
-  <p>Welcome, {{ current_user.username if current_user.is_authenticated else 'Guest' }}!</p>
-  ```
-
-### Updating Static Files
-
-- Add a style in `app/static/css/style.css`:
-  ```css
-  .welcome { color: blue; }
-  ```
-- Update `slider.js` for faster slides:
-  ```javascript
-  var slideInterval = setInterval(function() { moveSlide(1); }, 2000); // 2 seconds
-  ```
-
-### Adding a Blog Post Feature
-
-1. Use the existing `blog.py` routes or enhance them:
-   ```python
-   @blog_blueprint.route('/blog/quick-post', methods=['POST'])
-   @login_required
-   @blogger_required
-   def quick_post():
-       title = request.form['title']
-       content = request.form['content']
-       post = Post(title=title, content=content, author_id=current_user.id, slug=title.lower().replace(' ', '-'), is_published=True)
-       db.session.add(post)
-       db.session.commit()
-       return redirect(url_for('blog.show_blog'))
-   ```
-2. Add a form in `app/templates/blog/quick_post.html`.
-
-## Deployment
-
-To deploy on Heroku:
-
-1. **Install Heroku CLI**
+4. Run
    ```bash
-   heroku login
+   flask run --host=0.0.0.0 --debug
    ```
+   Visit `http://localhost:5000`.
 
-2. **Create a Heroku App**
-   ```bash
-   heroku create my-flask-app
-   ```
+## Deployment Runbooks
+- **Sovereign Path (VPS)**: Ubuntu/Debian + `gunicorn` + `systemd` + Nginx. Fixed monthly fee, air-gap capable. Run the same migrations/seeders as local.
+- **Hybrid Path (Heroku/Dokku)**: Use `Procfile`; set env vars; after deploy run `flask db upgrade`, `flask create-roles`, `flask seed-business-config`.
+- **Edge Path (On-Prem / Device)**: Raspberry Pi / Jetson. Same commands, zero third-party auth/CMS calls.
 
-3. **Set Environment Variables**
-   ```bash
-   heroku config:set SECRET_KEY=your_key DATABASE_URL=postgresql://your_db_info
-   heroku config:set MAIL_SERVER=smtp.example.com MAIL_PORT=587 MAIL_USE_TLS=True
-   heroku config:set MAIL_USERNAME=your_email MAIL_PASSWORD=your_pass MAIL_DEFAULT_SENDER=your_email
-   ```
+## Operational Notes
+- **Timezone Safety**: Appointments stored in UTC; `calendar.js` applies business hours from seeded config.
+- **RBAC**: Decorators in `auth_manager.py` enforce `admin_required`, etc.; roles created via `flask create-roles`.
+- **Templates**: All views extend `base.html`; meta tags already wired for SEO. Keep SSR; avoid client-side hydration.
+- **Assets**: Uploads handled locally via `file_manager.py`. Swap storage by adapting that module.
+- **Testing**: Use pytest/Flask testing; ensure migrations run cleanly before merge.
 
-4. **Push to Heroku**
-   ```bash
-   git push heroku main
-   ```
+## Support & Donations
+If this repo reduced your cloud burn or cognitive load, you can keep it sustainable via [GitHub Sponsors](https://github.com/sponsors/versoindustries).
 
-5. **Run Migrations**
-   ```bash
-   heroku run "flask db upgrade"
-   ```
-
-6. **Open the App**
-   ```bash
-   heroku open
-   ```
-
-The `Procfile` ensures Gunicorn runs the app:
-```
-web: gunicorn "app:create_app()"
-```
-
-## Additional Notes
-
-- **Timezone Handling**: Appointments use UTC storage with `pytz` for conversions (see `models.py` and `main_routes.py`).
-- **Security**: CSRF protection (Flask-WTF) and password hashing (Bcrypt) are built-in.
-- **JavaScript Features**:
-  - `calendar.js`: Integrates FullCalendar with touch support.
-  - `slider.js`: Supports touch swipes and auto-sliding.
-
-For more details, check code comments or file an issue on GitHub. Happy coding!
+## Call to Action
+Ship the monolith. Pay fixed costs. Sleep through DDoS headlines.

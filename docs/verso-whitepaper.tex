@@ -1,0 +1,233 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{url}
+\usepackage{amsmath}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue,
+    citecolor=blue
+}
+
+\title{Verso-Backend: Research Notes on a Sovereign Identity--Content--Scheduling Stack}
+\author{Verso Engineering}
+\date{November 30, 2025}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Verso-Backend is a Python/Flask modular monolith that delivers user identity, role-based authorization, a lightweight content system, and an appointment scheduler inside one codebase. Unlike SaaS-first stacks, Verso keeps state local to reduce control-plane sprawl and latency. This paper rewrites the system description as a research-style technical report: we formalize the problem statement, articulate architectural invariants, detail data flows and algorithms, describe the threat model, and outline an evaluation methodology for latency, safety, and correctness. The intent is to provide a citable, implementation-grounded reference similar in depth to architecture papers for AI systems, but focused on a full-stack web workload.
+\end{abstract}
+
+\tableofcontents
+
+\section{Problem Statement}
+Teams building appointment-driven services often assemble identity, CMS, and scheduling from independent SaaS components. This increases round-trip latency, complicates data residency, and yields failure modes that cross organizational boundaries. Verso-Backend asks whether a deliberately simple, server-rendered monolith can:
+\begin{itemize}[leftmargin=*]
+    \item keep user, content, and schedule state in one transactional domain;
+    \item minimize dependencies to improve debuggability and deterministic costs;
+    \item remain observable and auditable enough for production use while staying lightweight.
+\end{itemize}
+The system targets small-to-medium organizations that need predictable ownership rather than hyperscale multi-tenant economics.
+
+\section{System Overview}
+The runtime is a Flask application configured with SQLAlchemy ORM, Flask-Login, CSRF via Flask-WTF, bcrypt password hashing, Flask-Mail, and CKEditor-backed rich text. Functionality is partitioned via blueprints:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Auth} (`app/routes/auth.py`): registration, login, password reset, and ToS gating.
+    \item \textbf{Main \& Scheduling} (`app/routes/main\_routes.py`): public site, estimate intake, time-slot computation, and iCalendar export.
+    \item \textbf{Admin} (`app/routes/admin.py`): user/role assignment, service catalog, estimator roster, and business hours configuration.
+    \item \textbf{Blog/CMS} (`app/routes/blog.py`): CRUD for posts with Bleach sanitization and inline image blobs.
+    \item \textbf{User Dashboards} (`app/routes/user.py`): customer and commercial operator views layered on role checks.
+\end{itemize}
+Configuration is sourced from environment variables (`app/config.py`), with SQLite for local runs and PostgreSQL as the primary production store. Gunicorn and the `Procfile` support PaaS/VPS deployment. No client-side hydration is required; Jinja2 renders final HTML.
+
+\section{Core Data Model}
+All persistent state is defined in `app/models.py` and backed by SQLAlchemy. Table~\ref{tab:entities} lists the major entities and their roles.
+
+\begin{longtable}{|p{3cm}|p{9cm}|}
+\caption{Core persistent entities}\label{tab:entities}\\
+\hline
+\textbf{Entity} & \textbf{Purpose} \\\hline
+User & Credentials, contact fields, ToS acceptance; many-to-many with Role. \\\hline
+Role & Named capability sets (e.g., admin, blogger, commercial). \\\hline
+Service & Bookable offerings displayed to end users. \\\hline
+Estimator & Personnel able to receive appointments; referenced by Appointment. \\\hline
+Appointment & Time-zone--aware booking request with service and estimator foreign keys; timestamps normalized to UTC. \\\hline
+Post & Blog entry with slug, publish flag, sanitized HTML, optional image BLOB + MIME metadata. \\\hline
+ContactFormSubmission & Persistent inbox for contact requests. \\\hline
+BusinessConfig & Key-value configuration for business hours, buffers, and timezone. \\\hline
+\end{longtable}
+
+Indexing currently exists on post slugs (\texttt{idx\_post\_slug}); temporal indices on appointment times and contact submission timestamps are recommended for larger installations.
+
+\section{Request and State Lifecycles}
+\subsection{Authentication and Session Control}
+Passwords are hashed with bcrypt; Flask-Login issues session cookies. Role checks are enforced through decorators in `app/modules/auth\_manager.py`. A user who has not acknowledged the terms of service is redirected to \texttt{/accept-terms} after login until the \texttt{tos\_accepted} flag is set.
+
+\subsection{Scheduling Pipeline}
+The scheduler converts user-local intent into a canonical UTC booking while respecting business hours and buffer rules stored in `BusinessConfig`. Figure~\ref{alg:slot} shows the core slot generation logic reconstructed from `main\_routes.py`.
+
+\begin{lstlisting}[language=Python,caption={Time-slot generation and booking insertion},label={alg:slot},basicstyle=\ttfamily\footnotesize]
+def generate_time_slots(date_local, tz, hours, buffer_min):
+    day_start, day_end = hours  # naive times in local tz
+    cursor = tz.localize(datetime.combine(date_local, day_start))
+    end = tz.localize(datetime.combine(date_local, day_end))
+    slots = []
+    while cursor + timedelta(minutes=buffer_min) <= end:
+        if not slot_occupied(cursor):
+            slots.append(cursor.astimezone(pytz.utc))
+        cursor += timedelta(minutes=buffer_min)
+    return slots
+
+def book(preferred_slot_utc, estimator_id, service_id):
+    appt = Appointment(
+        preferred_date_time=preferred_slot_utc,
+        estimator_id=estimator_id,
+        service_id=service_id,
+        created_at=datetime.utcnow()
+    )
+    db.session.add(appt)
+    db.session.commit()
+\end{lstlisting}
+
+The application exposes \texttt{/get\_available\_time\_slots} to fetch candidate slots and \texttt{/request\_estimate} to persist a selection. All stored timestamps are coerced to UTC to avoid daylight-savings drift; conversions back to local time are performed at render/export time.
+
+\subsection{Content Publishing Path}
+Posts are created via CKEditor, sanitized by Bleach with a bounded set of allowed tags/attributes, and stored as HTML plus optional image BLOBs. Images are streamed by MIME type through `/blog/image/<id>`. Slugs are generated from titles and checked for uniqueness before commit.
+
+\section{Security and Threat Model}
+Verso operates under a ``secure-by-default monolith'' assumption:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Authentication:} bcrypt password hashes; optional email confirmation and reset via time-bound tokens (`itsdangerous.URLSafeTimedSerializer`).
+    \item \textbf{Authorization:} role-based checks enforced at view boundaries; admin-only routes gate mutating operations on users, roles, and business settings.
+    \item \textbf{Input safety:} CSRF protection on forms; Bleach sanitization of rich text; explicit MIME validation for uploaded images.
+    \item \textbf{Transport/session hygiene:} HTTPS termination assumed at the reverse proxy; session cookies should be `Secure`, `HttpOnly`, and `SameSite=Lax` or stronger.
+    \item \textbf{Auditability hooks:} SQLAlchemy event listeners already normalize timestamps to UTC. Hooks can emit structured JSON logs with request IDs to external collectors; these are low-overhead additions that preserve determinism.
+    \item \textbf{Abuse resistance (extensible):} endpoint-scoped rate limits and CAPTCHA on anonymous forms are straightforward additions using Flask-Limiter; they are not yet wired in the repository but are compatible with the current blueprint structure.
+\end{itemize}
+
+\section{Consistency and Correctness Properties}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Single-write path:} bookings are inserted through one code path, avoiding double-commit races typical in distributed schedulers.
+    \item \textbf{UTC canonicalization:} all `DateTime` fields are stored in UTC, eliminating daylight-saving anomalies during comparisons.
+    \item \textbf{Idempotent reads:} time-slot generation is pure with respect to persistent state (appointments + config); it can be cached safely without risking divergence.
+    \item \textbf{Template rendering:} server-rendered HTML ensures that authorization decisions and state views share one execution context.
+\end{itemize}
+
+\section{Performance Considerations}
+Critical paths involve one SQL transaction and a Jinja2 render. The following mitigations reduce tail latency without changing semantics:
+\begin{itemize}[leftmargin=*]
+    \item caching slot lists for a date/estimator tuple in Redis;
+    \item moving post images from BLOB columns to object storage with signed URLs to reduce database I/O;
+    \item adding indices on \texttt{appointment.preferred\_date\_time} and \texttt{contact\_form\_submission.submitted\_at} to accelerate admin dashboards.
+\end{itemize}
+These optimizations remain within the modular monolith envelope and preserve the single-process coherence that motivates the design.
+
+\section{Deployment Topologies}
+The system runs in three canonical shapes:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Developer mode:} SQLite, in-process Flask server, and local SMTP debug server.
+    \item \textbf{Small production:} 1--2 vCPU VPS with PostgreSQL, Gunicorn workers, and Nginx TLS termination.
+    \item \textbf{Resilient production:} PostgreSQL with streaming backups, Redis for sessions/cache, and worker processes (RQ/Celery) for email and sitemap submission. Health probes \texttt{/healthz} and \texttt{/readyz} are trivial to add for orchestrators.
+\end{itemize}
+No proprietary control planes are required; all dependencies are open source and deployable on-prem or in commodity cloud instances.
+
+\section{Enterprise Architecture Blueprint}
+To meet enterprise expectations while keeping the monolith, Verso is wrapped with hardened platform primitives:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Compute:} Stateless Gunicorn workers behind an L7 load balancer with autoscaling on CPU and p95 latency; blue/green or canary releases coordinated by feature flags.
+    \item \textbf{Data:} PostgreSQL in HA with synchronous standby in the primary AZ and asynchronous cross-region replica; logical decoding enabled for audit export; Redis clustered for sessions, CSRF tokens, and slot caches.
+    \item \textbf{Queues:} RQ or Celery workers for email, sitemap submission, and heavy content processing; dead-letter queue for failed jobs with idempotent retry semantics.
+    \item \textbf{Networking:} Private VPC, security groups that only expose 443 via the load balancer; egress is proxy-controlled with DNS allowlists for mail/APIs.
+    \item \textbf{Secrets:} All secrets injected at boot from Vault/KMS; zero secrets baked into images; short-lived DB credentials via IAM/Kerberos where supported.
+\end{itemize}
+
+\section{Security and Compliance Hardening}
+To satisfy SOC 2, ISO 27001, and GDPR controls:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Auth:} WebAuthn or TOTP MFA, plus SSO via SAML/OIDC for admins; session storage moved to Redis for global revocation.
+    \item \textbf{Crypto:} TLS 1.2+ with HSTS; AES-256 encryption at rest for database and object storage; per-tenant envelope keys for media in multi-tenant mode.
+    \item \textbf{AppSec:} CSP and \texttt{X-Frame-Options} headers, signed URLs for media, request-scoped rate limits, and CAPTCHA on unauthenticated write endpoints.
+    \item \textbf{Audit:} Structured JSON logs with request/user IDs shipped to SIEM; immutable audit table for auth events, role mutations, configuration changes, and content publishes.
+    \item \textbf{PII governance:} Data classification tags on columns; retention rules (e.g., contact submissions auto-purged after 365 days); DSAR export/erase flow with soft-delete plus purge job.
+    \item \textbf{Supply chain:} SBOM generation (Syft), dependency scanning (pip-audit/Bandit), image signing (Cosign), and provenance attestations enforced in CI.
+\end{itemize}
+
+\section{Multi-Tenancy and Isolation Options}
+Verso can serve multiple customers using either:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Row-level isolation:} shared schema with \texttt{tenant\_id} on all tables; Postgres RLS policies enforce isolation; per-tenant rate limits and signing keys.
+    \item \textbf{Schema-per-tenant:} each tenant receives its own schema (or database); simplifies legal isolation and residency at the cost of migration fan-out. Suitable for \textless100 tenants with orchestrated migrations.
+\end{itemize}
+In both cases, tenancy metadata propagates through request context to templates, logs, and metrics for traceability.
+
+\section{Reliability, DR, and SLOs}
+Suggested enterprise targets:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Availability SLO:} 99.9\% monthly for auth, booking, and content read paths.
+    \item \textbf{Latency SLO:} p95 \textless250 ms for GET pages; p95 \textless500 ms for booking POST under nominal load.
+    \item \textbf{RPO/RTO:} RPO \textless5 minutes using WAL archiving and continuous archiving; RTO \textless30 minutes via automated restore runbooks.
+    \item \textbf{Backups:} Nightly full plus 5-minute WAL shipping; quarterly restore drills with checksum verification; configuration drift tracked in Git.
+    \item \textbf{Deploys:} Zero-downtime via blue/green; schema changes gated by backward-compatible migrations and shadow reads.
+\end{itemize}
+
+\section{Observability and Operations}
+Enterprise readiness depends on fast detection and mitigation:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Metrics/Traces:} OpenTelemetry for Flask/SQLAlchemy; RED+USE dashboards; exemplar traces for slow queries and cache-miss storms.
+    \item \textbf{Logging:} JSON logs with correlation IDs propagated across workers and queues; PII scrubbing before sink.
+    \item \textbf{Alerting:} SLO-based alerts (error-budget burn) plus symptom alerts on queue depth, DB replication lag, and cache hit rate; on-call runbooks linked from alerts.
+    \item \textbf{Chaos/Resilience:} periodic failure-injection for DB failover and cache eviction to validate RTO and idempotency claims.
+\end{itemize}
+
+\section{Data Residency and Privacy-by-Design}
+For regulated regions, deploy per-region stacks with isolated databases and storage. Cross-region data movement occurs only through audited ETL jobs. Additional privacy measures:
+\begin{itemize}[leftmargin=*]
+    \item minimal data collection on contact/booking forms with explicit purpose statements;
+    \item optional anonymization of historical bookings for analytics;
+    \item signed, expiring links for any exported ICS or media artifacts.
+\end{itemize}
+
+\section{Software Delivery Lifecycle}
+A hardened SDLC keeps the monolith safe to change:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{CI/CD gates:} unit and property tests, security scans, schema drift checks, and contract tests for JSON endpoints.
+    \item \textbf{Artifact policy:} all container images signed; promotion only from provenance-verified builds; infrastructure plans reviewed and policy-checked (OPA/Conftest).
+    \item \textbf{Release cadence:} weekly releases with feature flags; emergency fixes via small, reviewable patches and postmortems within 48 hours of incidents.
+\end{itemize}
+
+\section{Evaluation Methodology}
+To characterize the system like an architecture paper, we propose the following repeatable measurements:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Latency:} end-to-end p50/p95 for login, slot query, and booking on a sample PostgreSQL dataset; measure with Locust or k6 against Gunicorn.
+    \item \textbf{Throughput:} sustainable requests per second before slot-generation CPU saturates; evaluate with and without Redis caching.
+    \item \textbf{Safety:} fuzz input forms with hypothesis/pytest to ensure CSRF coverage and HTML sanitization do not regress.
+    \item \textbf{Correctness:} property tests that verify round-trip time-zone conversions (`local -> UTC -> local`) are identity-preserving for a matrix of time zones and DST transitions.
+\end{itemize}
+All tests can run in CI without external SaaS dependencies, keeping the research loop fast.
+
+\section{Related Architectural Patterns}
+Verso aligns with modular monolith literature that advocates in-process boundaries with clear context ownership rather than microservice fragmentation. Similar patterns appear in Django and Rails SSR deployments; Verso contributes a concrete, scheduler-centric case study that emphasizes state locality and deterministic ownership.
+
+\section{Future Work as Research Questions}
+\begin{itemize}[leftmargin=*]
+    \item How far can slot computation be pushed with pure-Python optimization versus introducing a dedicated scheduler service?
+    \item Can we preserve monolith simplicity while introducing WebAuthn/TOTP multi-factor authentication without fragmenting the auth path?
+    \item What caching strategies (e.g., probabilistic TTLs) minimize stale slot windows while maximizing cache hit rate?
+    \item How does structured tracing (OpenTelemetry) influence mean time to resolution in operational incidents for a monolith of this scale?
+\end{itemize}
+These questions frame Verso-Backend as a living research artifact rather than a static product backlog.
+
+\section{Conclusion}
+Verso-Backend demonstrates that identity, content, and scheduling can cohabit a single Python codebase with minimal external dependencies while retaining clarity of control and performance predictability. By documenting algorithms, invariants, and evaluation methods, this report positions the project as a research-grade reference implementation for teams exploring sovereign, server-rendered architectures.
+
+\end{document}

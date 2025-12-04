@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}Build Powerful Web Applications with Flask{% endblock %}
+{% block title %}Verso Backend: The Sovereign Monolith{% endblock %}
 
 {% block description %}
-Verso Backend is a robust Flask template that simplifies creating scalable and secure web applications. Leverage Flask's lightweight framework to build feature-rich backends with ease.
+Verso Backend is the Sovereign Monolith Protocol: a Python/SQL stack that ships finished HTML, rejects the Complexity Tax, and runs comfortably on a $5–$20 VPS.
 {% endblock %}
 
 {% block additional_css %}
@@ -124,8 +124,8 @@ Verso Backend is a robust Flask template that simplifies creating scalable and s
     <img src="{{ url_for('static', filename='images/hero-bg.jpg') }}" alt="Hero Background">
     <div class="image-overlay"></div>
     <div class="hero-content">
-      <h1>Build Powerful Web Applications with Flask</h1>
-      <p>Verso Backend is a robust Flask template that simplifies creating scalable and secure web applications. Leverage Flask's lightweight framework to build feature-rich backends with ease.</p>
+      <h1>Ship Sovereign Software</h1>
+      <p>Verso Backend is an opinionated Flask + SQL monolith that keeps your auth, content, and scheduling under one roof. No hydration errors. No usage overages. Fixed-cost independence.</p>
     </div>
   </div>
 </section>
@@ -135,24 +135,24 @@ Verso Backend is a robust Flask template that simplifies creating scalable and s
 <section class="versatile-apps-section">
   <div class="versatile-container">
     <div class="versatile-text">
-      <h2>Versatile Applications with Flask</h2>
-      <p>Flask's lightweight and modular nature makes it perfect for a variety of applications, from community-driven platforms to business tools and beyond.</p>
+      <h2>The Complexity Containment Field</h2>
+      <p>One repo. One database. Zero SaaS rent. Verso ships finished truths to the browser and keeps latency inside the box.</p>
       <ul class="versatile-list">
-        <li><i class="fas fa-users"></i> Social Apps: Create platforms with user profiles, messaging, and real-time interactions.</li>
-        <li><i class="fas fa-home"></i> Rental Apps: Build marketplaces for property or equipment rentals with booking systems.</li>
-        <li><i class="fas fa-calendar"></i> Service Appointment Apps: Develop scheduling tools for businesses with calendar integration.</li>
-        <li><i class="fas fa-globe"></i> General Websites: Design dynamic sites with custom content management.</li>
-        <li><i class="fas fa-car"></i> Auto Inventory Management: Leverage GPT-4 powered sales descriptors for dynamic vehicle listings.</li>
-        <li><i class="fas fa-plus"></i> And Much More: Tailor Flask to niche projects with its extensible architecture.</li>
+        <li><i class="fas fa-lock"></i> Identity &amp; Access Core: Own your user table and RBAC—no MAU tax.</li>
+        <li><i class="fas fa-pen-fancy"></i> Sovereign Narrative Engine: First-party CMS for posts and pages.</li>
+        <li><i class="fas fa-calendar"></i> Temporal Logistics Module: Calendar bookings with UTC sanity built in.</li>
+        <li><i class="fas fa-database"></i> Single Latency Domain: SQL joins instead of N+1 API calls.</li>
+        <li><i class="fas fa-server"></i> Fixed-Cost Hosting: Runs quietly on $5–$20 VPS or on-prem edge boxes.</li>
+        <li><i class="fas fa-shield-alt"></i> Air-Gappable: No third-party auth or CMS dependencies required.</li>
       </ul>
     </div>
     <div class="versatile-icons">
-      <i class="fas fa-users icon-social"></i>
-      <i class="fas fa-home icon-rental"></i>
+      <i class="fas fa-lock icon-social"></i>
+      <i class="fas fa-pen-fancy icon-rental"></i>
       <i class="fas fa-calendar icon-appointment"></i>
-      <i class="fas fa-globe icon-website"></i>
-      <i class="fas fa-car icon-auto"></i>
-      <i class="fas fa-plus icon-more"></i>
+      <i class="fas fa-database icon-website"></i>
+      <i class="fas fa-server icon-auto"></i>
+      <i class="fas fa-shield-alt icon-more"></i>
     </div>
   </div>
 </section>
@@ -163,28 +163,28 @@ Verso Backend is a robust Flask template that simplifies creating scalable and s
   <h2>Gallery</h2>
   <div class="gallery-container" id="gallery-container">
     <a href="{{ url_for('static', filename='images/gallery/VersoIndustries-Social-Dashboard.jpg') }}">
-      <img class="lazy" data-src="{{ url_for('static', filename='images/gallery/VersoIndustries-Social-Dashboard.jpg') }}" alt="Social App Screenshot">
+      <img class="lazy" data-src="{{ url_for('static', filename='images/gallery/VersoIndustries-Social-Dashboard.jpg') }}" alt="Verso dashboard screenshot">
     </a>
     <a href="{{ url_for('static', filename='images/gallery/DumpsterDudes.jpg') }}">
-      <img class="lazy" data-src="{{ url_for('static', filename='images/gallery/DumpsterDudes.jpg') }}" alt="Rental App Screenshot">
+      <img class="lazy" data-src="{{ url_for('static', filename='images/gallery/DumpsterDudes.jpg') }}" alt="Verso booking experience">
     </a>
     <a href="{{ url_for('static', filename='images/gallery/ZNH-Mockup.jpg') }}">
-      <img class="lazy" data-src="{{ url_for('static', filename='images/gallery/ZNH-Mockup.jpg') }}" alt="Appointment App Screenshot">
+      <img class="lazy" data-src="{{ url_for('static', filename='images/gallery/ZNH-Mockup.jpg') }}" alt="UTC-safe calendar mockup">
     </a>
     <a href="{{ url_for('static', filename='images/gallery/nwauto.jpg') }}">
-      <img class="lazy" data-src="{{ url_for('static', filename='images/gallery/nwauto.jpg') }}" alt="Website Screenshot">
+      <img class="lazy" data-src="{{ url_for('static', filename='images/gallery/nwauto.jpg') }}" alt="Inventory landing page">
     </a>
     <a href="{{ url_for('static', filename='images/gallery/Notus-Auto-Sales-Mockup.jpg') }}">
-      <img class="lazy" data-src="{{ url_for('static', filename='images/gallery/Notus-Auto-Sales-Mockup.jpg') }}" alt="Website Screenshot">
+      <img class="lazy" data-src="{{ url_for('static', filename='images/gallery/Notus-Auto-Sales-Mockup.jpg') }}" alt="SSR marketing page">
     </a>
     <a href="{{ url_for('static', filename='images/gallery/cprism.jpg') }}">
-      <img class="lazy" data-src="{{ url_for('static', filename='images/gallery/cprism.jpg') }}" alt="Website Screenshot">
+      <img class="lazy" data-src="{{ url_for('static', filename='images/gallery/cprism.jpg') }}" alt="Content engine view">
     </a>
     <a href="{{ url_for('static', filename='images/gallery/GarageCafe-Mockup.jpg') }}">
-      <img class="lazy" data-src="{{ url_for('static', filename='images/gallery/GarageCafe-Mockup.jpg') }}" alt="Website Screenshot">
+      <img class="lazy" data-src="{{ url_for('static', filename='images/gallery/GarageCafe-Mockup.jpg') }}" alt="Service showcase page">
     </a>
     <a href="{{ url_for('static', filename='images/gallery/rockymtnburial.jpg') }}">
-      <img class="lazy" data-src="{{ url_for('static', filename='images/gallery/rockymtnburial.jpg') }}" alt="Website Screenshot">
+      <img class="lazy" data-src="{{ url_for('static', filename='images/gallery/rockymtnburial.jpg') }}" alt="Static-resilient memorial site">
     </a>
   </div>
   <button id="load-more" data-page="2">Load More</button>
@@ -198,43 +198,43 @@ Verso Backend is a robust Flask template that simplifies creating scalable and s
 
 <section class="features-section">
   <div class="features-container">
-    <h2>What You Can Do with Flask</h2>
-    <p>Flask empowers developers with its simplicity and flexibility. Verso Backend showcases this by offering:</p>
+    <h2>Modules of Sovereignty</h2>
+    <p>Each module is a subscription you no longer pay for:</p>
     <div class="features-grid">
       <div class="feature-item">
         <i class="fas fa-lock"></i>
-        <h3>User Authentication</h3>
-        <p>Implement secure user registration, login, and password resets with role-based access control.</p>
+        <h3>Identity &amp; Access Core</h3>
+        <p>Own your auth table, roles, and decorators. No per-MAU tax.</p>
       </div>
       <div class="feature-item">
         <i class="fas fa-database"></i>
-        <h3>Database Integration</h3>
-        <p>Use SQLAlchemy with Flask to manage predefined models for users, roles, and appointments.</p>
+        <h3>SQL Ground Truth</h3>
+        <p>Server-side joins keep latency and consistency in one place.</p>
       </div>
       <div class="feature-item">
         <i class="fas fa-file-alt"></i>
-        <h3>Form Handling</h3>
-        <p>Process user input seamlessly with WTForms for robust validation and security.</p>
+        <h3>Sovereign Narrative Engine</h3>
+        <p>Publish content with the built-in CMS; marketing moves without SaaS gates.</p>
       </div>
       <div class="feature-item">
         <i class="fas fa-envelope"></i>
-        <h3>Email Functionality</h3>
-        <p>Send notifications or password resets using Flask-Mail with minimal setup.</p>
+        <h3>Signals Not Spam</h3>
+        <p>Email hooks for notifications and resets—no external message rent.</p>
       </div>
       <div class="feature-item">
         <i class="fas fa-tachometer-alt"></i>
-        <h3>Admin Interface</h3>
-        <p>Create a dashboard to manage users and appointments quickly.</p>
+        <h3>Admin Command</h3>
+        <p>Role-aware dashboards for governance without extra dashboards-in-a-box.</p>
       </div>
       <div class="feature-item">
         <i class="fas fa-rocket"></i>
-        <h3>Easy Deployment</h3>
-        <p>Deploy to Heroku effortlessly with Verso’s pre-configured setup.</p>
+        <h3>Fixed-Cost Deploy</h3>
+        <p>Deploy to VPS/Heroku/Dokku or on-prem edge with the same code.</p>
       </div>
       <div class="feature-item">
         <i class="fas fa-puzzle-piece"></i>
-        <h3>Modular Design</h3>
-        <p>Extend your application with custom routes and features.</p>
+        <h3>Bounded Contexts</h3>
+        <p>Blueprint modularity without the microservice overhead.</p>
       </div>
     </div>
   </div>
@@ -244,13 +244,13 @@ Verso Backend is a robust Flask template that simplifies creating scalable and s
 
 <section class="get-started-section">
   <div class="get-started-container">
-    <h2>Get Started</h2>
-    <p>Experience Flask’s ease of use by setting up Verso Backend locally:</p>
+    <h2>Declare Independence</h2>
+    <p>Spin up the Sovereign Monolith locally:</p>
     <ol class="steps-list">
-      <li>Clone the repository from GitHub.</li>
-      <li>Set up a virtual environment and install dependencies.</li>
-      <li>Configure environment variables and initialize the database with Flask commands.</li>
-      <li>Run the app and explore Flask’s development server.</li>
+      <li>Clone the repo.</li>
+      <li>Create a virtualenv and install `requirements.txt`.</li>
+      <li>Set `.env`, run migrations, seed roles + business config.</li>
+      <li>Run `flask run` and ship HTML without hydration roulette.</li>
     </ol>
   </div>
 </section>
@@ -259,12 +259,12 @@ Verso Backend is a robust Flask template that simplifies creating scalable and s
 
 <section class="deploy-section">
   <div class="deploy-container">
-    <h2>Deploy with Flask</h2>
-    <p>Flask makes deployment straightforward. With Verso Backend, deploy to Heroku by:</p>
+    <h2>Deploy Without Rent</h2>
+    <p>Choose your sovereignty level:</p>
     <ol class="steps-list">
-      <li>Creating a Heroku app.</li>
-      <li>Setting environment variables.</li>
-      <li>Pushing your code and running migrations.</li>
+      <li>Raw VPS with Gunicorn + systemd + Nginx (fixed fee).</li>
+      <li>Heroku/Dokku using the provided `Procfile`.</li>
+      <li>On-prem/edge for regulated or offline deployments.</li>
     </ol>
   </div>
 </section>
@@ -274,14 +274,14 @@ Verso Backend is a robust Flask template that simplifies creating scalable and s
 <section class="frontend-section">
   <div class="frontend-container">
     <div class="frontend-text">
-      <h2>Connect Any Frontend</h2>
-      <p>Flask’s versatility shines with Verso Backend. Pair it with:</p>
+      <h2>Attach Interfaces on Your Terms</h2>
+      <p>SSR is default. If you need more:</p>
       <ul class="frontend-list">
-        <li>Jinja2 for server-side rendering.</li>
-        <li>Modern frameworks like React or Vue via API endpoints.</li>
-        <li>Design tools like Figma and Webflow for a custom UI.</li>
+        <li>Jinja2 pages for immediate, SEO-friendly delivery.</li>
+        <li>API endpoints for React/Vue if you truly need them.</li>
+        <li>Designer-friendly handoff; HTML first, no hydration traps.</li>
       </ul>
-      <p>Adapt Flask to your preferred frontend workflow effortlessly.</p>
+      <p>Keep state on the server. Keep rent out of the stack.</p>
     </div>
     <div class="frontend-icons">
       <i class="fab fa-html5 icon-jinja"></i>
@@ -295,13 +295,23 @@ Verso Backend is a robust Flask template that simplifies creating scalable and s
 
 <section class="community-section">
   <div class="community-container">
-    <h2>Join the Flask Community</h2>
-    <p>Contribute to Verso Backend and enhance your Flask skills:</p>
+    <h2>Adopt the Protocol</h2>
+    <p>Use it, fork it, or keep it air-gapped. The prize is sovereignty.</p>
     <ol class="steps-list">
-      <li>Fork the repository.</li>
-      <li>Add your improvements.</li>
-      <li>Submit a pull request.</li>
+      <li>Fork the monolith.</li>
+      <li>Instrument it to your domain.</li>
+      <li>Share improvements—zero rent added.</li>
     </ol>
+  </div>
+</section>
+
+<div class="small-spacer"></div>
+
+<section class="community-section">
+  <div class="community-container">
+    <h2>Support the Mission</h2>
+    <p>If this stack saves you from the Complexity Tax, you can keep it sustainable.</p>
+    <a class="btn btn-primary" href="https://github.com/sponsors/versoindustries" target="_blank" rel="noopener">Donate via GitHub Sponsors</a>
   </div>
 </section>
 {% endblock %}
