@@ -1,12 +1,12 @@
 /**
- * AdminDashboard Component
+ * AdminDashboard Component - Modern Futurist Theme
  * 
- * React version of the admin dashboard with KPI cards, charts, and data tables.
- * This component receives data from the Flask backend via props.
+ * React version of the admin dashboard with premium KPI cards, 
+ * animated charts, gradient effects, and enterprise-level design.
  */
 
-import { useState, useEffect, useCallback } from 'react'
-import { DollarSign, UserPlus, CalendarCheck, Users, ArrowUp, ArrowDown } from 'lucide-react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { DollarSign, UserPlus, CalendarCheck, Users, TrendingUp, TrendingDown, Activity, Zap } from 'lucide-react'
 import api from '../../../api'
 import { Spinner } from '../../ui/spinner'
 
@@ -49,7 +49,42 @@ export interface AdminDashboardProps {
 }
 
 // =============================================================================
-// KPI Card Component
+// Animated Counter Hook
+// =============================================================================
+
+function useAnimatedCounter(endValue: number, duration: number = 1000) {
+    const [value, setValue] = useState(0)
+    const prevValue = useRef(0)
+
+    useEffect(() => {
+        const startValue = prevValue.current
+        const startTime = performance.now()
+
+        const animate = (currentTime: number) => {
+            const elapsed = currentTime - startTime
+            const progress = Math.min(elapsed / duration, 1)
+
+            // Ease out cubic
+            const easeOut = 1 - Math.pow(1 - progress, 3)
+            const current = startValue + (endValue - startValue) * easeOut
+
+            setValue(Math.round(current))
+
+            if (progress < 1) {
+                requestAnimationFrame(animate)
+            } else {
+                prevValue.current = endValue
+            }
+        }
+
+        requestAnimationFrame(animate)
+    }, [endValue, duration])
+
+    return value
+}
+
+// =============================================================================
+// KPI Card Component - Premium Design
 // =============================================================================
 
 interface KPICardProps {
@@ -59,33 +94,49 @@ interface KPICardProps {
     icon: React.ReactNode
     iconColor: string
     trend?: number
+    gradientClass?: string
 }
 
-function KPICard({ title, value, subtitle, icon, iconColor, trend }: KPICardProps) {
+function KPICard({ title, value, subtitle, icon, iconColor, trend, gradientClass = '' }: KPICardProps) {
+    // Pulse animation for live data indicator
+    const [pulse, setPulse] = useState(true)
+
+    useEffect(() => {
+        const interval = setInterval(() => setPulse(p => !p), 2000)
+        return () => clearInterval(interval)
+    }, [])
+
     return (
-        <div className="kpi-card">
+        <div className={`kpi-card ${gradientClass}`}>
+            {/* Live data indicator */}
+            <div className="kpi-live-indicator" style={{ opacity: pulse ? 1 : 0.5 }}>
+                <Activity size={8} />
+            </div>
+
             <div className="kpi-header">
                 <span className="kpi-title">{title}</span>
-                <span className="kpi-icon" style={{ color: iconColor }}>
+                <div className="kpi-icon" style={{ background: `${iconColor}15`, color: iconColor }}>
                     {icon}
-                </span>
+                </div>
             </div>
+
             <div className="kpi-value">
                 {value}
                 {trend !== undefined && trend !== 0 && (
                     <span className={`kpi-trend ${trend > 0 ? 'up' : 'down'}`}>
-                        {trend > 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
+                        {trend > 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
                         {Math.abs(trend)}%
                     </span>
                 )}
             </div>
+
             {subtitle && <div className="kpi-subtitle">{subtitle}</div>}
         </div>
     )
 }
 
 // =============================================================================
-// Funnel Chart Component
+// Funnel Chart Component - Animated Progress Bars
 // =============================================================================
 
 interface FunnelChartProps {
@@ -94,21 +145,41 @@ interface FunnelChartProps {
 
 function FunnelChart({ stages }: FunnelChartProps) {
     const maxCount = Math.max(...stages.map(s => s.count), 1)
+    const [animated, setAnimated] = useState(false)
+
+    useEffect(() => {
+        const timer = setTimeout(() => setAnimated(true), 100)
+        return () => clearTimeout(timer)
+    }, [])
+
+    const stageClasses: Record<string, string> = {
+        'New': 'stage-new',
+        'Contacted': 'stage-contacted',
+        'Qualified': 'stage-qualified',
+        'Proposal': 'stage-proposal',
+        'Won': 'stage-won'
+    }
 
     return (
         <div className="funnel-container">
             {stages.map((stage, index) => (
                 <div key={index} className="funnel-stage">
-                    <span className="funnel-label">{stage.name}</span>
-                    <div className="funnel-bar-container">
+                    <div className="funnel-stage-header">
+                        <span className="funnel-stage-label">{stage.name}</span>
+                        <span className="funnel-stage-value">{stage.count}</span>
+                    </div>
+                    <div className="funnel-bar-bg">
                         <div
-                            className="funnel-bar"
+                            className={`funnel-bar-fill ${stageClasses[stage.name] || ''}`}
                             style={{
-                                width: `${(stage.count / maxCount) * 100}%`,
-                                backgroundColor: stage.color,
+                                width: animated ? `${(stage.count / maxCount) * 100}%` : '0%',
+                                backgroundColor: stageClasses[stage.name] ? undefined : stage.color,
+                                transitionDelay: `${index * 100}ms`
                             }}
                         >
-                            {stage.count}
+                            <span className="funnel-bar-percent">
+                                {Math.round((stage.count / maxCount) * 100)}%
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -130,7 +201,14 @@ export function AdminDashboard({
     const [chartData, setChartData] = useState<ChartData | null>(null)
     const [selectedDays, setSelectedDays] = useState(30)
     const [loading, setLoading] = useState(false)
-    const [chartRef, setChartRef] = useState<any>(null)
+    const chartRef = useRef<any>(null)
+    const leadsChartRef = useRef<any>(null)
+
+    // Animated values
+    const animatedRevenue = useAnimatedCounter(kpis?.revenue_month || 0, 1500)
+    const animatedLeads = useAnimatedCounter(kpis?.leads_month || 0, 1200)
+    const animatedAppointments = useAnimatedCounter(kpis?.appointments_today || 0, 1000)
+    const animatedUsers = useAnimatedCounter(kpis?.active_users || 0, 1100)
 
     // Load metrics
     const loadMetrics = useCallback(async (days: number) => {
@@ -152,7 +230,7 @@ export function AdminDashboard({
         loadMetrics(selectedDays)
     }, [])
 
-    // Chart initialization
+    // Chart initialization with gradient fills
     useEffect(() => {
         if (!chartData) return
 
@@ -160,78 +238,143 @@ export function AdminDashboard({
             const { Chart, registerables } = await import('chart.js')
             Chart.register(...registerables)
 
-            // Revenue Chart
+            // Revenue Chart with gradient
             const revenueCanvas = document.getElementById('revenueChart') as HTMLCanvasElement
             if (revenueCanvas) {
                 const ctx = revenueCanvas.getContext('2d')
                 if (ctx) {
                     // Destroy existing chart
-                    if (chartRef) chartRef.destroy()
+                    if (chartRef.current) chartRef.current.destroy()
 
-                    const newChart = new Chart(ctx, {
+                    // Create gradient
+                    const gradient = ctx.createLinearGradient(0, 0, 0, 280)
+                    gradient.addColorStop(0, 'rgba(16, 185, 129, 0.4)')
+                    gradient.addColorStop(1, 'rgba(16, 185, 129, 0)')
+
+                    chartRef.current = new Chart(ctx, {
                         type: 'line',
                         data: {
                             labels: chartData.labels,
                             datasets: [{
                                 label: 'Revenue ($)',
                                 data: chartData.revenue,
-                                borderColor: '#28a745',
-                                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                                borderColor: '#10b981',
+                                backgroundColor: gradient,
                                 fill: true,
                                 tension: 0.4,
+                                borderWidth: 3,
+                                pointBackgroundColor: '#10b981',
+                                pointBorderColor: '#fff',
+                                pointBorderWidth: 2,
+                                pointRadius: 4,
+                                pointHoverRadius: 6,
                             }],
                         },
                         options: {
                             responsive: true,
                             maintainAspectRatio: false,
-                            plugins: { legend: { display: false } },
+                            interaction: {
+                                intersect: false,
+                                mode: 'index',
+                            },
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    backgroundColor: 'rgba(15, 15, 25, 0.95)',
+                                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                                    borderWidth: 1,
+                                    titleColor: '#fff',
+                                    bodyColor: 'rgba(255, 255, 255, 0.8)',
+                                    padding: 12,
+                                    cornerRadius: 8,
+                                    displayColors: false,
+                                }
+                            },
                             scales: {
                                 y: {
                                     beginAtZero: true,
-                                    ticks: { color: 'rgba(255,255,255,0.7)' },
-                                    grid: { color: 'rgba(255,255,255,0.1)' },
+                                    ticks: {
+                                        color: 'rgba(255,255,255,0.5)',
+                                        font: { size: 11 }
+                                    },
+                                    grid: {
+                                        color: 'rgba(255,255,255,0.06)',
+                                    },
+                                    border: { display: false }
                                 },
                                 x: {
-                                    ticks: { color: 'rgba(255,255,255,0.7)' },
+                                    ticks: {
+                                        color: 'rgba(255,255,255,0.5)',
+                                        font: { size: 11 }
+                                    },
                                     grid: { display: false },
+                                    border: { display: false }
                                 },
                             },
                         },
                     })
-                    setChartRef(newChart)
                 }
             }
 
-            // Leads Chart
+            // Leads Chart with gradient bars
             const leadsCanvas = document.getElementById('leadsChart') as HTMLCanvasElement
             if (leadsCanvas) {
                 const ctx = leadsCanvas.getContext('2d')
                 if (ctx) {
-                    new Chart(ctx, {
+                    if (leadsChartRef.current) leadsChartRef.current.destroy()
+
+                    const gradient = ctx.createLinearGradient(0, 0, 0, 280)
+                    gradient.addColorStop(0, 'rgba(99, 102, 241, 0.8)')
+                    gradient.addColorStop(1, 'rgba(139, 92, 246, 0.4)')
+
+                    leadsChartRef.current = new Chart(ctx, {
                         type: 'bar',
                         data: {
                             labels: chartData.labels,
                             datasets: [{
                                 label: 'Leads',
                                 data: chartData.leads,
-                                backgroundColor: 'rgba(65, 105, 225, 0.6)',
-                                borderColor: '#4169e1',
-                                borderWidth: 1,
+                                backgroundColor: gradient,
+                                borderColor: 'rgba(99, 102, 241, 0.8)',
+                                borderWidth: 0,
+                                borderRadius: 6,
+                                borderSkipped: false,
                             }],
                         },
                         options: {
                             responsive: true,
                             maintainAspectRatio: false,
-                            plugins: { legend: { display: false } },
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    backgroundColor: 'rgba(15, 15, 25, 0.95)',
+                                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                                    borderWidth: 1,
+                                    titleColor: '#fff',
+                                    bodyColor: 'rgba(255, 255, 255, 0.8)',
+                                    padding: 12,
+                                    cornerRadius: 8,
+                                }
+                            },
                             scales: {
                                 y: {
                                     beginAtZero: true,
-                                    ticks: { color: 'rgba(255,255,255,0.7)' },
-                                    grid: { color: 'rgba(255,255,255,0.1)' },
+                                    ticks: {
+                                        color: 'rgba(255,255,255,0.5)',
+                                        font: { size: 11 }
+                                    },
+                                    grid: {
+                                        color: 'rgba(255,255,255,0.06)',
+                                    },
+                                    border: { display: false }
                                 },
                                 x: {
-                                    ticks: { color: 'rgba(255,255,255,0.7)' },
+                                    ticks: {
+                                        color: 'rgba(255,255,255,0.5)',
+                                        font: { size: 11 }
+                                    },
                                     grid: { display: false },
+                                    border: { display: false }
                                 },
                             },
                         },
@@ -249,7 +392,12 @@ export function AdminDashboard({
     }
 
     if (!kpis && loading) {
-        return <Spinner size="lg" />
+        return (
+            <div className="dashboard-loading">
+                <Spinner size="lg" />
+                <span>Loading dashboard...</span>
+            </div>
+        )
     }
 
     return (
@@ -259,33 +407,33 @@ export function AdminDashboard({
                 <div className="kpi-grid">
                     <KPICard
                         title="Revenue This Month"
-                        value={`$${(kpis.revenue_month / 100).toFixed(2)}`}
+                        value={`$${(animatedRevenue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
                         subtitle={`Today: $${(kpis.revenue_today / 100).toFixed(2)}`}
-                        icon={<DollarSign />}
-                        iconColor="#28a745"
+                        icon={<DollarSign size={24} />}
+                        iconColor="#10b981"
                         trend={kpis.revenue_trend}
                     />
                     <KPICard
                         title="Leads This Month"
-                        value={kpis.leads_month}
+                        value={animatedLeads}
                         subtitle={`Today: ${kpis.leads_today} new leads`}
-                        icon={<UserPlus />}
-                        iconColor="#17a2b8"
+                        icon={<UserPlus size={24} />}
+                        iconColor="#22d3ee"
                         trend={kpis.leads_trend}
                     />
                     <KPICard
                         title="Appointments Today"
-                        value={kpis.appointments_today}
+                        value={animatedAppointments}
                         subtitle="Scheduled for today"
-                        icon={<CalendarCheck />}
-                        iconColor="#ffc107"
+                        icon={<CalendarCheck size={24} />}
+                        iconColor="#f59e0b"
                     />
                     <KPICard
                         title="Active Users"
-                        value={kpis.active_users}
+                        value={animatedUsers}
                         subtitle={`of ${kpis.total_users} total (last 24h)`}
-                        icon={<Users />}
-                        iconColor="#6f42c1"
+                        icon={<Users size={24} />}
+                        iconColor="#a855f7"
                     />
                 </div>
             )}
@@ -294,40 +442,56 @@ export function AdminDashboard({
             <div className="charts-grid">
                 <div className="chart-card">
                     <div className="chart-header">
-                        <span className="chart-title">Revenue Over Time</span>
+                        <span className="chart-title">
+                            <Zap size={16} style={{ color: '#10b981' }} />
+                            Revenue Over Time
+                        </span>
                         <div className="chart-controls">
                             {[7, 30, 90].map(days => (
                                 <button
                                     key={days}
-                                    data-days={days}
                                     className={selectedDays === days ? 'active' : ''}
                                     onClick={() => handleDaysChange(days)}
                                 >
-                                    {days} Days
+                                    {days}D
                                 </button>
                             ))}
                         </div>
                     </div>
                     <div className="chart-container">
-                        {loading ? <Spinner /> : <canvas id="revenueChart" />}
+                        {loading ? (
+                            <div className="chart-loading"><Spinner /></div>
+                        ) : (
+                            <canvas id="revenueChart" />
+                        )}
                     </div>
                 </div>
 
                 <div className="chart-card">
                     <div className="chart-header">
-                        <span className="chart-title">Lead Pipeline</span>
+                        <span className="chart-title">
+                            <Activity size={16} style={{ color: '#6366f1' }} />
+                            Lead Pipeline
+                        </span>
                     </div>
                     {chartData?.funnel && <FunnelChart stages={chartData.funnel} />}
                 </div>
             </div>
 
             <div className="charts-grid">
-                <div className="chart-card">
+                <div className="chart-card" style={{ gridColumn: 'span 2' }}>
                     <div className="chart-header">
-                        <span className="chart-title">Leads Over Time</span>
+                        <span className="chart-title">
+                            <UserPlus size={16} style={{ color: '#8b5cf6' }} />
+                            Leads Over Time
+                        </span>
                     </div>
                     <div className="chart-container">
-                        {loading ? <Spinner /> : <canvas id="leadsChart" />}
+                        {loading ? (
+                            <div className="chart-loading"><Spinner /></div>
+                        ) : (
+                            <canvas id="leadsChart" />
+                        )}
                     </div>
                 </div>
             </div>

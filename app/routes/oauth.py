@@ -134,7 +134,9 @@ def google_callback():
     
     # Log in the user
     login_user(user)
-    user.last_activity_at = db.func.now()
+    from datetime import datetime
+    user.last_activity_at = datetime.utcnow()
+    user.last_login = datetime.utcnow()
     db.session.commit()
     
     # Redirect to onboarding if not completed

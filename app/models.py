@@ -63,6 +63,7 @@ class User(UserMixin, db.Model):
     onboarding_completed = db.Column(db.Boolean, default=False)
     onboarding_completed_at = db.Column(db.DateTime, nullable=True)
     last_activity_at = db.Column(db.DateTime, nullable=True)
+    last_login = db.Column(db.DateTime, nullable=True)  # Track last login time for admin dashboard KPIs
     timezone = db.Column(db.String(50), nullable=True)
     avatar_url = db.Column(db.String(500), nullable=True)
 

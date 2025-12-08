@@ -13,7 +13,7 @@
     </div>
 
     <div data-react-component="AdminCalendar" data-react-props='{
-            "eventsUrl": "{{ url_for(' calendar.get_events') }}", "updateUrlPattern"
+            "eventsUrl": "{{ url_for('calendar.get_events') }}", "updateUrlPattern"
         : "{{ url_for('calendar.update_event', event_id=0) | replace('0', '{id}') }}" , "initialView" : "dayGridMonth"
         , "height" : 700 }'>
         <!-- Fallback while React loads -->

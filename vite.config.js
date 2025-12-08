@@ -8,7 +8,7 @@ export default defineConfig({
     root: 'app/static/src',
     base: '/static/dist/',
     build: {
-        outDir: '../../dist',
+        outDir: '../dist',
         emptyOutDir: true,
         manifest: true,
         rollupOptions: {

@@ -1,0 +1,204 @@
+/**
+ * AlertBar CSS
+ * Modernist/Futurist Enterprise Design
+ * Uses theme variables from base.css for consistency
+ */
+
+/* ======================================
+   Alert Bar Container
+   ====================================== */
+.verso-alert-bar {
+    position: relative;
+    width: 100%;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, var(--glass-bg, rgba(31, 31, 31, 0.95)) 0%, rgba(20, 20, 35, 0.98) 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(var(--primary-rgb, 65, 105, 225), 0.3);
+    overflow: hidden;
+    z-index: 1001;
+}
+
+/* Pulse effect background */
+.verso-alert-bar__pulse {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(var(--primary-rgb, 65, 105, 225), 0.1) 0%, transparent 50%);
+    transform: translate(-50%, -50%);
+    animation: alertPulse 8s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes alertPulse {
+
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+}
+
+/* Content wrapper */
+.verso-alert-bar__content {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    z-index: 1;
+}
+
+/* Message section */
+.verso-alert-bar__message {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.verso-alert-bar__icon {
+    width: 18px;
+    height: 18px;
+    color: var(--primary-color, #4169e1);
+    animation: iconGlow 2s ease-in-out infinite;
+}
+
+@keyframes iconGlow {
+
+    0%,
+    100% {
+        filter: drop-shadow(0 0 4px rgba(var(--primary-rgb, 65, 105, 225), 0.5));
+    }
+
+    50% {
+        filter: drop-shadow(0 0 10px rgba(var(--primary-rgb, 65, 105, 225), 0.8));
+    }
+}
+
+.verso-alert-bar__text {
+    font-family: var(--font-family, 'Neon-Heavy', sans-serif);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow: 0 0 15px rgba(var(--primary-rgb, 65, 105, 225), 0.3);
+}
+
+/* CTA Button */
+.verso-alert-bar__cta {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1.25rem;
+    font-family: var(--font-family, 'Neon-Regular', sans-serif);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #ffffff;
+    background: var(--btn-gradient, linear-gradient(135deg, #4169e1, #6366f1));
+    border: none;
+    border-radius: 6px;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 3px 12px rgba(var(--primary-rgb, 65, 105, 225), 0.35);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.verso-alert-bar__cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(var(--primary-rgb, 65, 105, 225), 0.5);
+    color: #ffffff;
+}
+
+.verso-alert-bar__cta:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(var(--primary-rgb, 65, 105, 225), 0.35);
+}
+
+/* ======================================
+   Variants
+   ====================================== */
+
+/* Promo variant - gold/amber theme */
+.verso-alert-bar--promo {
+    background: linear-gradient(135deg, rgba(25, 20, 10, 0.95) 0%, rgba(35, 30, 15, 0.95) 100%);
+    border-bottom-color: rgba(234, 179, 8, 0.3);
+}
+
+.verso-alert-bar--promo .verso-alert-bar__pulse {
+    background: radial-gradient(circle, rgba(234, 179, 8, 0.15) 0%, transparent 50%);
+}
+
+.verso-alert-bar--promo .verso-alert-bar__icon {
+    color: #eab308;
+}
+
+.verso-alert-bar--promo .verso-alert-bar__cta {
+    background: linear-gradient(135deg, #d97706, #eab308);
+    box-shadow: 0 4px 15px rgba(234, 179, 8, 0.4);
+}
+
+.verso-alert-bar--promo .verso-alert-bar__cta:hover {
+    box-shadow: 0 6px 25px rgba(234, 179, 8, 0.6);
+}
+
+/* Urgent variant - red theme */
+.verso-alert-bar--urgent {
+    background: linear-gradient(135deg, rgba(30, 15, 15, 0.95) 0%, rgba(40, 20, 20, 0.95) 100%);
+    border-bottom-color: rgba(239, 68, 68, 0.3);
+}
+
+.verso-alert-bar--urgent .verso-alert-bar__pulse {
+    background: radial-gradient(circle, rgba(239, 68, 68, 0.15) 0%, transparent 50%);
+}
+
+.verso-alert-bar--urgent .verso-alert-bar__icon {
+    color: #ef4444;
+}
+
+.verso-alert-bar--urgent .verso-alert-bar__cta {
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+}
+
+.verso-alert-bar--urgent .verso-alert-bar__cta:hover {
+    box-shadow: 0 6px 25px rgba(239, 68, 68, 0.6);
+}
+
+/* ======================================
+   Responsive Design
+   ====================================== */
+@media (max-width: 640px) {
+    .verso-alert-bar {
+        padding: 0.75rem 1rem;
+    }
+
+    .verso-alert-bar__content {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .verso-alert-bar__text {
+        font-size: 0.8125rem;
+        letter-spacing: 0.1em;
+        text-align: center;
+    }
+
+    .verso-alert-bar__cta {
+        padding: 0.5rem 1.25rem;
+        font-size: 0.75rem;
+    }
+
+    .verso-alert-bar__icon {
+        width: 16px;
+        height: 16px;
+    }
+}

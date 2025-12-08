@@ -3,113 +3,340 @@
 {% block title %}Welcome to {{ business_config.get('business_name', 'Verso') }}{% endblock %}
 
 {% block additional_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-    .onboarding-container {
-        max-width: 600px;
-        margin: 2rem auto;
+    /* ========================================
+       Enterprise Onboarding - Premium Design
+       ======================================== */
+
+    /* CSS Custom Properties - Uses base.css theme colors */
+    :root {
+        /* Primary colors from base.css theme */
+        --onboard-primary: var(--accent-blue, #4169e1);
+        --onboard-primary-dark: var(--accent-blue-dark, #1348e7);
+        --onboard-secondary: var(--accent-blue, #4169e1);
+        --onboard-accent: var(--accent-blue, #4169e1);
+        --onboard-success: #2ecc71;
+        /* Background gradients matching base.css dark theme */
+        --onboard-bg-gradient-1: #1f1f1f;
+        --onboard-bg-gradient-2: #2a2a2a;
+        --onboard-bg-gradient-3: #1f1f1f;
+        /* Glass effect from base.css */
+        --onboard-glass-bg: var(--glass-bg, rgba(31, 31, 31, 0.8));
+        --onboard-glass-border: rgba(65, 105, 225, 0.3);
+        /* Typography from base.css */
+        --onboard-text-primary: var(--text-primary, #ffffff);
+        --onboard-text-secondary: rgba(255, 255, 255, 0.7);
+        --onboard-text-muted: rgba(255, 255, 255, 0.5);
+        --onboard-shadow-glow: 0 0 60px rgba(65, 105, 225, 0.3);
+        --onboard-card-radius: 24px;
+        --onboard-font: 'Neon-Regular', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    /* Animated Background */
+    .onboarding-wrapper {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, var(--onboard-bg-gradient-1) 0%, var(--onboard-bg-gradient-2) 50%, var(--onboard-bg-gradient-3) 100%);
+        overflow-y: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
         padding: 2rem;
     }
 
-    .onboarding-card {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        padding: 2.5rem;
-        text-align: center;
+    .onboarding-wrapper::before {
+        content: '';
+        position: fixed;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background:
+            radial-gradient(ellipse at 20% 80%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+            radial-gradient(ellipse at 50% 50%, rgba(6, 182, 212, 0.08) 0%, transparent 60%);
+        animation: backgroundPulse 15s ease-in-out infinite;
+        pointer-events: none;
+        z-index: 0;
     }
 
-    .onboarding-icon {
-        font-size: 4rem;
-        color: var(--primary-color, #007bff);
+    @keyframes backgroundPulse {
+
+        0%,
+        100% {
+            transform: translate(0, 0) rotate(0deg);
+            opacity: 1;
+        }
+
+        33% {
+            transform: translate(2%, -2%) rotate(1deg);
+            opacity: 0.9;
+        }
+
+        66% {
+            transform: translate(-2%, 2%) rotate(-1deg);
+            opacity: 1;
+        }
+    }
+
+    /* Floating Orbs */
+    .floating-orb {
+        position: fixed;
+        border-radius: 50%;
+        filter: blur(60px);
+        opacity: 0.4;
+        animation: floatOrb 20s ease-in-out infinite;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .floating-orb-1 {
+        width: 400px;
+        height: 400px;
+        background: var(--onboard-primary);
+        top: -100px;
+        right: -100px;
+        animation-delay: 0s;
+    }
+
+    .floating-orb-2 {
+        width: 300px;
+        height: 300px;
+        background: var(--onboard-secondary);
+        bottom: -50px;
+        left: -50px;
+        animation-delay: -7s;
+    }
+
+    .floating-orb-3 {
+        width: 200px;
+        height: 200px;
+        background: var(--onboard-accent);
+        top: 50%;
+        left: 50%;
+        animation-delay: -14s;
+    }
+
+    @keyframes floatOrb {
+
+        0%,
+        100% {
+            transform: translate(0, 0) scale(1);
+        }
+
+        25% {
+            transform: translate(30px, -30px) scale(1.05);
+        }
+
+        50% {
+            transform: translate(-20px, 20px) scale(0.95);
+        }
+
+        75% {
+            transform: translate(20px, 10px) scale(1.02);
+        }
+    }
+
+    /* Container */
+    .onboarding-container {
+        position: relative;
+        z-index: 1;
+        max-width: 520px;
+        width: 100%;
+        margin: 0 auto;
+        animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Glassmorphic Card */
+    .onboarding-card {
+        background: var(--onboard-glass-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--onboard-glass-border);
+        border-radius: var(--onboard-card-radius);
+        padding: 3rem;
+        text-align: center;
+        box-shadow:
+            var(--onboard-shadow-glow),
+            0 25px 50px -12px rgba(0, 0, 0, 0.5),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .onboarding-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    }
+
+    /* Progress Bar */
+    .progress-container {
         margin-bottom: 1.5rem;
     }
 
-    .onboarding-title {
-        font-size: 1.75rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
-        color: #333;
-    }
-
-    .onboarding-subtitle {
-        color: #666;
-        margin-bottom: 2rem;
-        line-height: 1.6;
-    }
-
-    .progress-container {
-        margin-bottom: 2rem;
-    }
-
     .progress-bar {
-        height: 8px;
-        background: #e9ecef;
-        border-radius: 4px;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
         overflow: hidden;
+        position: relative;
     }
 
     .progress-fill {
         height: 100%;
-        background: linear-gradient(90deg, var(--primary-color, #007bff), var(--secondary-color, #6c757d));
-        border-radius: 4px;
-        transition: width 0.3s ease;
+        background: linear-gradient(90deg, var(--onboard-primary), var(--onboard-secondary), var(--onboard-accent));
+        background-size: 200% 100%;
+        border-radius: 3px;
+        animation: shimmer 2s ease-in-out infinite;
+        box-shadow: 0 0 20px var(--onboard-primary);
+    }
+
+    @keyframes shimmer {
+        0% {
+            background-position: 200% 0;
+        }
+
+        100% {
+            background-position: -200% 0;
+        }
     }
 
     .progress-text {
-        font-size: 0.875rem;
-        color: #666;
-        margin-top: 0.5rem;
+        font-family: var(--onboard-font);
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--onboard-text-muted);
+        margin-top: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
     }
 
+    /* Step Dots */
     .onboarding-steps {
         display: flex;
         justify-content: center;
-        gap: 1rem;
-        margin-bottom: 2rem;
+        gap: 0.75rem;
+        margin-bottom: 2.5rem;
     }
 
     .step-dot {
-        width: 12px;
-        height: 12px;
+        width: 10px;
+        height: 10px;
         border-radius: 50%;
-        background: #e9ecef;
+        background: rgba(255, 255, 255, 0.15);
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
     }
 
     .step-dot.active {
-        background: var(--primary-color, #007bff);
+        background: var(--onboard-primary);
+        box-shadow: 0 0 20px var(--onboard-primary), 0 0 40px rgba(99, 102, 241, 0.4);
+        transform: scale(1.2);
+    }
+
+    .step-dot.active::after {
+        content: '';
+        position: absolute;
+        inset: -4px;
+        border-radius: 50%;
+        border: 2px solid var(--onboard-primary);
+        opacity: 0;
+        animation: pingDot 1.5s ease-out infinite;
+    }
+
+    @keyframes pingDot {
+        0% {
+            transform: scale(1);
+            opacity: 0.8;
+        }
+
+        100% {
+            transform: scale(2);
+            opacity: 0;
+        }
     }
 
     .step-dot.completed {
-        background: #28a745;
+        background: var(--onboard-success);
+        box-shadow: 0 0 15px var(--onboard-success);
     }
 
-    .btn-primary-lg {
-        padding: 0.75rem 2.5rem;
-        font-size: 1.1rem;
-        border-radius: 8px;
-        background: var(--primary-color, #007bff);
-        color: white;
-        border: none;
-        cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
+    /* Icon */
+    .onboarding-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, var(--onboard-primary), var(--onboard-secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: iconFloat 3s ease-in-out infinite;
+        display: inline-block;
     }
 
-    .btn-primary-lg:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    @keyframes iconFloat {
+
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-8px);
+        }
     }
 
-    .skip-link {
-        display: block;
-        margin-top: 1.5rem;
-        color: #666;
-        font-size: 0.875rem;
+    /* Typography */
+    .onboarding-title {
+        font-family: var(--onboard-font);
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--onboard-text-primary);
+        margin-bottom: 0.75rem;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
     }
 
-    .skip-link:hover {
-        color: #333;
+    .onboarding-title span {
+        background: linear-gradient(135deg, var(--onboard-primary), var(--onboard-accent));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 
+    .onboarding-subtitle {
+        font-family: var(--onboard-font);
+        font-size: 1rem;
+        font-weight: 400;
+        color: var(--onboard-text-secondary);
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+
+    /* Feature List */
     .feature-list {
         text-align: left;
         margin: 2rem 0;
@@ -119,100 +346,279 @@
         display: flex;
         align-items: flex-start;
         gap: 1rem;
-        margin-bottom: 1rem;
-        padding: 0.75rem;
-        background: #f8f9fa;
-        border-radius: 8px;
+        margin-bottom: 0.75rem;
+        padding: 1rem 1.25rem;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+        text-decoration: none;
+        cursor: pointer;
+        color: inherit;
+    }
+
+    .feature-item:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .feature-item:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .feature-item:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+
+    .feature-item:hover {
+        background: rgba(65, 105, 225, 0.15);
+        border-color: rgba(65, 105, 225, 0.5);
+        transform: translateX(4px);
+        box-shadow: 0 4px 20px rgba(65, 105, 225, 0.25);
     }
 
     .feature-icon {
-        color: #28a745;
         font-size: 1.25rem;
+        color: var(--onboard-success);
         flex-shrink: 0;
+        margin-top: 0.1rem;
+        filter: drop-shadow(0 0 8px var(--onboard-success));
+    }
+
+    .feature-text {
+        font-family: var(--onboard-font);
     }
 
     .feature-text strong {
         display: block;
+        font-weight: 600;
+        color: var(--onboard-text-primary);
         margin-bottom: 0.25rem;
+        font-size: 0.95rem;
+        user-select: text;
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        cursor: text;
     }
 
     .feature-text span {
-        font-size: 0.875rem;
-        color: #666;
+        font-size: 0.85rem;
+        color: var(--onboard-text-muted);
+        line-height: 1.5;
+        user-select: text;
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        cursor: text;
+    }
+
+    /* Primary Button */
+    .btn-primary-lg {
+        font-family: var(--onboard-font);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 1rem 2.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--onboard-primary), var(--onboard-secondary));
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow:
+            0 4px 15px rgba(99, 102, 241, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-primary-lg::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .btn-primary-lg:hover {
+        transform: translateY(-3px);
+        box-shadow:
+            0 8px 25px rgba(99, 102, 241, 0.5),
+            0 0 40px rgba(99, 102, 241, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-primary-lg:hover::before {
+        left: 100%;
+    }
+
+    .btn-primary-lg:active {
+        transform: translateY(-1px);
+    }
+
+    .btn-primary-lg i {
+        font-size: 0.9rem;
+        transition: transform 0.3s ease;
+    }
+
+    .btn-primary-lg:hover i {
+        transform: translateX(4px);
+    }
+
+    /* Skip Link */
+    .skip-onboarding {
+        display: inline-block;
+        margin-top: 1.5rem;
+        font-family: var(--onboard-font);
+        font-size: 0.85rem;
+        font-weight: 400;
+        color: var(--onboard-text-muted);
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+    }
+
+    .skip-onboarding:hover {
+        color: var(--onboard-text-secondary);
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+        .onboarding-wrapper {
+            padding: 1rem;
+            align-items: flex-start;
+            padding-top: 2rem;
+        }
+
+        .onboarding-card {
+            padding: 2rem 1.5rem;
+            border-radius: 20px;
+        }
+
+        .onboarding-title {
+            font-size: 1.5rem;
+        }
+
+        .onboarding-icon {
+            font-size: 3rem;
+        }
+
+        .btn-primary-lg {
+            width: 100%;
+            padding: 1rem 1.5rem;
+        }
+
+        .floating-orb {
+            opacity: 0.2;
+        }
+    }
+
+    /* Reduced Motion */
+    @media (prefers-reduced-motion: reduce) {
+
+        .onboarding-wrapper::before,
+        .floating-orb,
+        .onboarding-icon,
+        .progress-fill,
+        .step-dot.active::after {
+            animation: none;
+        }
+
+        .onboarding-container,
+        .feature-item {
+            animation: none;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<main class="onboarding-container">
-    <div class="onboarding-card">
-        <!-- Progress -->
-        <div class="progress-container">
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: {{ progress.percentage }}%"></div>
-            </div>
-            <div class="progress-text">Step 1 of 4</div>
-        </div>
+<div class="onboarding-wrapper">
+    <!-- Floating Orbs -->
+    <div class="floating-orb floating-orb-1"></div>
+    <div class="floating-orb floating-orb-2"></div>
+    <div class="floating-orb floating-orb-3"></div>
 
-        <!-- Step indicators -->
-        <div class="onboarding-steps">
-            <div class="step-dot active"></div>
-            <div class="step-dot"></div>
-            <div class="step-dot"></div>
-            <div class="step-dot"></div>
-        </div>
-
-        <!-- Welcome content -->
-        <div class="onboarding-icon">
-            <i class="fas fa-hand-sparkles"></i>
-        </div>
-
-        <h1 class="onboarding-title">Welcome, {{ current_user.first_name or current_user.username }}!</h1>
-
-        <p class="onboarding-subtitle">
-            Thanks for joining us! Let's get your account set up so you can make the most of
-            your experience.
-        </p>
-
-        <!-- Features preview -->
-        <div class="feature-list">
-            <div class="feature-item">
-                <i class="fas fa-check-circle feature-icon"></i>
-                <div class="feature-text">
-                    <strong>Complete Your Profile</strong>
-                    <span>Add your contact info and preferences</span>
+    <main class="onboarding-container">
+        <div class="onboarding-card">
+            <!-- Progress -->
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ progress.percentage }}%"></div>
                 </div>
+                <div class="progress-text">Step 1 of 4</div>
             </div>
-            <div class="feature-item">
-                <i class="fas fa-check-circle feature-icon"></i>
-                <div class="feature-text">
-                    <strong>Set Notification Preferences</strong>
-                    <span>Choose how you want to hear from us</span>
-                </div>
+
+            <!-- Step indicators -->
+            <div class="onboarding-steps">
+                <div class="step-dot active"></div>
+                <div class="step-dot"></div>
+                <div class="step-dot"></div>
+                <div class="step-dot"></div>
             </div>
-            <div class="feature-item">
-                <i class="fas fa-check-circle feature-icon"></i>
-                <div class="feature-text">
-                    <strong>Quick Feature Tour</strong>
-                    <span>Learn your way around in 60 seconds</span>
-                </div>
+
+            <!-- Welcome content -->
+            <div class="onboarding-icon">
+                <i class="fas fa-hand-sparkles"></i>
             </div>
+
+            <h1 class="onboarding-title">Welcome, <span>{{ current_user.first_name or current_user.username }}</span>!
+            </h1>
+
+            <p class="onboarding-subtitle">
+                Thanks for joining us! Let's get your account set up so you can make the most of
+                your experience.
+            </p>
+
+            <!-- Features preview - Clickable links to onboarding steps -->
+            <div class="feature-list">
+                <a href="{{ url_for('onboarding.profile') }}" class="feature-item">
+                    <i class="fas fa-check-circle feature-icon"></i>
+                    <div class="feature-text">
+                        <strong>Complete Your Profile</strong>
+                        <span>Add your contact info and preferences</span>
+                    </div>
+                </a>
+                <a href="{{ url_for('onboarding.preferences') }}" class="feature-item">
+                    <i class="fas fa-check-circle feature-icon"></i>
+                    <div class="feature-text">
+                        <strong>Set Notification Preferences</strong>
+                        <span>Choose how you want to hear from us</span>
+                    </div>
+                </a>
+                <a href="{{ url_for('onboarding.complete') }}" class="feature-item">
+                    <i class="fas fa-check-circle feature-icon"></i>
+                    <div class="feature-text">
+                        <strong>Quick Feature Tour</strong>
+                        <span>Learn your way around in 60 seconds</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Actions -->
+            <form method="POST" action="{{ url_for('onboarding.complete_welcome') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn-primary-lg">
+                    Let's Get Started <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <form method="POST" action="{{ url_for('onboarding.skip') }}" style="display: inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="skip-onboarding">
+                    Skip for now, I'll set up later
+                </button>
+            </form>
         </div>
-
-        <!-- Actions -->
-        <form method="POST" action="{{ url_for('onboarding.complete_welcome') }}">
-            {{ csrf_token() }}
-            <button type="submit" class="btn-primary-lg">
-                <i class="fas fa-arrow-right"></i> Let's Get Started
-            </button>
-        </form>
-
-        <form method="POST" action="{{ url_for('onboarding.skip') }}" style="display: inline;">
-            {{ csrf_token() }}
-            <button type="submit" class="skip-link" style="background: none; border: none; cursor: pointer;">
-                Skip for now, I'll set up later
-            </button>
-        </form>
-    </div>
-</main>
+    </main>
+</div>
 {% endblock %}

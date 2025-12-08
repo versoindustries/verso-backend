@@ -96,14 +96,9 @@
     <script>
         window.versoContext = {
             user: {
-                isAuthenticated: {{ current_user.is_authenticated | tojson }},
-        {% if current_user.is_authenticated %}
-        firstName: { { current_user.first_name | tojson } },
-        roles: [
-            {% for role in current_user.roles %}
-        "{{ role.name }}",
-            {% endfor %}
-                ],
+                isAuthenticated: {{ current_user.is_authenticated | tojson }}{% if current_user.is_authenticated %},
+        firstName: {{ current_user.first_name | tojson }},
+        roles: [{% for role in current_user.roles %}"{{ role.name }}"{% if not loop.last %}, {% endif %} {% endfor %}]
         {% endif %}
             },
         config: {
@@ -131,7 +126,7 @@
                                                                 setLanguageEn: "{{ url_for('main_routes.set_language', language='en') }}",
                                                                     setLanguageEs: "{{ url_for('main_routes.set_language', language='es') }}"
         },
-        unreadNotificationsCount: { { unread_notifications_count | default (0) } },
+        unreadNotificationsCount: {{ unread_notifications_count | default(0) }},
         year: new Date().getFullYear(),
             version: "{{ current_version }}"
         };
@@ -175,9 +170,8 @@
 
 <body {% block body_attributes %}{% endblock %}>
     <a href="#main-content" class="skip-link">Skip to main content</a>
-    <div class="alert-bar">
-        Demo Site
-        <a href="{{ url_for('main_routes.contact') }}" class="btn btn-23">Contact</a>
+    <div data-react-component="AlertBar"
+        data-react-props='{"message": "Demo Site", "ctaText": "Contact", "ctaUrl": "{{ url_for("main_routes.contact") }}"}'>
     </div>
     <div data-react-component="Header"></div>
 

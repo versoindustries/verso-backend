@@ -51,7 +51,9 @@ class LoginForm(FlaskForm):
 class SettingsForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
+    bio = TextAreaField('Bio', validators=[Optional(), Length(max=500)])
+    location = StringField('Location', validators=[Optional(), Length(max=100)])
+    password = PasswordField('Password', validators=[Optional()])
     confirm_password = PasswordField('Confirm Password', validators=[EqualTo('password')])
     submit = SubmitField('Update Settings')
 

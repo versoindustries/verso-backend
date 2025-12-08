@@ -91,6 +91,7 @@ registerComponent('Table', () => import('./components/ui/table'))
 // Layout Components
 registerComponent('Header', () => import('./components/layout/Header'))
 registerComponent('Footer', () => import('./components/layout/Footer'))
+registerComponent('AlertBar', () => import('./components/layout/AlertBar'))
 registerComponent('HomePage', () => import('./pages/HomePage'))
 
 // Feature Components - Existing

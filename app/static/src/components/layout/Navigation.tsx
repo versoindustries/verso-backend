@@ -8,7 +8,7 @@ export interface NavLinkProps {
 
 export const NavLink: React.FC<NavLinkProps> = ({ href, children, className }) => {
     return (
-        <a href={href} className={`verso-navlink ${className || ''}`}>
+        <a href={href} className={`verso-nav__link ${className || ''}`}>
             {children}
         </a>
     );
@@ -16,7 +16,7 @@ export const NavLink: React.FC<NavLinkProps> = ({ href, children, className }) =
 
 export const MobileNavLink: React.FC<NavLinkProps> = ({ href, children, className }) => {
     return (
-        <a href={href} className={`verso-mobile-navlink ${className || ''}`}>
+        <a href={href} className={`verso-mobile-menu__link ${className || ''}`}>
             {children}
         </a>
     );

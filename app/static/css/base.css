@@ -24,6 +24,12 @@
     font-style: normal;
 }
 
+/* Layout Component Imports - React Islands */
+@import url('./components/layout-header.css');
+@import url('./components/layout-footer.css');
+@import url('./components/layout-navigation.css');
+@import url('./components/layout-alertbar.css');
+
 /* Global Variables */
 :root {
     --primary-bg: linear-gradient(135deg, #1f1f1f 0%, #2a2a2a 100%);

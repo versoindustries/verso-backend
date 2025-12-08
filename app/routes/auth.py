@@ -222,6 +222,7 @@ def login():
         if user and bcrypt.check_password_hash(user.password_hash, form.password.data):
             login_user(user)
             user.last_activity_at = datetime.utcnow()
+            user.last_login = datetime.utcnow()
             
             # Log activity
             user.log_activity(
