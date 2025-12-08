@@ -1,8 +1,13 @@
 /* base.css */
 
-/* Font Imports and Definitions */
+/* All @import statements MUST come first (before any other CSS rules) */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+@import url('./components/layout-header.css');
+@import url('./components/layout-footer.css');
+@import url('./components/layout-navigation.css');
+@import url('./components/layout-alertbar.css');
 
+/* Font Face Definitions */
 @font-face {
     font-family: 'Neon-Heavy';
     src: url('../fonts/Neon-Heavy.woff') format('woff');
@@ -24,12 +29,6 @@
     font-style: normal;
 }
 
-/* Layout Component Imports - React Islands */
-@import url('./components/layout-header.css');
-@import url('./components/layout-footer.css');
-@import url('./components/layout-navigation.css');
-@import url('./components/layout-alertbar.css');
-
 /* Global Variables */
 :root {
     --primary-bg: linear-gradient(135deg, #1f1f1f 0%, #2a2a2a 100%);
@@ -37,6 +36,7 @@
     --text-primary: #ffffff;
     --accent-blue: #4169e1;
     --accent-blue-dark: #1348e7;
+    --primary-rgb: 65, 105, 225;
     --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.5);
     --shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.6);
     --pulse-effect: radial-gradient(circle, rgba(82, 80, 194, 0.2) 0%, transparent 70%);

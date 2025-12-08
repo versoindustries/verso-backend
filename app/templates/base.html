@@ -97,37 +97,37 @@
         window.versoContext = {
             user: {
                 isAuthenticated: {{ current_user.is_authenticated | tojson }}{% if current_user.is_authenticated %},
-        firstName: {{ current_user.first_name | tojson }},
-        roles: [{% for role in current_user.roles %}"{{ role.name }}"{% if not loop.last %}, {% endif %} {% endfor %}]
-        {% endif %}
+                firstName: {{ current_user.first_name | tojson }},
+                roles: [{% for role in current_user.roles %}"{{ role.name }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+            {% endif %}
             },
-        config: {
-            site_name: "Verso Backend",
+            config: {
+                site_name: "Verso Backend",
                 primary_color: "{{ business_config.get('primary_color', '#4169e1') }}",
-                    secondary_color: "{{ business_config.get('secondary_color', '#6c757d') }}",
-                        accent_color: "{{ business_config.get('accent_color', '#28a745') }}",
-                            font_family: "{{ business_config.get('font_family', 'Neon-Regular, sans-serif') }}",
-                                ga4_tracking_id: "{{ business_config.get('ga4_tracking_id', '') }}"
-        },
-        urls: {
-            index: "{{ url_for('main_routes.index') }}",
+                secondary_color: "{{ business_config.get('secondary_color', '#6c757d') }}",
+                accent_color: "{{ business_config.get('accent_color', '#28a745') }}",
+                font_family: "{{ business_config.get('font_family', 'Neon-Regular, sans-serif') }}",
+                ga4_tracking_id: "{{ business_config.get('ga4_tracking_id', '') }}"
+            },
+            urls: {
+                index: "{{ url_for('main_routes.index') }}",
                 about: "{{ url_for('main_routes.about') }}",
-                    services: "{{ url_for('main_routes.services') }}",
-                        contact: "{{ url_for('main_routes.contact') }}",
-                            login: "{{ url_for('auth.login') }}",
-                                register: "{{ url_for('auth.register') }}",
-                                    logout: "{{ url_for('auth.logout') }}",
-                                        blogIndex: "{{ url_for('blog.show_blog') }}",
-                                            blogManage: "{{ url_for('blog.manage_posts') }}",
-                                                blogNew: "{{ url_for('blog.new_post') }}",
-                                                    employeeDashboard: "{{ url_for('employee.dashboard') }}",
-                                                        messaging: "{{ url_for('messaging.index') }}",
-                                                            adminDashboard: "{{ url_for('admin.admin_dashboard') }}",
-                                                                setLanguageEn: "{{ url_for('main_routes.set_language', language='en') }}",
-                                                                    setLanguageEs: "{{ url_for('main_routes.set_language', language='es') }}"
-        },
-        unreadNotificationsCount: {{ unread_notifications_count | default(0) }},
-        year: new Date().getFullYear(),
+                services: "{{ url_for('main_routes.services') }}",
+                contact: "{{ url_for('main_routes.contact') }}",
+                login: "{{ url_for('auth.login') }}",
+                register: "{{ url_for('auth.register') }}",
+                logout: "{{ url_for('auth.logout') }}",
+                blogIndex: "{{ url_for('blog.show_blog') }}",
+                blogManage: "{{ url_for('blog.manage_posts') }}",
+                blogNew: "{{ url_for('blog.new_post') }}",
+                employeeDashboard: "{{ url_for('employee.dashboard') }}",
+                messaging: "{{ url_for('messaging.index') }}",
+                adminDashboard: "{{ url_for('admin.admin_dashboard') }}",
+                setLanguageEn: "{{ url_for('main_routes.set_language', language='en') }}",
+                setLanguageEs: "{{ url_for('main_routes.set_language', language='es') }}"
+            },
+            unreadNotificationsCount: {{ unread_notifications_count | default(0) }},
+            year: new Date().getFullYear(),
             version: "{{ current_version }}"
         };
     </script>
@@ -176,15 +176,8 @@
     <div data-react-component="Header"></div>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    <div class="flash-messages" aria-live="polite">
-        {% for category, message in messages %}
-        <div class="alert alert-{{ category }}">
-            {{ message }}
-        </div>
-        {% endfor %}
+    <div data-react-component="FlashAlerts" data-react-props='{{ {"messages": messages} | tojson }}'>
     </div>
-    {% endif %}
     {% endwith %}
 
     <main class="container" id="main-content" role="main">

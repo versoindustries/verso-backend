@@ -92,6 +92,7 @@ registerComponent('Table', () => import('./components/ui/table'))
 registerComponent('Header', () => import('./components/layout/Header'))
 registerComponent('Footer', () => import('./components/layout/Footer'))
 registerComponent('AlertBar', () => import('./components/layout/AlertBar'))
+registerComponent('FlashAlerts', () => import('./components/layout/FlashAlerts'))
 registerComponent('HomePage', () => import('./pages/HomePage'))
 
 // Feature Components - Existing
