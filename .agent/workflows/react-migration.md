@@ -11,6 +11,11 @@ description: Continue React template migration (Phase 18.3+)
 4. Update the checkbox in this file after successful migration
 5. Run `npm run build` to verify
 
+> **⚠️ IMPORTANT: No Tailwind CSS**  
+> This project uses 100% custom CSS. All styling is done section-by-section with BEM-style class names.  
+> Layout CSS files: `layout-header.css`, `layout-footer.css`, `layout-navigation.css`, `homepage-layout.css`  
+> Component CSS files are in `app/static/css/components/`
+
 ---
 
 ## Migration Patterns
@@ -142,7 +147,7 @@ Skip migration for: Forms, static pages, email templates, one-off pages
 | ✅ | `blog/manage_posts.html` | AdminDataTable | Post management |
 | ⏳ | `blog/blog.html` | TBD | Blog listing |
 | ⏳ | `blog/admin/editorial_calendar.html` | TBD | Calendar view |
-| ⏳ | `blog/admin/comment_moderation.html` | AdminDataTable | Comments |
+| ➖ | `blog/admin/comment_moderation.html` | - | Has bulk action form |
 | ➖ | `blog/edit.html` | - | Edit form |
 | ➖ | `blog/new_post.html` | - | Create form |
 | ➖ | `blog/blog_category.html` | - | Category page |
@@ -181,7 +186,7 @@ Skip migration for: Forms, static pages, email templates, one-off pages
 |--------|----------|-----------|-------|
 | ✅ | `admin/analytics/dashboard.html` | AnalyticsDashboard | Main analytics |
 | ✅ | `admin/analytics/goals/index.html` | AdminDataTable | Goals list |
-| ⏳ | `admin/analytics/funnels/index.html` | TBD | Funnel list |
+| ➖ | `admin/analytics/funnels/index.html` | - | Cards, not table |
 | ⏳ | `admin/analytics/funnels/detail.html` | TBD | Funnel viz |
 | ⏳ | `admin/analytics/sessions.html` | TBD | Sessions |
 | ⏳ | `admin/analytics/traffic.html` | TBD | Traffic |
@@ -198,7 +203,7 @@ Skip migration for: Forms, static pages, email templates, one-off pages
 |--------|----------|-----------|-------|
 | ✅ | `admin/crm/kanban.html` | KanbanBoard | Lead kanban |
 | ⏳ | `admin/crm/analytics.html` | TBD | CRM charts |
-| ⏳ | `admin/crm/duplicates.html` | AdminDataTable | Duplicate leads |
+| ✅ | `admin/crm/duplicates.html` | AdminDataTable | Duplicate leads |
 | ✅ | `admin/crm/templates.html` | AdminDataTable | CRM templates |
 | ➖ | `admin/crm/lead_detail.html` | - | Lead detail |
 | ➖ | `admin/crm/pipeline_settings.html` | - | Settings form |
@@ -229,9 +234,9 @@ Skip migration for: Forms, static pages, email templates, one-off pages
 | ✅ | `admin/email/templates/index.html` | EmailTemplateCards | Templates |
 | ✅ | `admin/email/sequences/index.html` | AdminDataTable | Sequences |
 | ✅ | `admin/newsletter/index.html` | AdminDataTable | Newsletters |
-| ⏳ | `admin/email/campaigns/index.html` | AdminDataTable | Campaigns |
-| ⏳ | `admin/email/segments/index.html` | AdminDataTable | Segments |
-| ⏳ | `admin/email/suppression/index.html` | AdminDataTable | Suppression |
+| ✅ | `admin/email/campaigns/index.html` | AdminDataTable | Campaigns |
+| ➖ | `admin/email/segments/index.html` | - | Cards, not table |
+| ✅ | `admin/email/suppression/index.html` | AdminDataTable | Suppression |
 | ⏳ | `admin/email/campaigns/stats.html` | TBD | Campaign stats |
 | ➖ | `admin/email/*/form.html` | - | Forms |
 | ➖ | `admin/email/templates/preview.html` | - | Preview |
@@ -245,14 +250,12 @@ Skip migration for: Forms, static pages, email templates, one-off pages
 |--------|----------|-----------|-------|
 | ✅ | `admin/forms/index.html` | AdminDataTable | Forms list |
 | ✅ | `admin/surveys/index.html` | AdminDataTable | Surveys list |
-| ⏳ | `admin/forms/submissions.html` | AdminDataTable | Submissions |
-| ⏳ | `admin/reviews/index.html` | AdminDataTable | Reviews |
+| ✅ | `admin/forms/submissions.html` | AdminDataTable | Submissions |
+| ✅ | `admin/reviews/index.html` | AdminDataTable | Review moderation |
 | ➖ | `admin/forms/create.html` | - | Create form |
 | ➖ | `admin/forms/edit.html` | - | Edit form |
 | ➖ | `admin/forms/submission_detail.html` | - | Detail view |
 | ➖ | `admin/surveys/create.html` | - | Create form |
-| ➖ | `admin/surveys/detail.html` | - | Detail view |
-| ➖ | `admin/reviews/detail.html` | - | Detail view |
 
 ---
 
@@ -263,8 +266,8 @@ Skip migration for: Forms, static pages, email templates, one-off pages
 | ✅ | `admin/scheduling/types/index.html` | AdminDataTable | Appt types |
 | ✅ | `admin/scheduling/resources/index.html` | AdminDataTable | Resources |
 | ✅ | `admin/scheduling/waitlist/index.html` | AdminDataTable | Waitlist |
-| ⏳ | `admin/availability/list_estimators.html` | AdminDataTable | Estimators |
-| ⏳ | `admin/availability/list_exceptions.html` | AdminDataTable | Exceptions |
+| ➖ | `admin/availability/list_estimators.html` | - | Cards, not table |
+| ✅ | `admin/availability/list_exceptions.html` | AdminDataTable | Exceptions |
 | ⏳ | `admin/scheduling/capacity.html` | TBD | Capacity view |
 | ➖ | `admin/scheduling/*/form.html` | - | Forms |
 | ➖ | `admin/availability/edit_availability.html` | - | Edit form |
@@ -277,8 +280,8 @@ Skip migration for: Forms, static pages, email templates, one-off pages
 |--------|----------|-----------|-------|
 | ✅ | `admin/tasks/cron.html` | AdminDataTable | Cron jobs |
 | ✅ | `admin/automation/index.html` | AdminDataTable | Automations |
-| ⏳ | `admin/tasks/queue.html` | AdminDataTable | Task queue |
-| ⏳ | `admin/tasks/dead_letter.html` | AdminDataTable | Dead letters |
+| ✅ | `admin/tasks/queue.html` | AdminDataTable | Task queue |
+| ✅ | `admin/tasks/dead_letter.html` | AdminDataTable | Dead letters |
 | ⏳ | `admin/tasks/worker_status.html` | TBD | Worker status |
 | ➖ | `admin/tasks/dashboard.html` | - | Dashboard |
 | ➖ | `admin/tasks/detail.html` | - | Task detail |
@@ -300,7 +303,7 @@ Skip migration for: Forms, static pages, email templates, one-off pages
 
 | Status | Template | Component | Notes |
 |--------|----------|-----------|-------|
-| ⏳ | `admin/reports/saved/index.html` | AdminDataTable | Saved reports |
+| ➖ | `admin/reports/saved/index.html` | - | Cards, not table |
 | ⏳ | `admin/reports/builder/index.html` | TBD | Report builder |
 | ⏳ | `admin/reports/revenue.html` | TBD | Revenue charts |
 | ⏳ | `admin/reports/customers.html` | TBD | Customer charts |
@@ -315,9 +318,9 @@ Skip migration for: Forms, static pages, email templates, one-off pages
 
 | Status | Template | Component | Notes |
 |--------|----------|-----------|-------|
-| ⏳ | `admin/hr/leave_requests.html` | AdminDataTable | Leave requests |
-| ⏳ | `admin/hr/leave_balances.html` | AdminDataTable | Leave balances |
-| ⏳ | `admin/hr/timesheets.html` | AdminDataTable | Timesheets |
+| ➖ | `admin/hr/leave_requests.html` | - | Has modals, complex |
+| ➖ | `admin/hr/leave_balances.html` | - | Form + table hybrid |
+| ➖ | `admin/hr/timesheets.html` | - | Multi-table grouped by user |
 | ⏳ | `admin/hr/org_chart.html` | TBD | Org chart |
 
 ---
@@ -328,7 +331,7 @@ Skip migration for: Forms, static pages, email templates, one-off pages
 |--------|----------|-----------|-------|
 | ⏳ | `admin/ai/dashboard.html` | TBD | AI dashboard |
 | ⏳ | `admin/compliance/dashboard.html` | TBD | Compliance |
-| ⏳ | `admin/backups/index.html` | AdminDataTable | Backups |
+| ✅ | `admin/backups/index.html` | AdminDataTable | Backups |
 | ⏳ | `admin/observability/metrics.html` | TBD | Metrics |
 | ⏳ | `admin/dashboards/operations.html` | TBD | Ops dashboard |
 | ⏳ | `admin/dashboards/owner.html` | TBD | Owner dashboard |
@@ -352,7 +355,7 @@ Skip migration for: Forms, static pages, email templates, one-off pages
 |--------|----------|-----------|-------|
 | ✅ | `employee/calendar.html` | EmployeeCalendar | Calendar |
 | ⏳ | `employee/dashboard.html` | TBD | Dashboard |
-| ⏳ | `employee/directory.html` | AdminDataTable | Directory |
+| ➖ | `employee/directory.html` | - | Cards, not table |
 | ⏳ | `employee/timesheet.html` | TBD | Timesheet |
 | ⏳ | `employee/org_chart.html` | TBD | Org chart |
 | ⏳ | `employee/shared_docs.html` | TBD | Documents |

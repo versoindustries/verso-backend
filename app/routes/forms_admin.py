@@ -245,9 +245,36 @@ def list_submissions(form_id):
         page=page, per_page=per_page, error_out=False
     )
     
+    # Status badge helper
+    def status_badge(s):
+        colors = {'new': 'danger', 'read': 'info', 'processed': 'success', 'archived': 'secondary'}
+        return f'<span class="badge bg-{colors.get(s, "secondary")}">{s.title()}</span>'
+    
+    # Get first few field values as preview
+    def get_preview(sub):
+        if not sub.data:
+            return '-'
+        values = list(sub.data.values())[:2]
+        preview = ', '.join(str(v)[:30] for v in values if v)
+        return preview[:50] + '...' if len(preview) > 50 else preview
+    
+    # Serialize for AdminDataTable
+    submissions_json = json.dumps([{
+        'id': sub.id,
+        'submitted': sub.submitted_at.strftime('%Y-%m-%d %H:%M') if sub.submitted_at else '-',
+        'status': status_badge(sub.status),
+        'preview': get_preview(sub),
+        'ip': f'<small class="text-muted">{sub.ip_address or "-"}</small>',
+        'actions': f'''<div class="btn-group btn-group-sm">
+            <a href="{url_for('forms_admin.view_submission', form_id=form_id, submission_id=sub.id)}" class="btn btn-outline-primary"><i class="bi bi-eye"></i></a>
+            <form action="{url_for('forms_admin.delete_submission', form_id=form_id, submission_id=sub.id)}" method="POST" class="d-inline" onsubmit="return confirm('Delete?');"><input type="hidden" name="csrf_token" value=""><button type="submit" class="btn btn-outline-danger"><i class="bi bi-trash"></i></button></form>
+        </div>'''
+    } for sub in submissions.items])
+    
     return render_template('admin/forms/submissions.html',
                          form=form,
                          submissions=submissions,
+                         submissions_json=submissions_json,
                          status_filter=status,
                          search=search,
                          date_from=date_from,
@@ -663,7 +690,9 @@ def delete_survey(survey_id):
 @role_required('admin')
 def list_reviews():
     """List reviews for moderation."""
-    status = request.args.get('status', 'pending')
+    from flask_wtf.csrf import generate_csrf
+    
+    status = request.args.get('status', '')
     rating = request.args.get('rating', '')
     product_id = request.args.get('product_id', '')
     
@@ -678,11 +707,7 @@ def list_reviews():
     if product_id:
         query = query.filter_by(product_id=int(product_id))
     
-    # Pagination
-    page = request.args.get('page', 1, type=int)
-    reviews = query.order_by(Review.created_at.desc()).paginate(
-        page=page, per_page=25, error_out=False
-    )
+    reviews = query.order_by(Review.created_at.desc()).all()
     
     # Get products for filter dropdown
     products = Product.query.order_by(Product.name).all()
@@ -690,8 +715,52 @@ def list_reviews():
     # Stats
     pending_count = Review.query.filter_by(status='pending').count()
     
+    csrf_token = generate_csrf()
+    
+    # Serialize for AdminDataTable
+    def get_rating_stars(rating):
+        stars = ''.join(['<i class="bi bi-star-fill text-warning"></i>' for _ in range(rating)])
+        empty = ''.join(['<i class="bi bi-star text-warning"></i>' for _ in range(5 - rating)])
+        return stars + empty
+    
+    def get_status_badge(status):
+        colors = {'pending': 'warning', 'approved': 'success', 'rejected': 'danger'}
+        return f'<span class="badge bg-{colors.get(status, "secondary")}">{status.title()}</span>'
+    
+    reviews_json = json.dumps([{
+        'id': r.id,
+        'product': f'<a href="{url_for("shop_admin.edit_product", product_id=r.product_id)}">{r.product.name[:30] if r.product else "Deleted"}</a>' if r.product else '<span class="text-muted">Deleted</span>',
+        'rating': get_rating_stars(r.rating),
+        'review': f'<strong>{r.title or "No title"}</strong>{"<span class=\"badge bg-success ms-1\">Verified</span>" if r.verified_purchase else ""}<br><small class="text-muted">{(r.body[:60] + "...") if r.body and len(r.body) > 60 else (r.body or "")}</small>',
+        'user': r.user.username if r.user else 'Anonymous',
+        'status': get_status_badge(r.status),
+        'date': r.created_at.strftime('%Y-%m-%d') if r.created_at else '-',
+        'actions': f'''<div class="btn-group btn-group-sm">
+            <a href="{url_for('forms_admin.view_review', review_id=r.id)}" class="btn btn-outline-primary" title="View"><i class="bi bi-eye"></i></a>
+            ''' + (f'''<form action="{url_for('forms_admin.approve_review', review_id=r.id)}" method="POST" class="d-inline">
+                <input type="hidden" name="csrf_token" value="{csrf_token}">
+                <button type="submit" class="btn btn-outline-success" title="Approve"><i class="bi bi-check-lg"></i></button>
+            </form>
+            <form action="{url_for('forms_admin.reject_review', review_id=r.id)}" method="POST" class="d-inline">
+                <input type="hidden" name="csrf_token" value="{csrf_token}">
+                <button type="submit" class="btn btn-outline-danger" title="Reject"><i class="bi bi-x-lg"></i></button>
+            </form>''' if r.status == 'pending' else '') + '''
+        </div>'''
+    } for r in reviews])
+    
+    columns_json = json.dumps([
+        {'accessorKey': 'product', 'header': 'Product', 'html': True},
+        {'accessorKey': 'rating', 'header': 'Rating', 'html': True},
+        {'accessorKey': 'review', 'header': 'Review', 'html': True},
+        {'accessorKey': 'user', 'header': 'User'},
+        {'accessorKey': 'status', 'header': 'Status', 'html': True},
+        {'accessorKey': 'date', 'header': 'Date'},
+        {'accessorKey': 'actions', 'header': 'Actions', 'html': True, 'sortable': False}
+    ])
+    
     return render_template('admin/reviews/index.html',
-                         reviews=reviews,
+                         reviews_json=reviews_json,
+                         columns_json=columns_json,
                          status_filter=status,
                          rating_filter=rating,
                          product_id_filter=product_id,

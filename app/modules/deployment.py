@@ -383,12 +383,32 @@ class HealthChecker:
         except Exception as e:
             return False, f'Database error: {str(e)}'
     
-    def check_redis(self) -> tuple:
-        """Check Redis connectivity."""
-        from app.modules.session_manager import session_manager
-        if session_manager.is_redis_available():
-            return True, 'Redis connection OK'
-        return False, 'Redis not available'
+    def check_memory(self) -> tuple:
+        """Check available system memory."""
+        try:
+            import os
+            # Get memory info from /proc/meminfo on Linux
+            if os.path.exists('/proc/meminfo'):
+                with open('/proc/meminfo', 'r') as f:
+                    lines = f.readlines()
+                    mem_info = {}
+                    for line in lines:
+                        parts = line.split(':')
+                        if len(parts) == 2:
+                            key = parts[0].strip()
+                            value = parts[1].strip().split()[0]
+                            mem_info[key] = int(value)
+                    
+                    total_kb = mem_info.get('MemTotal', 0)
+                    available_kb = mem_info.get('MemAvailable', mem_info.get('MemFree', 0))
+                    available_mb = available_kb / 1024
+                    
+                    if available_mb > 256:  # More than 256MB available
+                        return True, f'Memory OK: {available_mb:.0f} MB available'
+                    return False, f'Low memory: {available_mb:.0f} MB available'
+            return True, 'Memory check not available on this platform'
+        except Exception as e:
+            return False, f'Memory check error: {str(e)}'
     
     def check_disk_space(self, min_gb: float = 1.0) -> tuple:
         """Check available disk space."""

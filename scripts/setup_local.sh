@@ -1,16 +1,13 @@
 #!/bin/bash
-set -e
-
-echo "🚀 Starting Verso Local Setup..."
-
 set -euo pipefail
 
 # Colors for output
 GREEN='\033[0;32m'
 RED='\033[0;31m'
+YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-echo -e "${GREEN}Starting local setup for Verso-Backend...${NC}"
+echo -e "${GREEN}🚀 Starting Verso Local Setup...${NC}"
 
 # OS Detection
 OS="$(uname -s)"
@@ -48,27 +45,47 @@ source .venv/bin/activate
 
 # Install dependencies
 echo -e "${GREEN}Installing dependencies...${NC}"
+pip install --upgrade pip
 pip install -r requirements.txt
 
 # Check for .env file
 if [ ! -f ".env" ]; then
-    echo -e "${GREEN}No .env file found. Creating one from example...${NC}"
-    echo "FLASK_APP=app" > .env
-    echo "FLASK_DEBUG=1" >> .env
-    echo "SECRET_KEY=dev-key-change-me" >> .env
-    echo "DATABASE_URL=sqlite:///verso.sqlite" >> .env
+    echo -e "${YELLOW}No .env file found. Creating one from example...${NC}"
+    cat > .env << 'EOF'
+FLASK_APP=app
+FLASK_DEBUG=1
+SECRET_KEY=dev-key-change-me
+DATABASE_URL=sqlite:///verso.sqlite
+# Mail configuration (update as needed)
+# MAIL_SERVER=smtp.example.com
+# MAIL_PORT=587
+# MAIL_USE_TLS=True
+# MAIL_USERNAME=you@example.com
+# MAIL_PASSWORD=your_password
+# MAIL_DEFAULT_SENDER=you@example.com
+EOF
+    echo -e "${GREEN}.env file created. Please update with your settings.${NC}"
 fi
 
+# Database setup
 if [ ! -f "verso.sqlite" ]; then
-    echo "🗄️ Initializing database..."
-    flask db upgrade
-    echo "🌱 Seeding default data..."
-    flask seed-business-config
-    flask create-roles
+    echo -e "${GREEN}🗄️ Initializing database...${NC}"
+    flask db upgrade 2>/dev/null || flask db init && flask db upgrade
+    echo -e "${GREEN}🌱 Seeding default data...${NC}"
+    flask seed-business-config || true
+    flask create-roles || true
 else
-    echo "✅ Database found. Running migrations to be safe..."
+    echo -e "${GREEN}✅ Database found. Running migrations...${NC}"
     flask db upgrade
 fi
 
-echo "🎉 Setup complete! Launching Verso..."
-python run.py
+echo ""
+echo -e "${GREEN}🎉 Setup complete!${NC}"
+echo ""
+echo -e "To run the development server:"
+echo -e "  ${YELLOW}source .venv/bin/activate${NC}"
+echo -e "  ${YELLOW}python3 run.py${NC}"
+echo ""
+echo -e "Or use Flask's development server:"
+echo -e "  ${YELLOW}source .venv/bin/activate${NC}"
+echo -e "  ${YELLOW}flask run --host=0.0.0.0 --debug${NC}"

@@ -1,0 +1,220 @@
+/**
+ * Layout Footer CSS
+ * Modernist/Futurist Enterprise Design
+ * Full-width with gradient accents and glassmorphism
+ */
+
+/* ======================================
+   Footer Container
+   ====================================== */
+.verso-footer {
+    width: 100%;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.9) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    margin-top: auto;
+}
+
+.verso-footer__inner {
+    width: 100%;
+    max-width: 100%;
+    padding: 4rem 3rem;
+}
+
+/* ======================================
+   Footer Grid
+   ====================================== */
+.verso-footer__grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr;
+    gap: 3rem;
+    margin-bottom: 3rem;
+}
+
+@media (max-width: 1024px) {
+    .verso-footer__grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .verso-footer__grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .verso-footer__inner {
+        padding: 3rem 1.5rem;
+    }
+}
+
+/* ======================================
+   Brand Section
+   ====================================== */
+.verso-footer__brand {
+    display: flex;
+    flex-direction: column;
+}
+
+.verso-footer__logo {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 1.75rem;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    text-shadow: 0 0 30px rgba(65, 105, 225, 0.4);
+    margin-bottom: 1.25rem;
+}
+
+.verso-footer__tagline {
+    font-size: 0.9375rem;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.7;
+    max-width: 280px;
+}
+
+/* ======================================
+   Link Columns
+   ====================================== */
+.verso-footer__column {
+    display: flex;
+    flex-direction: column;
+}
+
+.verso-footer__heading {
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 1.25rem;
+}
+
+.verso-footer__links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.verso-footer__link {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.55);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+    padding-left: 0;
+}
+
+.verso-footer__link::before {
+    content: '';
+    position: absolute;
+    left: -12px;
+    top: 50%;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #4169e1, #6c63ff);
+    transition: width 0.3s ease;
+    transform: translateY(-50%);
+}
+
+.verso-footer__link:hover {
+    color: #ffffff;
+    padding-left: 16px;
+}
+
+.verso-footer__link:hover::before {
+    width: 8px;
+}
+
+/* ======================================
+   Language Switcher
+   ====================================== */
+.verso-footer__languages {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.verso-footer__lang-link {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.55);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.verso-footer__lang-link:hover {
+    color: #ffffff;
+}
+
+.verso-footer__lang-divider {
+    color: rgba(255, 255, 255, 0.25);
+}
+
+/* ======================================
+   Bottom Bar
+   ====================================== */
+.verso-footer__bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    gap: 1rem;
+}
+
+@media (max-width: 640px) {
+    .verso-footer__bottom {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+.verso-footer__copyright {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.verso-footer__version {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.35);
+}
+
+/* ======================================
+   Social Links (Optional)
+   ====================================== */
+.verso-footer__social {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.verso-footer__social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.verso-footer__social-link:hover {
+    background: rgba(99, 102, 241, 0.2);
+    border-color: rgba(99, 102, 241, 0.4);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+}
+
+.verso-footer__social-icon {
+    width: 18px;
+    height: 18px;
+}

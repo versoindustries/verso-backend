@@ -1,0 +1,503 @@
+/**
+ * Layout Header CSS
+ * Modernist/Futurist Enterprise Design
+ * Full-width glassmorphism header with neon accents
+ */
+
+/* ======================================
+   Header Container
+   ====================================== */
+.verso-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+}
+
+.verso-header:hover {
+    background: rgba(0, 0, 0, 0.45);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+}
+
+.verso-header__inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 80px;
+    padding: 0 2rem;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* ======================================
+   Logo Section
+   ====================================== */
+.verso-header__logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.verso-header__logo-img {
+    height: 40px;
+    width: auto;
+    transition: transform 0.3s ease;
+}
+
+.verso-header__logo:hover .verso-header__logo-img {
+    transform: scale(1.05);
+}
+
+.verso-header__logo-text {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 1.5rem;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    text-shadow: 0 0 20px rgba(65, 105, 225, 0.5);
+}
+
+@media (max-width: 768px) {
+    .verso-header__logo-text {
+        display: none;
+    }
+}
+
+/* ======================================
+   Desktop Navigation
+   ====================================== */
+.verso-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .verso-nav {
+        display: none;
+    }
+}
+
+.verso-nav__link {
+    position: relative;
+    padding: 0.75rem 1.25rem;
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+}
+
+.verso-nav__link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #4169e1, #6c63ff);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.verso-nav__link:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.verso-nav__link:hover::after {
+    width: 80%;
+}
+
+.verso-nav__link--active {
+    color: #ffffff;
+}
+
+.verso-nav__link--active::after {
+    width: 80%;
+}
+
+/* ======================================
+   Dropdown Menu
+   ====================================== */
+.verso-nav__dropdown {
+    position: relative;
+}
+
+.verso-nav__dropdown-trigger {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.75rem 1.25rem;
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.85);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.verso-nav__dropdown-trigger:hover {
+    color: #ffffff;
+}
+
+.verso-nav__dropdown-icon {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.3s ease;
+}
+
+.verso-nav__dropdown:hover .verso-nav__dropdown-icon {
+    transform: rotate(180deg);
+}
+
+.verso-nav__dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 200px;
+    padding: 0.5rem 0;
+    background: rgba(15, 15, 20, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+}
+
+.verso-nav__dropdown:hover .verso-nav__dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.verso-nav__dropdown-item {
+    display: block;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.75);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.verso-nav__dropdown-item:hover {
+    color: #ffffff;
+    background: rgba(99, 102, 241, 0.3);
+}
+
+/* ======================================
+   Right Side Actions
+   ====================================== */
+.verso-header__actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .verso-header__actions {
+        display: none;
+    }
+}
+
+.verso-header__location {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-right: 1rem;
+    margin-right: 0.5rem;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.875rem;
+}
+
+.verso-header__location-icon {
+    width: 16px;
+    height: 16px;
+}
+
+/* ======================================
+   User Menu
+   ====================================== */
+.verso-user-menu {
+    position: relative;
+}
+
+.verso-user-menu__trigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    border: 2px solid rgba(99, 102, 241, 0.5);
+    border-radius: 50%;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.verso-user-menu__trigger:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+}
+
+.verso-user-menu__dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.5rem;
+    min-width: 240px;
+    background: rgba(15, 15, 20, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px) scale(0.95);
+    transition: all 0.3s ease;
+}
+
+.verso-user-menu--open .verso-user-menu__dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.verso-user-menu__header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.verso-user-menu__label {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 0.25rem;
+}
+
+.verso-user-menu__name {
+    font-weight: 500;
+    color: #ffffff;
+}
+
+.verso-user-menu__section {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.verso-user-menu__section:last-child {
+    border-bottom: none;
+}
+
+.verso-user-menu__item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.75);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.verso-user-menu__item:hover {
+    color: #ffffff;
+    background: rgba(99, 102, 241, 0.2);
+}
+
+.verso-user-menu__item-icon {
+    width: 18px;
+    height: 18px;
+    opacity: 0.7;
+}
+
+.verso-user-menu__item:hover .verso-user-menu__item-icon {
+    opacity: 1;
+}
+
+/* ======================================
+   Auth Buttons (Logged Out)
+   ====================================== */
+.verso-header__auth {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.verso-btn--ghost {
+    padding: 0.625rem 1.25rem;
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.85);
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.verso-btn--ghost:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.verso-btn--primary {
+    padding: 0.625rem 1.5rem;
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #ffffff;
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    transition: all 0.3s ease;
+}
+
+.verso-btn--primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(99, 102, 241, 0.5);
+}
+
+/* ======================================
+   Mobile Menu Toggle
+   ====================================== */
+.verso-header__mobile-toggle {
+    display: none;
+    padding: 0.5rem;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.verso-header__mobile-toggle:hover {
+    color: #ffffff;
+}
+
+.verso-header__mobile-toggle-icon {
+    width: 24px;
+    height: 24px;
+}
+
+@media (max-width: 768px) {
+    .verso-header__mobile-toggle {
+        display: flex;
+    }
+}
+
+/* ======================================
+   Mobile Menu
+   ====================================== */
+.verso-mobile-menu {
+    display: none;
+    position: fixed;
+    top: 80px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(10, 10, 15, 0.98);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 1rem;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+}
+
+.verso-mobile-menu--open {
+    transform: translateX(0);
+}
+
+@media (max-width: 768px) {
+    .verso-mobile-menu {
+        display: block;
+    }
+}
+
+.verso-mobile-menu__nav {
+    padding: 1rem 0;
+}
+
+.verso-mobile-menu__link {
+    display: block;
+    padding: 1rem 1.25rem;
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.verso-mobile-menu__link:hover {
+    color: #ffffff;
+    background: rgba(99, 102, 241, 0.15);
+}
+
+.verso-mobile-menu__user {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    margin-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.verso-mobile-menu__avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    border-radius: 50%;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+.verso-mobile-menu__user-name {
+    font-weight: 500;
+    color: #ffffff;
+}
+
+.verso-mobile-menu__widgets {
+    display: flex;
+    gap: 1rem;
+    margin-left: auto;
+}

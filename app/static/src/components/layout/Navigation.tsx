@@ -3,15 +3,12 @@ import React from 'react';
 export interface NavLinkProps {
     href: string;
     children: React.ReactNode;
-    className?: string; // Allow overrides
+    className?: string;
 }
 
 export const NavLink: React.FC<NavLinkProps> = ({ href, children, className }) => {
     return (
-        <a
-            href={href}
-            className={`text-gray-200 hover:text-white hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 uppercase tracking-wider ${className || ''}`}
-        >
+        <a href={href} className={`verso-navlink ${className || ''}`}>
             {children}
         </a>
     );
@@ -19,10 +16,7 @@ export const NavLink: React.FC<NavLinkProps> = ({ href, children, className }) =
 
 export const MobileNavLink: React.FC<NavLinkProps> = ({ href, children, className }) => {
     return (
-        <a
-            href={href}
-            className={`block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-colors uppercase ${className || ''}`}
-        >
+        <a href={href} className={`verso-mobile-navlink ${className || ''}`}>
             {children}
         </a>
     );

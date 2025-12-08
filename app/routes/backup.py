@@ -38,6 +38,8 @@ def admin_required(f):
 @admin_required
 def list_backups():
     """List all backups."""
+    import json
+    
     backup_type = request.args.get('type')
     page = request.args.get('page', 1, type=int)
     per_page = 20
@@ -49,8 +51,46 @@ def list_backups():
     backups = query.paginate(page=page, per_page=per_page)
     schedules = BackupSchedule.query.filter_by(is_active=True).all()
     
+    # Helper functions for generating HTML
+    def get_type_badge(btype):
+        color = 'primary' if btype == 'database' else 'success' if btype == 'media' else 'warning'
+        return f'<span class="badge bg-{color}">{btype}</span>'
+    
+    def get_status_badge(status):
+        color_map = {'completed': 'success', 'in_progress': 'info', 'failed': 'danger'}
+        color = color_map.get(status, 'secondary')
+        return f'<span class="badge bg-{color}">{status.replace("_", " ").title()}</span>'
+    
+    def build_actions(backup):
+        actions = f'''<div class="btn-group btn-group-sm">
+            <a href="{url_for('backup.backup_detail', backup_id=backup.id)}" class="btn btn-outline-primary">
+                <i class="bi bi-eye"></i>
+            </a>'''
+        if backup.status == 'completed' and backup.file_path:
+            actions += f'''<a href="{url_for('backup.download_backup', backup_id=backup.id)}" class="btn btn-outline-success">
+                <i class="bi bi-download"></i>
+            </a>'''
+        actions += f'''<form action="{url_for('backup.delete_backup', backup_id=backup.id)}" method="post" class="d-inline" onsubmit="return confirm('Are you sure?')">
+            <button type="submit" class="btn btn-outline-danger">
+                <i class="bi bi-trash"></i>
+            </button>
+        </form></div>'''
+        return actions
+    
+    # Serialize backups for React AdminDataTable
+    backups_json = json.dumps([{
+        'id': f'#{backup.id}',
+        'type': get_type_badge(backup.backup_type),
+        'status': get_status_badge(backup.status),
+        'size': f'{round(backup.file_size_bytes / 1024 / 1024, 2)} MB' if backup.file_size_bytes else '-',
+        'started': backup.started_at.strftime('%Y-%m-%d %H:%M') if backup.started_at else '-',
+        'verified': '<i class="bi bi-check-circle-fill text-success"></i>' if backup.verified else '<i class="bi bi-x-circle text-muted"></i>',
+        'actions': build_actions(backup)
+    } for backup in backups.items])
+    
     return render_template('admin/backups/index.html',
                           backups=backups,
+                          backups_json=backups_json,
                           schedules=schedules,
                           current_type=backup_type)
 
@@ -428,8 +468,6 @@ def deployment_detail(deployment_id):
 @admin_required
 def api_backup_status():
     """Get backup system status."""
-    from app.modules.session_manager import session_manager
-    
     recent_backups = Backup.query.filter_by(status='completed').order_by(
         Backup.completed_at.desc()
     ).limit(5).all()
@@ -445,5 +483,4 @@ def api_backup_status():
             'size_mb': round(b.file_size_bytes / (1024 * 1024), 2) if b.file_size_bytes else None,
         } for b in recent_backups],
         'active_schedules': active_schedules,
-        'redis_available': session_manager.is_redis_available(),
     })

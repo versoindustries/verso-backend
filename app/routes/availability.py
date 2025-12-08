@@ -101,6 +101,8 @@ def delete_availability(availability_id):
 @admin_required
 def list_exceptions(estimator_id):
     """List exception dates for an estimator."""
+    import json
+    
     estimator = Estimator.query.get_or_404(estimator_id)
     exceptions = AvailabilityException.query.filter_by(estimator_id=estimator_id).order_by(
         AvailabilityException.date.desc()
@@ -109,10 +111,26 @@ def list_exceptions(estimator_id):
     form = AvailabilityExceptionForm()
     delete_form = CSRFTokenForm()
     
+    # Serialize exceptions for React AdminDataTable
+    exceptions_json = json.dumps([{
+        'id': ex.id,
+        'date': ex.date.strftime('%Y-%m-%d (%a)'),
+        'type': '<span class="badge bg-danger">Blocked</span>' if ex.is_blocked else '<span class="badge bg-warning">Custom Hours</span>',
+        'hours': '<span class="text-muted">N/A</span>' if ex.is_blocked else f'{ex.custom_start_time.strftime("%H:%M")} - {ex.custom_end_time.strftime("%H:%M")}',
+        'reason': ex.reason or '-',
+        'actions': f'''<form method="POST" class="d-inline" action="{url_for('availability.delete_exception', exception_id=ex.id)}">
+            <input type="hidden" name="csrf_token" value="{delete_form.csrf_token._value()}">
+            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this exception?')">
+                <i class="fas fa-trash"></i>
+            </button>
+        </form>'''
+    } for ex in exceptions])
+    
     return render_template(
         'admin/availability/list_exceptions.html',
         estimator=estimator,
         exceptions=exceptions,
+        exceptions_json=exceptions_json,
         form=form,
         delete_form=delete_form
     )

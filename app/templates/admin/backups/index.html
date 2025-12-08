@@ -97,85 +97,21 @@
 
     <!-- Backups Table -->
     <div class="card border-0 shadow-sm">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>ID</th>
-                        <th>Type</th>
-                        <th>Status</th>
-                        <th>Size</th>
-                        <th>Started</th>
-                        <th>Verified</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for backup in backups.items %}
-                    <tr>
-                        <td>#{{ backup.id }}</td>
-                        <td>
-                            <span
-                                class="badge bg-{{ 'primary' if backup.backup_type == 'database' else 'success' if backup.backup_type == 'media' else 'warning' }}">
-                                {{ backup.backup_type }}
-                            </span>
-                        </td>
-                        <td>
-                            {% if backup.status == 'completed' %}
-                            <span class="badge bg-success">Completed</span>
-                            {% elif backup.status == 'in_progress' %}
-                            <span class="badge bg-info">In Progress</span>
-                            {% elif backup.status == 'failed' %}
-                            <span class="badge bg-danger">Failed</span>
-                            {% else %}
-                            <span class="badge bg-secondary">{{ backup.status }}</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if backup.file_size_bytes %}
-                            {{ (backup.file_size_bytes / 1024 / 1024) | round(2) }} MB
-                            {% else %}
-                            -
-                            {% endif %}
-                        </td>
-                        <td>{{ backup.started_at.strftime('%Y-%m-%d %H:%M') if backup.started_at else '-' }}</td>
-                        <td>
-                            {% if backup.verified %}
-                            <i class="bi bi-check-circle-fill text-success"></i>
-                            {% else %}
-                            <i class="bi bi-x-circle text-muted"></i>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <div class="btn-group btn-group-sm">
-                                <a href="{{ url_for('backup.backup_detail', backup_id=backup.id) }}"
-                                    class="btn btn-outline-primary">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                                {% if backup.status == 'completed' and backup.file_path %}
-                                <a href="{{ url_for('backup.download_backup', backup_id=backup.id) }}"
-                                    class="btn btn-outline-success">
-                                    <i class="bi bi-download"></i>
-                                </a>
-                                {% endif %}
-                                <form action="{{ url_for('backup.delete_backup', backup_id=backup.id) }}" method="post"
-                                    class="d-inline" onsubmit="return confirm('Are you sure?')">
-                                    <button type="submit" class="btn btn-outline-danger">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="7" class="text-center text-muted py-4">
-                            No backups found. Create your first backup above.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="card-body p-0">
+            <div data-react-component="AdminDataTable" data-react-props='{
+                   "columns": [
+                     {"key": "id", "label": "ID"},
+                     {"key": "type", "label": "Type", "html": true},
+                     {"key": "status", "label": "Status", "html": true},
+                     {"key": "size", "label": "Size"},
+                     {"key": "started", "label": "Started"},
+                     {"key": "verified", "label": "Verified", "html": true},
+                     {"key": "actions", "label": "Actions", "html": true}
+                   ],
+                   "data": {{ backups_json|safe }},
+                   "emptyMessage": "No backups found. Create your first backup above."
+                 }'>
+            </div>
         </div>
     </div>
 

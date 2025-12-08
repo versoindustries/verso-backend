@@ -41,3 +41,9 @@
 @import url('./booking-page.css');
 @import url('./kanban-board.css');
 @import url('./email-template-cards.css');
+
+/* Layout component styles */
+@import url('./layout-header.css');
+@import url('./layout-footer.css');
+@import url('./layout-navigation.css');
+@import url('./homepage-layout.css');

@@ -25,57 +25,19 @@
                 <div class="card-header bg-light">
                     <strong>Scheduled Exceptions</strong>
                 </div>
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Type</th>
-                                <th>Hours</th>
-                                <th>Reason</th>
-                                <th width="80">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for ex in exceptions %}
-                            <tr>
-                                <td>{{ ex.date.strftime('%Y-%m-%d (%a)') }}</td>
-                                <td>
-                                    {% if ex.is_blocked %}
-                                    <span class="badge badge-danger">Blocked</span>
-                                    {% else %}
-                                    <span class="badge badge-warning">Custom Hours</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if ex.is_blocked %}
-                                    <span class="text-muted">N/A</span>
-                                    {% else %}
-                                    {{ ex.custom_start_time.strftime('%H:%M') }} - {{
-                                    ex.custom_end_time.strftime('%H:%M') }}
-                                    {% endif %}
-                                </td>
-                                <td>{{ ex.reason or '-' }}</td>
-                                <td>
-                                    <form method="POST" class="d-inline"
-                                        action="{{ url_for('availability.delete_exception', exception_id=ex.id) }}">
-                                        {{ delete_form.csrf_token }}
-                                        <button type="submit" class="btn btn-sm btn-outline-danger"
-                                            onclick="return confirm('Delete this exception?')">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                            {% else %}
-                            <tr>
-                                <td colspan="5" class="text-center text-muted py-4">
-                                    No exception dates scheduled.
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                <div class="card-body p-0">
+                    <div data-react-component="AdminDataTable" data-react-props='{
+                           "columns": [
+                             {"key": "date", "label": "Date"},
+                             {"key": "type", "label": "Type", "html": true},
+                             {"key": "hours", "label": "Hours", "html": true},
+                             {"key": "reason", "label": "Reason"},
+                             {"key": "actions", "label": "Action", "html": true}
+                           ],
+                           "data": {{ exceptions_json|safe }},
+                           "emptyMessage": "No exception dates scheduled."
+                         }'>
+                    </div>
                 </div>
             </div>
         </div>

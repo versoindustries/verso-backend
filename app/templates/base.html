@@ -67,6 +67,8 @@
 
             ;
 
+            ;
+
             /* Override base.css aliases with dynamic values */
             --accent-blue: var(--primary-color);
             --accent-blue-dark: var(--primary-color);
@@ -79,6 +81,17 @@
 
         /* Hide legacy flash messages as we use Toast now, or keep if useful for non-react pages */
         /* .flash-messages { display: none; } */
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        .btn-23,
+        .title-font {
+            font-family: var(--font-family) !important;
+        }
     </style>
     <script>
         window.versoContext = {
@@ -118,26 +131,14 @@
                                                                 setLanguageEn: "{{ url_for('main_routes.set_language', language='en') }}",
                                                                     setLanguageEs: "{{ url_for('main_routes.set_language', language='es') }}"
         },
-        unreadNotificationsCount: { { unread_notifications_count |default (0) } },
+        unreadNotificationsCount: { { unread_notifications_count | default (0) } },
         year: new Date().getFullYear(),
             version: "{{ current_version }}"
         };
     </script>
-
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6,
-    .btn-23,
-    .title-font {
-    font-family: var(--font-family) !important;
-    }
-    </style>
     <title>{% block title %}DemoSite{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/components.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/index.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome/all.min.css') }}">
     <script src="{{ url_for('static', filename='js/fullcalendar/index.global.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
@@ -211,20 +212,18 @@
 
         <div data-react-component="Footer"></div>
 
-
-
-
-        if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-        navigator.serviceWorker.register("{{ url_for('static', filename='sw.js') }}")
-        .then(registration => {
-        console.log('ServiceWorker registration successful with scope: ', registration.scope);
-        })
-        .catch(err => {
-        console.log('ServiceWorker registration failed: ', err);
-        });
-        });
-        }
+        <script>
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register("{{ url_for('static', filename='sw.js') }}")
+                        .then(registration => {
+                            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                        })
+                        .catch(err => {
+                            console.log('ServiceWorker registration failed: ', err);
+                        });
+                });
+            }
         </script>
 
         <script src="{{ url_for('static', filename='js/calendar.js') }}"> defer</script>

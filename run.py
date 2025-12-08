@@ -8,4 +8,4 @@ if __name__ == '__main__':
     # Bind to all interfaces so the server is reachable from other devices.
     host = '0.0.0.0'
     port = int(os.environ.get('PORT', 5000))
-    app.run(host=host, port=port, debug=os.environ.get('FLASK_DEBUG', '0') == '1')
+    app.run(host=host, port=port, debug=True)

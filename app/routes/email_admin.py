@@ -241,6 +241,8 @@ def test_template(id):
 @role_required('admin')
 def campaigns():
     """List all email campaigns."""
+    from flask_wtf.csrf import generate_csrf
+    
     status = request.args.get('status', '')
     
     query = EmailCampaign.query
@@ -250,9 +252,95 @@ def campaigns():
     
     campaigns = query.order_by(EmailCampaign.created_at.desc()).all()
     
+    csrf_token = generate_csrf()
+    status_colors = {
+        'draft': 'secondary',
+        'scheduled': 'info', 
+        'sending': 'warning',
+        'sent': 'success',
+        'paused': 'danger',
+        'cancelled': 'dark'
+    }
+    
+    # Serialize for AdminDataTable
+    campaigns_json = json.dumps([{
+        'id': c.id,
+        'name': f'<a href="{url_for("email_admin.campaign_stats", id=c.id)}" class="fw-bold">{c.name}</a>',
+        'template': f'<small>{c.template.name}</small>' if c.template else '<span class="text-muted">-</span>',
+        'audience': f'<span class="badge bg-secondary">{c.audience.name}</span>' if c.audience else '<span class="text-muted">-</span>',
+        'status': f'<span class="badge bg-{status_colors.get(c.status, "secondary")}">{c.status.title()}</span>',
+        'sent': c.sent_count,
+        'opens': f'{c.unique_open_count}' + (f' <small class="text-muted">({c.open_rate()}%)</small>' if c.sent_count > 0 else ''),
+        'clicks': f'{c.unique_click_count}' + (f' <small class="text-muted">({c.click_rate()}%)</small>' if c.sent_count > 0 else ''),
+        'created': c.created_at.strftime('%m/%d/%y') if c.created_at else '-',
+        'actions': _render_campaign_actions(c, csrf_token)
+    } for c in campaigns])
+    
+    columns_json = json.dumps([
+        {'accessorKey': 'name', 'header': 'Campaign', 'html': True},
+        {'accessorKey': 'template', 'header': 'Template', 'html': True},
+        {'accessorKey': 'audience', 'header': 'Audience', 'html': True},
+        {'accessorKey': 'status', 'header': 'Status', 'html': True},
+        {'accessorKey': 'sent', 'header': 'Sent', 'sortable': True},
+        {'accessorKey': 'opens', 'header': 'Opens', 'html': True},
+        {'accessorKey': 'clicks', 'header': 'Clicks', 'html': True},
+        {'accessorKey': 'created', 'header': 'Created'},
+        {'accessorKey': 'actions', 'header': 'Actions', 'html': True, 'sortable': False}
+    ])
+    
     return render_template('admin/email/campaigns/index.html',
                           campaigns=campaigns,
+                          campaigns_json=campaigns_json,
+                          columns_json=columns_json,
                           current_status=status)
+
+
+def _render_campaign_actions(campaign, csrf_token):
+    """Render HTML action buttons for a campaign."""
+    buttons = ['<div class="btn-group btn-group-sm">']
+    
+    # Send button for draft/scheduled/paused
+    if campaign.status in ['draft', 'scheduled', 'paused']:
+        buttons.append(f'''
+            <form method="POST" action="{url_for('email_admin.send_campaign', id=campaign.id)}" 
+                  class="d-inline" onsubmit="return confirm('Send this campaign now?');">
+                <input type="hidden" name="csrf_token" value="{csrf_token}">
+                <button type="submit" class="btn btn-success" title="Send Now">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
+        ''')
+    
+    # Pause button for sending
+    if campaign.status == 'sending':
+        buttons.append(f'''
+            <form method="POST" action="{url_for('email_admin.pause_campaign', id=campaign.id)}" class="d-inline">
+                <input type="hidden" name="csrf_token" value="{csrf_token}">
+                <button type="submit" class="btn btn-warning" title="Pause">
+                    <i class="fas fa-pause"></i>
+                </button>
+            </form>
+        ''')
+    
+    # Stats button
+    buttons.append(f'''
+        <a href="{url_for('email_admin.campaign_stats', id=campaign.id)}" 
+           class="btn btn-outline-primary" title="Stats">
+            <i class="fas fa-chart-bar"></i>
+        </a>
+    ''')
+    
+    # Edit button for draft/scheduled
+    if campaign.status in ['draft', 'scheduled']:
+        buttons.append(f'''
+            <a href="{url_for('email_admin.edit_campaign', id=campaign.id)}" 
+               class="btn btn-outline-secondary" title="Edit">
+                <i class="fas fa-edit"></i>
+            </a>
+        ''')
+    
+    buttons.append('</div>')
+    return ''.join(buttons)
 
 
 @email_admin_bp.route('/campaigns/new', methods=['GET', 'POST'])
@@ -754,7 +842,8 @@ def delete_sequence(id):
 @role_required('admin')
 def suppression_list():
     """View and manage email suppression list."""
-    page = request.args.get('page', 1, type=int)
+    from flask_wtf.csrf import generate_csrf
+    
     reason = request.args.get('reason', '')
     search = request.args.get('search', '')
     
@@ -766,11 +855,46 @@ def suppression_list():
     if search:
         query = query.filter(EmailSuppressionList.email.ilike(f'%{search}%'))
     
-    suppressions = query.order_by(EmailSuppressionList.added_at.desc())\
-        .paginate(page=page, per_page=50)
+    suppressions = query.order_by(EmailSuppressionList.added_at.desc()).all()
+    
+    csrf_token = generate_csrf()
+    reason_colors = {
+        'hard_bounce': 'danger',
+        'soft_bounce': 'warning', 
+        'unsubscribe': 'info',
+        'complaint': 'dark',
+        'manual': 'secondary'
+    }
+    
+    # Serialize for AdminDataTable
+    suppressions_json = json.dumps([{
+        'id': s.id,
+        'email': s.email,
+        'reason': f'<span class="badge bg-{reason_colors.get(s.reason, "secondary")}">{s.reason.replace("_", " ").title()}</span>',
+        'source': f'<small class="text-muted">{s.source or "-"}</small>',
+        'added': s.added_at.strftime('%Y-%m-%d %H:%M') if s.added_at else '-',
+        'actions': f'''
+            <form method="POST" action="{url_for('email_admin.remove_suppression', id=s.id)}"
+                  onsubmit="return confirm('Remove this email from suppression list? They will be able to receive emails again.');">
+                <input type="hidden" name="csrf_token" value="{csrf_token}">
+                <button type="submit" class="btn btn-sm btn-outline-success" title="Remove from list">
+                    <i class="fas fa-check"></i>
+                </button>
+            </form>
+        '''
+    } for s in suppressions])
+    
+    columns_json = json.dumps([
+        {'accessorKey': 'email', 'header': 'Email'},
+        {'accessorKey': 'reason', 'header': 'Reason', 'html': True},
+        {'accessorKey': 'source', 'header': 'Source', 'html': True},
+        {'accessorKey': 'added', 'header': 'Added'},
+        {'accessorKey': 'actions', 'header': 'Actions', 'html': True, 'sortable': False}
+    ])
     
     return render_template('admin/email/suppression/index.html',
-                          suppressions=suppressions,
+                          suppressions_json=suppressions_json,
+                          columns_json=columns_json,
                           current_reason=reason,
                           search=search)
 

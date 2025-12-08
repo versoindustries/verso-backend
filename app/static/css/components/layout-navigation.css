@@ -1,0 +1,156 @@
+/**
+ * Layout Navigation CSS
+ * Shared navigation styles for NavLink and MobileNavLink components
+ */
+
+/* ======================================
+   Shared Navigation Link Base
+   ====================================== */
+.verso-navlink {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+}
+
+.verso-navlink::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #4169e1, #6c63ff);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.verso-navlink:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.verso-navlink:hover::after {
+    width: 80%;
+}
+
+.verso-navlink--active {
+    color: #ffffff;
+}
+
+.verso-navlink--active::after {
+    width: 80%;
+}
+
+/* ======================================
+   Mobile Navigation Link
+   ====================================== */
+.verso-mobile-navlink {
+    display: block;
+    padding: 1rem 1.25rem;
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.verso-mobile-navlink:hover {
+    color: #ffffff;
+    background: rgba(99, 102, 241, 0.15);
+}
+
+.verso-mobile-navlink--with-icon {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.verso-mobile-navlink__icon {
+    width: 20px;
+    height: 20px;
+    opacity: 0.7;
+}
+
+.verso-mobile-navlink:hover .verso-mobile-navlink__icon {
+    opacity: 1;
+}
+
+/* ======================================
+   Badge for notifications, cart count, etc.
+   ====================================== */
+.verso-navlink__badge {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    border-radius: 9px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.5);
+}
+
+/* ======================================
+   Icon Button (for cart, notifications, etc.)
+   ====================================== */
+.verso-icon-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.75);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.verso-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.verso-icon-btn__icon {
+    width: 20px;
+    height: 20px;
+}
+
+.verso-icon-btn__badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    border-radius: 9px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.5);
+}

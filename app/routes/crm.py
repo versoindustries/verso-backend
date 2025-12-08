@@ -769,6 +769,8 @@ def api_time_to_close():
 @role_required('admin')
 def duplicates():
     """Find duplicate leads by email."""
+    import json
+    
     # Get all emails with count > 1 in Contacts
     contact_dups = db.session.query(
         ContactFormSubmission.email, 
@@ -827,4 +829,43 @@ def duplicates():
             'records': c_items + a_items
         })
     
-    return render_template('admin/crm/duplicates.html', duplicates=duplicates_data)
+    # Flatten for AdminDataTable - each record becomes a row
+    flattened_data = []
+    type_colors = {
+        'Contact Duplicates': 'warning',
+        'Appointment Duplicates': 'info',
+        'Cross-Table Match': 'danger'
+    }
+    
+    for group in duplicates_data:
+        for record in group['records']:
+            record_type = 'Appt' if hasattr(record, '__tablename__') and record.__tablename__ == 'appointment' else 'Contact'
+            record_date = record.submitted_at if hasattr(record, 'submitted_at') and record.submitted_at else record.created_at
+            
+            flattened_data.append({
+                'email': f'<strong>{group["email"]}</strong>',
+                'group_type': f'<span class="badge bg-{type_colors.get(group["type"], "secondary")}">{group["type"]}</span> <small class="text-muted">({group["count"]} items)</small>',
+                'record_type': f'<span class="badge bg-{"info" if record_type == "Appt" else "warning"}">{record_type}</span>',
+                'name': f'{record.first_name} {record.last_name}',
+                'date': record_date.strftime('%Y-%m-%d %H:%M') if record_date else '-',
+                'notes': f'<small>{(record.notes or "No notes")[:50]}{"..." if record.notes and len(record.notes) > 50 else ""}</small>',
+                'status': f'<span class="badge bg-secondary">{record.status or "New"}</span>'
+            })
+    
+    duplicates_json = json.dumps(flattened_data)
+    
+    columns_json = json.dumps([
+        {'accessorKey': 'email', 'header': 'Email', 'html': True},
+        {'accessorKey': 'group_type', 'header': 'Duplicate Type', 'html': True},
+        {'accessorKey': 'record_type', 'header': 'Record', 'html': True},
+        {'accessorKey': 'name', 'header': 'Name'},
+        {'accessorKey': 'date', 'header': 'Date'},
+        {'accessorKey': 'notes', 'header': 'Notes', 'html': True},
+        {'accessorKey': 'status', 'header': 'Status', 'html': True}
+    ])
+    
+    return render_template('admin/crm/duplicates.html', 
+                          duplicates=duplicates_data,
+                          duplicates_json=duplicates_json,
+                          columns_json=columns_json,
+                          has_duplicates=len(duplicates_data) > 0)

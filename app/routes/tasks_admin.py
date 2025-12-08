@@ -66,8 +66,12 @@ def dashboard():
 @role_required('admin')
 def queue():
     """View pending and processing tasks."""
+    import json
+    from app.forms import CSRFTokenForm
+    
     page = request.args.get('page', 1, type=int)
     status = request.args.get('status', 'pending')
+    form = CSRFTokenForm()
     
     valid_statuses = ['pending', 'processing', 'completed', 'failed', 'dead_letter']
     if status not in valid_statuses:
@@ -87,8 +91,30 @@ def queue():
         'dead_letter': Task.query.filter_by(status='dead_letter').count(),
     }
     
+    # Helper for priority badge
+    def priority_badge(p):
+        if p > 0:
+            return f'<span class="badge bg-danger">High ({p})</span>'
+        elif p < 0:
+            return f'<span class="badge bg-secondary">Low ({p})</span>'
+        else:
+            return '<span class="badge bg-light text-dark">Normal</span>'
+    
+    # Serialize for AdminDataTable
+    tasks_json = json.dumps([{
+        'id': task.id,
+        'name': f'''<a href="{url_for('tasks_admin.task_detail', task_id=task.id)}"><strong>{task.name}</strong></a>''' + (f'<br><small class="text-danger">{(task.error or "")[:50]}...</small>' if task.error else ''),
+        'priority': priority_badge(task.priority),
+        'retries': f'{task.retry_count} / {task.max_retries}',
+        'created': task.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+        'started': task.started_at.strftime('%H:%M:%S') if task.started_at else '-',
+        'completed': task.completed_at.strftime('%H:%M:%S') if task.completed_at else '-',
+        'actions': f'''<a href="{url_for('tasks_admin.task_detail', task_id=task.id)}" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></a>''' + (f'''<form action="{url_for('tasks_admin.retry_task', task_id=task.id)}" method="POST" style="display:inline;"><input type="hidden" name="csrf_token" value="{form.csrf_token._value()}"><button type="submit" class="btn btn-sm btn-outline-success" title="Retry"><i class="fas fa-redo"></i></button></form>''' if status in ['failed', 'dead_letter'] else '')
+    } for task in tasks.items])
+    
     return render_template('admin/tasks/queue.html',
         tasks=tasks,
+        tasks_json=tasks_json,
         current_status=status,
         status_counts=status_counts
     )
@@ -99,13 +125,32 @@ def queue():
 @role_required('admin')
 def dead_letter():
     """View and manage dead letter tasks."""
+    import json
+    from app.forms import CSRFTokenForm
+    
     page = request.args.get('page', 1, type=int)
+    form = CSRFTokenForm()
     
     tasks = Task.query.filter_by(status='dead_letter').order_by(
         Task.completed_at.desc()
     ).paginate(page=page, per_page=50, error_out=False)
     
-    return render_template('admin/tasks/dead_letter.html', tasks=tasks)
+    # Serialize for AdminDataTable
+    tasks_json = json.dumps([{
+        'id': task.id,
+        'name': f'<strong>{task.name}</strong>',
+        'retries': task.retry_count,
+        'created': task.created_at.strftime('%Y-%m-%d %H:%M'),
+        'failed_at': task.completed_at.strftime('%Y-%m-%d %H:%M') if task.completed_at else '-',
+        'error': f'<button class="btn btn-sm btn-outline-danger" type="button" onclick="alert(\'{(task.error or "No error message").replace(chr(39), chr(92)+chr(39)).replace(chr(10), " ")[:200]}...\')"><i class="fas fa-exclamation-triangle"></i> View</button>',
+        'actions': f'''<a href="{url_for('tasks_admin.task_detail', task_id=task.id)}" class="btn btn-sm btn-outline-primary" title="View Details"><i class="fas fa-eye"></i></a>
+            <form action="{url_for('tasks_admin.retry_task', task_id=task.id)}" method="POST" style="display:inline;">
+                <input type="hidden" name="csrf_token" value="{form.csrf_token._value()}">
+                <button type="submit" class="btn btn-sm btn-outline-success" title="Retry Task"><i class="fas fa-redo"></i> Retry</button>
+            </form>'''
+    } for task in tasks.items])
+    
+    return render_template('admin/tasks/dead_letter.html', tasks=tasks, tasks_json=tasks_json)
 
 
 @tasks_admin_bp.route('/<int:task_id>/retry', methods=['POST'])

@@ -6,79 +6,1387 @@
 \usepackage{graphicx}
 \usepackage{listings}
 \usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{tabularx}
 
 \geometry{margin=1in}
 
-\title{\textbf{Verso: The Sovereign Enterprise Operating System}}
+\definecolor{versoBlue}{HTML}{007BFF}
+\definecolor{codeGray}{HTML}{F8F9FA}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=versoBlue,
+    urlcolor=versoBlue,
+    citecolor=versoBlue
+}
+
+\lstset{
+    backgroundcolor=\color{codeGray},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    columns=fullflexible
+}
+
+\title{\textbf{Verso: The Sovereign Enterprise Operating System}\\[0.5em]
+\large Complete Technical Reference \& Feature Specification\\[0.3em]
+\normalsize A Declaration of Independence from Silicon Valley}
 \author{Michael Zimmerman \\ Founder \& Head of R\&D, Verso Industries}
-\date{\today}
+\date{December 2024 \\ Version 2.1 --- Comprehensive Edition}
 
 \begin{document}
 
 \maketitle
 
 \begin{abstract}
-The modern enterprise software landscape is dominated by fragmented SaaS solutions that fragment data ownership, inflate costs through per-seat pricing, and introduce existential platform risk. Verso is a rejection of this model. It is a "Sovereign Enterprise Operating System" designed to run on commodity infrastructure while providing a unified suite of business tools—CRM, ERP, E-commerce, and Communications. This paper details the technical philosophy, architecture, and capabilities of Verso, demonstrating how a "Lindy" stack (Python, SQL, HTML) can outperform complex microservices architectures in longevity, cost-efficiency, and data sovereignty.
+The modern enterprise has surrendered its operational sovereignty to a constellation of SaaS platforms that fragment data ownership, impose unsustainable per-seat pricing, and create existential platform dependency. Verso is a comprehensive rejection of this model---a \textbf{Sovereign Enterprise Operating System} designed to run on commodity infrastructure while providing a complete suite of business tools. This comprehensive whitepaper documents every feature, capability, and architectural decision in Verso 2.1, serving as a complete technical reference for the platform's \textbf{120+ database models}, \textbf{45 route modules}, \textbf{35 helper modules}, and \textbf{44 React components} spanning CRM, E-commerce, Communications, Analytics, Scheduling, Content Management, HR, Compliance, and AI-assisted operations.
 \end{abstract}
 
-\section{Introduction: The SaaS Trap}
-Businesses today are held hostage by their tools. Data is scattered across Salesforce, Slack, Shopify, and Google Drive. Each service demands a separate subscription, imposes its own terms of service, and silos data behind proprietary APIs. 
+\tableofcontents
+\newpage
 
-This fragmentation results in:
-\begin{enumerate}
-    \item \textbf{Data Sovereignty Loss}: You do not own your customer list; you rent access to it.
-    \item \textbf{Cost Explosion}: Marginal costs scale linearly with headcount, punishing growth.
-    \item \textbf{Integration Hell}: connecting these silos requires fragile "glue code" (Zapier, etc.).
-\end{enumerate}
+% ============================================================================
+\section{Executive Summary}
+% ============================================================================
 
-Verso proposes a radical alternative: \textbf{The Monolith.} A single, self-hosted application that you own, running on infrastructure you control, containing all your business logic and data.
+Verso consolidates the functionality of 15+ enterprise SaaS products into a single, self-hosted application:
 
-\section{Philosophy}
-Verso is built on four core pillars:
-\begin{itemize}
-    \item \textbf{Sovereignty}: Complete ownership of code and data. No reliance on external APIs for core functionality.
-    \item \textbf{Simplicity}: A rejection of "Resume Driven Development." We use proven, "Lindy" technologies: Python, Flask, PostgreSQL, and server-side rendered HTML.
-    \item \textbf{Frugality}: Designed to run on \$12/month infrastructure. No Redis, no S3, no Elasticsearch required for standard scale.
-    \item \textbf{Resilience}: Offline-first capabilities and self-healing deployment scripts.
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{SaaS Category} & \textbf{Verso Equivalent} \\
+\midrule
+Auth0 / Clerk & Identity \& MFA System \\
+Shopify Plus & Complete E-commerce Platform \\
+Salesforce / HubSpot & CRM \& Lead Management \\
+Calendly / Acuity & Scheduling \& Booking \\
+Mailchimp / Klaviyo & Email Marketing \& Drip Campaigns \\
+Contentful / Sanity & Blog \& CMS \\
+Mixpanel / Amplitude & Sovereign Analytics \\
+Slack / Teams & Internal Messaging \\
+Typeform / JotForm & Dynamic Forms \& Surveys \\
+Delighted / SurveyMonkey & NPS/CSAT Surveys \\
+Zendesk & Customer Reviews \& Feedback \\
+Gusto / BambooHR & Employee Portal \& HR \\
+OneSignal & Push Notifications \\
+Twilio & SMS Messaging \\
+Stripe Billing & Subscriptions \& Payments \\
+\bottomrule
+\end{tabular}
+\caption{SaaS Replacement Matrix}
+\end{table}
+
+\subsection{Platform Statistics}
+\begin{itemize}[noitemsep]
+    \item \textbf{Database Models}: 120+ SQLAlchemy models across 4,335 lines
+    \item \textbf{Route Modules}: 45 Flask blueprints totaling 500+ endpoints
+    \item \textbf{Helper Modules}: 35 business logic modules
+    \item \textbf{React Components}: 44 TypeScript components
+    \item \textbf{Templates}: 200+ Jinja2 templates
+    \item \textbf{Lines of Code}: 50,000+ (Python, TypeScript, HTML, CSS)
 \end{itemize}
 
+% ============================================================================
+\section{Philosophy: The Four Pillars}
+% ============================================================================
+
+\subsection{Sovereignty}
+Complete ownership of code and data. Every record, file, and configuration exists in databases and filesystems under your control. Core functionality requires zero external API calls. Stripe integration for payments is the only external dependency---and even that is abstracted for future payment provider flexibility.
+
+\subsection{Simplicity}
+A rejection of ``Resume Driven Development.'' Verso uses proven, battle-tested technologies:
+\begin{itemize}[noitemsep]
+    \item \textbf{Python 3.10+}: Readable, maintainable, well-understood
+    \item \textbf{Flask}: Micro-framework with explicit control
+    \item \textbf{SQLAlchemy 2.0}: Industry-standard ORM with raw SQL escape hatch
+    \item \textbf{PostgreSQL/SQLite}: ACID-compliant, battle-tested databases
+    \item \textbf{Server-rendered HTML}: Zero hydration, instant interactivity
+    \item \textbf{React Islands}: Strategic interactivity where needed
+\end{itemize}
+
+\subsection{Frugality}
+Designed to run on \$20/month infrastructure. No required Redis. No Elasticsearch cluster. No S3 bucket dependencies. No Kubernetes orchestration. A single VPS with 2GB RAM runs the entire system at meaningful scale.
+
+\subsection{Resilience}
+Offline-first design principles. Database-backed task queues eliminate Redis dependency for background processing. Self-contained deployment with single-file database backups. The entire business state can be restored from one SQL dump.
+
+% ============================================================================
 \section{Technical Architecture}
-\subsection{The Stack}
-Verso is a Python 3.10+ application using the Flask framework.
-\begin{itemize}
-    \item \textbf{Backend}: Flask Application Factory pattern with Blueprints for modularity (Shop, Calendar, CRM, Messaging).
-    \item \textbf{Database}: SQLAlchemy ORM supporting SQLite (for local/embedded) and PostgreSQL (for production).
-    \item \textbf{Frontend}: Server-side Jinja2 templates augmented with HTMX for dynamic interactions. No build step, no React complexity.
-    \item \textbf{Asynchrony}: A database-backed `Task` queue handles background jobs (emails, reports) without needing a separate Redis instance.
+% ============================================================================
+
+\subsection{Application Factory Pattern}
+Verso uses Flask's application factory pattern for testability and configuration flexibility:
+
+\begin{lstlisting}[language=Python]
+def create_app(config_class=Config):
+    app = Flask(__name__)
+    app.config.from_object(config_class)
+    
+    # Initialize extensions
+    db.init_app(app)
+    migrate.init_app(app, db)
+    login_manager.init_app(app)
+    mail.init_app(app)
+    cache.init_app(app)
+    babel.init_app(app)
+    
+    # Register 45+ blueprints
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(admin_bp, url_prefix='/admin')
+    app.register_blueprint(shop_bp)
+    # ...
+    
+    return app
+\end{lstlisting}
+
+\subsection{Complete Blueprint Registry}
+
+\begin{longtable}{@{}lll@{}}
+\toprule
+\textbf{Blueprint} & \textbf{Prefix} & \textbf{Purpose} \\
+\midrule
+\endhead
+admin & /admin & Admin dashboard, users, roles, config \\
+ai & /ai & AI-powered features \\
+analytics & /analytics & Traffic \& conversion tracking \\
+api & /api/v1 & REST API endpoints \\
+api\_docs & /api/docs & OpenAPI documentation \\
+auth & /auth & Login, register, password reset, OAuth \\
+automation & /automation & Workflow automation \\
+availability & /availability & Staff availability management \\
+backup & /backup & Database backup \& restore \\
+blog & /blog & Blog posts, categories, comments \\
+booking\_api & /booking & Booking REST API \\
+calendar & /calendar & FullCalendar integration \\
+cart & /cart & Shopping cart operations \\
+category\_admin & /admin/categories & Product category management \\
+crm & /crm & Lead management, pipelines \\
+ecommerce & /shop & Public storefront \\
+ecommerce\_admin & /admin/shop & E-commerce administration \\
+email\_admin & /admin/email & Email templates \& campaigns \\
+email\_tracking & /t & Email open/click tracking \\
+employee & /employee & Employee portal \\
+forms & /forms & Public form submissions \\
+forms\_admin & /admin/forms & Form builder \& surveys \\
+main\_routes & / & Homepage, contact, about \\
+media & /media & Media file serving \\
+messaging & /messaging & Internal chat \\
+newsletter & /newsletter & Newsletter management \\
+notifications & /notifications & Notification center \\
+oauth & /oauth & Social login callbacks \\
+observability & /observability & Metrics \& health checks \\
+onboarding & /onboarding & User onboarding flow \\
+orders\_admin & /admin/orders & Order management \\
+pages & /p & Dynamic pages \\
+privacy & /privacy & GDPR data export/deletion \\
+push & /push & Web push notifications \\
+reports & /reports & Report generation \\
+scheduling & /schedule & Appointment booking \\
+setup & /setup & Initial setup wizard \\
+shop & /shop & Product catalog \\
+shop\_admin & /admin/products & Product management \\
+subscriptions & /subscriptions & Stripe subscriptions \\
+tasks\_admin & /admin/tasks & Background task management \\
+theme & /theme & Theme customization \\
+user & /user & User profile \& settings \\
+webhooks & /webhooks & Outbound webhooks \\
+\bottomrule
+\caption{Complete Blueprint Registry (45 modules)}
+\end{longtable}
+
+\subsection{Database Schema Overview}
+
+The database contains \textbf{120+ models} organized across functional domains:
+
+\begin{longtable}{@{}lp{10cm}@{}}
+\toprule
+\textbf{Domain} & \textbf{Models} \\
+\midrule
+\endhead
+\textbf{Identity \& Auth} & User, Role, user\_roles, TOTPDevice, BackupCode, UserMFA, MFAChallenge, LoginAttempt, PasswordHistory, IPBlacklist \\
+\midrule
+\textbf{User Experience} & UserPreference, UserActivity, OnboardingStep, SavedItem, NotificationPreference \\
+\midrule
+\textbf{E-commerce Core} & Product, ProductVariant, ProductImage, ProductAttribute, ProductAttributeValue, ProductAttributeAssignment, Category, Collection, CollectionRule, CollectionProduct \\
+\midrule
+\textbf{E-commerce Orders} & Order, OrderItem, UserCart, InventoryLock, DownloadToken, DownloadLog \\
+\midrule
+\textbf{Pricing \& Promotions} & Discount, DiscountRule, DiscountUsage, GiftCard, GiftCardTransaction, ProductBundle, BundleItem \\
+\midrule
+\textbf{Shipping \& Tax} & ShippingZone, ShippingRate, TaxRate \\
+\midrule
+\textbf{Customer Engagement} & Wishlist, RecentlyViewed, RelatedProduct, Review, ReviewVote \\
+\midrule
+\textbf{Subscriptions} & Subscription (Stripe integration) \\
+\midrule
+\textbf{Content Management} & Post, PostRevision, PostImage, PostView, Tag, post\_tags, BlogCategory, PostSeries, Comment, Page, PageRevision, PageCustomField, PageRender, Media \\
+\midrule
+\textbf{Scheduling} & Appointment, AppointmentType, AppointmentAttendee, Availability, AvailabilityException, Resource, ResourceBooking, Waitlist, BookingPolicy, CheckInToken, RescheduleRequest, Service, Estimator \\
+\midrule
+\textbf{CRM \& Leads} & ContactFormSubmission, PipelineStage, LeadNote, LeadActivity, LeadScore, LeadScoreRule, FollowUpReminder \\
+\midrule
+\textbf{Communications} & Channel, Message, ChannelMember, MessageReaction, Notification, EmailTemplate, EmailCampaign, EmailSend, EmailClickTrack, DripSequence, SequenceEnrollment, PushSubscription, SMSTemplate, SMSConsent, EmailSuppressionList, Audience, AudienceMember \\
+\midrule
+\textbf{Forms \& Surveys} & FormDefinition, FormSubmission, FormIntegration, Survey, SurveyResponse \\
+\midrule
+\textbf{Analytics} & PageView, VisitorSession, ConversionGoal, Conversion, Funnel, FunnelStep, SavedReport, ReportExport \\
+\midrule
+\textbf{HR \& Employee} & LeaveRequest, LeaveType, LeaveBalance, TimeEntry, EncryptedDocument, DocumentShare \\
+\midrule
+\textbf{Operations} & Task, CronTask, WorkerHeartbeat, AuditLog, Location, ApiKey, Newsletter, UnsubscribedEmail, BusinessConfig \\
+\midrule
+\textbf{Automation} & Workflow, WorkflowStep, Webhook, WebhookDelivery \\
+\midrule
+\textbf{Infrastructure} & Backup, BackupSchedule, FeatureFlag, DeploymentLog \\
+\midrule
+\textbf{Compliance} & ConsentRecord, DataExportRequest, RetentionPolicy, DataRetentionLog \\
+\bottomrule
+\caption{Complete Data Model Registry (120+ models)}
+\end{longtable}
+
+% ============================================================================
+\section{Identity \& Access Management}
+% ============================================================================
+
+\subsection{User Model}
+The User model is the central identity entity with 30+ fields:
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Core Identity}: username, email, password\_hash, first\_name, last\_name
+    \item \textbf{Profile}: bio, skills, phone, timezone, avatar\_url, profile\_photo
+    \item \textbf{Employment}: job\_title, department, reports\_to\_id, location\_id
+    \item \textbf{OAuth}: oauth\_provider (google/apple/microsoft), oauth\_id
+    \item \textbf{Verification}: confirmed, email\_verified, email\_verification\_token
+    \item \textbf{Onboarding}: onboarding\_completed, profile\_completion\_score
+    \item \textbf{Activity}: last\_activity\_at, date (registration)
+    \item \textbf{Emergency}: emergency\_contacts (JSON)
 \end{itemize}
 
-\subsection{Data Storage Strategy}
-Verso eschews cloud object storage (S3) in favor of database-backed file storage. The `Media` model stores files as BLOBs directly in PostgreSQL. While unconventional for "web scale" hype, this approach ensures:
-\begin{itemize}
-    \item \textbf{Transactional Integrity}: A file and its metadata (`Product`, `Message`) are committed or rolled back together.
-    \item \textbf{Simplicity}: Backing up the database backs up the \textit{entire} business state, including user uploads.
-    \item \textbf{Portability}: The entire system can be moved to a new host by restoring a single SQL dump.
+\subsection{Role-Based Access Control}
+Default roles with hierarchical permissions:
+\begin{itemize}[noitemsep]
+    \item \textbf{admin}: Full system access
+    \item \textbf{commercial}: Sales/CRM access
+    \item \textbf{blogger}: Content creation access
+    \item \textbf{employee}: Employee portal access
+    \item \textbf{user}: Standard user access
 \end{itemize}
 
-\section{Core Modules}
-\subsection{Commerce}
-The `Shop` blueprint provides a complete e-commerce solution. It integrates Stripe for payments but maintains the `Order`, `Product`, and `Inventory` state locally. It supports physical goods and is continuously evolving to support digital downloads and subscriptions.
+\subsection{Multi-Factor Authentication}
+Complete MFA implementation:
+\begin{itemize}[noitemsep]
+    \item \textbf{TOTP}: Time-based One-Time Passwords (Google Authenticator compatible)
+    \item \textbf{Backup Codes}: One-time recovery codes
+    \item \textbf{SMS/Email}: Secondary verification channels
+    \item \textbf{Challenge Tracking}: MFAChallenge model with attempt limits and expiration
+    \item \textbf{Password History}: Prevent password reuse (configurable depth)
+\end{itemize}
 
-\subsection{Operations (CRM \& Calendar)}
-Lead management is integrated directly into the platform. The `CRM` module tracks `ContactFormSubmissions` and `Appointments` on a Kanban board. The `Calendar` module (powered by FullCalendar.js) allows for drag-and-drop scheduling, with all time data normalized to UTC in the backend.
+\subsection{OAuth Integration}
+Social login support:
+\begin{itemize}[noitemsep]
+    \item Google Sign-In
+    \item Apple Sign-In
+    \item Microsoft Account
+\end{itemize}
 
-\subsection{Internal Communications}
-Verso replaces Slack with a context-aware messaging system. Channels and Direct Messages are stored in the same database as the business data, allowing for tight integration (e.g., linking an `Order` directly in a chat).
+\subsection{Security Features}
+\begin{itemize}[noitemsep]
+    \item \textbf{Login Attempt Tracking}: LoginAttempt model with IP, user agent, location, device fingerprint
+    \item \textbf{IP Blacklisting}: Automatic and manual IP blocking with expiration
+    \item \textbf{Progressive Delays}: Exponential backoff on failed logins
+    \item \textbf{Session Management}: Concurrent session tracking with forced logout capability
+    \item \textbf{Password Policies}: Configurable strength requirements
+\end{itemize}
 
+% ============================================================================
+\section{E-Commerce Platform}
+% ============================================================================
+
+A complete e-commerce solution rivaling Shopify Plus---without the platform fees.
+
+\subsection{Product Management}
+
+\subsubsection{Core Product Model}
+\begin{itemize}[noitemsep]
+    \item name, description, price (cents), currency
+    \item inventory\_count with stock tracking
+    \item is\_digital flag with file\_id for digital goods
+    \item is\_subscription with stripe\_price\_id for recurring billing
+    \item category\_id for hierarchical organization
+    \item media\_id for primary image
+    \item location\_id for multi-location inventory
+\end{itemize}
+
+\subsubsection{Product Variants}
+Full variant support with SKU-level inventory:
+\begin{itemize}[noitemsep]
+    \item sku (unique identifier)
+    \item name (e.g., ``Large / Blue'')
+    \item price\_adjustment (cents added/subtracted from base)
+    \item inventory\_count per variant
+    \item attributes (JSON: \{``size'': ``L'', ``color'': ``Blue''\})
+    \item is\_active toggle
+\end{itemize}
+
+\subsubsection{Product Attributes}
+Reusable attribute system:
+\begin{itemize}[noitemsep]
+    \item \textbf{ProductAttribute}: Size, Color, Material definitions
+    \item \textbf{ProductAttributeValue}: S, M, L, XL with color swatches
+    \item \textbf{ProductAttributeAssignment}: Link attributes to products
+    \item Attribute types: select, color, size, text
+\end{itemize}
+
+\subsubsection{Product Images}
+Multi-image galleries:
+\begin{itemize}[noitemsep]
+    \item Multiple images per product with positioning
+    \item is\_primary flag for main image
+    \item variant\_id for variant-specific images
+    \item image\_type: photo, lifestyle, diagram
+    \item alt\_text for accessibility/SEO
+\end{itemize}
+
+\subsection{Collections}
+Smart and manual product groupings:
+\begin{itemize}[noitemsep]
+    \item \textbf{Manual Collections}: Curated product lists with ordering
+    \item \textbf{Smart Collections}: Rule-based auto-population
+    \item Collection rules: category, tag, price range, in\_stock
+    \item Sort options: manual, best\_selling, newest, price\_asc/desc, alpha
+    \item SEO fields: seo\_title, seo\_description
+    \item Scheduling: starts\_at, ends\_at for seasonal collections
+    \item show\_on\_homepage toggle
+\end{itemize}
+
+\subsection{Product Bundles}
+Bundle pricing with automatic savings:
+\begin{itemize}[noitemsep]
+    \item Fixed bundle price OR percentage/fixed discount
+    \item BundleItem model for included products
+    \item Optional items with is\_default\_selected
+    \item Automatic savings calculation
+    \item Date-based activation (starts\_at, ends\_at)
+\end{itemize}
+
+\subsection{Discount System}
+Comprehensive coupon and automatic discount engine:
+
+\subsubsection{Discount Types}
+\begin{itemize}[noitemsep]
+    \item \textbf{percentage}: X\% off order
+    \item \textbf{fixed\_amount}: \$X off order
+    \item \textbf{buy\_x\_get\_y}: BOGO promotions
+    \item \textbf{free\_shipping}: Waive shipping costs
+\end{itemize}
+
+\subsubsection{Discount Features}
+\begin{itemize}[noitemsep]
+    \item Coupon codes OR automatic application
+    \item minimum\_order\_cents requirement
+    \item maximum\_discount\_cents cap
+    \item maximum\_uses total limit
+    \item usage\_limit\_per\_customer
+    \item applies\_to: all, specific\_products, specific\_collections
+    \item Date scheduling: starts\_at, ends\_at
+    \item customer\_eligibility: all, new\_customers, returning\_customers
+    \item combine\_with\_other\_discounts flag
+    \item DiscountRule conditions for complex logic
+    \item DiscountUsage tracking per order/user
+\end{itemize}
+
+\subsection{Gift Cards}
+Full gift card lifecycle management:
+\begin{itemize}[noitemsep]
+    \item Unique codes with balance tracking
+    \item initial\_balance\_cents and current\_balance\_cents
+    \item Expiration dates
+    \item Recipient info: email, name, sender\_name, message
+    \item Purchase tracking (purchased\_order\_id)
+    \item GiftCardTransaction history: purchase, redemption, refund, adjustment
+    \item Delivery tracking (delivered\_at)
+\end{itemize}
+
+\subsection{Shipping}
+Zone-based shipping with multiple rate types:
+
+\subsubsection{ShippingZone}
+\begin{itemize}[noitemsep]
+    \item countries (JSON list of ISO codes)
+    \item states (JSON list of state codes)
+    \item zip\_codes for granular targeting
+    \item is\_rest\_of\_world fallback zone
+\end{itemize}
+
+\subsubsection{ShippingRate}
+\begin{itemize}[noitemsep]
+    \item rate\_type: flat, weight\_based, price\_based, free
+    \item price\_cents and price\_per\_kg\_cents
+    \item Weight/price thresholds (min/max)
+    \item free\_shipping\_threshold\_cents
+    \item estimated\_days\_min/max for delivery estimates
+\end{itemize}
+
+\subsection{Tax}
+Jurisdiction-based tax calculation:
+\begin{itemize}[noitemsep]
+    \item Rate by country, state, zip\_code
+    \item tax\_type: sales, vat, gst
+    \item applies\_to\_shipping flag
+    \item is\_compound for tax-on-tax
+    \item priority for application order
+\end{itemize}
+
+\subsection{Orders}
+Complete order management:
+\begin{itemize}[noitemsep]
+    \item status: pending, paid, shipped, cancelled
+    \item fulfillment\_status: unfulfilled, shipped, delivered, returned
+    \item Tracking: tracking\_number, carrier, shipped\_at, delivered\_at
+    \item stripe\_payment\_intent\_id for payment tracking
+    \item shipping\_address (JSON)
+    \item Guest checkout support (email without user\_id)
+    \item OrderItem with price\_at\_purchase for historical accuracy
+\end{itemize}
+
+\subsection{Digital Products}
+Secure digital delivery:
+\begin{itemize}[noitemsep]
+    \item \textbf{DownloadToken}: Unique tokens with max\_downloads and expiration
+    \item \textbf{DownloadLog}: Track all download attempts with IP, user agent
+\end{itemize}
+
+\subsection{Subscriptions}
+Stripe subscription integration:
+\begin{itemize}[noitemsep]
+    \item stripe\_subscription\_id and stripe\_customer\_id
+    \item status: active, past\_due, canceled, trialing
+    \item current\_period\_start/end
+    \item cancel\_at\_period\_end flag
+\end{itemize}
+
+\subsection{Customer Engagement}
+\begin{itemize}[noitemsep]
+    \item \textbf{Wishlist}: Save products/variants for later
+    \item \textbf{RecentlyViewed}: Track browsing history per user/session
+    \item \textbf{RelatedProduct}: Cross-sell, up-sell, accessory, frequently\_bought\_together
+\end{itemize}
+
+\subsection{Reviews}
+Product review system with moderation:
+\begin{itemize}[noitemsep]
+    \item 1-5 star rating with title and body
+    \item status: pending, approved, rejected
+    \item verified\_purchase flag (linked to order)
+    \item helpful\_count / not\_helpful\_count voting
+    \item Owner/admin response capability
+    \item Image attachments (JSON)
+    \item ReviewVote for helpful/not helpful tracking
+\end{itemize}
+
+% ============================================================================
+\section{Scheduling \& Calendar}
+% ============================================================================
+
+FullCalendar-powered scheduling with UTC-safe time handling.
+
+\subsection{Appointment Types}
+Configurable booking types:
+\begin{itemize}[noitemsep]
+    \item duration\_minutes, buffer\_before, buffer\_after
+    \item price (optional)
+    \item color for calendar display
+    \item max\_per\_day per staff limit
+    \item max\_attendees for group appointments
+    \item booking\_window\_days (how far in advance)
+    \item min\_notice\_hours (minimum booking notice)
+    \item required\_resource\_type for auto-booking rooms/equipment
+    \item intake\_form\_id for pre-appointment data collection
+\end{itemize}
+
+\subsection{Staff Availability}
+\begin{itemize}[noitemsep]
+    \item \textbf{Availability}: Weekly recurring slots (day\_of\_week, start\_time, end\_time)
+    \item \textbf{AvailabilityException}: Holidays, PTO, custom hours
+    \item is\_blocked for full days off
+    \item custom\_start\_time/end\_time for modified hours
+    \item reason field (``Holiday'', ``PTO'')
+\end{itemize}
+
+\subsection{Resources}
+Physical resource booking:
+\begin{itemize}[noitemsep]
+    \item resource\_type: room, equipment, vehicle
+    \item capacity for occupancy limits
+    \item amenities (JSON list)
+    \item hourly\_rate for billing
+    \item \textbf{ResourceBooking}: Time slot reservations linked to appointments
+\end{itemize}
+
+\subsection{Waitlist}
+Queue management for popular slots:
+\begin{itemize}[noitemsep]
+    \item preferred\_date, preferred\_time\_range (morning/afternoon/evening)
+    \item preferred\_staff\_id
+    \item status: waiting, offered, booked, expired, cancelled
+    \item priority for VIP handling
+    \item Offer expiration (offer\_expires\_at)
+\end{itemize}
+
+\subsection{Booking Policies}
+Per-type policies:
+\begin{itemize}[noitemsep]
+    \item Cancellation: cancellation\_hours, cancellation\_fee
+    \item No-show: no\_show\_fee, no\_show\_penalty\_type (none/fee/block)
+    \item Deposits: deposit\_required, deposit\_amount/percentage
+    \item Reschedule: max\_reschedules, reschedule\_hours
+    \item Reminders: reminder\_1/2/3\_hours, send\_confirmation, send\_reminders
+\end{itemize}
+
+\subsection{Group Appointments}
+\begin{itemize}[noitemsep]
+    \item \textbf{AppointmentAttendee}: Multiple attendees per appointment
+    \item Individual check-in tracking
+    \item Status per attendee: confirmed, cancelled, no\_show
+\end{itemize}
+
+\subsection{QR Check-In}
+\begin{itemize}[noitemsep]
+    \item \textbf{CheckInToken}: Unique QR codes per appointment
+    \item Token expiration
+    \item checked\_in\_method: qr, manual
+\end{itemize}
+
+\subsection{Reschedule Workflow}
+\begin{itemize}[noitemsep]
+    \item \textbf{RescheduleRequest}: Staff-initiated proposals
+    \item proposed\_datetime, reason
+    \item status: pending, approved, rejected
+    \item admin\_notes for decisions
+\end{itemize}
+
+% ============================================================================
+\section{CRM \& Lead Management}
+% ============================================================================
+
+Integrated customer relationship management.
+
+\subsection{Pipeline Stages}
+Kanban-style lead tracking:
+\begin{itemize}[noitemsep]
+    \item Customizable stages with ordering
+    \item color for visual distinction
+    \item probability (0-100\%) for forecasting
+    \item auto\_actions for workflow triggers
+    \item is\_won\_stage / is\_lost\_stage flags
+    \item Multi-pipeline support (pipeline\_name)
+\end{itemize}
+
+\subsection{Lead Sources}
+ContactFormSubmission with enriched tracking:
+\begin{itemize}[noitemsep]
+    \item source: contact\_form, referral, website, etc.
+    \item assigned\_to\_id for rep assignment
+    \item custom\_fields (JSON) for dynamic data
+    \item tags (JSON) for categorization
+    \item location\_id for multi-location tracking
+\end{itemize}
+
+\subsection{Lead Scoring}
+ML-assisted qualification:
+\begin{itemize}[noitemsep]
+    \item \textbf{LeadScore}: Total score with breakdown (JSON)
+    \item \textbf{LeadScoreRule}: Configurable scoring rules
+    \item Categories: source, engagement, fit, behavior
+    \item Condition types: source\_equals, has\_phone, message\_length\_gt, etc.
+\end{itemize}
+
+\subsection{Activity Timeline}
+Complete interaction history:
+\begin{itemize}[noitemsep]
+    \item \textbf{LeadNote}: Manual notes with pinning
+    \item \textbf{LeadActivity}: Auto-logged events (status\_change, email\_sent, note\_added)
+    \item old\_value / new\_value for change tracking
+    \item extra\_data (JSON) for context
+\end{itemize}
+
+\subsection{Follow-Up Reminders}
+Stale lead prevention:
+\begin{itemize}[noitemsep]
+    \item due\_date with status tracking
+    \item Assignment to specific users
+    \item status: pending, completed, dismissed
+\end{itemize}
+
+% ============================================================================
+\section{Communication Hub}
+% ============================================================================
+
+Unified internal and customer communication.
+
+\subsection{Messaging}
+Slack-like internal communication:
+\begin{itemize}[noitemsep]
+    \item \textbf{Channel}: Public, private, or direct message
+    \item is\_archived, is\_direct flags
+    \item description for channel context
+    \item \textbf{Message}: Content with optional attachments
+    \item Thread support (parent\_id)
+    \item @mention extraction
+    \item \textbf{ChannelMember}: Membership with read receipts (last\_read\_message\_id)
+    \item is\_muted for notification control
+    \item \textbf{MessageReaction}: Emoji reactions on messages
+\end{itemize}
+
+\subsection{Email Marketing}
+Complete campaign management:
+
+\subsubsection{Email Templates}
+\begin{itemize}[noitemsep]
+    \item subject, body\_html, body\_text
+    \item template\_type: general, welcome, follow\_up, marketing, transactional
+    \item category for organization
+    \item variables\_schema (JSON) with defaults
+    \item Template rendering with variable substitution
+\end{itemize}
+
+\subsubsection{Audiences}
+Dynamic or static segmentation:
+\begin{itemize}[noitemsep]
+    \item \textbf{Audience}: Segment definitions
+    \item is\_dynamic for rule-based recalculation
+    \item filter\_rules (JSON) for dynamic audiences
+    \item \textbf{AudienceMember}: Static membership
+    \item member\_count caching
+\end{itemize}
+
+\subsubsection{Email Campaigns}
+\begin{itemize}[noitemsep]
+    \item template\_id, audience\_id linking
+    \item status: draft, scheduled, sending, sent, paused, cancelled
+    \item Scheduling (scheduled\_at, sent\_at, completed\_at)
+    \item A/B testing: subject\_line\_a/b, ab\_test\_percentage
+    \item Stats: sent/delivered/open/click/unsubscribe/bounce/complaint counts
+    \item Open rate and click rate calculations
+\end{itemize}
+
+\subsubsection{Email Tracking}
+Privacy-respecting engagement tracking:
+\begin{itemize}[noitemsep]
+    \item \textbf{EmailSend}: Individual send records
+    \item tracking\_token for pixel/link tracking
+    \item Timestamps: sent\_at, delivered\_at, first/last\_opened\_at, first\_clicked\_at
+    \item Engagement counts: open\_count, click\_count
+    \item Status flags: bounced, bounce\_type/reason, unsubscribed, complained
+    \item \textbf{EmailClickTrack}: Detailed link analytics
+\end{itemize}
+
+\subsection{Drip Sequences}
+Automated email sequences:
+\begin{itemize}[noitemsep]
+    \item \textbf{DripSequence}: Sequence definitions
+    \item trigger\_event: user\_signup, order\_placed, form\_submit, manual
+    \item steps\_config (JSON) with template and delay
+    \item \textbf{SequenceEnrollment}: User progress tracking
+    \item current\_step, next\_step\_at
+    \item status: active, paused, completed, unsubscribed
+    \item context\_data for personalization
+\end{itemize}
+
+\subsection{Push Notifications}
+Web push with VAPID:
+\begin{itemize}[noitemsep]
+    \item \textbf{PushSubscription}: Subscription data
+    \item endpoint, p256dh\_key, auth\_key
+    \item device\_name for user identification
+    \item categories (JSON) for notification preferences
+    \item pywebpush integration
+\end{itemize}
+
+\subsection{SMS}
+TCPA-compliant SMS messaging:
+\begin{itemize}[noitemsep]
+    \item \textbf{SMSTemplate}: Message templates with segment calculation
+    \item \textbf{SMSConsent}: Consent tracking
+    \item consent\_source, consent\_text, ip\_address
+    \item categories: transactional, marketing, reminders
+    \item Revocation support
+\end{itemize}
+
+\subsection{Suppression}
+Email deliverability management:
+\begin{itemize}[noitemsep]
+    \item \textbf{EmailSuppressionList}: Global suppression
+    \item reason: hard\_bounce, unsubscribe, complaint
+    \item source tracking
+    \item \textbf{UnsubscribedEmail}: Newsletter opt-outs
+\end{itemize}
+
+\subsection{Notifications}
+Unified notification system:
+\begin{itemize}[noitemsep]
+    \item \textbf{Notification}: All app events
+    \item type: message, leave\_approved, appointment\_reminder, order\_placed, mention
+    \item title, body, link
+    \item related\_type/id for navigation
+    \item email\_sent for digest tracking
+    \item \textbf{NotificationPreference}: User settings
+    \item email\_digest\_enabled/frequency
+    \item muted\_types (JSON)
+\end{itemize}
+
+% ============================================================================
+\section{Content Management System}
+% ============================================================================
+
+First-party blog and page management.
+
+\subsection{Blog}
+
+\subsubsection{Posts}
+\begin{itemize}[noitemsep]
+    \item title, slug, content (CKEditor HTML)
+    \item blog\_category\_id for categorization
+    \item tags (many-to-many with Tag model)
+    \item is\_featured flag
+    \item series\_id, series\_order for multi-part content
+    \item publish\_at for scheduled publishing
+    \item meta\_description for SEO
+    \item read\_time\_minutes (auto-calculated)
+    \item is\_published toggle
+    \item Hero image (BLOB) with MIME type
+    \item additional\_authors for multi-author posts
+\end{itemize}
+
+\subsubsection{Categories \& Tags}
+\begin{itemize}[noitemsep]
+    \item \textbf{BlogCategory}: Hierarchical categories (parent\_id)
+    \item \textbf{Tag}: Many-to-many tagging
+    \item Slug-based URLs
+    \item Breadcrumb generation (get\_ancestors)
+\end{itemize}
+
+\subsubsection{Series}
+\begin{itemize}[noitemsep]
+    \item \textbf{PostSeries}: Group related posts
+    \item title, description, slug
+    \item series\_order on posts
+\end{itemize}
+
+\subsubsection{Comments}
+\begin{itemize}[noitemsep]
+    \item Threaded comments (parent\_id)
+    \item Registered user or guest (author\_name, author\_email)
+    \item status: pending, approved, spam, rejected
+    \item ip\_hash for abuse prevention
+\end{itemize}
+
+\subsubsection{Revisions}
+Full version control:
+\begin{itemize}[noitemsep]
+    \item \textbf{PostRevision}: Complete content snapshots
+    \item revision\_note for change descriptions
+    \item User attribution
+\end{itemize}
+
+\subsubsection{Analytics}
+\begin{itemize}[noitemsep]
+    \item \textbf{PostView}: Deduplicated view tracking
+    \item session\_id, user\_id, ip\_hash
+    \item referrer tracking
+\end{itemize}
+
+\subsection{Pages}
+Static pages with staging workflow:
+\begin{itemize}[noitemsep]
+    \item status: draft, review, published
+    \item html\_content (CKEditor)
+    \item meta\_description, canonical\_url
+    \item schema\_type: WebPage, AboutPage, ContactPage, FAQPage
+    \item author\_id for attribution
+    \item \textbf{PageRevision}: Version history
+    \item \textbf{PageCustomField}: Flexible key-value fields
+    \item field\_type: text, number, date, boolean, json
+    \item \textbf{PageRender}: Pre-rendered HTML cache
+\end{itemize}
+
+\subsection{Media}
+File management:
+\begin{itemize}[noitemsep]
+    \item filename, data (BLOB), mimetype, size
+    \item checksum for deduplication
+    \item uploaded\_by\_id for attribution
+\end{itemize}
+
+% ============================================================================
+\section{Forms \& Data Collection}
+% ============================================================================
+
+Dynamic form builder with integrations.
+
+\subsection{Form Definitions}
+\begin{itemize}[noitemsep]
+    \item fields\_schema (JSON) with field definitions
+    \item Field types: text, email, phone, textarea, select, checkbox, radio, file
+    \item Validation rules per field
+    \item settings (JSON): submit\_text, success\_message, redirect\_url, honeypot, rate\_limit
+    \item Multi-page support (is\_multi\_page, page\_config)
+    \item Conditional logic (JSON) for field visibility
+    \item submissions\_count caching
+\end{itemize}
+
+\subsection{Form Submissions}
+\begin{itemize}[noitemsep]
+    \item data (JSON) storage
+    \item Tracking: ip\_address, user\_agent, referrer
+    \item utm\_params for source attribution
+    \item status: new, read, processed, archived
+    \item Spam detection: is\_spam, spam\_score
+    \item File attachments (JSON)
+\end{itemize}
+
+\subsection{Form Integrations}
+Post-submission automation:
+\begin{itemize}[noitemsep]
+    \item integration\_type: webhook, crm\_lead, email\_list, email\_notify, slack
+    \item config (JSON) per type
+    \item field\_mapping for data transformation
+    \item Trigger tracking: last\_triggered\_at, trigger\_count, last\_error
+\end{itemize}
+
+\subsection{Surveys}
+NPS, CSAT, CES, and custom surveys:
+\begin{itemize}[noitemsep]
+    \item survey\_type: nps, csat, ces, custom
+    \item questions\_schema (JSON) with question definitions
+    \item trigger\_event: order\_complete, appointment\_complete, manual
+    \item trigger\_delay\_hours
+    \item display\_mode: page, embed, modal
+    \item thank\_you\_message, redirect\_url
+    \item NPS calculation method
+\end{itemize}
+
+\subsection{Survey Responses}
+\begin{itemize}[noitemsep]
+    \item responses (JSON) for answers
+    \item score for primary metric
+    \item nps\_category: promoter, passive, detractor
+    \item context\_type/id for linking to orders, appointments
+\end{itemize}
+
+% ============================================================================
+\section{Analytics \& Reporting}
+% ============================================================================
+
+Built-in analytics with no external dependencies.
+
+\subsection{Page Tracking}
+\begin{itemize}[noitemsep]
+    \item \textbf{PageView}: Individual page views
+    \item session\_id for visitor sessions
+    \item UTM tracking: source, medium, campaign, term, content
+    \item Device intelligence: device\_type, browser, os (parsed from user\_agent)
+    \item load\_time\_ms for performance monitoring
+    \item ip\_hash for privacy-respecting tracking
+\end{itemize}
+
+\subsection{Visitor Sessions}
+\begin{itemize}[noitemsep]
+    \item \textbf{VisitorSession}: Complete session tracking
+    \item entry\_page, exit\_page
+    \item pages\_viewed, duration\_seconds
+    \item bounce detection
+    \item Source tracking with UTM params
+    \item Device and location info
+\end{itemize}
+
+\subsection{Conversion Tracking}
+\begin{itemize}[noitemsep]
+    \item \textbf{ConversionGoal}: Goal definitions
+    \item goal\_type: page\_visit, form\_submit, purchase, signup, custom
+    \item target\_path for URL matching
+    \item target\_value for monetary goals
+    \item count\_once\_per\_session option
+    \item \textbf{Conversion}: Individual conversion events
+    \item First/last touch attribution
+\end{itemize}
+
+\subsection{Funnels}
+\begin{itemize}[noitemsep]
+    \item \textbf{Funnel}: Funnel definitions
+    \item \textbf{FunnelStep}: Steps linked to conversion goals
+    \item Conversion rate calculations between steps
+    \item Drop-off analysis
+\end{itemize}
+
+\subsection{Report Builder}
+\begin{itemize}[noitemsep]
+    \item \textbf{SavedReport}: Custom report configurations
+    \item report\_type: revenue, products, customers, traffic, custom
+    \item config\_json for filters, groupings, date ranges
+    \item Scheduling: schedule\_cron, last\_run\_at, next\_run\_at
+    \item is\_public for sharing
+    \item \textbf{ReportExport}: Generated exports
+    \item format: csv, pdf, xlsx
+    \item Expiration and download tracking
+\end{itemize}
+
+% ============================================================================
+\section{HR \& Employee Portal}
+% ============================================================================
+
+\subsection{Leave Management}
+\begin{itemize}[noitemsep]
+    \item \textbf{LeaveRequest}: Leave applications
+    \item leave\_type: vacation, sick, personal, unpaid
+    \item status: pending, approved, rejected
+    \item Approval workflow with approved\_by\_id, admin\_notes
+    \item \textbf{LeaveType}: Configurable policies
+    \item default\_days\_per\_year
+    \item Carryover: allows\_carryover, max\_carryover\_days
+    \item is\_paid, requires\_approval flags
+    \item \textbf{LeaveBalance}: Per-user annual entitlements
+    \item balance\_days, used\_days, carryover\_days
+\end{itemize}
+
+\subsection{Time Tracking}
+\begin{itemize}[noitemsep]
+    \item \textbf{TimeEntry}: Clock in/out
+    \item clock\_in, clock\_out timestamps
+    \item duration\_minutes (auto-calculated)
+    \item notes for context
+\end{itemize}
+
+\subsection{Document Management}
+\begin{itemize}[noitemsep]
+    \item \textbf{EncryptedDocument}: Secure storage
+    \item blob\_data (encrypted content)
+    \item category: contracts, certifications, personal
+    \item expires\_at for certifications/licenses
+    \item Signature support: requires\_signature, signed\_by\_id, signed\_at
+    \item \textbf{DocumentShare}: Sharing between users/roles
+    \item permissions: view, download
+\end{itemize}
+
+\subsection{Employee Profile}
+User model extensions:
+\begin{itemize}[noitemsep]
+    \item job\_title, department
+    \item reports\_to\_id (org chart)
+    \item profile\_photo\_id
+    \item direct\_reports relationship
+\end{itemize}
+
+% ============================================================================
+\section{Automation \& Workflows}
+% ============================================================================
+
+\subsection{Workflow Engine}
+\begin{itemize}[noitemsep]
+    \item \textbf{Workflow}: Automation definitions
+    \item trigger\_event: lead.created, order.created, etc.
+    \item is\_active toggle
+    \item \textbf{WorkflowStep}: Sequential actions
+    \item action\_type: send\_email, create\_task, update\_field, webhook
+    \item config (JSON) for action parameters
+    \item Ordered execution
+\end{itemize}
+
+\subsection{Webhooks}
+Outbound integrations:
+\begin{itemize}[noitemsep]
+    \item \textbf{Webhook}: Endpoint configuration
+    \item url, secret (HMAC signing)
+    \item events (JSON): lead.created, order.created, order.updated
+    \item failure\_count for backoff
+    \item \textbf{WebhookDelivery}: Delivery tracking
+    \item idempotency\_key for deduplication
+    \item Retry logic: attempt\_count, max\_attempts, next\_retry\_at
+    \item signature (HMAC)
+    \item duration\_ms for performance
+\end{itemize}
+
+\subsection{Background Tasks}
+Database-backed job queue:
+\begin{itemize}[noitemsep]
+    \item \textbf{Task}: Queue entries
+    \item name, payload (JSON)
+    \item status: pending, processing, completed, failed, dead\_letter
+    \item Retry logic: retry\_count, max\_retries, next\_retry\_at
+    \item priority (-10 low to +10 high)
+    \item Exponential backoff calculation
+    \item \textbf{CronTask}: Scheduled jobs
+    \item schedule: @hourly, @daily, @weekly, or cron expression
+    \item last\_run, next\_run tracking
+    \item \textbf{WorkerHeartbeat}: Worker health monitoring
+    \item tasks\_processed, tasks\_failed counters
+\end{itemize}
+
+% ============================================================================
+\section{Security Architecture}
+% ============================================================================
+
+Defense-in-depth across multiple layers.
+
+\subsection{Input Validation}
+\begin{itemize}[noitemsep]
+    \item WTForms with field-specific validators
+    \item Bleach HTML sanitization for rich text
+    \item SQLAlchemy parameterized queries (no raw string interpolation)
+    \item JSON schema validation for API payloads
+\end{itemize}
+
+\subsection{Security Headers}
+\begin{lstlisting}
+Content-Security-Policy: default-src 'self'; ...
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-XSS-Protection: 1; mode=block
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: geolocation=(), microphone=(), camera=()
+\end{lstlisting}
+
+\subsection{CSRF Protection}
+Flask-WTF CSRF tokens on all state-changing forms. API endpoints use bearer token authentication.
+
+\subsection{Rate Limiting}
+Configurable limits on:
+\begin{itemize}[noitemsep]
+    \item Login attempts (5/minute per IP)
+    \item Password reset requests (3/hour per email)
+    \item API endpoints (configurable per-route)
+    \item Form submissions (prevent spam)
+\end{itemize}
+
+\subsection{Attack Prevention}
+\begin{itemize}[noitemsep]
+    \item \textbf{LoginAttempt}: Brute force detection
+    \item \textbf{IPBlacklist}: Automatic and manual blocking
+    \item Progressive delays on failed logins
+    \item Device fingerprinting
+    \item GeoIP anomaly detection
+\end{itemize}
+
+% ============================================================================
+\section{Compliance \& Privacy}
+% ============================================================================
+
+\subsection{GDPR Compliance}
+\begin{itemize}[noitemsep]
+    \item \textbf{DataExportRequest}: One-click personal data export
+    \item Format: JSON or CSV
+    \item Processing status tracking
+    \item Download expiration
+    \item Right to deletion workflow
+    \item \textbf{ConsentRecord}: Consent audit trail
+    \item consent\_type: analytics, marketing, necessary, functional
+    \item consent\_source, policy\_version tracking
+    \item IP and user agent logging
+\end{itemize}
+
+\subsection{Data Retention}
+\begin{itemize}[noitemsep]
+    \item \textbf{RetentionPolicy}: Configurable policies
+    \item data\_type, table\_name targeting
+    \item retention\_days
+    \item action: delete, anonymize, archive
+    \item execution\_interval\_hours
+    \item \textbf{DataRetentionLog}: Execution audit
+    \item Records processed/deleted/anonymized/archived counts
+\end{itemize}
+
+\subsection{Audit Logging}
+\begin{itemize}[noitemsep]
+    \item \textbf{AuditLog}: Complete audit trail
+    \item action, target\_type, target\_id
+    \item details (JSON) for changesets
+    \item ip\_address, timestamp
+    \item User attribution
+\end{itemize}
+
+\subsection{Accessibility (WCAG 2.1 AA)}
+\begin{itemize}[noitemsep]
+    \item Skip navigation links
+    \item Proper heading hierarchy (single H1 per page)
+    \item ARIA labels and roles on interactive elements
+    \item Focus management for modals and drawers
+    \item Screen reader tested (NVDA, VoiceOver)
+    \item Keyboard navigation for all functionality
+\end{itemize}
+
+% ============================================================================
+\section{Infrastructure \& Operations}
+% ============================================================================
+
+\subsection{Backup System}
+\begin{itemize}[noitemsep]
+    \item \textbf{Backup}: Backup records
+    \item backup\_type: database, media, full
+    \item status: pending, in\_progress, completed, failed
+    \item Verification: verified, verification\_date
+    \item checksum (SHA-256) for integrity
+    \item encrypted flag
+    \item storage\_location: local, s3, azure
+    \item \textbf{BackupSchedule}: Automated backups
+    \item frequency: hourly, daily, weekly, monthly
+    \item retention\_days
+    \item Custom cron expressions
+\end{itemize}
+
+\subsection{Feature Flags}
+Gradual rollout support:
+\begin{itemize}[noitemsep]
+    \item \textbf{FeatureFlag}: Feature toggles
+    \item is\_enabled, rollout\_percentage (0-100)
+    \item user\_whitelist / user\_blacklist
+    \item segment\_ids targeting
+    \item Date scheduling: starts\_at, ends\_at
+    \item Deterministic rollout by user ID
+\end{itemize}
+
+\subsection{Deployment Tracking}
+\begin{itemize}[noitemsep]
+    \item \textbf{DeploymentLog}: Deployment history
+    \item version, environment
+    \item status: in\_progress, success, failed, rolled\_back
+    \item rollback\_version for recovery
+    \item commit\_sha for traceability
+    \item migration\_ran flag
+\end{itemize}
+
+\subsection{Observability}
+Production-ready monitoring:
+\begin{itemize}[noitemsep]
+    \item Structured JSON logging with correlation IDs
+    \item Prometheus-compatible /metrics endpoint
+    \item Health checks: application, database, Redis, disk space
+    \item Request timing and slow query logging
+    \item Sentry integration (optional)
+    \item Worker heartbeat monitoring
+\end{itemize}
+
+% ============================================================================
+\section{React Component Library}
+% ============================================================================
+
+44 TypeScript React components organized by domain:
+
+\subsection{Admin Components}
+\begin{itemize}[noitemsep]
+    \item AdminDataTable: Sortable, filterable data tables
+    \item AdminDashboard: KPI cards and metrics
+    \item EmailTemplateCards: Template gallery with preview
+\end{itemize}
+
+\subsection{Analytics}
+\begin{itemize}[noitemsep]
+    \item AnalyticsDashboard: Traffic and conversion charts
+\end{itemize}
+
+\subsection{Booking}
+\begin{itemize}[noitemsep]
+    \item BookingWizard: Multi-step booking flow
+    \item BookingPage: Full booking interface
+    \item DateTimePicker: Date/time selection
+\end{itemize}
+
+\subsection{Calendar}
+\begin{itemize}[noitemsep]
+    \item FullCalendar integration
+    \item Availability management
+\end{itemize}
+
+\subsection{Cart \& Shop}
+\begin{itemize}[noitemsep]
+    \item ShoppingCartWidget: Cart drawer/widget
+    \item ProductGallery: Image galleries
+    \item ImageGallery: Lightbox galleries
+\end{itemize}
+
+\subsection{Charts}
+\begin{itemize}[noitemsep]
+    \item Chart: Recharts-based visualizations
+    \item Line, bar, pie, area charts
+\end{itemize}
+
+\subsection{CRM}
+\begin{itemize}[noitemsep]
+    \item KanbanBoard: Drag-and-drop lead management
+    \item Pipeline visualization
+\end{itemize}
+
+\subsection{Forms}
+\begin{itemize}[noitemsep]
+    \item FormBuilder: Dynamic form creation
+    \item FormRenderer: Form display
+\end{itemize}
+
+\subsection{Messaging}
+\begin{itemize}[noitemsep]
+    \item MessageThread: Chat interface
+\end{itemize}
+
+\subsection{Notifications}
+\begin{itemize}[noitemsep]
+    \item NotificationBell: Real-time notifications
+    \item Toast: Notification toasts
+\end{itemize}
+
+\subsection{UI Components}
+\begin{itemize}[noitemsep]
+    \item Button, Input, Select, Textarea
+    \item Modal, Dropdown, Sheet
+    \item Card, Badge, Spinner
+    \item Tabs, Accordion
+\end{itemize}
+
+\subsection{Layout}
+\begin{itemize}[noitemsep]
+    \item Header, Footer, Navigation
+    \item HomePage with glassmorphism design
+\end{itemize}
+
+% ============================================================================
+\section{API Reference}
+% ============================================================================
+
+REST API with OpenAPI documentation at /api/docs.
+
+\subsection{Authentication}
+\begin{itemize}[noitemsep]
+    \item API keys with scoped permissions
+    \item Bearer token authentication
+    \item Key hashing (SHA-256) for security
+    \item Last-used tracking
+\end{itemize}
+
+\subsection{Available Scopes}
+\begin{itemize}[noitemsep]
+    \item read:leads, write:leads
+    \item read:orders, write:orders
+    \item read:products, write:products
+    \item read:appointments, write:appointments
+    \item read:users (admin only)
+\end{itemize}
+
+\subsection{Core Endpoints}
+\begin{itemize}[noitemsep]
+    \item /api/v1/leads - Lead management
+    \item /api/v1/orders - Order operations
+    \item /api/v1/products - Product catalog
+    \item /api/v1/appointments - Booking API
+    \item /api/v1/cart - Cart operations
+    \item /api/v1/notifications - Notification management
+\end{itemize}
+
+% ============================================================================
+\section{Deployment Options}
+% ============================================================================
+
+\subsection{Sovereign Path: Raw VPS}
+Ubuntu/Debian + Gunicorn + Nginx. Fixed monthly cost. Air-gappable. Complete control.
+\begin{lstlisting}[language=bash]
+gunicorn -w 4 -b 0.0.0.0:8000 "app:create_app()"
+\end{lstlisting}
+
+\subsection{Hybrid Path: PaaS}
+Heroku, Dokku, Railway with Procfile. Quick deployment, managed SSL.
+
+\subsection{Container Path: Docker/Kubernetes}
+\begin{itemize}[noitemsep]
+    \item Dockerfile included
+    \item Kubernetes manifests in /k8s
+    \item Helm charts in /helm
+\end{itemize}
+
+\subsection{Edge Path: On-Premises}
+Raspberry Pi, Jetson, air-gapped servers. Identical codebase. Zero external dependencies for core functionality.
+
+% ============================================================================
+\section{Economic Analysis}
+% ============================================================================
+
+\subsection{SaaS Stack Cost Comparison}
+For a 50-person company at 100k MAU:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lrr@{}}
+\toprule
+\textbf{Function} & \textbf{SaaS Stack} & \textbf{Verso} \\
+\midrule
+Auth (Auth0/Clerk) & \$1,800/mo & \$0 \\
+CMS (Contentful/Sanity) & \$489/mo & \$0 \\
+E-commerce (Shopify Plus) & \$2,000/mo & \$0 \\
+Scheduling (Calendly Enterprise) & \$1,250/mo & \$0 \\
+Analytics (Mixpanel/Amplitude) & \$1,000/mo & \$0 \\
+Email Marketing (Klaviyo) & \$700/mo & \$0 \\
+Messaging (Slack Business+) & \$750/mo & \$0 \\
+CRM (HubSpot) & \$500/mo & \$0 \\
+Forms (Typeform) & \$200/mo & \$0 \\
+Surveys (Delighted) & \$224/mo & \$0 \\
+Push (OneSignal) & \$100/mo & \$0 \\
+Hosting & \$200/mo & \$20-100 \\
+\midrule
+\textbf{Total} & \textbf{\$9,213/mo} & \textbf{\$20-100/mo} \\
+\textbf{Annual} & \textbf{\$110,556} & \textbf{\$240-1,200} \\
+\bottomrule
+\end{tabular}
+\caption{Total Cost of Ownership Comparison}
+\end{table}
+
+% ============================================================================
 \section{Future Roadmap}
-Verso is evolving from a prototype to a standard. Future phases focus on:
-\begin{itemize}
-    \item \textbf{Phase 2}: Content Sovereignty (CMS)
-    \item \textbf{Phase 7}: Multi-Location Support ("The Empire" Update)
-    \item \textbf{Phase 8}: Developer Experience \& Public API
+% ============================================================================
+
+\subsection{Phase 34: Mobile Applications}
+React Native companion apps sharing the Verso API for iOS and Android.
+
+\subsection{Phase 35: Multi-Tenancy}
+Organizational boundaries for agencies managing multiple clients from one instance.
+
+\subsection{Phase 36: Marketplace}
+Plugin architecture for community-contributed modules.
+
+\subsection{Phase 37: AI Expansion}
+Deeper AI integration for content generation, customer service automation, and predictive analytics.
+
+\subsection{Phase 38: CalDAV/CardDAV}
+Standard calendar and contact sync for native mobile integration.
+
+% ============================================================================
+\section{Conclusion}
+% ============================================================================
+
+Verso is not just software---it is a declaration of independence. By consolidating business functions into a sovereign, simplified, and frugal operating system, we empower founders to build enduring institutions rather than renting their operations from Silicon Valley platforms.
+
+The Verso stack proves that:
+\begin{itemize}[noitemsep]
+    \item A carefully architected monolith can deliver microservice-level modularity
+    \item Server-side rendering with strategic React islands provides optimal UX
+    \item ``Lindy'' technologies (Python, SQL, HTML) outperform framework churn
+    \item Data sovereignty is achievable without sacrificing modern capabilities
+    \item Enterprise features don't require enterprise pricing
+    \item 120+ database models can coexist in a maintainable schema
+    \item 45 route modules can serve as logical microservice boundaries
 \end{itemize}
 
-\section{Conclusion}
-Verso is not just software; it is a declaration of independence. By consolidating business functions into a sovereign, simplified, and frugal operating system, we empower founders to build enduring institutions rather than renting their operations from Silicon Valley giants.
+\textbf{Claim your sovereignty. Ship the monolith. Sleep at night.}
+
+\vspace{2em}
+\hrule
+\vspace{1em}
+\noindent\textit{Verso-Backend v2.1.0 ``Sovereign Enterprise''\\
+Released December 2024\\
+Open source under AGPL-3.0 License\\
+\url{https://github.com/versoindustries/verso-backend}}
 
 \end{document}

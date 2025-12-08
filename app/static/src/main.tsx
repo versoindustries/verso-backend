@@ -15,6 +15,8 @@
 
 import React, { Component, ErrorInfo, ReactNode, Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
+// Import the entire registry module to ensure all registerComponent calls execute
+import './registry'
 import { getComponent, hasComponent, getRegisteredComponents } from './registry'
 import { ToastProvider } from './components/ui/toast'
 import './index.css'

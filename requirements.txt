@@ -58,6 +58,6 @@ pytest-cov>=4.0
 pytest-flask>=1.0
 pip-audit>=2.0
 bandit>=1.7
-redis>=4.0
+# redis>=4.0  # Disabled - using app's own worker setup instead
 # boto3>=1.0  # For S3 backups (uncomment if needed)
 

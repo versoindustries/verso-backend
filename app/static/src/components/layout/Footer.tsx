@@ -8,46 +8,54 @@ const Footer: React.FC = () => {
     const { urls, year, version } = context;
 
     return (
-        <footer className="bg-black/80 backdrop-blur-md border-t border-white/10 mt-auto">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-                    <div className="col-span-1 md:col-span-1">
-                        <span className="font-neon-heavy text-2xl text-white tracking-widest uppercase">Verso</span>
-                        <p className="mt-4 text-sm text-gray-400">
+        <footer className="verso-footer">
+            <div className="verso-footer__inner">
+                <div className="verso-footer__grid">
+                    {/* Brand Column */}
+                    <div className="verso-footer__brand">
+                        <span className="verso-footer__logo">Verso</span>
+                        <p className="verso-footer__tagline">
                             The Sovereign Monolith Protocol. Ship finished truths.
                         </p>
                     </div>
-                    <div>
-                        <h3 className="text-sm font-semibold text-gray-200 uppercase tracking-wider mb-4">Navigation</h3>
-                        <ul className="space-y-2">
-                            <li><a href={urls.index} className="text-gray-400 hover:text-white text-sm transition-colors">Home</a></li>
-                            <li><a href={urls.about} className="text-gray-400 hover:text-white text-sm transition-colors">About</a></li>
-                            <li><a href={urls.services} className="text-gray-400 hover:text-white text-sm transition-colors">Services</a></li>
-                            <li><a href={urls.blogIndex} className="text-gray-400 hover:text-white text-sm transition-colors">Blog</a></li>
+
+                    {/* Navigation Column */}
+                    <div className="verso-footer__column">
+                        <h3 className="verso-footer__heading">Navigation</h3>
+                        <ul className="verso-footer__links">
+                            <li><a href={urls.index} className="verso-footer__link">Home</a></li>
+                            <li><a href={urls.about} className="verso-footer__link">About</a></li>
+                            <li><a href={urls.services} className="verso-footer__link">Services</a></li>
+                            <li><a href={urls.blogIndex} className="verso-footer__link">Blog</a></li>
                         </ul>
                     </div>
-                    <div>
-                        <h3 className="text-sm font-semibold text-gray-200 uppercase tracking-wider mb-4">Connect</h3>
-                        <ul className="space-y-2">
-                            <li><a href={urls.contact} className="text-gray-400 hover:text-white text-sm transition-colors">Contact Us</a></li>
-                            <li><a href="https://github.com/versoindustries" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white text-sm transition-colors">GitHub</a></li>
+
+                    {/* Connect Column */}
+                    <div className="verso-footer__column">
+                        <h3 className="verso-footer__heading">Connect</h3>
+                        <ul className="verso-footer__links">
+                            <li><a href={urls.contact} className="verso-footer__link">Contact Us</a></li>
+                            <li><a href="https://github.com/versoindustries" target="_blank" rel="noopener noreferrer" className="verso-footer__link">GitHub</a></li>
                         </ul>
                     </div>
-                    <div>
-                        <h3 className="text-sm font-semibold text-gray-200 uppercase tracking-wider mb-4">Language</h3>
-                        <div className="flex space-x-4">
-                            <a href={urls.setLanguageEn} className="text-gray-400 hover:text-white text-sm transition-colors">English</a>
-                            <span className="text-gray-600">|</span>
-                            <a href={urls.setLanguageEs} className="text-gray-400 hover:text-white text-sm transition-colors">Español</a>
+
+                    {/* Language Column */}
+                    <div className="verso-footer__column">
+                        <h3 className="verso-footer__heading">Language</h3>
+                        <div className="verso-footer__languages">
+                            <a href={urls.setLanguageEn} className="verso-footer__lang-link">English</a>
+                            <span className="verso-footer__lang-divider">|</span>
+                            <a href={urls.setLanguageEs} className="verso-footer__lang-link">Español</a>
                         </div>
                     </div>
                 </div>
 
-                <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center">
-                    <p className="text-sm text-gray-400">
+                {/* Bottom Bar */}
+                <div className="verso-footer__bottom">
+                    <p className="verso-footer__copyright">
                         &copy; <span id="current-year">{year}</span> Verso Industries. All rights reserved.
                     </p>
-                    <p className="text-sm text-gray-500 mt-2 md:mt-0">
+                    <p className="verso-footer__version">
                         Empowered by our own backend! v{version}
                     </p>
                 </div>

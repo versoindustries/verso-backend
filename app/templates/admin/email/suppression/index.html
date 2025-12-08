@@ -45,73 +45,14 @@
         </div>
     </div>
 
-    <!-- Suppression List -->
+    <!-- Suppression List - React Component -->
     <div class="card">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Email</th>
-                        <th>Reason</th>
-                        <th>Source</th>
-                        <th>Added</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in suppressions.items %}
-                    <tr>
-                        <td>{{ item.email }}</td>
-                        <td>
-                            {% set reason_colors = {'hard_bounce': 'danger', 'soft_bounce': 'warning', 'unsubscribe':
-                            'info', 'complaint': 'dark', 'manual': 'secondary'} %}
-                            <span class="badge bg-{{ reason_colors.get(item.reason, 'secondary') }}">
-                                {{ item.reason|replace('_', ' ')|title }}
-                            </span>
-                        </td>
-                        <td><small class="text-muted">{{ item.source or '-' }}</small></td>
-                        <td>{{ item.added_at.strftime('%Y-%m-%d %H:%M') if item.added_at else '-' }}</td>
-                        <td>
-                            <form method="POST" action="{{ url_for('email_admin.remove_suppression', id=item.id) }}"
-                                onsubmit="return confirm('Remove this email from suppression list? They will be able to receive emails again.');">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <button type="submit" class="btn btn-sm btn-outline-success" title="Remove from list">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="5" class="text-center py-4 text-muted">
-                            No suppressed emails found.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div data-react-component="AdminDataTable" data-react-props='{
+               "columns": {{ columns_json|safe }},
+               "data": {{ suppressions_json|safe }},
+               "emptyMessage": "No suppressed emails found."
+             }'>
         </div>
-
-        {% if suppressions.pages > 1 %}
-        <div class="card-footer">
-            <nav>
-                <ul class="pagination pagination-sm justify-content-center mb-0">
-                    {% for page_num in suppressions.iter_pages() %}
-                    {% if page_num %}
-                    <li class="page-item {% if page_num == suppressions.page %}active{% endif %}">
-                        <a class="page-link"
-                            href="{{ url_for('email_admin.suppression_list', page=page_num, reason=current_reason, search=search) }}">
-                            {{ page_num }}
-                        </a>
-                    </li>
-                    {% else %}
-                    <li class="page-item disabled"><span class="page-link">...</span></li>
-                    {% endif %}
-                    {% endfor %}
-                </ul>
-            </nav>
-        </div>
-        {% endif %}
     </div>
 </div>
 

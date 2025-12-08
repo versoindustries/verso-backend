@@ -67,113 +67,65 @@
 
 <!-- Submissions List -->
 <div class="card">
-    <div class="card-body">
-        {% if submissions.items %}
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Status</th>
-                        <th>Preview</th>
-                        <th>Submitted</th>
-                        <th>IP</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for sub in submissions.items %}
-                    <tr class="{{ 'table-light fw-bold' if sub.status == 'new' }}">
-                        <td>
-                            <a
-                                href="{{ url_for('forms_admin.view_submission', form_id=form.id, submission_id=sub.id) }}">
-                                #{{ sub.id }}
-                            </a>
-                            {% if sub.is_spam %}
-                            <span class="badge bg-warning">Spam</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if sub.status == 'new' %}
-                            <span class="badge bg-primary">New</span>
-                            {% elif sub.status == 'read' %}
-                            <span class="badge bg-info">Read</span>
-                            {% elif sub.status == 'processed' %}
-                            <span class="badge bg-success">Processed</span>
-                            {% else %}
-                            <span class="badge bg-secondary">{{ sub.status }}</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% set preview_fields = [] %}
-                            {% for field in form.fields_schema[:3] if field.type not in ('heading', 'paragraph') %}
-                            {% set val = sub.data.get(field.name) %}
-                            {% if val %}
-                            {% set _ = preview_fields.append(val[:30] ~ '...' if val|length > 30 else val) %}
-                            {% endif %}
-                            {% endfor %}
-                            <small class="text-muted">{{ preview_fields | join(' | ') }}</small>
-                        </td>
-                        <td>
-                            {{ sub.submitted_at.strftime('%Y-%m-%d %H:%M') if sub.submitted_at else '-' }}
-                        </td>
-                        <td>
-                            <small class="text-muted">{{ sub.ip_address[:15] if sub.ip_address else '-' }}...</small>
-                        </td>
-                        <td>
-                            <a href="{{ url_for('forms_admin.view_submission', form_id=form.id, submission_id=sub.id) }}"
-                                class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-eye"></i> View
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <div class="card-body p-0">
+        <div data-react-component="AdminDataTable" data-react-props='{
+               "columns": [
+                 {"key": "id", "label": "ID"},
+                 {"key": "submitted", "label": "Submitted"},
+                 {"key": "status", "label": "Status", "html": true},
+                 {"key": "preview", "label": "Preview"},
+                 {"key": "ip", "label": "IP", "html": true},
+                 {"key": "actions", "label": "Actions", "html": true}
+               ],
+               "data": {{ submissions_json|safe }},
+               "emptyMessage": "No submissions yet."
+             }'>
         </div>
-
-        <!-- Pagination -->
-        <nav aria-label="Submissions pagination">
-            <ul class="pagination justify-content-center">
-                {% if submissions.has_prev %}
-                <li class="page-item">
-                    <a class="page-link"
-                        href="{{ url_for('forms_admin.list_submissions', form_id=form.id, page=submissions.prev_num, status=status_filter, date_from=date_from, date_to=date_to) }}">
-                        Previous
-                    </a>
-                </li>
-                {% endif %}
-
-                {% for page_num in submissions.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
-                {% if page_num %}
-                <li class="page-item {{ 'active' if page_num == submissions.page }}">
-                    <a class="page-link"
-                        href="{{ url_for('forms_admin.list_submissions', form_id=form.id, page=page_num, status=status_filter, date_from=date_from, date_to=date_to) }}">
-                        {{ page_num }}
-                    </a>
-                </li>
-                {% else %}
-                <li class="page-item disabled"><span class="page-link">...</span></li>
-                {% endif %}
-                {% endfor %}
-
-                {% if submissions.has_next %}
-                <li class="page-item">
-                    <a class="page-link"
-                        href="{{ url_for('forms_admin.list_submissions', form_id=form.id, page=submissions.next_num, status=status_filter, date_from=date_from, date_to=date_to) }}">
-                        Next
-                    </a>
-                </li>
-                {% endif %}
-            </ul>
-        </nav>
-        {% else %}
-        <div class="text-center py-5">
-            <i class="bi bi-inbox display-1 text-muted"></i>
-            <h4 class="mt-3">No Submissions Yet</h4>
-            <p class="text-muted">Submissions will appear here once people start filling out your form.</p>
-        </div>
-        {% endif %}
     </div>
+</div>
+
+<!-- Pagination -->
+<nav aria-label="Submissions pagination">
+    <ul class="pagination justify-content-center">
+        {% if submissions.has_prev %}
+        <li class="page-item">
+            <a class="page-link"
+                href="{{ url_for('forms_admin.list_submissions', form_id=form.id, page=submissions.prev_num, status=status_filter, date_from=date_from, date_to=date_to) }}">
+                Previous
+            </a>
+        </li>
+        {% endif %}
+
+        {% for page_num in submissions.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if page_num %}
+        <li class="page-item {{ 'active' if page_num == submissions.page }}">
+            <a class="page-link"
+                href="{{ url_for('forms_admin.list_submissions', form_id=form.id, page=page_num, status=status_filter, date_from=date_from, date_to=date_to) }}">
+                {{ page_num }}
+            </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">...</span></li>
+        {% endif %}
+        {% endfor %}
+
+        {% if submissions.has_next %}
+        <li class="page-item">
+            <a class="page-link"
+                href="{{ url_for('forms_admin.list_submissions', form_id=form.id, page=submissions.next_num, status=status_filter, date_from=date_from, date_to=date_to) }}">
+                Next
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% else %}
+<div class="text-center py-5">
+    <i class="bi bi-inbox display-1 text-muted"></i>
+    <h4 class="mt-3">No Submissions Yet</h4>
+    <p class="text-muted">Submissions will appear here once people start filling out your form.</p>
+</div>
+{% endif %}
+</div>
 </div>
 {% endblock %}
