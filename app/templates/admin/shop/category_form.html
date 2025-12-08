@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit' if category else 'Create' }} Category - Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('category_admin.categories_list') }}">Categories</a></li>
+            <li class="breadcrumb-item active">{{ 'Edit' if category else 'Create' }} Category</li>
+        </ol>
+    </nav>
+
+    <h1>{{ 'Edit' if category else 'Create' }} Category</h1>
+
+    <form method="post" class="mt-4" style="max-width: 600px;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="mb-3">
+            <label for="name" class="form-label">Category Name *</label>
+            <input type="text" class="form-control" id="name" name="name"
+                value="{{ category.name if category else '' }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" name="description"
+                rows="3">{{ category.description if category else '' }}</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="parent_id" class="form-label">Parent Category</label>
+            <select class="form-select" id="parent_id" name="parent_id">
+                <option value="">— None (Top Level) —</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if category and category.parent_id==cat.id %}selected{% endif %}>
+                    {{ cat.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="display_order" class="form-label">Display Order</label>
+            <input type="number" class="form-control" id="display_order" name="display_order"
+                value="{{ category.display_order if category else 0 }}" min="0">
+            <div class="form-text">Lower numbers appear first.</div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+                {{ 'Update' if category else 'Create' }} Category
+            </button>
+            <a href="{{ url_for('category_admin.categories_list') }}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

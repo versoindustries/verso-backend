@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications - Verso{% endblock %}
+
+{% block additional_css %}
+<style>
+    .notifications-list {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .notification-item {
+        display: flex;
+        align-items: flex-start;
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+        transition: background-color 0.2s;
+    }
+
+    .notification-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .notification-item.unread {
+        background-color: #e3f2fd;
+        border-left: 3px solid var(--primary-color, #007bff);
+    }
+
+    .notification-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: var(--primary-color, #007bff);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        flex-shrink: 0;
+    }
+
+    .notification-icon.message {
+        background-color: #17a2b8;
+    }
+
+    .notification-icon.leave_approved {
+        background-color: #28a745;
+    }
+
+    .notification-icon.leave_rejected {
+        background-color: #dc3545;
+    }
+
+    .notification-icon.order_placed {
+        background-color: #6f42c1;
+    }
+
+    .notification-icon.mention {
+        background-color: #fd7e14;
+    }
+
+    .notification-icon.appointment_reminder {
+        background-color: #20c997;
+    }
+
+    .notification-content {
+        flex: 1;
+    }
+
+    .notification-title {
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #333;
+    }
+
+    .notification-body {
+        color: #666;
+        font-size: 0.9em;
+        margin-bottom: 5px;
+    }
+
+    .notification-time {
+        font-size: 0.8em;
+        color: #999;
+    }
+
+    .notification-actions {
+        margin-left: 15px;
+    }
+
+    .btn-mark-read {
+        padding: 5px 10px;
+        font-size: 0.85em;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #999;
+    }
+
+    .empty-state i {
+        font-size: 4em;
+        margin-bottom: 20px;
+    }
+
+    .notifications-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #eee;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="notifications-list">
+    <div class="notifications-header">
+        <h2><i class="fas fa-bell"></i> Notifications</h2>
+        <div>
+            <a href="{{ url_for('notifications.preferences') }}" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-cog"></i> Preferences
+            </a>
+            <form action="{{ url_for('notifications.mark_all_read') }}" method="POST" style="display: inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-sm btn-primary">
+                    <i class="fas fa-check-double"></i> Mark All Read
+                </button>
+            </form>
+        </div>
+    </div>
+
+    {% if notifications.items %}
+    {% for notification in notifications.items %}
+    <div class="notification-item {% if not notification.is_read %}unread{% endif %}">
+        <div class="notification-icon {{ notification.type }}">
+            {% if notification.type == 'message' %}
+            <i class="fas fa-comment"></i>
+            {% elif notification.type == 'mention' %}
+            <i class="fas fa-at"></i>
+            {% elif notification.type == 'leave_approved' %}
+            <i class="fas fa-check"></i>
+            {% elif notification.type == 'leave_rejected' %}
+            <i class="fas fa-times"></i>
+            {% elif notification.type == 'order_placed' %}
+            <i class="fas fa-shopping-cart"></i>
+            {% elif notification.type == 'appointment_reminder' %}
+            <i class="fas fa-calendar"></i>
+            {% else %}
+            <i class="fas fa-bell"></i>
+            {% endif %}
+        </div>
+        <div class="notification-content">
+            <div class="notification-title">
+                {% if notification.link %}
+                <a href="{{ url_for('notifications.mark_read', notification_id=notification.id) }}">{{
+                    notification.title }}</a>
+                {% else %}
+                {{ notification.title }}
+                {% endif %}
+            </div>
+            {% if notification.body %}
+            <div class="notification-body">{{ notification.body | truncate(150) }}</div>
+            {% endif %}
+            <div class="notification-time">
+                <i class="far fa-clock"></i> {{ notification.created_at.strftime('%b %d, %Y at %I:%M %p') }}
+            </div>
+        </div>
+        <div class="notification-actions">
+            {% if not notification.is_read %}
+            <form action="{{ url_for('notifications.mark_read', notification_id=notification.id) }}" method="POST"
+                style="display: inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-sm btn-outline-primary btn-mark-read" title="Mark as read">
+                    <i class="fas fa-check"></i>
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Pagination -->
+    {% if notifications.pages > 1 %}
+    <nav aria-label="Notifications pagination" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if notifications.has_prev %}
+            <li class="page-item">
+                <a class="page-link"
+                    href="{{ url_for('notifications.index', page=notifications.prev_num) }}">Previous</a>
+            </li>
+            {% endif %}
+
+            {% for page_num in notifications.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if page_num %}
+            <li class="page-item {% if page_num == notifications.page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('notifications.index', page=page_num) }}">{{ page_num }}</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+            {% endfor %}
+
+            {% if notifications.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('notifications.index', page=notifications.next_num) }}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+    {% else %}
+    <div class="empty-state">
+        <i class="far fa-bell-slash"></i>
+        <h4>No Notifications</h4>
+        <p>You're all caught up! Check back later for new notifications.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

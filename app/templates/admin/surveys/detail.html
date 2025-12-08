@@ -1,0 +1,196 @@
+{% extends "admin/dashboard_base.html" %}
+
+{% block title %}{{ survey.name }} - Survey Analytics{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-bar-chart me-2"></i>{{ survey.name }}</h2>
+    <div>
+        <a href="{{ url_for('forms.view_survey', survey_id=survey.id) }}" target="_blank"
+            class="btn btn-outline-secondary">
+            <i class="bi bi-eye me-1"></i> Preview
+        </a>
+        <a href="{{ url_for('forms_admin.list_surveys') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
+    </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}
+<div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endfor %}
+{% endwith %}
+
+<!-- Key Metrics -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h6 class="text-muted">Total Responses</h6>
+                <h2 class="mb-0">{{ analytics.total_responses }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h6 class="text-muted">Average Score</h6>
+                <h2 class="mb-0">{{ analytics.average_score or '-' }}</h2>
+            </div>
+        </div>
+    </div>
+    {% if survey.survey_type == 'nps' %}
+    <div class="col-md-3">
+        <div
+            class="card {{ 'bg-success text-white' if analytics.nps_score and analytics.nps_score > 50 else 'bg-warning' if analytics.nps_score and analytics.nps_score > 0 else 'bg-danger text-white' if analytics.nps_score else '' }}">
+            <div class="card-body text-center">
+                <h6>NPS Score</h6>
+                <h2 class="mb-0">{{ analytics.nps_score if analytics.nps_score is not none else '-' }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h6 class="text-muted">Promoters</h6>
+                <h2 class="mb-0 text-success">
+                    {{ analytics.nps_breakdown.promoters.pct if analytics.nps_breakdown else 0 }}%
+                </h2>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% if survey.survey_type == 'nps' and analytics.nps_breakdown %}
+<!-- NPS Breakdown -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>NPS Breakdown</h5>
+    </div>
+    <div class="card-body">
+        <div class="row text-center">
+            <div class="col-md-4">
+                <div class="p-3 bg-success bg-opacity-10 rounded">
+                    <h4 class="text-success">Promoters (9-10)</h4>
+                    <h2>{{ analytics.nps_breakdown.promoters.count }}</h2>
+                    <p class="mb-0">{{ analytics.nps_breakdown.promoters.pct }}%</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-3 bg-warning bg-opacity-10 rounded">
+                    <h4 class="text-warning">Passives (7-8)</h4>
+                    <h2>{{ analytics.nps_breakdown.passives.count }}</h2>
+                    <p class="mb-0">{{ analytics.nps_breakdown.passives.pct }}%</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-3 bg-danger bg-opacity-10 rounded">
+                    <h4 class="text-danger">Detractors (0-6)</h4>
+                    <h2>{{ analytics.nps_breakdown.detractors.count }}</h2>
+                    <p class="mb-0">{{ analytics.nps_breakdown.detractors.pct }}%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Score Distribution -->
+{% if analytics.score_distribution %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Score Distribution</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            {% for score, count in analytics.score_distribution.items() | sort %}
+            <div class="col">
+                <div class="text-center">
+                    <div class="progress" style="height: 100px;">
+                        <div class="progress-bar" role="progressbar"
+                            style="width: {{ (count / analytics.total_responses * 100) | round }}%; height: 100%;"
+                            aria-valuenow="{{ count }}" aria-valuemin="0"
+                            aria-valuemax="{{ analytics.total_responses }}">
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <strong>{{ score }}</strong>
+                        <small class="d-block text-muted">{{ count }}</small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Recent Responses -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-chat-quote me-2"></i>Recent Responses</h5>
+    </div>
+    <div class="card-body">
+        {% if recent_responses %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Score</th>
+                        {% if survey.survey_type == 'nps' %}
+                        <th>Category</th>
+                        {% endif %}
+                        <th>Feedback</th>
+                        <th>User</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for response in recent_responses %}
+                    <tr>
+                        <td>{{ response.completed_at.strftime('%Y-%m-%d %H:%M') if response.completed_at else '-' }}
+                        </td>
+                        <td>
+                            <span class="badge bg-primary">{{ response.score or '-' }}</span>
+                        </td>
+                        {% if survey.survey_type == 'nps' %}
+                        <td>
+                            {% if response.nps_category == 'promoter' %}
+                            <span class="badge bg-success">Promoter</span>
+                            {% elif response.nps_category == 'passive' %}
+                            <span class="badge bg-warning">Passive</span>
+                            {% elif response.nps_category == 'detractor' %}
+                            <span class="badge bg-danger">Detractor</span>
+                            {% endif %}
+                        </td>
+                        {% endif %}
+                        <td>
+                            {% for q_id, answer in response.responses.items() %}
+                            {% if answer is string and answer | length > 0 %}
+                            <small>{{ answer[:100] }}{{ '...' if answer | length > 100 }}</small>
+                            {% endif %}
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {% if response.user %}
+                            {{ response.user.username }}
+                            {% else %}
+                            <span class="text-muted">Anonymous</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted text-center py-3">No responses yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

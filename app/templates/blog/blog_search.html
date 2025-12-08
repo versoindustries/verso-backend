@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block additional_css %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/blog.css') }}">
+{% endblock %}
+
+{% block title %}Search: {{ query|e }} - Blog{% endblock %}
+
+{% block description %}Search results for "{{ query|e }}"{% endblock %}
+
+{% block content %}
+<section class="header-section">
+  <div class="container text-center py-10">
+    <h1 class="text-4xl md:text-5xl font-bold mb-4">
+      <i class="fas fa-search mr-2"></i>Search Results
+    </h1>
+    <p class="text-lg md:text-xl font-light text-gray-600">
+      {% if posts and posts.total > 0 %}
+        Found {{ posts.total }} result{{ 's' if posts.total != 1 else '' }} for "{{ query|e }}"
+      {% else %}
+        No results found for "{{ query|e }}"
+      {% endif %}
+    </p>
+    <hr class="w-24 mx-auto mt-6 border-gray-300">
+  </div>
+</section>
+
+<!-- Search Form -->
+<section class="search-form-section">
+  <div class="container py-4">
+    <form action="{{ url_for('blog.search') }}" method="GET" class="flex justify-center gap-2 max-w-xl mx-auto">
+      <input type="text" name="q" value="{{ query|e }}" placeholder="Search posts..." 
+             class="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+      <button type="submit" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+        <i class="fas fa-search"></i>
+      </button>
+    </form>
+  </div>
+</section>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <section class="flash-section">
+      <div class="container py-5">
+        {% for category, message in messages %}
+          <div class="alert {% if category == 'danger' %}bg-red-500{% elif category == 'warning' %}bg-yellow-500{% else %}bg-green-500{% endif %} text-white p-4 rounded-lg shadow-md flex items-center justify-between mb-2">
+            <span>{{ message|e }}</span>
+            <button class="close-alert text-white hover:text-gray-200" aria-label="Close alert">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+{% endwith %}
+
+<section class="blog-grid-section">
+  <div class="container py-8">
+    {% if posts and posts.items %}
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {% for post in posts.items %}
+          <article class="blog-card bg-white rounded-lg shadow-md hover:shadow-lg transition-transform duration-200 hover:scale-105">
+            <img 
+              src="{{ url_for('blog.serve_image', post_id=post.id) if post.image else url_for('static', filename='images/placeholder.jpg') }}" 
+              alt="{{ post.title|e }} thumbnail" 
+              class="blog-card-img w-full h-48 object-cover rounded-t-lg">
+            <div class="p-4">
+              <h2 class="text-xl font-bold mb-2 hover:text-blue-600 transition-colors">
+                <a href="{{ url_for('blog.show_post', slug=post.slug) }}">{{ post.title|e }}</a>
+              </h2>
+              <p class="text-gray-600 text-base line-clamp-3 mb-3">
+                {{ post.meta_description or post.content[:150]|striptags|e }}...
+              </p>
+              <div class="flex justify-between items-center text-sm text-gray-500">
+                <time datetime="{{ post.created_at.isoformat() }}">
+                  {{ post.created_at.strftime('%B %d, %Y') }}
+                </time>
+                {% if post.read_time_minutes %}
+                  <span><i class="fas fa-clock mr-1"></i>{{ post.read_time_minutes }} min read</span>
+                {% endif %}
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="text-center py-10">
+        <i class="fas fa-search text-4xl text-gray-400 mb-4"></i>
+        <p class="text-lg text-gray-600">No posts match your search.</p>
+        <a href="{{ url_for('blog.show_blog') }}" class="mt-4 inline-block text-blue-500 hover:underline">
+          <i class="fas fa-arrow-left mr-1"></i>Back to Blog
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+{% if posts and posts.items %}
+  <section class="pagination-section">
+    <div class="container py-8 text-center">
+      <nav class="flex justify-center space-x-2">
+        {% if posts.has_prev %}
+          <a href="{{ url_for('blog.search', q=query, page=posts.prev_num) }}" 
+             class="pagination-btn px-4 py-2 border rounded-md hover:bg-blue-500 hover:text-white transition-colors">
+            <i class="fas fa-chevron-left mr-1"></i> Previous
+          </a>
+        {% endif %}
+        
+        {% for page_num in posts.iter_pages(left_edge=1, left_current=1, right_current=2, right_edge=1) %}
+          {% if page_num %}
+            {% if page_num == posts.page %}
+              <span class="pagination-btn px-4 py-2 border rounded-md bg-blue-500 text-white font-bold">{{ page_num }}</span>
+            {% else %}
+              <a href="{{ url_for('blog.search', q=query, page=page_num) }}" 
+                 class="pagination-btn px-4 py-2 border rounded-md hover:bg-blue-500 hover:text-white transition-colors">{{ page_num }}</a>
+            {% endif %}
+          {% else %}
+            <span class="px-4 py-2 text-gray-500">...</span>
+          {% endif %}
+        {% endfor %}
+        
+        {% if posts.has_next %}
+          <a href="{{ url_for('blog.search', q=query, page=posts.next_num) }}" 
+             class="pagination-btn px-4 py-2 border rounded-md hover:bg-blue-500 hover:text-white transition-colors">
+            Next <i class="fas fa-chevron-right ml-1"></i>
+          </a>
+        {% endif %}
+      </nav>
+    </div>
+  </section>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.querySelectorAll('.close-alert').forEach(button => {
+    button.addEventListener('click', () => {
+      button.closest('.alert').remove();
+    });
+  });
+</script>
+{% endblock %}

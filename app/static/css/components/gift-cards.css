@@ -1,0 +1,30 @@
+/**
+ * Gift Cards Admin Styles
+ * 
+ * Component-specific styles for the gift cards admin interface.
+ */
+
+/* Gift card code styling */
+.admin-data-table code {
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+}
+
+/* KPI cards row */
+.gift-cards-kpi {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Balance display in table */
+.balance-positive {
+    color: var(--bs-success, #198754);
+    font-weight: 600;
+}
+
+.balance-empty {
+    color: var(--bs-secondary, #6c757d);
+}

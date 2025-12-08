@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+
+{% block title %}Messaging - Verso{% endblock %}
+
+{% block additional_css %}
+<style>
+    .messaging-container {
+        display: flex;
+        gap: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+        min-height: 60vh;
+    }
+
+    .sidebar {
+        width: 280px;
+        flex-shrink: 0;
+    }
+
+    .main-content {
+        flex: 1;
+        background: rgba(42, 42, 42, 0.9);
+        border-radius: 10px;
+        padding: 30px;
+    }
+
+    .channel-section {
+        margin-bottom: 20px;
+    }
+
+    .channel-section h4 {
+        color: var(--text-primary);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 10px;
+        opacity: 0.7;
+    }
+
+    .channel-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .channel-list li {
+        margin-bottom: 2px;
+    }
+
+    .channel-list a {
+        display: flex;
+        align-items: center;
+        padding: 10px 12px;
+        color: var(--text-primary);
+        text-decoration: none;
+        border-radius: 6px;
+        transition: background 0.2s ease;
+    }
+
+    .channel-list a:hover {
+        background: rgba(65, 105, 225, 0.15);
+    }
+
+    .channel-list a.archived {
+        opacity: 0.5;
+    }
+
+    .channel-icon {
+        margin-right: 8px;
+        opacity: 0.7;
+    }
+
+    .user-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .user-list li {
+        margin-bottom: 2px;
+    }
+
+    .user-list a {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        color: var(--text-primary);
+        text-decoration: none;
+        border-radius: 6px;
+        transition: background 0.2s ease;
+    }
+
+    .user-list a:hover {
+        background: rgba(65, 105, 225, 0.15);
+    }
+
+    .user-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--btn-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 10px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+
+    .create-channel-form {
+        background: rgba(31, 31, 31, 0.5);
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 20px;
+    }
+
+    .create-channel-form h5 {
+        color: var(--text-primary);
+        margin-bottom: 15px;
+    }
+
+    .form-row {
+        margin-bottom: 10px;
+    }
+
+    .form-row label {
+        display: block;
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+        color: var(--text-primary);
+    }
+
+    .form-row input,
+    .form-row select {
+        width: 100%;
+        padding: 8px 10px;
+        background: rgba(42, 42, 42, 0.8);
+        border: 1px solid rgba(65, 105, 225, 0.3);
+        border-radius: 5px;
+        color: var(--text-primary);
+    }
+
+    .welcome-message {
+        text-align: center;
+        padding: 50px 20px;
+    }
+
+    .welcome-message i {
+        font-size: 4rem;
+        color: var(--accent-blue);
+        margin-bottom: 20px;
+    }
+
+    .welcome-message h2 {
+        margin-bottom: 15px;
+    }
+
+    .welcome-message p {
+        color: rgba(255, 255, 255, 0.7);
+        margin-bottom: 20px;
+    }
+
+    .toggle-link {
+        font-size: 0.8rem;
+        color: var(--accent-blue);
+        text-decoration: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="messaging-container">
+    <div class="sidebar">
+        <!-- Public Channels -->
+        <div class="channel-section">
+            <h4><i class="fas fa-hashtag"></i> Channels</h4>
+            <ul class="channel-list">
+                {% for channel in public_channels %}
+                <li>
+                    <a href="{{ url_for('messaging.channel', channel_id=channel.id) }}"
+                        class="{% if channel.is_archived %}archived{% endif %}">
+                        <span class="channel-icon">#</span>
+                        {{ channel.name }}
+                        {% if channel.is_archived %}
+                        <small>(archived)</small>
+                        {% endif %}
+                    </a>
+                </li>
+                {% else %}
+                <li><span style="opacity: 0.5; padding: 10px 12px; display: block;">No channels yet</span></li>
+                {% endfor %}
+            </ul>
+            <a href="{{ url_for('messaging.index', archived='1' if not show_archived else '0') }}" class="toggle-link">
+                {% if show_archived %}Hide{% else %}Show{% endif %} archived
+            </a>
+        </div>
+
+        <!-- Private Channels -->
+        {% if private_channels %}
+        <div class="channel-section">
+            <h4><i class="fas fa-lock"></i> Private</h4>
+            <ul class="channel-list">
+                {% for channel in private_channels %}
+                <li>
+                    <a href="{{ url_for('messaging.channel', channel_id=channel.id) }}">
+                        <span class="channel-icon"><i class="fas fa-lock"></i></span>
+                        {{ channel.name }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Direct Messages -->
+        <div class="channel-section">
+            <h4><i class="fas fa-comments"></i> Direct Messages</h4>
+            <ul class="channel-list">
+                {% for channel in dm_channels %}
+                <li>
+                    <a href="{{ url_for('messaging.channel', channel_id=channel.id) }}">
+                        <span class="user-avatar">{{ channel.get_display_name(current_user)[0].upper() }}</span>
+                        {{ channel.get_display_name(current_user) }}
+                    </a>
+                </li>
+                {% else %}
+                <li><span style="opacity: 0.5; padding: 10px 12px; display: block;">No conversations yet</span></li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Start New DM -->
+        <div class="channel-section">
+            <h4><i class="fas fa-plus"></i> New Conversation</h4>
+            <ul class="user-list">
+                {% for user in users[:5] %}
+                <li>
+                    <a href="{{ url_for('messaging.direct_message', user_id=user.id) }}">
+                        <span class="user-avatar">{{ user.username[0].upper() }}</span>
+                        {{ user.username }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Create Channel Form -->
+        <div class="create-channel-form">
+            <h5><i class="fas fa-plus-circle"></i> Create Channel</h5>
+            <form action="{{ url_for('messaging.create_channel') }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="form-row">
+                    <input type="text" name="name" placeholder="Channel name" required>
+                </div>
+                <div class="form-row">
+                    <select name="type">
+                        <option value="public">Public</option>
+                        <option value="private">Private</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm" style="width: 100%;">
+                    <i class="fas fa-plus"></i> Create
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="welcome-message">
+            <i class="fas fa-comments"></i>
+            <h2>Welcome to Messaging</h2>
+            <p>Select a channel or start a direct conversation.</p>
+            <p>Use @username to mention someone in your messages.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

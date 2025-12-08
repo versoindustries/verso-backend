@@ -1,0 +1,93 @@
+{% extends "admin/dashboard_base.html" %}
+
+{% block title %}Form Builder - Admin{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components/admin-data-table.css') }}">
+{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-ui-checks-grid me-2"></i>Forms</h2>
+    <a href="{{ url_for('forms_admin.create_form') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i> Create Form
+    </a>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}
+<div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endfor %}
+{% endwith %}
+
+<div class="card">
+    <div class="card-body">
+        {% if forms %}
+        {# React AdminDataTable Component #}
+        <div data-react-component="AdminDataTable" data-react-props='{
+                "columns": [
+                    {"accessorKey": "name", "header": "Name", "html": true},
+                    {"accessorKey": "slug", "header": "Slug", "html": true},
+                    {"accessorKey": "fields_count", "header": "Fields"},
+                    {"accessorKey": "submissions_count", "header": "Submissions"},
+                    {"accessorKey": "new_submissions", "header": "New", "html": true},
+                    {"accessorKey": "status", "header": "Status", "html": true},
+                    {"accessorKey": "created_at", "header": "Created"},
+                    {"accessorKey": "actions", "header": "Actions", "sortable": false, "html": true}
+                ],
+                "data": {{ forms_json | safe }},
+                "defaultPageSize": 25,
+                "emptyMessage": "No forms found matching your search."
+             }'>
+            <!-- Fallback table while React loads -->
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Slug</th>
+                            <th>Fields</th>
+                            <th>Submissions</th>
+                            <th>New</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for form in forms %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('forms_admin.edit_form', form_id=form.id) }}">
+                                    <strong>{{ form.name }}</strong>
+                                </a>
+                            </td>
+                            <td><code>{{ form.slug }}</code></td>
+                            <td>{{ form.fields_schema|length if form.fields_schema else 0 }}</td>
+                            <td>{{ form.submissions_count }}</td>
+                            <td>{{ form.new_submissions }}</td>
+                            <td>{{ 'Active' if form.is_active else 'Inactive' }}</td>
+                            <td>{{ form.created_at.strftime('%Y-%m-%d') if form.created_at else '-' }}</td>
+                            <td>-</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-ui-checks-grid display-1 text-muted"></i>
+            <h4 class="mt-3">No Forms Yet</h4>
+            <p class="text-muted">Create your first form to start collecting data.</p>
+            <a href="{{ url_for('forms_admin.create_form') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-1"></i> Create Form
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

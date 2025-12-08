@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Automation Workflows{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Automation Workflows</h1>
+        <a href="{{ url_for('automation.new_workflow') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> New Workflow
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-0">
+            <div data-react-component="AdminDataTable" data-react-props='{
+                "columns": [
+                    {"accessorKey": "name", "header": "Name", "html": true, "sortable": true},
+                    {"accessorKey": "trigger_event", "header": "Trigger Event", "html": true, "sortable": true},
+                    {"accessorKey": "steps", "header": "Steps", "sortable": true},
+                    {"accessorKey": "status", "header": "Status", "html": true},
+                    {"accessorKey": "actions", "header": "Actions", "html": true}
+                ],
+                "data": {{ workflows_json | safe }},
+                "idKey": "id",
+                "emptyStateMessage": "No workflows defined.",
+                "emptyStateLink": "{{ url_for(\"automation.new_workflow\") }}",
+                "emptyStateLinkText": "Create one now"
+            }'></div>
+        </div>
+    </div>
+</div>
+{% endblock %}

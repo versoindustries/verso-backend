@@ -1,0 +1,90 @@
+{% extends "admin/dashboard_base.html" %}
+
+{% block title %}Surveys - Admin{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components/admin-data-table.css') }}">
+{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-clipboard-data me-2"></i>Surveys</h2>
+    <a href="{{ url_for('forms_admin.create_survey') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i> Create Survey
+    </a>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}
+<div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endfor %}
+{% endwith %}
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5>NPS Surveys</h5>
+                <h2>{{ surveys | selectattr('survey_type', 'eq', 'nps') | list | length }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5>CSAT Surveys</h5>
+                <h2>{{ surveys | selectattr('survey_type', 'eq', 'csat') | list | length }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h5>Total Responses</h5>
+                <h2>{{ surveys | sum(attribute='response_count') }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if surveys %}
+        <div data-react-component="AdminDataTable" data-react-props='{
+            "columns": [
+                {"accessorKey": "name", "header": "Name", "html": true, "sortable": true},
+                {"accessorKey": "type", "header": "Type", "html": true},
+                {"accessorKey": "responses", "header": "Responses", "sortable": true},
+                {"accessorKey": "score", "header": "Score", "html": true},
+                {"accessorKey": "status", "header": "Status", "html": true},
+                {"accessorKey": "created_at", "header": "Created", "sortable": true},
+                {"accessorKey": "actions", "header": "Actions", "html": true, "sortable": false}
+            ],
+            "data": {{ surveys_json | safe }},
+            "idKey": "id",
+            "defaultPageSize": 25,
+            "emptyMessage": "No surveys yet."
+        }'>
+            <!-- Loading fallback -->
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-clipboard-data display-1 text-muted"></i>
+            <h4 class="mt-3">No Surveys Yet</h4>
+            <p class="text-muted">Create your first survey to start collecting feedback.</p>
+            <a href="{{ url_for('forms_admin.create_survey') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-1"></i> Create Survey
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

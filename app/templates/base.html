@@ -1,28 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+    {% if business_config.get('ga4_tracking_id') %}
+    <!-- Google Analytics 4 -->
+    <script async
+        src="https://www.googletagmanager.com/gtag/js?id={{ business_config.get('ga4_tracking_id') }}"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', "{{ business_config.get('ga4_tracking_id') }}");
+    </script>
+    {% endif %}
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
-    <meta name="description" content="{% block description %}At Verso, we're not merely developing software; we're architecting an entire ecosystem.{% endblock %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="{% block description %}At Verso, we're not merely developing software; we're architecting an entire ecosystem.{% endblock %}">
     <meta property="og:type" content="website">
     <meta property="og:image" content="{{ url_for('static', filename='images/logo.png') }}">
     <meta name="twitter:card" content="summary_large_image">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/favicon-32x32.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='images/favicon-16x16.png') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}">
-    <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='images/android-chrome-192x192.png') }}">
-    <link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='images/android-chrome-512x512.png') }}">
-    <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
+    <link rel="icon" type="image/png" sizes="192x192"
+        href="{{ url_for('static', filename='images/android-chrome-192x192.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512"
+        href="{{ url_for('static', filename='images/android-chrome-512x512.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <link rel="mask-icon" href="{{ url_for('static', filename='images/safari-pinned-tab.svg') }}" color="#5bbad5">
     <meta name="theme-color" content="#333333">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/base.css') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <style>
+        :root {
+
+            /* Dynamic theme variables from BusinessConfig */
+            --primary-color: {
+                    {
+                    business_config.get('primary_color', '#4169e1')
+                }
+            }
+
+            ;
+
+            --secondary-color: {
+                    {
+                    business_config.get('secondary_color', '#6c757d')
+                }
+            }
+
+            ;
+
+            --accent-color: {
+                    {
+                    business_config.get('accent_color', '#28a745')
+                }
+            }
+
+            ;
+
+            --font-family: {
+                    {
+                    business_config.get('font_family', "'Neon-Regular', sans-serif")
+                }
+            }
+
+            ;
+
+            /* Override base.css aliases with dynamic values */
+            --accent-blue: var(--primary-color);
+            --accent-blue-dark: var(--primary-color);
+            --btn-gradient: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        }
+
+        body {
+            font-family: var(--font-family) !important;
+        }
+
+        /* Hide legacy flash messages as we use Toast now, or keep if useful for non-react pages */
+        /* .flash-messages { display: none; } */
+    </style>
+    <script>
+        window.versoContext = {
+            user: {
+                isAuthenticated: {{ current_user.is_authenticated | tojson }},
+        {% if current_user.is_authenticated %}
+        firstName: { { current_user.first_name | tojson } },
+        roles: [
+            {% for role in current_user.roles %}
+        "{{ role.name }}",
+            {% endfor %}
+                ],
+        {% endif %}
+            },
+        config: {
+            site_name: "Verso Backend",
+                primary_color: "{{ business_config.get('primary_color', '#4169e1') }}",
+                    secondary_color: "{{ business_config.get('secondary_color', '#6c757d') }}",
+                        accent_color: "{{ business_config.get('accent_color', '#28a745') }}",
+                            font_family: "{{ business_config.get('font_family', 'Neon-Regular, sans-serif') }}",
+                                ga4_tracking_id: "{{ business_config.get('ga4_tracking_id', '') }}"
+        },
+        urls: {
+            index: "{{ url_for('main_routes.index') }}",
+                about: "{{ url_for('main_routes.about') }}",
+                    services: "{{ url_for('main_routes.services') }}",
+                        contact: "{{ url_for('main_routes.contact') }}",
+                            login: "{{ url_for('auth.login') }}",
+                                register: "{{ url_for('auth.register') }}",
+                                    logout: "{{ url_for('auth.logout') }}",
+                                        blogIndex: "{{ url_for('blog.show_blog') }}",
+                                            blogManage: "{{ url_for('blog.manage_posts') }}",
+                                                blogNew: "{{ url_for('blog.new_post') }}",
+                                                    employeeDashboard: "{{ url_for('employee.dashboard') }}",
+                                                        messaging: "{{ url_for('messaging.index') }}",
+                                                            adminDashboard: "{{ url_for('admin.admin_dashboard') }}",
+                                                                setLanguageEn: "{{ url_for('main_routes.set_language', language='en') }}",
+                                                                    setLanguageEs: "{{ url_for('main_routes.set_language', language='es') }}"
+        },
+        unreadNotificationsCount: { { unread_notifications_count |default (0) } },
+        year: new Date().getFullYear(),
+            version: "{{ current_version }}"
+        };
+    </script>
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    .btn-23,
+    .title-font {
+    font-family: var(--font-family) !important;
+    }
+    </style>
     <title>{% block title %}DemoSite{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/components.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome/all.min.css') }}">
     <script src="{{ url_for('static', filename='js/fullcalendar/index.global.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
-    <script src="https://polyfill-fastly.io/v3/polyfill.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='js/jquery-3.6.0.min.js') }}"></script>
     <script>
         // Utility function to get the CSRF token from the cookie
         function getCsrfToken() {
@@ -35,12 +154,13 @@
                     return cookie.substring(name.length, cookie.length);
                 }
             }
-            return null;
+            const meta = document.querySelector('meta[name="csrf-token"]');
+            return meta ? meta.getAttribute('content') : null;
         }
 
         // Example: Set up CSRF token for AJAX requests with jQuery
         $.ajaxSetup({
-            beforeSend: function(xhr, settings) {
+            beforeSend: function (xhr, settings) {
                 if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
                     xhr.setRequestHeader('X-CSRFToken', getCsrfToken());
                 }
@@ -49,310 +169,71 @@
     </script>
     {% block additional_css %}{% endblock %}
     {% block head %}{% endblock %} <!-- Additional head content -->
+    {{ vite_tags() }}
 </head>
+
 <body {% block body_attributes %}{% endblock %}>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <div class="alert-bar">
         Demo Site
         <a href="{{ url_for('main_routes.contact') }}" class="btn btn-23">Contact</a>
-    </div>    
-    <header>
-        <div class="logo">
-            <a href="{{ url_for('main_routes.index') }}">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
-            </a>
-        </div>
-        <h1 class="title-font"><a href="{{ url_for('main_routes.index') }}" style="color: #fff; text-decoration: none;">Verso Backend</a></h1>
-        <div id="menuToggle">
-            <input type="checkbox" />
-            <span></span>
-            <span></span>
-            <span></span>
-            <nav id="menu">
-                <ul>
-                    <li><a href="{{ url_for('main_routes.index') }}">Home</a></li>
-                    
-                    <!-- About Dropdown -->
-                    <li class="dropdown">
-                        <a href="{{ url_for('main_routes.about') }}" class="dropbtn">About</a>
-                        <div class="dropdown-content">
-                            <a href="{{ url_for('blog.show_blog') }}">Blog Posts</a>
-                        </div>
-                    </li>
-                    
-                    <!-- Services Dropdown -->
-                    <li class="dropdown">
-                        <a href="{{ url_for('main_routes.services') }}" class="dropbtn">Services</a>
-                        <div class="dropdown-content">
-                        </div>
-                    </li>
-                    
-                    <li><a href="{{ url_for('main_routes.contact') }}">Contact</a></li>
-                    
-                    <!-- Blog Management Dropdown (Visible to Bloggers/Admins) -->
-                    {% if current_user.is_authenticated and current_user.has_role('blogger') %}
-                        <li class="dropdown blog-management-dropdown">
-                            <a href="#" class="dropbtn" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-blog"></i> Blog Management
-                            </a>
-                            <div class="dropdown-content">
-                                <a href="{{ url_for('blog.manage_posts') }}"><i class="fas fa-list"></i> Manage Posts</a>
-                                <a href="{{ url_for('blog.new_post') }}"><i class="fas fa-plus"></i> Create New Post</a>
-                            </div>
-                        </li>
-                    {% endif %}
-                    
-                    {% if current_user.is_authenticated %}
-                        <!-- User Dropdown -->
-                        <li class="dropdown">
-                            <a href="#" class="dropbtn">Welcome, {{ current_user.first_name }}</a>
-                            <div class="dropdown-content">
-                                <a href="{{ url_for('auth.logout') }}">Logout</a>
-                                {% if current_user.has_role('admin') %}
-                                    <div class="divider"></div>
-                                    <a href="{{ url_for('admin.admin_dashboard') }}">Admin Dashboard</a>
-                                {% endif %}
-                            </div>
-                        </li>
-                    {% else %}
-                        <li><a href="{{ url_for('auth.login') }}">Login</a></li>
-                        <li><a href="{{ url_for('auth.register') }}">Register</a></li>
-                    {% endif %}
-                </ul>
-                <div class="small-spacer"></div>
-                <div class="notification-icon">
-                    <a href="#" id="notification-icon">
-                        Notifications
-                        {% if unread_notifications_count|default(0) > 0 %}
-                            <span class="badge">{{ unread_notifications_count }}</span>
-                        {% endif %}
-                    </a>
-                    <!-- Notification Dropdown -->
-                    <div class="notification-dropdown" id="notification-dropdown">
-                        <ul id="notification-list">
-                            <!-- Notifications will be dynamically loaded here -->
-                            <li>Loading notifications...</li>
-                        </ul>
-                        <button id="mark-all-read">Mark All as Read</button>
-                    </div>
-                </div>
-            </nav>
-        </div>
-    </header>
+    </div>
+    <div data-react-component="Header"></div>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="flash-messages">
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
+    {% if messages %}
+    <div class="flash-messages" aria-live="polite">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
     {% endwith %}
 
-    <div class="container">
+    <main class="container" id="main-content" role="main">
         {% block content %}
-            {% block body %}{% endblock %}
-            <!-- Main content will be overridden in child templates -->
+        {% block body %}{% endblock %}
+        <!-- Main content will be overridden in child templates -->
         {% endblock %}
-    </div>
+        </div>
 
-<div class="section-spacer"></div>
+        <div class="section-spacer"></div>
 
-{% if not hide_estimate_form %}
-<div class="wrapper" id="appointment-form">
-    <div class="form-heading">
-        <h2>Book an Appointment Directly with US</h2>
-    </div>
+        {% if not hide_estimate_form %}
+        <div data-react-component="BookingWizard"></div>
+        {% endif %}
 
-    <!-- Step 1: Personal Information -->
-    <div id="step-1" class="left-container">
-        <form id="personal-info-form" class="form-box" method="POST" action="{{ url_for('main_routes.request_estimate') }}">
-            {{ erf_form.hidden_tag() }}
-            <fieldset class="fieldset">
-                <legend class="legend">Personal Information:</legend>
+        {% block scripts %}{% endblock %}
 
-                <div class="form-group">
-                    {{ erf_form.first_name.label(class="form-label") }}<span class="text-danger">* Required</span>
-                    {{ erf_form.first_name(class="form-control", required=True) }}
-                    {% if erf_form.first_name.errors %}
-                        <div class="form-error">
-                            {% for error in erf_form.first_name.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
+        <div class="section-spacer"></div>
 
-                <div class="form-group">
-                    {{ erf_form.last_name.label(class="form-label") }}<span class="text-danger">* Required</span>
-                    {{ erf_form.last_name(class="form-control", required=True) }}
-                    {% if erf_form.last_name.errors %}
-                        <div class="form-error">
-                            {% for error in erf_form.last_name.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
+        <div data-react-component="Footer"></div>
 
-                <div class="form-group">
-                    {{ erf_form.phone.label(class="form-label") }}<span class="text-danger">* Required</span>
-                    {{ erf_form.phone(class="form-control", required=True) }}
-                    {% if erf_form.phone.errors %}
-                        <div class="form-error">
-                            {% for error in erf_form.phone.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
 
-                <div class="form-group">
-                    {{ erf_form.email.label(class="form-label") }}<span class="text-danger">* Required</span>
-                    {{ erf_form.email(class="form-control", required=True) }}
-                    {% if erf_form.email.errors %}
-                        <div class="form-error">
-                            {% for error in erf_form.email.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-            </fieldset>
-            <!-- Next Button -->
-            <div class="form-group">
-                <button type="button" class="btn btn-primary" id="next-button">Next</button>
-            </div>
-        </form>
-    </div>
 
-    <!-- Step 2: Appointment Information (Initially Hidden) -->
-    <div id="step-2" class="left-container" style="display: none;">
-        <form id="appointment-form" class="form-box" action="{{ url_for('main_routes.request_estimate') }}" method="post">
-            {{ erf_form.hidden_tag() }}
-            
-            <!-- Hidden inputs for personal info from Step 1 -->
-            <input type="hidden" id="hidden_first_name" name="first_name">
-            <input type="hidden" id="hidden_last_name" name="last_name">
-            <input type="hidden" id="hidden_phone" name="phone">
-            <input type="hidden" id="hidden_email" name="email">
-            
-            <fieldset class="fieldset">
-                <legend class="legend">Appointment Information:</legend>
-                
-                <!-- Estimator Selection -->
-                <div class="form-group">
-                    <label for="estimator" class="form-label">Select Estimator</label><span class="text-danger">* Required</span>
-                    {{ erf_form.estimator(class="form-control", required=True) }}
-                    {% if erf_form.estimator.errors %}
-                        <div class="form-error">
-                            {% for error in erf_form.estimator.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-                
-                <!-- Service Selection -->
-                <div class="form-group">
-                    {{ erf_form.service.label(class="form-label") }}<span class="text-danger">* Required</span>
-                    {{ erf_form.service(class="form-control", required=True) }}
-                    {% if erf_form.service.errors %}
-                        <div class="form-error">
-                            {% for error in erf_form.service.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
 
-                <!-- Preferred Date -->
-                <div class="form-group">
-                    {{ erf_form.preferred_date.label(class="form-label") }}<span class="text-danger">* Required</span>
-                    <input type="date" id="{{ erf_form.preferred_date.id }}" name="{{ erf_form.preferred_date.name }}" class="form-control" required>
-                    {% if erf_form.preferred_date.errors %}
-                        <div class="form-error">
-                            {% for error in erf_form.preferred_date.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-
-                <!-- Preferred Time -->
-                <div class="form-group">
-                    {{ erf_form.preferred_time.label(class="form-label") }}<span class="text-danger">* Required</span>
-                    <select id="preferred_time" name="{{ erf_form.preferred_time.name }}" class="form-control" required>
-                        <option value="">Select a time</option>
-                    </select>
-                    {% if erf_form.preferred_time.errors %}
-                        <div class="form-error">
-                            {% for error in erf_form.preferred_time.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-            </fieldset>
-            
-            <!-- Submit Button -->
-            <div class="form-group">
-                <input type="hidden" name="referrer" value="{{ request.url }}">
-                {{ erf_form.submit(class="btn btn-primary") }}
-            </div>
-        </form>
-    </div>
-
-    <!-- Calendar (Initially Hidden) -->
-    <div class="right-container" style="display: none;" id="calendar-container">
-        <div id="calendar" class="calendar-box"></div>
-    </div>
-    <div class="small-spacer"></div>
-</div>                 
-{% endif %}
-
-{% block scripts %}{% endblock %}
-
-<div class="section-spacer"></div>
-
-<footer>
-    <p>&copy; <span id="current-year"></span> Verso Industries. All rights reserved.</p>
-    <p>&copy; <span id="current-year-2"></span> Empowered by our own backend!</a>.</p>
-</footer>
-    
-<script>
-    // Get the current year
-    const year = new Date().getFullYear();
-
-    // Set the current year in the footer
-    document.getElementById('current-year').textContent = year;
-    document.getElementById('current-year-2').textContent = year;
-</script>
-
-<script>
-    $(document).ready(function() {
-        // Close sidebar when clicking outside
-        $(document).on('click', function(event) {
-            const $menu = $('#menu');
-            const $menuToggle = $('#menuToggle input');
-            const $target = $(event.target);
-
-            // Check if the menu is open and the click is outside both the menu and toggle
-            if ($menuToggle.is(':checked') && !$target.closest('#menu').length && !$target.closest('#menuToggle').length) {
-                $menuToggle.prop('checked', false); // Uncheck the toggle to close the menu
-            }
+        if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+        navigator.serviceWorker.register("{{ url_for('static', filename='sw.js') }}")
+        .then(registration => {
+        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        })
+        .catch(err => {
+        console.log('ServiceWorker registration failed: ', err);
         });
-
-        // Ensure dropdowns don’t trigger the outside click closure
-        $('.dropdown-content, .notification-dropdown').on('click', function(event) {
-            event.stopPropagation(); // Prevents clicks inside dropdowns from closing the menu
         });
-    });
-</script>
-    
-<script src="{{ url_for('static', filename='js/calendar.js') }}"> defer</script>    
-    
+        }
+        </script>
+
+        <script src="{{ url_for('static', filename='js/calendar.js') }}"> defer</script>
+
+        {# Phase 24: Real User Monitoring (RUM) Script Injection #}
+        {% if rum_script %}
+        {{ rum_script|safe }}
+        {% endif %}
+
 </body>
+
 </html>

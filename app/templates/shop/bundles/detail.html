@@ -1,0 +1,137 @@
+{% extends "shop/base.html" %}
+
+{% block title %}{{ bundle.name }} - {{ business_config.company_name|default('Shop') }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('shop.index') }}">Shop</a></li>
+            <li class="breadcrumb-item active">{{ bundle.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Bundle Image -->
+        <div class="col-lg-6 mb-4">
+            {% if bundle.image_id %}
+            <img src="{{ url_for('media_bp.serve_media', media_id=bundle.image_id) }}" class="img-fluid rounded shadow"
+                alt="{{ bundle.name }}">
+            {% else %}
+            <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 400px;">
+                <i class="fas fa-box-open fa-5x text-muted"></i>
+            </div>
+            {% endif %}
+
+            <!-- Savings Badge -->
+            {% if bundle.get_savings() > 0 %}
+            <div class="position-absolute top-0 end-0 m-3">
+                <span class="badge bg-danger fs-5 p-2">
+                    Save ${{ "%.2f"|format(bundle.get_savings() / 100) }}
+                </span>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Bundle Details -->
+        <div class="col-lg-6">
+            <h1 class="display-6 fw-bold mb-3">{{ bundle.name }}</h1>
+
+            {% if bundle.description %}
+            <p class="lead text-muted mb-4">{{ bundle.description }}</p>
+            {% endif %}
+
+            <!-- Pricing -->
+            <div class="mb-4">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="fs-2 fw-bold text-primary">${{ "%.2f"|format(bundle.get_bundle_price() / 100) }}</span>
+                    {% if bundle.get_savings() > 0 %}
+                    <span class="fs-4 text-decoration-line-through text-muted">${{
+                        "%.2f"|format(bundle.get_original_price() / 100) }}</span>
+                    <span class="badge bg-success fs-6">
+                        {% if bundle.discount_type == 'percentage' %}
+                        {{ bundle.discount_value }}% OFF
+                        {% else %}
+                        ${{ "%.2f"|format(bundle.discount_value / 100) }} OFF
+                        {% endif %}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Bundle Contents -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-box me-2"></i>What's Included</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for item in bundle.items %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            {% if item.product.media_id %}
+                            <img src="{{ url_for('media_bp.serve_media', media_id=item.product.media_id) }}"
+                                class="rounded me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                            {% else %}
+                            <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center"
+                                style="width: 50px; height: 50px;">
+                                <i class="fas fa-image text-muted"></i>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <strong>{{ item.product.name }}</strong>
+                                {% if item.variant %}
+                                <br><small class="text-muted">{{ item.variant.name }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-secondary">x{{ item.quantity }}</span>
+                            {% if item.is_optional %}
+                            <br><small class="text-muted">Optional</small>
+                            {% endif %}
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <div class="card-footer bg-light">
+                    <div class="d-flex justify-content-between">
+                        <span>{{ bundle.items.count() }} items</span>
+                        <span class="text-success fw-bold">You save ${{ "%.2f"|format(bundle.get_savings() / 100)
+                            }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add to Cart Form -->
+            <form method="POST" action="{{ url_for('ecommerce.add_bundle_to_cart', slug=bundle.slug) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                {% set all_in_stock = true %}
+                {% for item in bundle.items %}
+                {% if not item.is_optional and item.product.inventory_count < item.quantity %} {% set all_in_stock=false
+                    %} {% endif %} {% endfor %} {% if all_in_stock %} <button type="submit"
+                    class="btn btn-primary btn-lg w-100 mb-3">
+                    <i class="fas fa-shopping-cart me-2"></i>
+                    Add Bundle to Cart - ${{ "%.2f"|format(bundle.get_bundle_price() / 100) }}
+                    </button>
+                    {% else %}
+                    <button class="btn btn-secondary btn-lg w-100 mb-3" disabled>
+                        <i class="fas fa-times-circle me-2"></i>
+                        Some Items Out of Stock
+                    </button>
+                    {% endif %}
+            </form>
+
+            <!-- Individual Product Links -->
+            <p class="text-center text-muted small">
+                Or buy items individually:
+                {% for item in bundle.items %}
+                <a href="{{ url_for('shop.product_detail', product_id=item.product.id) }}" class="text-decoration-none">
+                    {{ item.product.name }}</a>{% if not loop.last %}, {% endif %}
+                {% endfor %}
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

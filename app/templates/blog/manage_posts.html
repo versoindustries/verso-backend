@@ -5,7 +5,8 @@
 {% block description %}View, edit, or delete your blog posts below.{% endblock %}
 
 {% block additional_css %}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/manage_posts.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components/admin-data-table.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components/blog-manage-posts.css') }}">
 {% endblock %}
 
 {% block head %}
@@ -30,127 +31,127 @@
 {% endblock %}
 
 {% block content %}
-<section class="header-section">
-  <div class="header-content">
-    <h1><i class="fas fa-blog"></i> {{ title }}</h1>
-    <p>{{ description }}</p>
-    <nav class="breadcrumb">
-      <a href="{{ url_for('blog.show_blog') }}">Blog</a> > <span>Manage Posts</span>
-    </nav>
+<div class="container py-4">
+  {# Breadcrumb #}
+  <nav class="blog-breadcrumb">
+    <a href="{{ url_for('blog.show_blog') }}">Blog</a> &gt; <span>Manage Posts</span>
+  </nav>
+
+  {# Page header #}
+  <div class="blog-manage-header">
+    <h1><i class="fas fa-blog me-2"></i>Manage Your Posts</h1>
+    <a href="{{ url_for('blog.new_post') }}" class="btn btn-primary">
+      <i class="fas fa-plus me-1"></i> New Post
+    </a>
   </div>
-</section>
 
-<section class="post-list-section">
-  {% if posts.items %}
-    <div class="post-list-container">
-      {% for post in posts.items %}
-        <article class="post-card">
-          {% if post.image and post.image_mime_type %}
-            <img src="{{ url_for('blog.serve_image', post_id=post.id) }}" alt="{{ post.title | e }}" class="post-thumbnail">
-          {% else %}
-            <img src="{{ url_for('static', filename='images/placeholder.jpg') }}" alt="Placeholder" class="post-thumbnail">
-          {% endif %}
-          <div class="post-content">
-            <h2 class="post-title">{{ post.title | e }}</h2>
-            <p class="post-meta">Posted on {{ post.created_at.strftime('%Y-%m-%d') }}</p>
-            {% if current_user.has_role('admin') %}
-              <p class="post-meta">Author: {{ post.author.username | e }}</p>
-            {% endif %}
-            <div class="post-actions">
-              <a href="{{ url_for('blog.show_post', slug=post.slug) }}" class="action-button view-button">
-                <i class="fas fa-eye"></i> View
-              </a>
-              <a href="{{ url_for('blog.edit_post', post_id=post.id) }}" class="action-button edit-button">
-                <i class="fas fa-edit"></i> Edit
-              </a>
-              <form action="{{ url_for('blog.delete_post', id=post.id) }}" method="POST" class="delete-form">
-                {{ form.csrf_token }}
-                <button type="submit" class="action-button delete-button">
-                  <i class="fas fa-trash"></i> Delete
-                </button>
-              </form>
-            </div>
-          </div>
-        </article>
-      {% endfor %}
-    </div>
-  {% else %}
-    <div class="no-posts-alert">
-      <p>No posts available. Create one now!</p>
-      <a href="{{ url_for('blog.new_post') }}" class="create-button">Create Post</a>
-    </div>
-  {% endif %}
-</section>
+  {# Flash messages #}
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+  <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show">
+    {{ message | e }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  {% endfor %}
+  {% endwith %}
 
-{% if posts.items %}
-<section class="pagination-section">
-  <div class="pagination-container">
-    {% if posts.has_prev %}
-      <a href="{{ url_for('blog.manage_posts', page=posts.prev_num) }}" class="pagination-button">
-        <i class="fas fa-chevron-left"></i> Previous
-      </a>
-    {% else %}
-      <span class="pagination-button disabled">
-        <i class="fas fa-chevron-left"></i> Previous
-      </span>
-    {% endif %}
-
-    {% for page_num in posts.iter_pages() %}
-      {% if page_num %}
-        {% if page_num == posts.page %}
-          <span class="pagination-button current">{{ page_num }}</span>
-        {% else %}
-          <a href="{{ url_for('blog.manage_posts', page=page_num) }}" class="pagination-button">{{ page_num }}</a>
-        {% endif %}
+  {# Posts table #}
+  <div class="card blog-manage-table">
+    <div class="card-body">
+      {% if posts and posts.items %}
+      <div data-react-component="AdminDataTable" data-react-props='{
+                    "columns": [
+                        {"accessorKey": "thumbnail", "header": "", "sortable": false, "html": true},
+                        {"accessorKey": "title", "header": "Title", "html": true},
+                        {% if is_admin %}{"accessorKey": "author", "header": "Author"},{% endif %}
+                        {"accessorKey": "date", "header": "Date"},
+                        {"accessorKey": "status", "header": "Status", "html": true},
+                        {"accessorKey": "actions", "header": "Actions", "sortable": false, "html": true}
+                    ],
+                    "data": {{ posts_json | safe }},
+                    "defaultPageSize": 25,
+                    "emptyMessage": "No posts found matching your search."
+                }'>
+        <!-- Fallback table while React loads -->
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Title</th>
+                {% if is_admin %}<th>Author</th>{% endif %}
+                <th>Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for post in posts.items %}
+              <tr>
+                <td>
+                  {% if post.image and post.image_mime_type %}
+                  <img src="{{ url_for('blog.serve_image', post_id=post.id) }}" alt="{{ post.title | e }}"
+                    class="img-thumbnail" style="max-width: 60px;">
+                  {% else %}
+                  <span class="text-muted"><i class="fas fa-image"></i></span>
+                  {% endif %}
+                </td>
+                <td><a href="{{ url_for('blog.show_post', slug=post.slug) }}"><strong>{{ post.title | e }}</strong></a>
+                </td>
+                {% if is_admin %}<td>{{ post.author.username | e }}</td>{% endif %}
+                <td>{{ post.created_at.strftime('%Y-%m-%d') }}</td>
+                <td>
+                  {% if post.is_published %}
+                  <span class="badge bg-success">Published</span>
+                  {% elif post.publish_at %}
+                  <span class="badge bg-warning">Scheduled</span>
+                  {% else %}
+                  <span class="badge bg-secondary">Draft</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <a href="{{ url_for('blog.show_post', slug=post.slug) }}" class="btn btn-sm btn-outline-secondary"><i
+                      class="fas fa-eye"></i></a>
+                  <a href="{{ url_for('blog.edit_post', post_id=post.id) }}" class="btn btn-sm btn-outline-primary"><i
+                      class="fas fa-edit"></i></a>
+                  <form action="{{ url_for('blog.delete_post', id=post.id) }}" method="POST"
+                    class="d-inline delete-form">
+                    {{ form.csrf_token }}
+                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
       {% else %}
-        <span class="pagination-ellipsis">...</span>
+      <div class="blog-manage-empty">
+        <i class="fas fa-file-alt"></i>
+        <h3>No Posts Yet</h3>
+        <p>Create your first blog post to get started.</p>
+        <a href="{{ url_for('blog.new_post') }}" class="btn btn-primary">
+          <i class="fas fa-plus me-1"></i> Create Post
+        </a>
+      </div>
       {% endif %}
-    {% endfor %}
-
-    {% if posts.has_next %}
-      <a href="{{ url_for('blog.manage_posts', page=posts.next_num) }}" class="pagination-button">
-        Next <i class="fas fa-chevron-right"></i>
-      </a>
-    {% else %}
-      <span class="pagination-button disabled">
-        Next <i class="fas fa-chevron-right"></i>
-      </span>
-    {% endif %}
-  </div>
-</section>
-{% endif %}
-
-<section class="footer-section">
-  <div class="footer-content">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="flash-message {{ category }}">
-            <i class="fas fa-exclamation-circle"></i> {{ message | e }}
-            <button class="dismiss-button">Dismiss</button>
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
-    <div class="footer-links">
-      <a href="{{ url_for('blog.new_post') }}" class="create-button">Create New Post</a>
-      <a href="{{ url_for('blog.show_blog') }}">Back to Blog</a>
-      <a href="{{ url_for('main_routes.contact') }}">Contact Support</a>
     </div>
   </div>
-</section>
+
+  {# Footer links #}
+  <div class="mt-4 text-center">
+    <a href="{{ url_for('blog.show_blog') }}" class="btn btn-outline-secondary">
+      <i class="fas fa-arrow-left me-1"></i> Back to Blog
+    </a>
+  </div>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
 <script>
-  // Dismiss flash messages
-  document.querySelectorAll('.dismiss-button').forEach(button => {
-    button.addEventListener('click', () => {
-      button.parentElement.style.display = 'none';
-    });
-  });
-
-  // Confirm delete action
+  // Confirm delete action (for fallback table before React loads)
   document.querySelectorAll('.delete-form').forEach(form => {
     form.addEventListener('submit', (e) => {
       if (!confirm('Are you sure you want to delete this post?')) {

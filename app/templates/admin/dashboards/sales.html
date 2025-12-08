@@ -1,0 +1,330 @@
+{% extends "base.html" %}
+
+{% block title %}Sales Dashboard{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/admindash.css') }}">
+<style>
+    .sales-container {
+        max-width: 1300px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .sales-header {
+        background: linear-gradient(135deg, #642b73, #c6426e);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .sales-header h1 {
+        color: #fff;
+        margin: 0;
+        font-size: 1.75rem;
+    }
+
+    .sales-header .subtitle {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .dashboard-nav {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .dashboard-nav a {
+        padding: 0.6rem 1.25rem;
+        background: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.8);
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+    .dashboard-nav a:hover,
+    .dashboard-nav a.active {
+        background: rgba(255, 255, 255, 0.25);
+        color: #fff;
+    }
+
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-box {
+        background: rgba(42, 42, 42, 0.9);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stat-box .value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .stat-box .label {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.9rem;
+    }
+
+    .sales-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .sales-card {
+        background: rgba(42, 42, 42, 0.9);
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sales-card-header {
+        padding: 1rem 1.25rem;
+        background: rgba(0, 0, 0, 0.3);
+    }
+
+    .sales-card-header h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        color: #fff;
+    }
+
+    .sales-card-body {
+        padding: 1.25rem;
+    }
+
+    /* Funnel */
+    .funnel-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .funnel-stage {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .funnel-label {
+        width: 80px;
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .funnel-bar-wrap {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        height: 28px;
+        overflow: hidden;
+    }
+
+    .funnel-bar {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding-right: 0.75rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #fff;
+        min-width: 40px;
+        transition: width 0.5s ease;
+    }
+
+    /* Leads List */
+    .leads-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .leads-list li {
+        padding: 0.75rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .leads-list li:last-child {
+        border-bottom: none;
+    }
+
+    .lead-info .name {
+        color: #fff;
+        font-weight: 500;
+    }
+
+    .lead-info .meta {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .lead-action {
+        padding: 0.4rem 0.8rem;
+        background: var(--primary-color, #4169e1);
+        color: #fff;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.8rem;
+    }
+
+    /* Reminders */
+    .reminder-item {
+        padding: 0.75rem;
+        background: rgba(255, 193, 7, 0.1);
+        border-left: 3px solid #ffc107;
+        margin-bottom: 0.5rem;
+        border-radius: 0 6px 6px 0;
+    }
+
+    .reminder-item.overdue {
+        background: rgba(220, 53, 69, 0.1);
+        border-left-color: #dc3545;
+    }
+
+    .reminder-item .title {
+        color: #fff;
+        font-weight: 500;
+    }
+
+    .reminder-item .due {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: rgba(255, 255, 255, 0.5);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="section-spacer"></div>
+
+<div class="sales-container">
+    <div class="sales-header">
+        <div>
+            <h1><i class="fas fa-chart-line"></i> Sales Dashboard</h1>
+            <p class="subtitle">Pipeline and conversion tracking</p>
+        </div>
+        <div class="dashboard-nav">
+            <a href="{{ url_for('admin.owner_dashboard') }}">Owner</a>
+            <a href="{{ url_for('admin.operations_dashboard') }}">Operations</a>
+            <a href="{{ url_for('admin.sales_dashboard') }}" class="active">Sales</a>
+            <a href="{{ url_for('admin.admin_dashboard') }}">Main</a>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+        <div class="stat-box">
+            <div class="value">{{ data.total_pipeline }}</div>
+            <div class="label">Active Pipeline</div>
+        </div>
+        <div class="stat-box">
+            <div class="value">{{ data.conversions_mtd }}</div>
+            <div class="label">Conversions MTD</div>
+        </div>
+        <div class="stat-box">
+            <div class="value">{{ data.due_reminders|length }}</div>
+            <div class="label">Due Follow-ups</div>
+        </div>
+    </div>
+
+    <div class="sales-grid">
+        <!-- Lead Funnel -->
+        <div class="sales-card">
+            <div class="sales-card-header">
+                <h3><i class="fas fa-filter"></i> Lead Funnel</h3>
+            </div>
+            <div class="sales-card-body">
+                {% set max_count = [1] %}
+                {% for stage in data.funnel %}
+                {% if stage.count > max_count[0] %}
+                {% if max_count.append(stage.count) %}{% endif %}
+                {% if max_count.pop(0) %}{% endif %}
+                {% endif %}
+                {% endfor %}
+
+                <div class="funnel-container">
+                    {% for stage in data.funnel %}
+                    <div class="funnel-stage">
+                        <span class="funnel-label">{{ stage.name }}</span>
+                        <div class="funnel-bar-wrap">
+                            <div class="funnel-bar"
+                                style="width: {{ (stage.count / max_count[0] * 100) if max_count[0] > 0 else 0 }}%; background-color: {{ stage.color }};">
+                                {{ stage.count }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Due Reminders -->
+        <div class="sales-card">
+            <div class="sales-card-header">
+                <h3><i class="fas fa-bell"></i> Follow-up Reminders</h3>
+            </div>
+            <div class="sales-card-body">
+                {% if data.due_reminders %}
+                {% for reminder in data.due_reminders[:8] %}
+                <div class="reminder-item {% if reminder.due_date.date() < now.date() %}overdue{% endif %}">
+                    <div class="title">{{ reminder.note[:50] if reminder.note else 'Follow up' }}{{ '...' if
+                        reminder.note and reminder.note|length > 50 else '' }}</div>
+                    <div class="due">Due: {{ reminder.due_date.strftime('%b %d, %Y') }}</div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="empty-state">No reminders due</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Hot Leads -->
+        <div class="sales-card">
+            <div class="sales-card-header">
+                <h3><i class="fas fa-fire"></i> Hot Leads This Month</h3>
+            </div>
+            <div class="sales-card-body">
+                {% if data.hot_leads %}
+                <ul class="leads-list">
+                    {% for lead in data.hot_leads %}
+                    <li>
+                        <div class="lead-info">
+                            <div class="name">{{ lead.first_name }} {{ lead.last_name }}</div>
+                            <div class="meta">{{ lead.email }} • {{ lead.status or 'new' }}</div>
+                        </div>
+                        <a href="{{ url_for('crm.lead_detail', lead_type='contact', lead_id=lead.id) }}"
+                            class="lead-action">View</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state">No recent leads</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="section-spacer"></div>
+{% endblock %}

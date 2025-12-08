@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Unsubscribe{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-envelope-open-text fa-4x text-warning mb-4"></i>
+                    <h2 class="mb-3">Unsubscribe from Emails?</h2>
+                    <p class="text-muted mb-4">
+                        You're about to unsubscribe <strong>{{ email }}</strong> from our marketing emails.
+                    </p>
+
+                    {% if campaign %}
+                    <p class="text-muted small mb-4">
+                        This will remove you from: {{ campaign.name }}
+                    </p>
+                    {% endif %}
+
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-danger btn-lg mb-3">
+                            <i class="fas fa-times-circle me-2"></i>Yes, Unsubscribe Me
+                        </button>
+                    </form>
+
+                    <a href="/" class="btn btn-link text-muted">
+                        Cancel and go back
+                    </a>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="{{ url_for('email_tracking.email_preferences', token=token) }}" class="text-muted">
+                    <i class="fas fa-cog me-1"></i>Manage email preferences instead
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

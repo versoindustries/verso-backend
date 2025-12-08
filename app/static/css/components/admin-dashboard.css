@@ -1,0 +1,302 @@
+/**
+ * AdminDashboard Component Styles
+ * 
+ * Styles for the React AdminDashboard component (KPI cards, charts, funnel).
+ * Import this in templates that use the AdminDashboard component.
+ */
+
+/* =============================================================================
+   KPI Grid & Cards
+   ============================================================================= */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.kpi-card {
+    background: var(--component-bg, rgba(42, 42, 42, 0.95));
+    border: 1px solid var(--component-border-color, rgba(255, 255, 255, 0.1));
+    border-radius: var(--component-border-radius, 0.375rem);
+    padding: 1.5rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.kpi-card-success {
+    border-left: 4px solid var(--success-color, #28a745);
+}
+
+.kpi-card-info {
+    border-left: 4px solid var(--info-color, #17a2b8);
+}
+
+.kpi-card-warning {
+    border-left: 4px solid var(--warning-color, #ffc107);
+}
+
+.kpi-card-purple {
+    border-left: 4px solid #6f42c1;
+}
+
+.kpi-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.kpi-title {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.kpi-icon {
+    font-size: 1.25rem;
+    opacity: 0.8;
+}
+
+.kpi-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.kpi-trend {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.kpi-trend.up {
+    background: rgba(40, 167, 69, 0.15);
+    color: var(--success-color, #28a745);
+}
+
+.kpi-trend.down {
+    background: rgba(220, 53, 69, 0.15);
+    color: var(--danger-color, #dc3545);
+}
+
+.kpi-trend.neutral {
+    background: rgba(108, 117, 125, 0.15);
+    color: #6c757d;
+}
+
+.kpi-subtitle {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: 0.5rem;
+}
+
+/* =============================================================================
+   Charts Grid & Cards
+   ============================================================================= */
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.chart-card {
+    background: var(--component-bg, rgba(42, 42, 42, 0.95));
+    border: 1px solid var(--component-border-color, rgba(255, 255, 255, 0.1));
+    border-radius: var(--component-border-radius, 0.375rem);
+    overflow: hidden;
+}
+
+.chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--component-border-color, rgba(255, 255, 255, 0.1));
+}
+
+.chart-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+.chart-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.chart-controls button {
+    padding: 0.375rem 0.75rem;
+    background: transparent;
+    border: 1px solid var(--component-border-color, rgba(255, 255, 255, 0.1));
+    border-radius: var(--component-border-radius, 0.375rem);
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.chart-controls button:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.chart-controls button.active {
+    background: var(--primary-color, #4169e1);
+    border-color: var(--primary-color, #4169e1);
+    color: #fff;
+}
+
+.chart-container {
+    padding: 1.5rem;
+    min-height: 300px;
+}
+
+.chart-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* =============================================================================
+   Funnel Chart
+   ============================================================================= */
+.funnel-container {
+    padding: 1.5rem;
+}
+
+.funnel-stage {
+    margin-bottom: 1rem;
+}
+
+.funnel-stage:last-child {
+    margin-bottom: 0;
+}
+
+.funnel-stage-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.funnel-stage-label {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.funnel-stage-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+.funnel-bar-bg {
+    height: 24px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.funnel-bar-fill {
+    height: 100%;
+    background: var(--primary-color, #4169e1);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 0.5rem;
+}
+
+.funnel-bar-fill.stage-new {
+    background: #17a2b8;
+}
+
+.funnel-bar-fill.stage-contacted {
+    background: #4169e1;
+}
+
+.funnel-bar-fill.stage-qualified {
+    background: #ffc107;
+}
+
+.funnel-bar-fill.stage-proposal {
+    background: #fd7e14;
+}
+
+.funnel-bar-fill.stage-won {
+    background: #28a745;
+}
+
+.funnel-bar-percent {
+    font-size: 0.75rem;
+    color: #fff;
+    font-weight: 600;
+}
+
+/* =============================================================================
+   Dashboard Loading State
+   ============================================================================= */
+.dashboard-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 1rem;
+}
+
+.dashboard-loading .spinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-top-color: var(--primary-color, #4169e1);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-right: 0.75rem;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 768px) {
+    .kpi-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .chart-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .chart-controls {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}

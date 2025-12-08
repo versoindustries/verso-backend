@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-filter me-2"></i>Conversion Funnels</h2>
+        <a href="{{ url_for('analytics.create_funnel') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Create Funnel
+        </a>
+    </div>
+
+    <div class="row">
+        {% for item in funnels %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>
+                        {% if item.funnel.is_active %}
+                        <i class="fas fa-circle text-success me-2" style="font-size: 0.6rem;"></i>
+                        {% else %}
+                        <i class="fas fa-circle text-secondary me-2" style="font-size: 0.6rem;"></i>
+                        {% endif %}
+                        {{ item.funnel.name }}
+                    </span>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item"
+                                    href="{{ url_for('analytics.funnel_detail', funnel_id=item.funnel.id) }}"><i
+                                        class="fas fa-chart-bar me-2"></i>View Details</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <form action="{{ url_for('analytics.delete_funnel', funnel_id=item.funnel.id) }}"
+                                    method="POST" onsubmit="return confirm('Delete this funnel?');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="dropdown-item text-danger"><i
+                                            class="fas fa-trash me-2"></i>Delete</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">{{ item.funnel.description or 'No description' }}</p>
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-muted">Steps</span>
+                        <span class="badge bg-info">{{ item.step_count }}</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Conversion Rate</span>
+                        <span
+                            class="badge bg-{{ 'success' if item.conversion_rate >= 50 else 'warning' if item.conversion_rate >= 20 else 'danger' }} fs-6">
+                            {{ item.conversion_rate }}%
+                        </span>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="{{ url_for('analytics.funnel_detail', funnel_id=item.funnel.id) }}"
+                        class="btn btn-outline-primary w-100">
+                        <i class="fas fa-chart-bar me-2"></i>View Analysis
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-filter fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No funnels created yet</p>
+                    <a href="{{ url_for('analytics.create_funnel') }}" class="btn btn-primary">Create Your First
+                        Funnel</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="mt-3">
+        <a href="{{ url_for('analytics.dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

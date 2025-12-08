@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block additional_css %}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/login.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/login.css') }}">
 {% endblock %}
 
 {% block title %}Login{% endblock %}
@@ -12,27 +12,35 @@
         <!-- Flash Messages Display -->
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            {% for category, message in messages %}
-            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            {% endfor %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        {% endfor %}
         {% endif %}
         {% endwith %}
 
-        <h2>Login</h2>
+        <h1>Login</h1>
         <form method="POST" action="{{ url_for('auth.login') }}">
             {{ form.hidden_tag() }}
             <div class="form-group">
                 {{ form.email.label(class="form-control-label") }}
-                {{ form.email(class="form-control") }}
+                {{ form.email(class="form-control", aria_required="true", aria_describedby="email-error" if
+                form.email.errors else None) }}
+                {% if form.email.errors %}
+                <span class="form-error" id="email-error" role="alert">{{ form.email.errors[0] }}</span>
+                {% endif %}
             </div>
             <div class="form-group">
                 {{ form.password.label(class="form-control-label") }}
-                {{ form.password(class="form-control") }}
+                {{ form.password(class="form-control", aria_required="true", aria_describedby="password-error" if
+                form.password.errors else None) }}
+                {% if form.password.errors %}
+                <span class="form-error" id="password-error" role="alert">{{ form.password.errors[0] }}</span>
+                {% endif %}
             </div>
             <div class="form-group">
                 <button type="submit" class="btn btn-primary">Login</button>

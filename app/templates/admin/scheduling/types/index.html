@@ -1,0 +1,33 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Appointment Types{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Appointment Types</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{{ url_for('scheduling.new_type') }}" class="btn btn-sm btn-primary">
+            <i class="fas fa-plus"></i> New Type
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div data-react-component="AdminDataTable" data-react-props='{
+            "columns": [
+                {"accessorKey": "name", "header": "Name", "html": true, "sortable": true},
+                {"accessorKey": "duration", "header": "Duration", "sortable": true},
+                {"accessorKey": "price", "header": "Price", "sortable": true},
+                {"accessorKey": "status", "header": "Status", "html": true},
+                {"accessorKey": "actions", "header": "Actions", "html": true}
+            ],
+            "data": {{ types_json | safe }},
+            "idKey": "id",
+            "emptyStateMessage": "No appointment types defined.",
+            "emptyStateLink": "{{ url_for(\"scheduling.new_type\") }}",
+            "emptyStateLinkText": "Create your first type"
+        }'></div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Preview: {{ template.name }} - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a href="{{ url_for('email_admin.templates') }}" class="btn btn-outline-secondary btn-sm mb-2">
+                <i class="fas fa-arrow-left me-2"></i>Back to Templates
+            </a>
+            <h1 class="h3 mb-0">Preview: {{ template.name }}</h1>
+        </div>
+        <div>
+            <a href="{{ url_for('email_admin.edit_template', id=template.id) }}" class="btn btn-outline-primary">
+                <i class="fas fa-edit me-2"></i>Edit Template
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Preview Tabs -->
+            <div class="card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#html-preview"
+                                type="button">
+                                <i class="fas fa-code me-2"></i>HTML Preview
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#text-preview" type="button">
+                                <i class="fas fa-align-left me-2"></i>Plain Text
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#source-view" type="button">
+                                <i class="fas fa-file-code me-2"></i>Source
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body p-0">
+                    <div class="tab-content">
+                        <!-- HTML Preview -->
+                        <div class="tab-pane fade show active" id="html-preview" role="tabpanel">
+                            <div class="bg-light p-3 border-bottom">
+                                <strong>Subject:</strong> {{ subject }}
+                            </div>
+                            <div class="p-3">
+                                <iframe id="preview-frame"
+                                    style="width: 100%; height: 500px; border: 1px solid #ddd;"></iframe>
+                            </div>
+                        </div>
+
+                        <!-- Plain Text Preview -->
+                        <div class="tab-pane fade" id="text-preview" role="tabpanel">
+                            <div class="p-3">
+                                <pre class="bg-light p-3 rounded"
+                                    style="white-space: pre-wrap;">{{ text_content or 'No plain text version available.' }}</pre>
+                            </div>
+                        </div>
+
+                        <!-- Source View -->
+                        <div class="tab-pane fade" id="source-view" role="tabpanel">
+                            <div class="p-3">
+                                <pre class="bg-dark text-light p-3 rounded"
+                                    style="overflow-x: auto;"><code>{{ html_content }}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Test Send -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-paper-plane me-2"></i>Send Test Email</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('email_admin.test_template', id=template.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="mb-3">
+                            <label for="test_email" class="form-label">Recipient Email</label>
+                            <input type="email" class="form-control" id="test_email" name="test_email"
+                                value="{{ current_user.email }}" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-paper-plane me-2"></i>Send Test
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Template Info -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Template Info</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="mb-0">
+                        <dt>Type</dt>
+                        <dd><span class="badge bg-info">{{ template.template_type }}</span></dd>
+
+                        {% if template.category %}
+                        <dt>Category</dt>
+                        <dd><span class="badge bg-secondary">{{ template.category }}</span></dd>
+                        {% endif %}
+
+                        <dt>Status</dt>
+                        <dd>
+                            <span class="badge bg-{{ 'success' if template.is_active else 'secondary' }}">
+                                {{ 'Active' if template.is_active else 'Inactive' }}
+                            </span>
+                        </dd>
+
+                        <dt>Created</dt>
+                        <dd>{{ template.created_at.strftime('%Y-%m-%d %H:%M') if template.created_at else 'N/A' }}</dd>
+
+                        <dt>Last Updated</dt>
+                        <dd>{{ template.updated_at.strftime('%Y-%m-%d %H:%M') if template.updated_at else 'N/A' }}</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Sample Context -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-database me-2"></i>Preview Data</h5>
+                </div>
+                <div class="card-body">
+                    <pre class="bg-light p-2 rounded small mb-0">{{ context|tojson(indent=2) }}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Load HTML content into iframe
+        var iframe = document.getElementById('preview-frame');
+        var doc = iframe.contentWindow.document;
+        doc.open();
+        doc.write({{ html_content| tojson }});
+    doc.close();
+});
+</script>
+{% endblock %}

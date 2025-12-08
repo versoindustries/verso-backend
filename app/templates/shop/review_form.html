@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Write a Review - {{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Write a Review</h4>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
+                        {% if product.images %}
+                        <img src="{{ url_for('static', filename='uploads/' ~ product.images[0]) }}"
+                            alt="{{ product.name }}" class="me-3" style="width: 80px; height: 80px; object-fit: cover;">
+                        {% endif %}
+                        <div>
+                            <h5 class="mb-1">{{ product.name }}</h5>
+                            {% if is_verified_purchase %}
+                            <span class="badge bg-success"><i class="bi bi-patch-check me-1"></i>Verified
+                                Purchase</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                    {% endwith %}
+
+                    <form method="POST" action="{{ url_for('forms.create_review', product_id=product.id) }}"
+                        id="reviewForm">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <!-- Star Rating -->
+                        <div class="mb-4">
+                            <label class="form-label fs-5">Overall Rating <span class="text-danger">*</span></label>
+                            <div class="rating-select d-flex gap-2 justify-content-center" id="ratingSelect">
+                                {% for i in range(1, 6) %}
+                                <div class="rating-star">
+                                    <input type="radio" name="rating" id="rating_{{ i }}" value="{{ i }}" class="d-none"
+                                        required>
+                                    <label for="rating_{{ i }}" class="btn btn-outline-warning btn-lg"
+                                        data-rating="{{ i }}">
+                                        <i class="bi bi-star-fill"></i>
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="text-center mt-2">
+                                <span id="ratingText" class="text-muted">Click to rate</span>
+                            </div>
+                        </div>
+
+                        <!-- Review Title -->
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Review Title</label>
+                            <input type="text" class="form-control" id="title" name="title"
+                                placeholder="Summarize your experience" maxlength="200">
+                        </div>
+
+                        <!-- Review Body -->
+                        <div class="mb-3">
+                            <label for="body" class="form-label">Your Review</label>
+                            <textarea class="form-control" id="body" name="body" rows="5"
+                                placeholder="What did you like or dislike? How did this product meet your expectations?"></textarea>
+                            <small class="form-text text-muted">
+                                Tips: Be specific, honest, and helpful to other shoppers.
+                            </small>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-send me-1"></i> Submit Review
+                            </button>
+                        </div>
+
+                        <p class="text-muted text-center mt-3 small">
+                            Your review will be visible after moderation.
+                        </p>
+                    </form>
+                </div>
+            </div>
+
+            <div class="text-center mt-3">
+                <a href="{{ url_for('forms.product_reviews', product_id=product.id) }}" class="text-muted">
+                    <i class="bi bi-arrow-left me-1"></i> Back to reviews
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ratingLabels = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+        const stars = document.querySelectorAll('.rating-star label');
+        const ratingText = document.getElementById('ratingText');
+
+        stars.forEach((star, index) => {
+            star.addEventListener('click', function () {
+                const rating = index + 1;
+
+                // Update visual state
+                stars.forEach((s, i) => {
+                    if (i < rating) {
+                        s.classList.add('btn-warning');
+                        s.classList.remove('btn-outline-warning');
+                    } else {
+                        s.classList.remove('btn-warning');
+                        s.classList.add('btn-outline-warning');
+                    }
+                });
+
+                // Update text
+                ratingText.textContent = ratingLabels[rating];
+                ratingText.classList.remove('text-muted');
+            });
+
+            star.addEventListener('mouseenter', function () {
+                const rating = index + 1;
+                ratingText.textContent = ratingLabels[rating];
+            });
+        });
+
+        document.getElementById('ratingSelect').addEventListener('mouseleave', function () {
+            const checked = document.querySelector('input[name="rating"]:checked');
+            if (checked) {
+                ratingText.textContent = ratingLabels[parseInt(checked.value)];
+            } else {
+                ratingText.textContent = 'Click to rate';
+            }
+        });
+    });
+</script>
+
+<style>
+    .rating-star label {
+        cursor: pointer;
+        font-size: 1.5rem;
+        transition: transform 0.2s;
+    }
+
+    .rating-star label:hover {
+        transform: scale(1.1);
+    }
+</style>
+{% endblock %}

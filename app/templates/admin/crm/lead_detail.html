@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}Lead Detail - {{ item.first_name }} {{ item.last_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Header with quick actions -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('crm.board') }}">CRM Board</a></li>
+                    <li class="breadcrumb-item active">{{ item.first_name }} {{ item.last_name }}</li>
+                </ol>
+            </nav>
+            <h2>
+                <span class="badge"
+                    style="background-color: {{ stages|selectattr('name', 'equalto', item.status)|first|attr('color') if stages|selectattr('name', 'equalto', item.status)|first else '#6c757d' }}">
+                    {{ item.status or 'New' }}
+                </span>
+                {{ item.first_name }} {{ item.last_name }}
+            </h2>
+            {% if lead_score %}
+            <span class="badge badge-info">Score: {{ lead_score.score }}</span>
+            {% endif %}
+        </div>
+        <div class="col-md-4 text-right">
+            <div class="dropdown d-inline-block">
+                <button class="btn btn-outline-primary dropdown-toggle" data-toggle="dropdown">
+                    Change Status
+                </button>
+                <div class="dropdown-menu dropdown-menu-right">
+                    {% for stage in stages %}
+                    <a class="dropdown-item {% if item.status == stage.name %}active{% endif %}" href="#"
+                        onclick="updateStatus('{{ lead_type }}', {{ item.id }}, '{{ stage.name }}'); return false;"
+                        style="border-left: 4px solid {{ stage.color }};">
+                        {{ stage.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left Column: Lead Info & Forms -->
+        <div class="col-md-4">
+            <!-- Contact Info Card -->
+            <div class="card mb-4">
+                <div class="card-header">Contact Information</div>
+                <div class="card-body">
+                    <p><i class="fas fa-envelope"></i> <a href="mailto:{{ item.email }}">{{ item.email }}</a></p>
+                    <p><i class="fas fa-phone"></i> <a href="tel:{{ item.phone }}">{{ item.phone }}</a></p>
+                    <p><i class="fas fa-calendar"></i> {{ (item.submitted_at if lead_type == 'contact' else
+                        item.created_at).strftime('%Y-%m-%d %H:%M') }}</p>
+                    {% if lead_type == 'contact' and item.source %}
+                    <p><i class="fas fa-link"></i> Source: <span class="badge badge-secondary">{{ item.source }}</span>
+                    </p>
+                    {% endif %}
+                    {% if lead_type == 'contact' and item.assigned_to %}
+                    <p><i class="fas fa-user"></i> Assigned to: {{ item.assigned_to.first_name }} {{
+                        item.assigned_to.last_name }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Message/Notes Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    {% if lead_type == 'contact' %}Message{% else %}Details{% endif %}
+                </div>
+                <div class="card-body">
+                    {% if lead_type == 'contact' %}
+                    <p>{{ item.message }}</p>
+                    {% else %}
+                    <p><strong>Service:</strong> {{ item.service.name if item.service else 'N/A' }}</p>
+                    <p><strong>Estimator:</strong> {{ item.estimator.name if item.estimator else 'N/A' }}</p>
+                    <p><strong>Preferred Time:</strong> {{ item.preferred_date_time.strftime('%Y-%m-%d %H:%M') if
+                        item.preferred_date_time else 'N/A' }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Assign Lead (Contact only) -->
+            {% if lead_type == 'contact' %}
+            <div class="card mb-4">
+                <div class="card-header">Assign Lead</div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('crm.assign_lead', lead_type=lead_type, lead_id=item.id) }}">
+                        {{ assign_form.hidden_tag() }}
+                        <div class="form-group">
+                            {{ assign_form.assigned_to_id(class="form-control") }}
+                        </div>
+                        {{ assign_form.submit(class="btn btn-primary btn-block") }}
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Add Reminder -->
+            <div class="card mb-4">
+                <div class="card-header">Schedule Follow-Up</div>
+                <div class="card-body">
+                    <form method="POST"
+                        action="{{ url_for('crm.create_reminder', lead_type=lead_type, lead_id=item.id) }}">
+                        {{ reminder_form.hidden_tag() }}
+                        <div class="form-group">
+                            <label>Due Date</label>
+                            {{ reminder_form.due_date(class="form-control", type="datetime-local") }}
+                        </div>
+                        <div class="form-group">
+                            {{ reminder_form.note(class="form-control", placeholder="Reminder note...") }}
+                        </div>
+                        {{ reminder_form.submit(class="btn btn-warning btn-block") }}
+                    </form>
+                </div>
+            </div>
+
+            <!-- Pending Reminders -->
+            {% if reminders %}
+            <div class="card mb-4 border-warning">
+                <div class="card-header bg-warning text-dark">Pending Reminders</div>
+                <ul class="list-group list-group-flush">
+                    {% for r in reminders %}
+                    <li class="list-group-item">
+                        <small class="text-muted">{{ r.due_date.strftime('%Y-%m-%d %H:%M') }}</small>
+                        <p class="mb-0">{{ r.note or 'Follow up' }}</p>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Column: Timeline -->
+        <div class="col-md-8">
+            <!-- Add Note Form -->
+            <div class="card mb-4">
+                <div class="card-header">Add Note</div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('crm.add_note', lead_type=lead_type, lead_id=item.id) }}">
+                        {{ note_form.hidden_tag() }}
+                        <div class="form-group">
+                            {{ note_form.content(class="form-control", rows=3, placeholder="Add a note about this
+                            lead...") }}
+                        </div>
+                        <div class="form-check mb-3">
+                            {{ note_form.is_pinned(class="form-check-input") }}
+                            <label class="form-check-label">Pin this note</label>
+                        </div>
+                        {{ note_form.submit(class="btn btn-primary") }}
+                    </form>
+                </div>
+            </div>
+
+            <!-- Notes & Activities Timeline -->
+            <div class="card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-toggle="tab" href="#notes-tab">Notes ({{ notes|length
+                                }})</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#activities-tab">Activity Log ({{
+                                activities|length }})</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content">
+                        <!-- Notes Tab -->
+                        <div class="tab-pane fade show active" id="notes-tab">
+                            {% for note in notes %}
+                            <div
+                                class="border-left border-primary pl-3 mb-3 {% if note.is_pinned %}bg-light p-2{% endif %}">
+                                {% if note.is_pinned %}<span class="badge badge-info">Pinned</span>{% endif %}
+                                <small class="text-muted d-block">
+                                    {{ note.user.username if note.user else 'System' }} &middot;
+                                    {{ note.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                </small>
+                                <p class="mb-0">{{ note.content }}</p>
+                            </div>
+                            {% else %}
+                            <p class="text-muted">No notes yet.</p>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Activities Tab -->
+                        <div class="tab-pane fade" id="activities-tab">
+                            <ul class="list-unstyled">
+                                {% for activity in activities %}
+                                <li class="mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <span
+                                            class="badge badge-{{ 'success' if activity.activity_type == 'lead_won' else 'danger' if activity.activity_type == 'lead_lost' else 'secondary' }} mr-2">
+                                            {{ activity.activity_type.replace('_', ' ').title() }}
+                                        </span>
+                                        <small class="text-muted">{{ activity.created_at.strftime('%Y-%m-%d %H:%M')
+                                            }}</small>
+                                    </div>
+                                    <p class="mb-0 ml-2">{{ activity.description }}</p>
+                                </li>
+                                {% else %}
+                                <li class="text-muted">No activities recorded yet.</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateStatus(leadType, leadId, newStatus) {
+        fetch("{{ url_for('crm.update_status') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                id: leadId,
+                type: leadType,
+                status: newStatus
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + (data.error || 'Unknown error'));
+                }
+            });
+    }
+</script>
+{% endblock %}

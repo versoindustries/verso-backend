@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}New Workflow{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Create New Workflow</h1>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <form method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+                <div class="mb-3">
+                    <label for="name" class="form-label">Workflow Name</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="trigger_event" class="form-label">Trigger Event</label>
+                    <select class="form-select" id="trigger_event" name="trigger_event" required>
+                        <option value="">Select an event...</option>
+                        <option value="lead.created">Lead Created</option>
+                        <option value="lead.updated">Lead Updated</option>
+                        <option value="order.created">Order Created</option>
+                        <option value="order.updated">Order Updated</option>
+                        <option value="product.created">Product Created</option>
+                        <option value="user.registered">User Registered</option>
+                    </select>
+                    <div class="form-text">The system event that initiates this workflow.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="2"></textarea>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">Create Workflow</button>
+                    <a href="{{ url_for('automation.index') }}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

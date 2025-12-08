@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block additional_css %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/admindash.css') }}">
+<style>
+    .search-page {
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .search-header {
+        margin-bottom: 2rem;
+    }
+
+    .search-form {
+        display: flex;
+        gap: 0.5rem;
+        max-width: 600px;
+        margin-bottom: 1rem;
+    }
+
+    .search-form input {
+        flex: 1;
+        padding: 0.75rem 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        background: rgba(42, 42, 42, 0.9);
+        color: #fff;
+        font-size: 1rem;
+    }
+
+    .search-form input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+    }
+
+    .search-form button {
+        padding: 0.75rem 1.5rem;
+        background: var(--primary-color);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .search-results-summary {
+        color: rgba(255, 255, 255, 0.7);
+        margin-bottom: 1rem;
+    }
+
+    .results-section {
+        margin-bottom: 2rem;
+    }
+
+    .results-section h3 {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        color: #fff;
+        font-size: 1.1rem;
+    }
+
+    .results-section h3 .badge {
+        background: var(--primary-color);
+        padding: 0.2rem 0.5rem;
+        border-radius: 10px;
+        font-size: 0.8rem;
+    }
+
+    .results-list {
+        background: rgba(42, 42, 42, 0.9);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .result-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        transition: background 0.2s;
+    }
+
+    .result-item:last-child {
+        border-bottom: none;
+    }
+
+    .result-item:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .result-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .result-title {
+        font-weight: 600;
+        color: #fff;
+    }
+
+    .result-meta {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .result-actions a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+    .no-results {
+        color: rgba(255, 255, 255, 0.6);
+        text-align: center;
+        padding: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="search-page">
+    <div class="search-header">
+        <h1>Admin Search</h1>
+        <form class="search-form" action="{{ url_for('admin.admin_search') }}" method="GET">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search users, leads, orders, posts..."
+                autofocus>
+            <button type="submit"><i class="fas fa-search"></i> Search</button>
+        </form>
+        {% if results %}
+        <p class="search-results-summary">Found {{ total_count }} result(s) for "{{ query }}"</p>
+        {% endif %}
+    </div>
+
+    {% if results %}
+
+    {% if results.users %}
+    <div class="results-section">
+        <h3><i class="fas fa-users"></i> Users <span class="badge">{{ results.users|length }}</span></h3>
+        <div class="results-list">
+            {% for user in results.users %}
+            <div class="result-item">
+                <div class="result-info">
+                    <span class="result-title">{{ user.username }}</span>
+                    <span class="result-meta">{{ user.email }} • {{ user.first_name or '' }} {{ user.last_name or ''
+                        }}</span>
+                </div>
+                <div class="result-actions">
+                    <a href="{{ url_for('admin.edit_user', user_id=user.id) }}">Edit →</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if results.leads %}
+    <div class="results-section">
+        <h3><i class="fas fa-user-plus"></i> Leads <span class="badge">{{ results.leads|length }}</span></h3>
+        <div class="results-list">
+            {% for lead in results.leads %}
+            <div class="result-item">
+                <div class="result-info">
+                    <span class="result-title">{{ lead.first_name }} {{ lead.last_name }}</span>
+                    <span class="result-meta">{{ lead.email }} • {{ lead.phone or 'No phone' }}</span>
+                </div>
+                <div class="result-actions">
+                    <a href="{{ url_for('crm.board') }}">View in CRM →</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if results.orders %}
+    <div class="results-section">
+        <h3><i class="fas fa-shopping-cart"></i> Orders <span class="badge">{{ results.orders|length }}</span></h3>
+        <div class="results-list">
+            {% for order in results.orders %}
+            <div class="result-item">
+                <div class="result-info">
+                    <span class="result-title">Order #{{ order.id }}</span>
+                    <span class="result-meta">${{ '%.2f' % (order.total_amount / 100) }} • {{ order.status }}</span>
+                </div>
+                <div class="result-actions">
+                    <a href="{{ url_for('orders_admin.order_detail', order_id=order.id) }}">View →</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if results.posts %}
+    <div class="results-section">
+        <h3><i class="fas fa-pen"></i> Posts <span class="badge">{{ results.posts|length }}</span></h3>
+        <div class="results-list">
+            {% for post in results.posts %}
+            <div class="result-item">
+                <div class="result-info">
+                    <span class="result-title">{{ post.title }}</span>
+                    <span class="result-meta">/blog/{{ post.slug }}</span>
+                </div>
+                <div class="result-actions">
+                    <a href="{{ url_for('blog.edit_post', post_id=post.id) }}">Edit →</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if total_count == 0 %}
+    <div class="no-results">
+        <i class="fas fa-search" style="font-size: 3rem; opacity: 0.3; margin-bottom: 1rem;"></i>
+        <p>No results found for "{{ query }}"</p>
+    </div>
+    {% endif %}
+
+    {% elif query %}
+    <div class="no-results">
+        <p>Enter at least 2 characters to search.</p>
+    </div>
+    {% endif %}
+
+    <div style="margin-top: 2rem;">
+        <a href="{{ url_for('admin.admin_dashboard') }}" class="quick-action-btn">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

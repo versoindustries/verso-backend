@@ -1,0 +1,179 @@
+{% extends "admin/base.html" %}
+
+{% block title %}AI Insights Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">AI Business Intelligence</h1>
+            <p class="text-muted mb-0">ML-powered insights and predictions</p>
+        </div>
+        <div>
+            <a href="{{ url_for('ai.lead_scoring') }}" class="btn btn-outline-primary me-2">
+                <i class="bi bi-star"></i> Lead Scoring
+            </a>
+            <a href="{{ url_for('ai.churn_analysis') }}" class="btn btn-outline-warning me-2">
+                <i class="bi bi-person-x"></i> Churn Analysis
+            </a>
+            <a href="{{ url_for('ai.revenue_forecast') }}" class="btn btn-outline-success">
+                <i class="bi bi-graph-up"></i> Forecasting
+            </a>
+        </div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="row g-3 mb-4">
+        {% if insights.lead_insights %}
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 bg-primary bg-opacity-10 rounded-3 p-3">
+                            <i class="bi bi-people-fill text-primary fs-4"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Total Leads (30d)</h6>
+                            <h3 class="mb-0">{{ insights.lead_insights.total }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 bg-success bg-opacity-10 rounded-3 p-3">
+                            <i class="bi bi-fire text-success fs-4"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Hot Leads</h6>
+                            <h3 class="mb-0">{{ insights.lead_insights.hot_leads }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 bg-info bg-opacity-10 rounded-3 p-3">
+                            <i class="bi bi-bar-chart-fill text-info fs-4"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Avg Lead Score</h6>
+                            <h3 class="mb-0">{{ insights.lead_insights.average_score }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 bg-warning bg-opacity-10 rounded-3 p-3">
+                            <i class="bi bi-check2-circle text-warning fs-4"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Qualified Leads</h6>
+                            <h3 class="mb-0">{{ insights.lead_insights.qualified_leads }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="row g-4">
+        <!-- Quick Actions -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a href="{{ url_for('ai.lead_scoring') }}"
+                            class="list-group-item list-group-item-action d-flex align-items-center">
+                            <i class="bi bi-star-fill text-warning me-3"></i>
+                            <div>
+                                <h6 class="mb-0">View Lead Scores</h6>
+                                <small class="text-muted">See all leads ranked by conversion potential</small>
+                            </div>
+                        </a>
+                        <a href="{{ url_for('ai.churn_analysis') }}"
+                            class="list-group-item list-group-item-action d-flex align-items-center">
+                            <i class="bi bi-person-x-fill text-danger me-3"></i>
+                            <div>
+                                <h6 class="mb-0">Churn Risk Analysis</h6>
+                                <small class="text-muted">Identify customers at risk of leaving</small>
+                            </div>
+                        </a>
+                        <a href="{{ url_for('ai.revenue_forecast') }}"
+                            class="list-group-item list-group-item-action d-flex align-items-center">
+                            <i class="bi bi-graph-up-arrow text-success me-3"></i>
+                            <div>
+                                <h6 class="mb-0">Revenue Forecast</h6>
+                                <small class="text-muted">Predict future revenue with ML</small>
+                            </div>
+                        </a>
+                        <a href="{{ url_for('ai.anomaly_detection') }}"
+                            class="list-group-item list-group-item-action d-flex align-items-center">
+                            <i class="bi bi-exclamation-triangle-fill text-warning me-3"></i>
+                            <div>
+                                <h6 class="mb-0">Anomaly Detection</h6>
+                                <small class="text-muted">Detect unusual patterns in metrics</small>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Capabilities -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">AI Capabilities</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded-3 text-center">
+                                <i class="bi bi-stars text-primary fs-3 mb-2 d-block"></i>
+                                <h6 class="mb-1">Lead Scoring</h6>
+                                <small class="text-muted">ML-based conversion prediction</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded-3 text-center">
+                                <i class="bi bi-person-dash text-warning fs-3 mb-2 d-block"></i>
+                                <h6 class="mb-1">Churn Prediction</h6>
+                                <small class="text-muted">Identify at-risk customers</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded-3 text-center">
+                                <i class="bi bi-graph-up text-success fs-3 mb-2 d-block"></i>
+                                <h6 class="mb-1">Revenue Forecasting</h6>
+                                <small class="text-muted">Time-series predictions</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded-3 text-center">
+                                <i class="bi bi-activity text-danger fs-3 mb-2 d-block"></i>
+                                <h6 class="mb-1">Anomaly Detection</h6>
+                                <small class="text-muted">Statistical outlier detection</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}Notification Preferences{% endblock %}
+
+{% block additional_css %}
+<style>
+    .onboarding-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 2rem;
+    }
+
+    .onboarding-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        padding: 2.5rem;
+    }
+
+    .onboarding-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .onboarding-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .onboarding-subtitle {
+        color: #666;
+    }
+
+    .progress-container {
+        margin-bottom: 2rem;
+    }
+
+    .progress-bar {
+        height: 8px;
+        background: #e9ecef;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary-color, #007bff), #28a745);
+        border-radius: 4px;
+    }
+
+    .progress-text {
+        font-size: 0.875rem;
+        color: #666;
+        margin-top: 0.5rem;
+        text-align: center;
+    }
+
+    .onboarding-steps {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .step-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #e9ecef;
+    }
+
+    .step-dot.completed {
+        background: #28a745;
+    }
+
+    .step-dot.active {
+        background: var(--primary-color, #007bff);
+    }
+
+    .preference-group {
+        margin-bottom: 2rem;
+    }
+
+    .preference-group-title {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .preference-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .preference-item:hover {
+        background: #e9ecef;
+    }
+
+    .preference-checkbox {
+        margin-top: 0.25rem;
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+
+    .preference-label {
+        flex: 1;
+        cursor: pointer;
+    }
+
+    .preference-label strong {
+        display: block;
+        margin-bottom: 0.25rem;
+        color: #333;
+    }
+
+    .preference-label span {
+        font-size: 0.875rem;
+        color: #666;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #eee;
+    }
+
+    .btn-primary {
+        padding: 0.75rem 2rem;
+        font-size: 1rem;
+        border-radius: 8px;
+        background: var(--primary-color, #007bff);
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-secondary {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        border-radius: 8px;
+        background: #f8f9fa;
+        color: #666;
+        border: 1px solid #ddd;
+        cursor: pointer;
+        text-decoration: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="onboarding-container">
+    <div class="onboarding-card">
+        <!-- Progress -->
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {{ progress.percentage }}%"></div>
+            </div>
+            <div class="progress-text">Step 3 of 4</div>
+        </div>
+
+        <div class="onboarding-steps">
+            <div class="step-dot completed"></div>
+            <div class="step-dot completed"></div>
+            <div class="step-dot active"></div>
+            <div class="step-dot"></div>
+        </div>
+
+        <div class="onboarding-header">
+            <h1 class="onboarding-title">Notification Preferences</h1>
+            <p class="onboarding-subtitle">Choose how you'd like to hear from us</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('onboarding.preferences') }}">
+            {{ form.hidden_tag() }}
+
+            <div class="preference-group">
+                <h3 class="preference-group-title">
+                    <i class="fas fa-envelope"></i> Email Notifications
+                </h3>
+
+                <label class="preference-item">
+                    {{ form.email_order_updates(class="preference-checkbox") }}
+                    <div class="preference-label">
+                        <strong>Order & Shipment Updates</strong>
+                        <span>Get notified when your orders are confirmed, shipped, and delivered</span>
+                    </div>
+                </label>
+
+                <label class="preference-item">
+                    {{ form.email_appointment_reminders(class="preference-checkbox") }}
+                    <div class="preference-label">
+                        <strong>Appointment Reminders</strong>
+                        <span>Receive reminders before your scheduled appointments</span>
+                    </div>
+                </label>
+
+                <label class="preference-item">
+                    {{ form.email_newsletter(class="preference-checkbox") }}
+                    <div class="preference-label">
+                        <strong>Newsletter</strong>
+                        <span>Stay up to date with our latest news and announcements</span>
+                    </div>
+                </label>
+
+                <label class="preference-item">
+                    {{ form.email_marketing(class="preference-checkbox") }}
+                    <div class="preference-label">
+                        <strong>Promotions & Offers</strong>
+                        <span>Get exclusive deals and special offers</span>
+                    </div>
+                </label>
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ url_for('onboarding.profile') }}" class="btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+                <button type="submit" class="btn-primary">
+                    {{ form.submit.label.text }} <i class="fas fa-check"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
+{% endblock %}

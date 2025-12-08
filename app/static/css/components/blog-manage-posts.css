@@ -1,0 +1,95 @@
+/**
+ * Blog Management Page Styles
+ * 
+ * Styles specific to the blog post management table.
+ */
+
+/* Page header */
+.blog-manage-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.blog-manage-header h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--text-primary, #1a1a2e);
+}
+
+/* Table customizations */
+.blog-manage-table .img-thumbnail {
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.blog-manage-table .delete-form {
+    display: inline;
+    margin: 0;
+}
+
+.blog-manage-table .btn-group {
+    display: flex;
+    gap: 0.25rem;
+}
+
+/* Status badges */
+.blog-manage-table .badge {
+    font-weight: 500;
+    padding: 0.375em 0.75em;
+}
+
+/* Action buttons */
+.blog-manage-table .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8125rem;
+}
+
+.blog-manage-table .btn-sm i {
+    font-size: 0.75rem;
+}
+
+/* Empty state */
+.blog-manage-empty {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.blog-manage-empty i {
+    font-size: 4rem;
+    color: var(--text-muted, #6c757d);
+    margin-bottom: 1rem;
+}
+
+.blog-manage-empty h3 {
+    color: var(--text-secondary, #64748b);
+    margin-bottom: 0.5rem;
+}
+
+.blog-manage-empty p {
+    color: var(--text-muted, #6c757d);
+    margin-bottom: 1.5rem;
+}
+
+/* Breadcrumb */
+.blog-breadcrumb {
+    margin-bottom: 1rem;
+}
+
+.blog-breadcrumb a {
+    color: var(--primary-color, #3b82f6);
+    text-decoration: none;
+}
+
+.blog-breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+/* Delete confirmation dialog */
+.delete-form button:hover {
+    background-color: var(--danger-color, #dc3545);
+    border-color: var(--danger-color, #dc3545);
+    color: white;
+}

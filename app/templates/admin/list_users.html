@@ -2,6 +2,7 @@
 
 {% block additional_css %}
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/list_users.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/components/admin-data-table.css') }}">
 {% endblock %}
 
 {% block title %}
@@ -43,60 +44,82 @@ Manage user accounts, including viewing, editing, and deleting users, as well as
     </header>
 
     <div class="action-buttons">
-      <a href="{{ url_for('admin.new_user') }}" class="btn btn-primary"><i class="fas fa-user-plus"></i> Create New User</a>
-      <a href="{{ url_for('admin.list_roles') }}" class="btn btn-secondary"><i class="fas fa-shield-alt"></i> Manage Roles</a>
+      <a href="{{ url_for('admin.new_user') }}" class="btn btn-primary"><i class="fas fa-user-plus"></i> Create New
+        User</a>
+      <a href="{{ url_for('admin.list_roles') }}" class="btn btn-secondary"><i class="fas fa-shield-alt"></i> Manage
+        Roles</a>
     </div>
 
     {% if users %}
-    <div class="table-responsive">
-      <table class="user-table">
-        <thead>
-          <tr>
-            <th scope="col">ID</th>
-            <th scope="col">Username</th>
-            <th scope="col">Email</th>
-            <th scope="col">Roles</th>
-            <th scope="col">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for user in users %}
-          <tr>
-            <td data-label="ID">{{ user.id }}</td>
-            <td data-label="Username">
-              <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="user-link">{{ user.username | e }}</a>
-            </td>
-            <td data-label="Email">{{ user.email | e }}</td>
-            <td data-label="Roles">{{ user.roles | map(attribute='name') | join(', ') | e }}</td>
-            <td data-label="Actions">
-              <form method="POST" action="{{ url_for('admin.delete_user', user_id=user.id) }}" class="delete-form" onsubmit="return confirm('Are you sure you want to delete {{ user.username | e }}?');">
-                {{ form.csrf_token }}
-                <button type="submit" class="btn btn-danger" aria-label="Delete user {{ user.username | e }}">
-                  <i class="fas fa-trash-alt"></i> Delete
-                </button>
-              </form>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <!-- Build users data for React component -->
+    {% set users_data = [] %}
+    {% for user in users %}
+    {% set _ = users_data.append({
+    'id': user.id,
+    'username': user.username,
+    'email': user.email,
+    'roles': user.roles | map(attribute='name') | join(', '),
+    'last_login': user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else 'Never',
+    'edit_url': url_for('admin.edit_user', user_id=user.id),
+    'delete_url': url_for('admin.delete_user', user_id=user.id)
+    }) %}
+    {% endfor %}
+
+    <!-- Build bulk actions with role options -->
+    {% set bulk_actions = [
+    {'value': 'delete', 'label': 'Delete Selected', 'confirmMessage': 'Are you sure you want to delete {count} user(s)?
+    This cannot be undone.'},
+    {'value': 'deactivate', 'label': 'Deactivate Selected', 'confirmMessage': 'Deactivate {count} user(s)?'},
+    {'value': 'activate', 'label': 'Activate Selected', 'confirmMessage': 'Activate {count} user(s)?'}
+    ] %}
+    {% for role in roles %}
+    {% set _ = bulk_actions.append({'value': 'add_role_' ~ role.id, 'label': 'Add Role: ' ~ role.name}) %}
+    {% endfor %}
+
+    <!-- React AdminDataTable Component -->
+    <div data-react-component="AdminDataTable" data-react-props='{
+            "columns": [
+                {"accessorKey": "id", "header": "ID"},
+                {"accessorKey": "username", "header": "Username"},
+                {"accessorKey": "email", "header": "Email"},
+                {"accessorKey": "roles", "header": "Roles"},
+                {"accessorKey": "last_login", "header": "Last Login"}
+            ],
+            "data": {{ users_data | tojson }},
+            "idKey": "id",
+            "bulkActions": {{ bulk_actions | tojson }},
+            "bulkActionUrl": "{{ url_for(' admin.bulk_user_action') }}", "exportCsvUrl"
+      : "{{ url_for('admin.export_users_csv') }}" , "defaultPageSize" : 25, "emptyMessage" : "No users found" }'>
+      <!-- Fallback content while React loads -->
+      <div class="table-responsive">
+        <table class="user-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Roles</th>
+              <th>Last Login</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users[:10] %}
+            <tr>
+              <td>{{ user.id }}</td>
+              <td>{{ user.username }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.roles | map(attribute='name') | join(', ') }}</td>
+              <td>{{ user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else 'Never' }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <p class="text-muted">Loading interactive table...</p>
+      </div>
     </div>
     {% else %}
     <p class="no-users">No users found.</p>
     {% endif %}
   </div>
 </section>
-{% endblock %}
-
-{% block scripts %}
-<script>
-  // Ensure delete confirmation is accessible and functional
-  document.querySelectorAll('.delete-form').forEach(form => {
-    form.addEventListener('submit', (e) => {
-      if (!confirm(form.getAttribute('onsubmit').replace('return confirm(\'', '').replace('\');', ''))) {
-        e.preventDefault();
-      }
-    });
-  });
-</script>
 {% endblock %}

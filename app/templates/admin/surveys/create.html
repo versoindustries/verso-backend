@@ -1,0 +1,189 @@
+{% extends "admin/dashboard_base.html" %}
+
+{% block title %}Create Survey - Admin{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-plus-lg me-2"></i>Create Survey</h2>
+    <a href="{{ url_for('forms_admin.list_surveys') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Back
+    </a>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}
+<div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endfor %}
+{% endwith %}
+
+<form method="POST" action="{{ url_for('forms_admin.create_survey') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="questions_schema" id="questionsSchema" value="[]">
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-gear me-2"></i>Survey Settings</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Survey Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="name" name="name" required
+                            placeholder="e.g., Post-Purchase NPS">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="2"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="survey_type" class="form-label">Survey Type</label>
+                        <select class="form-select" id="survey_type" name="survey_type"
+                            onchange="updateQuestionPreset()">
+                            <option value="nps">NPS (Net Promoter Score)</option>
+                            <option value="csat">CSAT (Customer Satisfaction)</option>
+                            <option value="ces">CES (Customer Effort Score)</option>
+                            <option value="custom">Custom Survey</option>
+                        </select>
+                        <small class="form-text text-muted">
+                            NPS and CSAT surveys use standardized questions; choose Custom for flexibility.
+                        </small>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3">
+                        <label for="trigger_event" class="form-label">Trigger Event (optional)</label>
+                        <select class="form-select" id="trigger_event" name="trigger_event">
+                            <option value="">Manual only</option>
+                            <option value="order_complete">After Order Completion</option>
+                            <option value="appointment_complete">After Appointment</option>
+                            <option value="support_ticket_closed">After Support Ticket Closed</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="trigger_delay_hours" class="form-label">Delay After Trigger (hours)</label>
+                        <input type="number" class="form-control" id="trigger_delay_hours" name="trigger_delay_hours"
+                            value="24" min="0" max="720">
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3">
+                        <label for="thank_you_message" class="form-label">Thank You Message</label>
+                        <textarea class="form-control" id="thank_you_message" name="thank_you_message"
+                            rows="2">Thank you for your feedback!</textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="is_active" name="is_active" value="true"
+                                checked>
+                            <label class="form-check-label" for="is_active">Survey is Active</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-ui-checks me-2"></i>Preview</h5>
+                </div>
+                <div class="card-body" id="surveyPreview">
+                    <div class="text-center text-muted py-5">
+                        <i class="bi bi-eye display-4"></i>
+                        <p class="mt-2">Survey preview will appear here</p>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i> Create Survey
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function updateQuestionPreset() {
+        const type = document.getElementById('survey_type').value;
+        const preview = document.getElementById('surveyPreview');
+
+        if (type === 'nps') {
+            preview.innerHTML = `
+            <div class="text-center mb-4">
+                <p class="lead">How likely are you to recommend us to a friend or colleague?</p>
+                <div class="d-flex justify-content-center gap-1">
+                    ${[...Array(11).keys()].map(i => `
+                        <div class="form-check form-check-inline">
+                            <input type="radio" class="btn-check" name="nps_score" id="nps_${i}" value="${i}">
+                            <label class="btn btn-outline-primary btn-sm" for="nps_${i}">${i}</label>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="d-flex justify-content-between mt-2 text-muted small">
+                    <span>Not at all likely</span>
+                    <span>Extremely likely</span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">What is the main reason for your score?</label>
+                <textarea class="form-control" rows="3" disabled></textarea>
+            </div>
+        `;
+        } else if (type === 'csat') {
+            preview.innerHTML = `
+            <div class="text-center mb-4">
+                <p class="lead">How satisfied are you with your experience?</p>
+                <div class="d-flex justify-content-center gap-2">
+                    ${['😠', '😟', '😐', '🙂', '😊'].map((emoji, i) => `
+                        <div class="form-check form-check-inline">
+                            <input type="radio" class="btn-check" name="csat_score" id="csat_${i + 1}" value="${i + 1}">
+                            <label class="btn btn-outline-secondary btn-lg" for="csat_${i + 1}" style="font-size: 2rem;">${emoji}</label>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        } else if (type === 'ces') {
+            preview.innerHTML = `
+            <div class="text-center mb-4">
+                <p class="lead">How easy was it to [complete task]?</p>
+                <div class="d-flex justify-content-center gap-1">
+                    ${[1, 2, 3, 4, 5, 6, 7].map(i => `
+                        <div class="form-check form-check-inline">
+                            <input type="radio" class="btn-check" name="ces_score" id="ces_${i}" value="${i}">
+                            <label class="btn btn-outline-primary" for="ces_${i}">${i}</label>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="d-flex justify-content-between mt-2 text-muted small">
+                    <span>Very difficult</span>
+                    <span>Very easy</span>
+                </div>
+            </div>
+        `;
+        } else {
+            preview.innerHTML = `
+            <div class="text-center text-muted py-5">
+                <i class="bi bi-pencil-square display-4"></i>
+                <p class="mt-2">Custom surveys allow you to define your own questions after creation.</p>
+            </div>
+        `;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', updateQuestionPreset);
+</script>
+{% endblock %}

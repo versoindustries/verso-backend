@@ -1,0 +1,162 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}{{ 'Edit Webhook' if webhook else 'New Webhook' }} - API Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <a href="{{ url_for('admin.webhooks') }}" class="text-decoration-none">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Webhooks
+                    </a>
+                    <h2 class="mt-2">
+                        <i class="fas fa-plug me-2"></i>
+                        {{ 'Edit Webhook' if webhook else 'Create Webhook' }}
+                    </h2>
+                </div>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="POST"
+                        action="{{ url_for('admin.webhook_save', id=webhook.id) if webhook else url_for('admin.webhook_save') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Webhook Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="name" name="name"
+                                value="{{ webhook.name if webhook else '' }}" required
+                                placeholder="e.g., Slack Notifications">
+                            <div class="form-text">A descriptive name for this webhook</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="url" class="form-label">Target URL <span class="text-danger">*</span></label>
+                            <input type="url" class="form-control" id="url" name="url"
+                                value="{{ webhook.url if webhook else '' }}" required
+                                placeholder="https://example.com/webhook">
+                            <div class="form-text">The URL that will receive webhook POST requests</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Events <span class="text-danger">*</span></label>
+                            <div class="form-text mb-2">Select which events should trigger this webhook</div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="events"
+                                            value="lead.created" id="evt_lead_created" {{ 'checked' if webhook
+                                            and 'lead.created' in (webhook.events or []) }}>
+                                        <label class="form-check-label" for="evt_lead_created">
+                                            <code>lead.created</code> - New lead submitted
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="events"
+                                            value="lead.updated" id="evt_lead_updated" {{ 'checked' if webhook
+                                            and 'lead.updated' in (webhook.events or []) }}>
+                                        <label class="form-check-label" for="evt_lead_updated">
+                                            <code>lead.updated</code> - Lead status changed
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="events"
+                                            value="product.created" id="evt_product_created" {{ 'checked' if webhook
+                                            and 'product.created' in (webhook.events or []) }}>
+                                        <label class="form-check-label" for="evt_product_created">
+                                            <code>product.created</code> - Product added
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="events"
+                                            value="order.created" id="evt_order_created" {{ 'checked' if webhook
+                                            and 'order.created' in (webhook.events or []) }}>
+                                        <label class="form-check-label" for="evt_order_created">
+                                            <code>order.created</code> - New order placed
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="events"
+                                            value="order.updated" id="evt_order_updated" {{ 'checked' if webhook
+                                            and 'order.updated' in (webhook.events or []) }}>
+                                        <label class="form-check-label" for="evt_order_updated">
+                                            <code>order.updated</code> - Order status changed
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if webhook and webhook.secret %}
+                        <div class="mb-3">
+                            <label class="form-label">Current Secret</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control font-monospace" id="secret-display"
+                                    value="{{ webhook.secret[:8] }}..." readonly>
+                                <button type="button" class="btn btn-outline-secondary" onclick="copySecret()">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">Use this secret to verify webhook signatures</div>
+                            <input type="hidden" id="full-secret" value="{{ webhook.secret }}">
+                        </div>
+                        {% else %}
+                        <div class="mb-3">
+                            <label for="secret" class="form-label">Secret (Optional)</label>
+                            <input type="text" class="form-control font-monospace" id="secret" name="secret"
+                                placeholder="Leave blank to auto-generate">
+                            <div class="form-text">A secret key for HMAC signature verification. Auto-generated if not
+                                provided.</div>
+                        </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="is_active" name="is_active"
+                                    {{ 'checked' if not webhook or webhook.is_active }}>
+                                <label class="form-check-label" for="is_active">
+                                    <strong>Active</strong> - Enable webhook delivery
+                                </label>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('admin.webhooks') }}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>{{ 'Update Webhook' if webhook else 'Create Webhook' }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function copySecret() {
+        const secret = document.getElementById('full-secret').value;
+        navigator.clipboard.writeText(secret).then(() => {
+            alert('Secret copied to clipboard!');
+        });
+    }
+</script>
+{% endblock %}

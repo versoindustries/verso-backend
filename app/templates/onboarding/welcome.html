@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome to {{ business_config.get('business_name', 'Verso') }}{% endblock %}
+
+{% block additional_css %}
+<style>
+    .onboarding-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 2rem;
+    }
+
+    .onboarding-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        padding: 2.5rem;
+        text-align: center;
+    }
+
+    .onboarding-icon {
+        font-size: 4rem;
+        color: var(--primary-color, #007bff);
+        margin-bottom: 1.5rem;
+    }
+
+    .onboarding-title {
+        font-size: 1.75rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #333;
+    }
+
+    .onboarding-subtitle {
+        color: #666;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+
+    .progress-container {
+        margin-bottom: 2rem;
+    }
+
+    .progress-bar {
+        height: 8px;
+        background: #e9ecef;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary-color, #007bff), var(--secondary-color, #6c757d));
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+
+    .progress-text {
+        font-size: 0.875rem;
+        color: #666;
+        margin-top: 0.5rem;
+    }
+
+    .onboarding-steps {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .step-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #e9ecef;
+    }
+
+    .step-dot.active {
+        background: var(--primary-color, #007bff);
+    }
+
+    .step-dot.completed {
+        background: #28a745;
+    }
+
+    .btn-primary-lg {
+        padding: 0.75rem 2.5rem;
+        font-size: 1.1rem;
+        border-radius: 8px;
+        background: var(--primary-color, #007bff);
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-primary-lg:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .skip-link {
+        display: block;
+        margin-top: 1.5rem;
+        color: #666;
+        font-size: 0.875rem;
+    }
+
+    .skip-link:hover {
+        color: #333;
+    }
+
+    .feature-list {
+        text-align: left;
+        margin: 2rem 0;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .feature-icon {
+        color: #28a745;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    .feature-text strong {
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+
+    .feature-text span {
+        font-size: 0.875rem;
+        color: #666;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="onboarding-container">
+    <div class="onboarding-card">
+        <!-- Progress -->
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {{ progress.percentage }}%"></div>
+            </div>
+            <div class="progress-text">Step 1 of 4</div>
+        </div>
+
+        <!-- Step indicators -->
+        <div class="onboarding-steps">
+            <div class="step-dot active"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+        </div>
+
+        <!-- Welcome content -->
+        <div class="onboarding-icon">
+            <i class="fas fa-hand-sparkles"></i>
+        </div>
+
+        <h1 class="onboarding-title">Welcome, {{ current_user.first_name or current_user.username }}!</h1>
+
+        <p class="onboarding-subtitle">
+            Thanks for joining us! Let's get your account set up so you can make the most of
+            your experience.
+        </p>
+
+        <!-- Features preview -->
+        <div class="feature-list">
+            <div class="feature-item">
+                <i class="fas fa-check-circle feature-icon"></i>
+                <div class="feature-text">
+                    <strong>Complete Your Profile</strong>
+                    <span>Add your contact info and preferences</span>
+                </div>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-check-circle feature-icon"></i>
+                <div class="feature-text">
+                    <strong>Set Notification Preferences</strong>
+                    <span>Choose how you want to hear from us</span>
+                </div>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-check-circle feature-icon"></i>
+                <div class="feature-text">
+                    <strong>Quick Feature Tour</strong>
+                    <span>Learn your way around in 60 seconds</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <form method="POST" action="{{ url_for('onboarding.complete_welcome') }}">
+            {{ csrf_token() }}
+            <button type="submit" class="btn-primary-lg">
+                <i class="fas fa-arrow-right"></i> Let's Get Started
+            </button>
+        </form>
+
+        <form method="POST" action="{{ url_for('onboarding.skip') }}" style="display: inline;">
+            {{ csrf_token() }}
+            <button type="submit" class="skip-link" style="background: none; border: none; cursor: pointer;">
+                Skip for now, I'll set up later
+            </button>
+        </form>
+    </div>
+</main>
+{% endblock %}

@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Organization Chart{% endblock %}
+
+{% block extra_css %}
+<style>
+    .org-chart {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .org-node {
+        background: var(--bs-light);
+        border: 2px solid var(--bs-primary);
+        border-radius: 8px;
+        padding: 1rem;
+        text-align: center;
+        min-width: 150px;
+        margin: 0.5rem;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .org-node:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .org-node .name {
+        font-weight: bold;
+        color: var(--bs-dark);
+    }
+
+    .org-node .title {
+        font-size: 0.85rem;
+        color: var(--bs-secondary);
+    }
+
+    .org-node .dept {
+        font-size: 0.75rem;
+        color: var(--bs-info);
+    }
+
+    .org-children {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        position: relative;
+        padding-top: 1.5rem;
+    }
+
+    .org-children::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 50%;
+        border-left: 2px solid var(--bs-secondary);
+        height: 1.5rem;
+    }
+
+    .org-branch {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .org-branch::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        border-top: 2px solid var(--bs-secondary);
+        width: 50%;
+        left: 50%;
+    }
+
+    .org-branch:first-child::before {
+        left: 50%;
+    }
+
+    .org-branch:last-child::before {
+        left: 0;
+        width: 50%;
+    }
+
+    .org-branch:only-child::before {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-sitemap me-2"></i>Organization Chart</h1>
+        <a href="{{ url_for('employee.directory') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Directory
+        </a>
+    </div>
+
+    <div class="org-chart">
+        {% for root in org_data %}
+        {{ render_org_node(root) }}
+        {% else %}
+        <div class="alert alert-info">No organization structure defined yet.</div>
+        {% endfor %}
+    </div>
+</div>
+
+{% macro render_org_node(node) %}
+<div class="org-branch">
+    <div class="org-node">
+        <div class="name">{{ node.name }}</div>
+        <div class="title">{{ node.title }}</div>
+        {% if node.department %}
+        <div class="dept">{{ node.department }}</div>
+        {% endif %}
+    </div>
+    {% if node.children %}
+    <div class="org-children">
+        {% for child in node.children %}
+        {{ render_org_node(child) }}
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endmacro %}
+{% endblock %}

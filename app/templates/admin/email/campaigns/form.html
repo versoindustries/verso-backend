@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}{{ action }} Campaign - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="mb-4">
+        <a href="{{ url_for('email_admin.campaigns') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-2"></i>Back to Campaigns
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0">{{ action }} Email Campaign</h4>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <!-- Campaign Name -->
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Campaign Name <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="name" name="name" required
+                                value="{{ campaign.name if campaign else '' }}" placeholder="e.g., December Newsletter">
+                        </div>
+
+                        <!-- Template Selection -->
+                        <div class="mb-3">
+                            <label for="template_id" class="form-label">Email Template <span
+                                    class="text-danger">*</span></label>
+                            <select class="form-select" id="template_id" name="template_id" required>
+                                <option value="">Select a template...</option>
+                                {% for template in templates %}
+                                <option value="{{ template.id }}" {% if campaign and campaign.template_id==template.id
+                                    %}selected{% endif %}>
+                                    {{ template.name }} ({{ template.template_type }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Audience Selection -->
+                        <div class="mb-3">
+                            <label for="audience_id" class="form-label">Target Audience</label>
+                            <select class="form-select" id="audience_id" name="audience_id">
+                                <option value="">All Subscribers</option>
+                                {% for audience in audiences %}
+                                <option value="{{ audience.id }}" {% if campaign and campaign.audience_id==audience.id
+                                    %}selected{% endif %}>
+                                    {{ audience.name }} ({{ audience.member_count }} members)
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">Leave blank to send to all active subscribers</small>
+                        </div>
+
+                        <!-- Subject Line Override -->
+                        <div class="mb-3">
+                            <label for="subject_line_a" class="form-label">Subject Line Override</label>
+                            <input type="text" class="form-control" id="subject_line_a" name="subject_line_a"
+                                value="{{ campaign.subject_line_a if campaign else '' }}"
+                                placeholder="Leave blank to use template subject">
+                            <small class="text-muted">Override the template's subject line for this campaign</small>
+                        </div>
+
+                        <!-- A/B Testing -->
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title">A/B Testing (Optional)</h6>
+                                <div class="mb-3">
+                                    <label for="subject_line_b" class="form-label">Subject Line B</label>
+                                    <input type="text" class="form-control" id="subject_line_b" name="subject_line_b"
+                                        value="{{ campaign.subject_line_b if campaign else '' }}"
+                                        placeholder="Alternative subject for testing">
+                                </div>
+                                <div class="mb-0">
+                                    <label for="ab_test_percentage" class="form-label">Test Percentage</label>
+                                    <div class="input-group" style="max-width: 200px;">
+                                        <input type="number" class="form-control" id="ab_test_percentage"
+                                            name="ab_test_percentage" min="0" max="50"
+                                            value="{{ campaign.ab_test_percentage if campaign else 0 }}">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                    <small class="text-muted">Percentage of audience for each variant (0 = no A/B
+                                        test)</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <!-- Scheduling -->
+                        <div class="card bg-light mb-3">
+                            <div class="card-header">Schedule</div>
+                            <div class="card-body">
+                                <div class="mb-0">
+                                    <label for="scheduled_at" class="form-label">Send At</label>
+                                    <input type="datetime-local" class="form-control" id="scheduled_at"
+                                        name="scheduled_at"
+                                        value="{{ campaign.scheduled_at.strftime('%Y-%m-%dT%H:%M') if campaign and campaign.scheduled_at else '' }}">
+                                    <small class="text-muted">Leave blank to save as draft</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tips -->
+                        <div class="card bg-info bg-opacity-10 border-info">
+                            <div class="card-body">
+                                <h6 class="card-title text-info"><i class="fas fa-lightbulb me-2"></i>Tips</h6>
+                                <ul class="small mb-0">
+                                    <li>Test your campaign with a small group first</li>
+                                    <li>Send at optimal times (Tue-Thu, 10am)</li>
+                                    <li>Keep subject lines under 50 characters</li>
+                                    <li>Always include an unsubscribe link</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ url_for('email_admin.campaigns') }}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>{{ action }} Campaign
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

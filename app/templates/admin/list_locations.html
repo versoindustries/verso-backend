@@ -1,0 +1,25 @@
+{% extends "admin/dashboard.html" %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Locations</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{{ url_for('admin.new_location') }}" class="btn btn-sm btn-outline-primary">
+            <i class="fas fa-plus"></i> New Location
+        </a>
+    </div>
+</div>
+
+<div data-react-component="AdminDataTable" data-react-props='{
+    "columns": [
+        {"accessorKey": "id", "header": "ID", "sortable": true},
+        {"accessorKey": "name", "header": "Name", "sortable": true},
+        {"accessorKey": "address", "header": "Address"},
+        {"accessorKey": "users", "header": "Users", "sortable": true},
+        {"accessorKey": "actions", "header": "Actions", "html": true}
+    ],
+    "data": {{ locations_json | safe }},
+    "idKey": "id",
+    "emptyMessage": "No locations found."
+}'></div>
+{% endblock %}

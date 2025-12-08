@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Custom Fields - {{ page.title }} | Admin{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/list_users.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="user-management-section">
+    <div class="container">
+        <header class="section-header">
+            <h1 class="section-title"><i class="fas fa-cog"></i> Custom Fields</h1>
+            <p class="section-subtitle">
+                <a href="{{ url_for('admin.edit_page', page_id=page.id) }}">{{ page.title }}</a> –
+                Flexible metadata fields
+            </p>
+        </header>
+
+        <div class="action-buttons mb-4">
+            <a href="{{ url_for('admin.edit_page', page_id=page.id) }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Edit
+            </a>
+            <a href="{{ url_for('admin.page_revisions', page_id=page.id) }}" class="btn btn-info">
+                <i class="fas fa-history"></i> Revision History
+            </a>
+        </div>
+
+        <div class="row">
+            <!-- Add New Field Form -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <i class="fas fa-plus"></i> Add Custom Field
+                    </div>
+                    <div class="card-body">
+                        <form method="POST">
+                            {{ form.hidden_tag() }}
+
+                            <div class="form-group">
+                                {{ form.field_name.label(class="form-label") }}
+                                {{ form.field_name(class="form-control") }}
+                            </div>
+
+                            <div class="form-group">
+                                {{ form.field_type.label(class="form-label") }}
+                                {{ form.field_type(class="form-control") }}
+                            </div>
+
+                            <div class="form-group">
+                                {{ form.field_value.label(class="form-label") }}
+                                {{ form.field_value(class="form-control", rows=3) }}
+                            </div>
+
+                            <div class="form-group">
+                                {{ form.display_order.label(class="form-label") }}
+                                {{ form.display_order(class="form-control") }}
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-save"></i> Add Field
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Existing Fields List -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-list"></i> Existing Fields ({{ fields | length }})
+                    </div>
+                    <div class="card-body">
+                        {% if fields %}
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Field Name</th>
+                                    <th>Type</th>
+                                    <th>Value</th>
+                                    <th>Order</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for field in fields %}
+                                <tr>
+                                    <td><code>{{ field.field_name }}</code></td>
+                                    <td><span class="badge badge-secondary">{{ field.field_type }}</span></td>
+                                    <td>
+                                        {% if field.field_value %}
+                                        {{ field.field_value[:50] | e }}{% if field.field_value|length > 50 %}...{%
+                                        endif %}
+                                        {% else %}
+                                        <span class="text-muted">Empty</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ field.display_order }}</td>
+                                    <td>
+                                        <form method="POST"
+                                            action="{{ url_for('admin.delete_custom_field', field_id=field.id) }}"
+                                            style="display: inline;" onsubmit="return confirm('Delete this field?');">
+                                            {{ csrf_form.csrf_token }}
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% else %}
+                        <p class="text-muted">No custom fields defined. Add one using the form on the left.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h6>Using Custom Fields in Templates</h6>
+                        <p class="text-muted">Access custom fields in your Jinja2 templates:</p>
+                        <pre><code>{% raw %}{% for field in page.custom_fields %}
+  {{ field.field_name }}: {{ field.get_typed_value() }}
+{% endfor %}{% endraw %}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Reviews - {{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Product Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>{{ product.name }} Reviews</h2>
+            <p class="text-muted mb-0">
+                <span class="text-warning">
+                    {% for i in range(5) %}
+                    <i
+                        class="bi bi-star{{ '-fill' if i < avg_rating|int else '-half' if i == avg_rating|int and avg_rating % 1 >= 0.5 else '' }}"></i>
+                    {% endfor %}
+                </span>
+                <strong>{{ avg_rating }}</strong> out of 5 • {{ total_reviews }} review{{ 's' if total_reviews != 1 }}
+            </p>
+        </div>
+        <a href="{{ url_for('forms.create_review', product_id=product.id) }}" class="btn btn-primary">
+            <i class="bi bi-star me-1"></i> Write a Review
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Rating Distribution Sidebar -->
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Rating Breakdown</h5>
+                </div>
+                <div class="card-body">
+                    {% for rating in range(5, 0, -1) %}
+                    {% set count = rating_counts.get(rating, 0) %}
+                    {% set pct = (count / total_reviews * 100) if total_reviews > 0 else 0 %}
+                    <div class="d-flex align-items-center mb-2">
+                        <a href="?rating={{ rating }}&sort={{ sort }}" class="text-decoration-none text-dark"
+                            style="width: 60px;">
+                            {{ rating }} <i class="bi bi-star-fill text-warning"></i>
+                        </a>
+                        <div class="progress flex-grow-1 mx-2" style="height: 8px;">
+                            <div class="progress-bar bg-warning" style="width: {{ pct }}%"></div>
+                        </div>
+                        <span class="text-muted" style="width: 30px;">{{ count }}</span>
+                    </div>
+                    {% endfor %}
+
+                    {% if rating_filter %}
+                    <hr>
+                    <a href="{{ url_for('forms.product_reviews', product_id=product.id, sort=sort) }}"
+                        class="btn btn-sm btn-outline-secondary w-100">
+                        Clear filter
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Reviews List -->
+        <div class="col-md-9">
+            <!-- Sort Options -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span>
+                    {% if rating_filter %}
+                    Showing {{ rating_filter }}-star reviews
+                    {% else %}
+                    Showing all reviews
+                    {% endif %}
+                </span>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        Sort by: {{ {'newest': 'Newest', 'oldest': 'Oldest', 'highest': 'Highest rated', 'lowest':
+                        'Lowest rated', 'helpful': 'Most helpful'}.get(sort, 'Newest') }}
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="?sort=newest&rating={{ rating_filter or '' }}">Newest</a>
+                        </li>
+                        <li><a class="dropdown-item" href="?sort=oldest&rating={{ rating_filter or '' }}">Oldest</a>
+                        </li>
+                        <li><a class="dropdown-item" href="?sort=highest&rating={{ rating_filter or '' }}">Highest
+                                rated</a></li>
+                        <li><a class="dropdown-item" href="?sort=lowest&rating={{ rating_filter or '' }}">Lowest
+                                rated</a></li>
+                        <li><a class="dropdown-item" href="?sort=helpful&rating={{ rating_filter or '' }}">Most
+                                helpful</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            {% if reviews.items %}
+            {% for review in reviews.items %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="text-warning mb-1">
+                                {% for i in range(5) %}
+                                <i class="bi bi-star{{ '-fill' if i < review.rating else '' }}"></i>
+                                {% endfor %}
+                            </div>
+                            <h5 class="mb-1">
+                                {{ review.title or 'Review' }}
+                                {% if review.verified_purchase %}
+                                <span class="badge bg-success ms-1">Verified Purchase</span>
+                                {% endif %}
+                            </h5>
+                        </div>
+                        <small class="text-muted">{{ review.created_at.strftime('%B %d, %Y') if review.created_at else
+                            '' }}</small>
+                    </div>
+
+                    <p class="mb-2">{{ review.body }}</p>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            By {{ review.user.username if review.user else 'Anonymous' }}
+                        </small>
+                        <div>
+                            <span class="me-2 text-muted">Helpful?</span>
+                            <form action="{{ url_for('forms.vote_review', review_id=review.id) }}" method="POST"
+                                class="d-inline vote-form">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="helpful" value="true">
+                                <button type="submit" class="btn btn-sm btn-outline-success">
+                                    <i class="bi bi-hand-thumbs-up"></i> {{ review.helpful_count }}
+                                </button>
+                            </form>
+                            <form action="{{ url_for('forms.vote_review', review_id=review.id) }}" method="POST"
+                                class="d-inline vote-form">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="helpful" value="false">
+                                <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-hand-thumbs-down"></i> {{ review.not_helpful_count }}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    {% if review.response %}
+                    <div class="mt-3 p-3 bg-light rounded">
+                        <strong><i class="bi bi-reply me-1"></i>Response from Seller:</strong>
+                        <p class="mb-0 mt-1">{{ review.response }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Pagination -->
+            <nav aria-label="Reviews pagination">
+                <ul class="pagination justify-content-center">
+                    {% if reviews.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link"
+                            href="?page={{ reviews.prev_num }}&sort={{ sort }}&rating={{ rating_filter or '' }}">Previous</a>
+                    </li>
+                    {% endif %}
+
+                    {% for page_num in reviews.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                    {% if page_num %}
+                    <li class="page-item {{ 'active' if page_num == reviews.page }}">
+                        <a class="page-link"
+                            href="?page={{ page_num }}&sort={{ sort }}&rating={{ rating_filter or '' }}">{{ page_num
+                            }}</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if reviews.has_next %}
+                    <li class="page-item">
+                        <a class="page-link"
+                            href="?page={{ reviews.next_num }}&sort={{ sort }}&rating={{ rating_filter or '' }}">Next</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-star display-1 text-muted"></i>
+                <h4 class="mt-3">No Reviews Yet</h4>
+                <p class="text-muted">Be the first to review this product!</p>
+                <a href="{{ url_for('forms.create_review', product_id=product.id) }}" class="btn btn-primary">
+                    <i class="bi bi-star me-1"></i> Write a Review
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

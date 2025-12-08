@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}{{ estimator.name }} - Weekly Availability{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('admin.admin_dashboard') }}">Admin</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('availability.list_estimators') }}">Availability</a></li>
+            <li class="breadcrumb-item active">{{ estimator.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-clock"></i> {{ estimator.name }} - Weekly Schedule</h2>
+        <a href="{{ url_for('availability.list_exceptions', estimator_id=estimator.id) }}"
+            class="btn btn-outline-secondary">
+            <i class="fas fa-calendar-times"></i> Exception Dates
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Current Schedule -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <strong>Current Weekly Schedule</strong>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-bordered mb-0">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Day</th>
+                                <th>Hours</th>
+                                <th width="100">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for day_num, day_name in [(0, 'Monday'), (1, 'Tuesday'), (2, 'Wednesday'), (3,
+                            'Thursday'), (4, 'Friday'), (5, 'Saturday'), (6, 'Sunday')] %}
+                            <tr>
+                                <td><strong>{{ day_name }}</strong></td>
+                                <td>
+                                    {% if availability_by_day[day_num] %}
+                                    {% for slot in availability_by_day[day_num] %}
+                                    <span class="badge badge-success mr-1 mb-1">
+                                        {{ slot.start_time.strftime('%H:%M') }} - {{ slot.end_time.strftime('%H:%M') }}
+                                    </span>
+                                    <form method="POST" class="d-inline"
+                                        action="{{ url_for('availability.delete_availability', availability_id=slot.id) }}">
+                                        {{ delete_form.csrf_token }}
+                                        <button type="submit" class="btn btn-sm btn-link text-danger p-0" title="Remove"
+                                            onclick="return confirm('Delete this slot?')">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </form>
+                                    {% endfor %}
+                                    {% else %}
+                                    <span class="text-muted">Not available</span>
+                                    {% endif %}
+                                </td>
+                                <td></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Availability Form -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-plus"></i> Add Availability
+                </div>
+                <div class="card-body">
+                    <form method="POST"
+                        action="{{ url_for('availability.add_availability', estimator_id=estimator.id) }}">
+                        {{ form.csrf_token }}
+
+                        <div class="form-group">
+                            <label>{{ form.day_of_week.label.text }}</label>
+                            {{ form.day_of_week(class="form-control") }}
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label>{{ form.start_time.label.text }}</label>
+                                {{ form.start_time(class="form-control") }}
+                            </div>
+                            <div class="form-group col-6">
+                                <label>{{ form.end_time.label.text }}</label>
+                                {{ form.end_time(class="form-control") }}
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fas fa-save"></i> Add Time Slot
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-body bg-light">
+                    <h6><i class="fas fa-info-circle"></i> Quick Tips</h6>
+                    <small class="text-muted">
+                        <ul class="mb-0 pl-3">
+                            <li>Add multiple slots per day for breaks</li>
+                            <li>Use Exceptions for holidays/PTO</li>
+                            <li>Slots are displayed in 24-hour format</li>
+                        </ul>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

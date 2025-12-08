@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Audit Logs{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components/admin-data-table.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="mb-4">
+        <h1 class="h3 mb-0">Audit Logs</h1>
+        <p class="text-muted">Track administrative actions and security events.</p>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div data-react-component="AdminDataTable" data-react-props='{
+                "columns": [
+                    {"accessorKey": "timestamp", "header": "Timestamp (UTC)", "sortable": true},
+                    {"accessorKey": "user", "header": "User", "html": true},
+                    {"accessorKey": "action", "header": "Action", "html": true, "sortable": true},
+                    {"accessorKey": "target_type", "header": "Target Type"},
+                    {"accessorKey": "target_id", "header": "Target ID"},
+                    {"accessorKey": "ip_address", "header": "IP Address"},
+                    {"accessorKey": "details", "header": "Details", "html": true}
+                ],
+                "data": {{ logs_json | safe }},
+                "idKey": "id",
+                "defaultPageSize": 50,
+                "emptyMessage": "No audit logs found."
+            }'>
+                <!-- Loading fallback -->
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Server-side Pagination -->
+            {% if logs.pages > 1 %}
+            <nav class="mt-4" aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if logs.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin.audit_logs', page=logs.prev_num) }}">Previous</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Previous</span>
+                    </li>
+                    {% endif %}
+
+                    <li class="page-item disabled">
+                        <span class="page-link">Page {{ logs.page }} of {{ logs.pages }}</span>
+                    </li>
+
+                    {% if logs.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin.audit_logs', page=logs.next_num) }}">Next</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Next</span>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,362 @@
+{% extends "admin/base.html" %}
+{% block title %}System Metrics - Admin{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col-sm-6">
+                <h1 class="m-0"><i class="fas fa-chart-line mr-2"></i>System Metrics</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="{{ url_for('admin.admin_dashboard') }}">Admin</a></li>
+                    <li class="breadcrumb-item active">System Metrics</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+
+        <!-- System Health Status -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-heartbeat mr-2"></i>System Health</h3>
+                        <div class="card-tools">
+                            <span class="badge badge-{{ 'success' if health.database.status == 'ok' else 'danger' }}">
+                                {{ 'Healthy' if health.database.status == 'ok' else 'Unhealthy' }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Database Status -->
+                            <div class="col-md-3 col-sm-6">
+                                <div
+                                    class="info-box {{ 'bg-success' if health.database.status == 'ok' else 'bg-danger' }}">
+                                    <span class="info-box-icon"><i class="fas fa-database"></i></span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">Database</span>
+                                        <span class="info-box-number">{{ health.database.status|upper }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Workers Status -->
+                            <div class="col-md-3 col-sm-6">
+                                <div
+                                    class="info-box {{ 'bg-success' if health.workers.status == 'ok' else ('bg-warning' if health.workers.status == 'degraded' else 'bg-secondary') }}">
+                                    <span class="info-box-icon"><i class="fas fa-cogs"></i></span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">Workers</span>
+                                        <span class="info-box-number">
+                                            {% if health.workers.active_workers is defined %}
+                                            {{ health.workers.active_workers }} Active
+                                            {% else %}
+                                            {{ health.workers.status|upper }}
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Cache Status -->
+                            <div class="col-md-3 col-sm-6">
+                                <div
+                                    class="info-box {{ 'bg-success' if health.cache.status == 'ok' else 'bg-warning' }}">
+                                    <span class="info-box-icon"><i class="fas fa-memory"></i></span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">Cache</span>
+                                        <span class="info-box-number">{{ health.cache.status|upper }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Mail Status -->
+                            <div class="col-md-3 col-sm-6">
+                                <div
+                                    class="info-box {{ 'bg-success' if health.mail.status == 'configured' else 'bg-secondary' }}">
+                                    <span class="info-box-icon"><i class="fas fa-envelope"></i></span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">Mail</span>
+                                        <span class="info-box-number">{{ health.mail.status|upper }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Info & Uptime -->
+        <div class="row">
+            <div class="col-lg-4 col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-server mr-2"></i>System Info</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table">
+                            <tr>
+                                <td><strong>Hostname</strong></td>
+                                <td>{{ system_info.hostname }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Environment</strong></td>
+                                <td>
+                                    <span class="badge badge-{{ 'warning' if system_info.flask_debug else 'success' }}">
+                                        {{ system_info.environment|upper }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Python Version</strong></td>
+                                <td>{{ system_info.python_version }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Uptime</strong></td>
+                                <td>{{ system_info.uptime_hours }} hours</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Request Statistics -->
+            <div class="col-lg-4 col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-globe mr-2"></i>Request Statistics</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table">
+                            <tr>
+                                <td><strong>Total Requests</strong></td>
+                                <td>{{ request_stats.total|default(0) }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Error Count</strong></td>
+                                <td>
+                                    <span class="{{ 'text-danger' if request_stats.errors else '' }}">
+                                        {{ request_stats.errors|default(0) }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Error Rate</strong></td>
+                                <td>
+                                    <span
+                                        class="{{ 'text-danger' if request_stats.error_rate and request_stats.error_rate > 0.05 else '' }}">
+                                        {{ (request_stats.error_rate * 100)|round(2) }}%
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Avg Response Time</strong></td>
+                                <td>{{ request_stats.avg_duration_ms|default(0) }} ms</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Database Statistics -->
+            <div class="col-lg-4 col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-database mr-2"></i>Database Statistics</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table">
+                            <tr>
+                                <td><strong>Total Queries</strong></td>
+                                <td>{{ db_stats.total_queries|default(0) }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Total Query Time</strong></td>
+                                <td>{{ db_stats.total_duration|default(0) }} s</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Slow Queries</strong></td>
+                                <td>
+                                    <span class="{{ 'text-warning' if db_stats.slow_queries else '' }}">
+                                        {{ db_stats.slow_queries|default(0) }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Avg Query Time</strong></td>
+                                <td>{{ db_stats.avg_duration_ms|default(0) }} ms</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Business KPIs -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-chart-bar mr-2"></i>Business KPIs</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-lg-3 col-6">
+                                <div class="small-box bg-info">
+                                    <div class="inner">
+                                        <h3>{{ business_stats.total_users|default(0) }}</h3>
+                                        <p>Total Users</p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <div class="small-box-footer">
+                                        +{{ business_stats.new_users_24h|default(0) }} last 24h
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-3 col-6">
+                                <div class="small-box bg-success">
+                                    <div class="inner">
+                                        <h3>{{ business_stats.total_orders|default(0) }}</h3>
+                                        <p>Total Orders</p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="fas fa-shopping-cart"></i>
+                                    </div>
+                                    <div class="small-box-footer">
+                                        +{{ business_stats.orders_24h|default(0) }} last 24h
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-3 col-6">
+                                <div class="small-box bg-warning">
+                                    <div class="inner">
+                                        <h3>{{ business_stats.total_appointments|default(0) }}</h3>
+                                        <p>Appointments</p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="fas fa-calendar-check"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-3 col-6">
+                                <div class="small-box bg-danger">
+                                    <div class="inner">
+                                        <h3>{{ business_stats.total_leads|default(0) }}</h3>
+                                        <p>Leads</p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="fas fa-user-plus"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Task Queue Status -->
+        {% if business_stats.pending_tasks is defined %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-tasks mr-2"></i>Task Queue</h3>
+                        <div class="card-tools">
+                            <a href="{{ url_for('tasks_admin.dashboard') }}" class="btn btn-sm btn-outline-primary">
+                                View All Tasks
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="info-box bg-gradient-info">
+                                    <span class="info-box-icon"><i class="fas fa-clock"></i></span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">Pending Tasks</span>
+                                        <span class="info-box-number">{{ business_stats.pending_tasks }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Quick Links -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-external-link-alt mr-2"></i>Monitoring Endpoints</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <a href="{{ url_for('observability.health') }}" target="_blank"
+                                    class="btn btn-block btn-outline-success">
+                                    <i class="fas fa-heartbeat mr-2"></i>/health
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="{{ url_for('observability.ready') }}" target="_blank"
+                                    class="btn btn-block btn-outline-info">
+                                    <i class="fas fa-check-circle mr-2"></i>/ready
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="{{ url_for('observability.live') }}" target="_blank"
+                                    class="btn btn-block btn-outline-primary">
+                                    <i class="fas fa-signal mr-2"></i>/live
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="{{ url_for('observability.metrics') }}" target="_blank"
+                                    class="btn btn-block btn-outline-warning">
+                                    <i class="fas fa-chart-line mr-2"></i>/metrics
+                                </a>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <p class="text-muted mb-0">
+                                <small>
+                                    <strong>Note:</strong> The <code>/metrics</code> endpoint can be optionally
+                                    protected
+                                    by setting the <code>METRICS_TOKEN</code> environment variable. When set, requests
+                                    must include <code>Authorization: Bearer &lt;token&gt;</code> header.
+                                </small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-refresh every 30 seconds
+    setTimeout(() => {
+        location.reload();
+    }, 30000);
+</script>
+{% endblock %}

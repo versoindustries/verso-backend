@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <div class="alert alert-success">
+        <h4 class="alert-heading">Unsubscribed</h4>
+        <p>You have been successfully unsubscribed from our newsletter list.</p>
+        <hr>
+        <p class="mb-0">Email: {{ email }}</p>
+    </div>
+    <a href="{{ url_for('main_routes.index') }}" class="btn btn-primary">Return to Home</a>
+</div>
+{% endblock %}

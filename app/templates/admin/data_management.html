@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Data Management{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1 class="h2">Data Management</h1>
+        <p class="text-muted">Backup, restore, import, and export system data.</p>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Backup / Export -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Backup & Export</h6>
+            </div>
+            <div class="card-body">
+                <p>Download a full backup of the database including all users, settings, and content. The backup is
+                    provided as a ZIP file containing JSON dumps of all tables.</p>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> This file can be used to restore the system or migrate to another
+                    instance.
+                </div>
+                <a href="{{ url_for('admin.download_backup') }}" class="btn btn-primary btn-block">
+                    <i class="fas fa-download"></i> Download Full Backup
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import / Restore -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-danger">Import & Restore</h6>
+            </div>
+            <div class="card-body">
+                <p>Restore the system from a previous backup ZIP file. </p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i> <strong>Warning:</strong> This process sends data to the
+                    database. If records exist with the same ID, they may be updated or cause conflicts depending on the
+                    specific model logic.
+                </div>
+
+                <form action="{{ url_for('admin.import_data') }}" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <div class="form-group">
+                        <label for="file">Select Backup ZIP File</label>
+                        <input type="file" class="form-control-file" id="file" name="file" accept=".zip" required>
+                    </div>
+                    <button type="submit" class="btn btn-danger btn-block"
+                        onclick="return confirm('Are you sure you want to import this data? This could overwrite existing information.');">
+                        <i class="fas fa-file-import"></i> Import Data
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- GDPR Export -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-info">GDPR / Personal Data Export</h6>
+            </div>
+            <div class="card-body">
+                <p>Export all personal data associated with a specific email address (User profile, Orders,
+                    Appointments, Contact submissions).</p>
+                <form action="{{ url_for('admin.export_user_data') }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <div class="form-group">
+                        <label for="email">User Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required
+                            placeholder="user@example.com">
+                    </div>
+                    <button type="submit" class="btn btn-info btn-block">
+                        <i class="fas fa-file-export"></i> Export Personal Data
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

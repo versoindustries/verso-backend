@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Reschedule Requests - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h2 class="mb-4"><i class="fas fa-calendar-check"></i> Reschedule Requests</h2>
+
+    <!-- Pending Requests -->
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-dark">
+            <strong><i class="fas fa-clock"></i> Pending Requests ({{ pending|length }})</strong>
+        </div>
+        <div class="card-body">
+            <div data-react-component="AdminDataTable" data-react-props='{
+                   "columns": [
+                     {"accessorKey": "appointment", "header": "Appointment", "html": true},
+                     {"accessorKey": "staff", "header": "Staff"},
+                     {"accessorKey": "current_time", "header": "Current Time"},
+                     {"accessorKey": "proposed_time", "header": "Proposed Time", "html": true},
+                     {"accessorKey": "reason", "header": "Reason"},
+                     {"accessorKey": "submitted", "header": "Submitted"},
+                     {"accessorKey": "actions", "header": "Actions", "html": true}
+                   ],
+                   "data": {{ pending_json|safe }},
+                   "emptyMessage": "No pending reschedule requests.",
+                   "defaultPageSize": 10
+                 }'>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reject Modals (kept for form functionality) -->
+    {% for rr in pending %}
+    <div class="modal fade" id="rejectModal{{ rr.id }}" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST" action="{{ url_for('admin.reject_reschedule', request_id=rr.id) }}">
+                    {{ form.csrf_token }}
+                    <div class="modal-header">
+                        <h5 class="modal-title">Reject Reschedule Request</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Reason for Rejection (Optional)</label>
+                            <textarea name="admin_notes" class="form-control" rows="3"
+                                placeholder="Enter reason..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Reject Request</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Recent History -->
+    <div class="card">
+        <div class="card-header bg-light">
+            <strong><i class="fas fa-history"></i> Recent History</strong>
+        </div>
+        <div class="card-body">
+            <div data-react-component="AdminDataTable" data-react-props='{
+                   "columns": [
+                     {"accessorKey": "appointment", "header": "Appointment"},
+                     {"accessorKey": "proposed_time", "header": "Proposed Time"},
+                     {"accessorKey": "status", "header": "Status", "html": true},
+                     {"accessorKey": "admin_notes", "header": "Admin Notes"},
+                     {"accessorKey": "processed", "header": "Processed"}
+                   ],
+                   "data": {{ recent_json|safe }},
+                   "emptyMessage": "No recent history.",
+                   "defaultPageSize": 10
+                 }'>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

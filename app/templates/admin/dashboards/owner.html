@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}Owner Dashboard - Executive View{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/admindash.css') }}">
+<style>
+    .exec-container {
+        max-width: 1300px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .exec-header {
+        background: linear-gradient(135deg, #1a1a2e, #16213e);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .exec-header h1 {
+        color: #fff;
+        margin: 0;
+        font-size: 1.75rem;
+    }
+
+    .exec-header .subtitle {
+        color: rgba(255, 255, 255, 0.6);
+        margin-top: 0.25rem;
+    }
+
+    .dashboard-nav {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .dashboard-nav a {
+        padding: 0.6rem 1.25rem;
+        background: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.8);
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+    .dashboard-nav a:hover,
+    .dashboard-nav a.active {
+        background: var(--primary-color, #4169e1);
+        color: #fff;
+    }
+
+    .kpi-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 2rem;
+    }
+
+    .kpi-box {
+        background: rgba(42, 42, 42, 0.95);
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .kpi-box .label {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.6);
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+    }
+
+    .kpi-box .value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .kpi-box .sub {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.5);
+        margin-top: 0.25rem;
+    }
+
+    .section-card {
+        background: rgba(42, 42, 42, 0.9);
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .section-header {
+        padding: 1rem 1.25rem;
+        background: rgba(0, 0, 0, 0.3);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .section-header h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        color: #fff;
+    }
+
+    .section-body {
+        padding: 1.25rem;
+    }
+
+    .products-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .products-list li {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        color: #fff;
+    }
+
+    .products-list li:last-child {
+        border-bottom: none;
+    }
+
+    .products-list .revenue {
+        color: #28a745;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="section-spacer"></div>
+
+<div class="exec-container">
+    <div class="exec-header">
+        <div>
+            <h1><i class="fas fa-crown"></i> Owner Dashboard</h1>
+            <p class="subtitle">Executive performance overview</p>
+        </div>
+        <div class="dashboard-nav">
+            <a href="{{ url_for('admin.owner_dashboard') }}" class="active">Owner</a>
+            <a href="{{ url_for('admin.operations_dashboard') }}">Operations</a>
+            <a href="{{ url_for('admin.sales_dashboard') }}">Sales</a>
+            <a href="{{ url_for('admin.admin_dashboard') }}">Main</a>
+        </div>
+    </div>
+
+    <!-- KPI Row -->
+    <div class="kpi-row">
+        <div class="kpi-box">
+            <div class="label">Revenue MTD</div>
+            <div class="value">${{ '%.2f' % (kpis.revenue_mtd / 100) }}</div>
+            <div class="sub">{{ kpis.orders_mtd }} orders</div>
+        </div>
+        <div class="kpi-box">
+            <div class="label">Revenue YTD</div>
+            <div class="value">${{ '%.2f' % (kpis.revenue_ytd / 100) }}</div>
+            <div class="sub">{{ kpis.orders_ytd }} orders</div>
+        </div>
+        <div class="kpi-box">
+            <div class="label">Avg Order Value</div>
+            <div class="value">${{ '%.2f' % (kpis.avg_order_value / 100) }}</div>
+            <div class="sub">This month</div>
+        </div>
+        <div class="kpi-box">
+            <div class="label">Conversion Rate</div>
+            <div class="value">{{ kpis.conversion_rate }}%</div>
+            <div class="sub">Lead to sale</div>
+        </div>
+    </div>
+
+    <div class="kpi-row">
+        <div class="kpi-box">
+            <div class="label">Leads MTD</div>
+            <div class="value">{{ kpis.leads_mtd }}</div>
+        </div>
+        <div class="kpi-box">
+            <div class="label">Leads YTD</div>
+            <div class="value">{{ kpis.leads_ytd }}</div>
+        </div>
+        <div class="kpi-box">
+            <div class="label">Orders MTD</div>
+            <div class="value">{{ kpis.orders_mtd }}</div>
+        </div>
+        <div class="kpi-box">
+            <div class="label">Orders YTD</div>
+            <div class="value">{{ kpis.orders_ytd }}</div>
+        </div>
+    </div>
+
+    <!-- Top Products -->
+    <div class="section-card">
+        <div class="section-header">
+            <h3><i class="fas fa-trophy"></i> Top Products This Month</h3>
+        </div>
+        <div class="section-body">
+            {% if kpis.top_products %}
+            <ul class="products-list">
+                {% for name, qty, revenue in kpis.top_products %}
+                <li>
+                    <span>{{ name }} ({{ qty }} sold)</span>
+                    <span class="revenue">${{ '%.2f' % (revenue / 100) }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p style="color: rgba(255,255,255,0.5); text-align: center;">No sales this month yet</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="section-spacer"></div>
+{% endblock %}

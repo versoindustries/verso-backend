@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}Complete Your Profile{% endblock %}
+
+{% block additional_css %}
+<style>
+    .onboarding-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 2rem;
+    }
+
+    .onboarding-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        padding: 2.5rem;
+    }
+
+    .onboarding-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .onboarding-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .onboarding-subtitle {
+        color: #666;
+    }
+
+    .progress-container {
+        margin-bottom: 2rem;
+    }
+
+    .progress-bar {
+        height: 8px;
+        background: #e9ecef;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary-color, #007bff), #28a745);
+        border-radius: 4px;
+    }
+
+    .progress-text {
+        font-size: 0.875rem;
+        color: #666;
+        margin-top: 0.5rem;
+        text-align: center;
+    }
+
+    .onboarding-steps {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .step-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #e9ecef;
+    }
+
+    .step-dot.completed {
+        background: #28a745;
+    }
+
+    .step-dot.active {
+        background: var(--primary-color, #007bff);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color, #007bff);
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #eee;
+    }
+
+    .btn-primary {
+        padding: 0.75rem 2rem;
+        font-size: 1rem;
+        border-radius: 8px;
+        background: var(--primary-color, #007bff);
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-secondary {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        border-radius: 8px;
+        background: #f8f9fa;
+        color: #666;
+        border: 1px solid #ddd;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .form-error {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="onboarding-container">
+    <div class="onboarding-card">
+        <!-- Progress -->
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {{ progress.percentage }}%"></div>
+            </div>
+            <div class="progress-text">Step 2 of 4</div>
+        </div>
+
+        <div class="onboarding-steps">
+            <div class="step-dot completed"></div>
+            <div class="step-dot active"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+        </div>
+
+        <div class="onboarding-header">
+            <h1 class="onboarding-title">Complete Your Profile</h1>
+            <p class="onboarding-subtitle">Help us personalize your experience</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('onboarding.profile') }}">
+            {{ form.hidden_tag() }}
+
+            <div class="form-row">
+                <div class="form-group">
+                    {{ form.first_name.label }}
+                    {{ form.first_name(class="form-control", placeholder="First name") }}
+                    {% if form.first_name.errors %}
+                    <span class="form-error">{{ form.first_name.errors[0] }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.last_name.label }}
+                    {{ form.last_name(class="form-control", placeholder="Last name") }}
+                    {% if form.last_name.errors %}
+                    <span class="form-error">{{ form.last_name.errors[0] }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                {{ form.phone.label }}
+                {{ form.phone(class="form-control", placeholder="+1 (555) 123-4567") }}
+                {% if form.phone.errors %}
+                <span class="form-error">{{ form.phone.errors[0] }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form.timezone.label }}
+                {{ form.timezone(class="form-control") }}
+                {% if form.timezone.errors %}
+                <span class="form-error">{{ form.timezone.errors[0] }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form.bio.label }}
+                {{ form.bio(class="form-control", rows="3", placeholder="Tell us a bit about yourself...") }}
+                {% if form.bio.errors %}
+                <span class="form-error">{{ form.bio.errors[0] }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ url_for('onboarding.welcome') }}" class="btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+                <button type="submit" class="btn-primary">
+                    Continue <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
+{% endblock %}

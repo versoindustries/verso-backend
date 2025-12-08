@@ -1,9 +1,53 @@
-env/
-*.pyc
-*.pyc
-.pyc
-*.psd
-/instance
-/migrations
-/env
+# Git Ignore Patterns for Verso-Backend
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+.venv/
+venv/
+
+# Database
+*.sqlite
+*.sqlite3
+instance/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Node
+node_modules/
+dist/
+app/static/dist/
+
+# Build artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+*.pem
+*.key
+
+# Migrations (tracked for production deployments)
+# /migrations
+
+# Assets
+*.psd

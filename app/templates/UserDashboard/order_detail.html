@@ -1,0 +1,385 @@
+{% extends "base.html" %}
+
+{% block title %}Order #{{ order.id }} - My Account{% endblock %}
+
+{% block additional_css %}
+<style>
+    .order-detail-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: rgba(42, 42, 42, 0.9);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .order-header h1 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.5rem;
+        color: #fff;
+    }
+
+    .order-header .order-date {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.9rem;
+    }
+
+    .order-status {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+
+    .order-status.paid {
+        background: rgba(40, 167, 69, 0.2);
+        color: #28a745;
+    }
+
+    .order-status.pending {
+        background: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+    }
+
+    .order-status.shipped {
+        background: rgba(23, 162, 184, 0.2);
+        color: #17a2b8;
+    }
+
+    .order-status.delivered {
+        background: rgba(40, 167, 69, 0.3);
+        color: #28a745;
+    }
+
+    .order-status.cancelled {
+        background: rgba(220, 53, 69, 0.2);
+        color: #dc3545;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        margin-bottom: 1.5rem;
+    }
+
+    .back-link:hover {
+        color: #fff;
+    }
+
+    .order-section {
+        background: rgba(42, 42, 42, 0.9);
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .section-header {
+        padding: 1rem 1.25rem;
+        background: rgba(0, 0, 0, 0.3);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .section-header h3 {
+        margin: 0;
+        font-size: 1rem;
+        color: #fff;
+    }
+
+    .section-body {
+        padding: 1.25rem;
+    }
+
+    /* Order Items Table */
+    .items-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .items-table th,
+    .items-table td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .items-table th {
+        color: rgba(255, 255, 255, 0.7);
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .items-table td {
+        color: #fff;
+    }
+
+    .items-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .item-name {
+        font-weight: 500;
+    }
+
+    .item-digital {
+        font-size: 0.75rem;
+        color: var(--primary-color, #4169e1);
+        margin-left: 0.5rem;
+    }
+
+    /* Totals */
+    .order-totals {
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        padding-top: 1rem;
+        margin-top: 1rem;
+    }
+
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .total-row.grand-total {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #fff;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        padding-top: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    /* Tracking Info */
+    .tracking-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .tracking-item {
+        padding: 1rem;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+    }
+
+    .tracking-item .label {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.6);
+        margin-bottom: 0.25rem;
+    }
+
+    .tracking-item .value {
+        font-weight: 600;
+        color: #fff;
+    }
+
+    /* Downloads Section */
+    .downloads-list {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .download-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+    }
+
+    .download-item .info h4 {
+        margin: 0 0 0.25rem 0;
+        color: #fff;
+    }
+
+    .download-item .info p {
+        margin: 0;
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .download-btn {
+        padding: 0.5rem 1rem;
+        background: var(--primary-color, #4169e1);
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .download-btn:hover {
+        opacity: 0.9;
+        color: #fff;
+    }
+
+    .download-btn.disabled {
+        background: rgba(255, 255, 255, 0.2);
+        cursor: not-allowed;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="section-spacer"></div>
+
+<div class="order-detail-container">
+    <a href="{{ url_for('user.my_account', tab='orders') }}" class="back-link">
+        <i class="fas fa-arrow-left"></i> Back to Orders
+    </a>
+
+    <!-- Order Header -->
+    <div class="order-header">
+        <div>
+            <h1>Order #{{ order.id }}</h1>
+            <div class="order-date">
+                Placed on {{ order.created_at.strftime('%B %d, %Y at %I:%M %p') if order.created_at else 'N/A' }}
+            </div>
+        </div>
+        <span class="order-status {{ order.status }}">{{ order.status|capitalize }}</span>
+    </div>
+
+    <!-- Order Items -->
+    <div class="order-section">
+        <div class="section-header">
+            <h3><i class="fas fa-box"></i> Order Items</h3>
+        </div>
+        <div class="section-body">
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.items %}
+                    <tr>
+                        <td>
+                            <span class="item-name">{{ item.product.name if item.product else 'Product' }}</span>
+                            {% if item.product and item.product.is_digital %}
+                            <span class="item-digital"><i class="fas fa-download"></i> Digital</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ item.quantity }}</td>
+                        <td>${{ '%.2f' % ((item.price_at_purchase or item.unit_price or 0) / 100) }}</td>
+                        <td>${{ '%.2f' % (((item.price_at_purchase or item.unit_price or 0) * item.quantity) / 100) }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="order-totals">
+                <div class="total-row">
+                    <span>Subtotal</span>
+                    <span>${{ '%.2f' % (order.total_amount / 100) }}</span>
+                </div>
+                <div class="total-row grand-total">
+                    <span>Total</span>
+                    <span>${{ '%.2f' % (order.total_amount / 100) }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if order.tracking_number or order.shipped_at %}
+    <!-- Shipping Info -->
+    <div class="order-section">
+        <div class="section-header">
+            <h3><i class="fas fa-truck"></i> Shipping Information</h3>
+        </div>
+        <div class="section-body">
+            <div class="tracking-info">
+                {% if order.tracking_number %}
+                <div class="tracking-item">
+                    <div class="label">Tracking Number</div>
+                    <div class="value">{{ order.tracking_number }}</div>
+                </div>
+                {% endif %}
+                {% if order.carrier %}
+                <div class="tracking-item">
+                    <div class="label">Carrier</div>
+                    <div class="value">{{ order.carrier|upper }}</div>
+                </div>
+                {% endif %}
+                {% if order.shipped_at %}
+                <div class="tracking-item">
+                    <div class="label">Shipped On</div>
+                    <div class="value">{{ order.shipped_at.strftime('%B %d, %Y') }}</div>
+                </div>
+                {% endif %}
+                {% if order.delivered_at %}
+                <div class="tracking-item">
+                    <div class="label">Delivered On</div>
+                    <div class="value">{{ order.delivered_at.strftime('%B %d, %Y') }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if download_tokens %}
+    <!-- Digital Downloads -->
+    <div class="order-section">
+        <div class="section-header">
+            <h3><i class="fas fa-download"></i> Digital Downloads</h3>
+        </div>
+        <div class="section-body">
+            <div class="downloads-list">
+                {% for token in download_tokens %}
+                <div class="download-item">
+                    <div class="info">
+                        <h4>{{ token.order_item.product.name if token.order_item and token.order_item.product else
+                            'Digital Product' }}</h4>
+                        <p>{{ token.download_count }}/{{ token.max_downloads }} downloads used •
+                            Expires {{ token.expires_at.strftime('%b %d, %Y') if token.expires_at else 'Never' }}</p>
+                    </div>
+                    {% if token.is_valid() %}
+                    <a href="{{ url_for('cart.download_file', token=token.token) }}" class="download-btn">
+                        <i class="fas fa-download"></i> Download
+                    </a>
+                    {% else %}
+                    <span class="download-btn disabled">
+                        <i class="fas fa-ban"></i> Unavailable
+                    </span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if order.shipping_address %}
+    <!-- Shipping Address -->
+    <div class="order-section">
+        <div class="section-header">
+            <h3><i class="fas fa-map-marker-alt"></i> Shipping Address</h3>
+        </div>
+        <div class="section-body">
+            <p style="color: #fff; margin: 0; white-space: pre-line;">{{ order.shipping_address }}</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div class="section-spacer"></div>
+{% endblock %}

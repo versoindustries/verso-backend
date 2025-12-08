@@ -1,0 +1,98 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block title %}Leave Balance Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h1 class="mb-4"><i class="fas fa-balance-scale me-2"></i>Leave Balance Management - {{ year }}</h1>
+
+    <!-- Add New Balance -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-plus me-2"></i>Add/Adjust Leave Balance</h5>
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('admin.adjust_leave_balance') }}" method="post">
+                {{ form.hidden_tag() }}
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        {{ form.user_id.label(class="form-label") }}
+                        {{ form.user_id(class="form-select") }}
+                    </div>
+                    <div class="col-md-2">
+                        {{ form.leave_type.label(class="form-label") }}
+                        {{ form.leave_type(class="form-select") }}
+                    </div>
+                    <div class="col-md-2">
+                        {{ form.year.label(class="form-label") }}
+                        {{ form.year(class="form-control") }}
+                    </div>
+                    <div class="col-md-2">
+                        {{ form.balance_days.label(class="form-label") }}
+                        {{ form.balance_days(class="form-control") }}
+                    </div>
+                    <div class="col-md-2">
+                        {{ form.carryover_days.label(class="form-label") }}
+                        {{ form.carryover_days(class="form-control") }}
+                    </div>
+                    <div class="col-md-1 d-flex align-items-end">
+                        {{ form.submit(class="btn btn-primary w-100") }}
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Employee Balances -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-users me-2"></i>Employee Leave Balances</h5>
+        </div>
+        <div class="card-body">
+            {% if users_balances %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Vacation</th>
+                            <th>Sick</th>
+                            <th>Personal</th>
+                            <th>Unpaid</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user_id, data in users_balances.items() %}
+                        <tr>
+                            <td>
+                                <strong>{{ data.user.first_name or '' }} {{ data.user.last_name or data.user.username
+                                    }}</strong>
+                                <br><small class="text-muted">{{ data.user.email }}</small>
+                            </td>
+                            {% for leave_type in ['vacation', 'sick', 'personal', 'unpaid'] %}
+                            <td>
+                                {% set balance = data.balances|selectattr('leave_type', 'equalto', leave_type)|first %}
+                                {% if balance %}
+                                <span
+                                    class="badge bg-{{ 'success' if balance.remaining_days() > 3 else ('warning' if balance.remaining_days() > 0 else 'danger') }}">
+                                    {{ "%.1f"|format(balance.remaining_days()) }} remaining
+                                </span>
+                                <br><small class="text-muted">{{ "%.1f"|format(balance.balance_days) }} allocated / {{
+                                    "%.1f"|format(balance.used_days) }} used</small>
+                                {% else %}
+                                <span class="text-muted">Not set</span>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted mb-0">No leave balances configured for {{ year }}.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

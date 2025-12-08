@@ -1,0 +1,125 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Webhooks - API Management{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components/admin-data-table.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="fas fa-plug me-2"></i>Outbound Webhooks</h2>
+            <p class="text-muted mb-0">Configure webhooks to notify external services when events occur.</p>
+        </div>
+        <a href="{{ url_for('admin.webhook_new') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>New Webhook
+        </a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0">Configured Webhooks</h5>
+        </div>
+        <div class="card-body">
+            {% if webhooks %}
+            <div data-react-component="AdminDataTable" data-react-props='{
+                "columns": [
+                    {"accessorKey": "name", "header": "Name", "html": true, "sortable": true},
+                    {"accessorKey": "url", "header": "URL", "html": true},
+                    {"accessorKey": "events", "header": "Events", "html": true},
+                    {"accessorKey": "status", "header": "Status", "html": true},
+                    {"accessorKey": "last_triggered", "header": "Last Triggered", "html": true},
+                    {"accessorKey": "failures", "header": "Failures", "html": true},
+                    {"accessorKey": "actions", "header": "Actions", "html": true, "sortable": false}
+                ],
+                "data": {{ webhooks_json | safe }},
+                "idKey": "id",
+                "defaultPageSize": 25,
+                "emptyMessage": "No webhooks configured."
+            }'>
+                <!-- Loading fallback -->
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-plug fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No webhooks configured yet.</p>
+                <a href="{{ url_for('admin.webhook_new') }}" class="btn btn-primary">Create Your First Webhook</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Available Events</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm mb-0">
+                        <tbody>
+                            <tr>
+                                <td><code>lead.created</code></td>
+                                <td>Fired when a new lead is created</td>
+                            </tr>
+                            <tr>
+                                <td><code>lead.updated</code></td>
+                                <td>Fired when a lead's status changes</td>
+                            </tr>
+                            <tr>
+                                <td><code>order.created</code></td>
+                                <td>Fired when a new order is placed</td>
+                            </tr>
+                            <tr>
+                                <td><code>order.updated</code></td>
+                                <td>Fired when an order's status changes</td>
+                            </tr>
+                            <tr>
+                                <td><code>product.created</code></td>
+                                <td>Fired when a new product is added</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Security</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2"><strong>Signature Verification</strong></p>
+                    <p class="small text-muted">
+                        Each webhook request includes an <code>X-Webhook-Signature</code> header with an HMAC-SHA256
+                        signature.
+                    </p>
+                    <p class="mb-2"><strong>Retry Behavior</strong></p>
+                    <p class="small text-muted mb-0">
+                        Failed deliveries retry up to 3 times with exponential backoff. Webhooks are automatically
+                        disabled after 10 consecutive failures.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

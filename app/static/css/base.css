@@ -134,9 +134,20 @@ body {
 
 /* Pulse Animation */
 @keyframes pulse {
-    0% { transform: scale(0.8); opacity: 0.3; }
-    50% { transform: scale(1); opacity: 0.5; }
-    100% { transform: scale(0.8); opacity: 0.3; }
+    0% {
+        transform: scale(0.8);
+        opacity: 0.3;
+    }
+
+    50% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+
+    100% {
+        transform: scale(0.8);
+        opacity: 0.3;
+    }
 }
 
 /* Responsive Design for Alert Bar */
@@ -194,7 +205,8 @@ header:hover {
 }
 
 header .logo {
-    order: 2; /* Keeps logo on the right */
+    order: 2;
+    /* Keeps logo on the right */
 }
 
 header .logo img {
@@ -216,7 +228,8 @@ header h1.title-font {
     letter-spacing: 1.5px;
     text-shadow: 0 0 12px rgba(82, 80, 194, 0.6);
     margin: 0;
-    order: 1; /* Positions title in the middle */
+    order: 1;
+    /* Positions title in the middle */
     flex-grow: 1;
     text-align: center;
 }
@@ -227,7 +240,8 @@ header h1.title-font a {
 }
 
 #menuToggle {
-    order: 0; /* Keeps menu toggle on the left */
+    order: 0;
+    /* Keeps menu toggle on the left */
     position: relative;
     z-index: 3;
     -webkit-user-select: none;
@@ -258,8 +272,8 @@ header h1.title-font a {
     z-index: 1;
     transform-origin: 4px 0px;
     transition: transform 0.5s cubic-bezier(0.77, 0.2, 0.05, 1.0),
-                background 0.5s cubic-bezier(0.77, 0.2, 0.05, 1.0),
-                opacity 0.55s ease;
+        background 0.5s cubic-bezier(0.77, 0.2, 0.05, 1.0),
+        opacity 0.55s ease;
 }
 
 #menuToggle span:first-child {
@@ -270,18 +284,18 @@ header h1.title-font a {
     transform-origin: 0% 100%;
 }
 
-#menuToggle input:checked ~ span {
+#menuToggle input:checked~span {
     opacity: 1;
     transform: rotate(45deg) translate(-2px, -1px);
     background: #ffd700;
 }
 
-#menuToggle input:checked ~ span:nth-last-child(3) {
+#menuToggle input:checked~span:nth-last-child(3) {
     opacity: 0;
     transform: rotate(0deg) scale(0.2, 0.2);
 }
 
-#menuToggle input:checked ~ span:nth-last-child(2) {
+#menuToggle input:checked~span:nth-last-child(2) {
     transform: rotate(-45deg) translate(0, -1px);
 }
 
@@ -299,7 +313,8 @@ header h1.title-font a {
 
     header h1.title-font {
         font-size: 2.5rem;
-        order: 1; /* Keeps title centered */
+        order: 1;
+        /* Keeps title centered */
         margin: 10px 0;
     }
 
@@ -327,7 +342,8 @@ header h1.title-font a {
     }
 
     header h1.title-font {
-        font-size: 1.2rem; /* Max heading size at 480px */
+        font-size: 1.2rem;
+        /* Max heading size at 480px */
         margin: 5px 0;
     }
 
@@ -348,7 +364,8 @@ header h1.title-font a {
 #menu {
     position: fixed;
     top: 0;
-    left: -100%; /* Hidden off-screen initially */
+    left: -100%;
+    /* Hidden off-screen initially */
     width: 300px;
     height: 100vh;
     background: var(--glass-bg);
@@ -361,8 +378,9 @@ header h1.title-font a {
     border-right: 2px solid rgba(65, 105, 225, 0.3);
 }
 
-#menuToggle input:checked ~ #menu {
-    left: 0; /* Slides in when checked */
+#menuToggle input:checked~#menu {
+    left: 0;
+    /* Slides in when checked */
 }
 
 #menu ul {
@@ -407,11 +425,14 @@ header h1.title-font a {
 
 .dropdown-content {
     display: none;
-    position: static; /* Stays within the slide-out menu */
-    background: rgba(42, 42, 42, 0.9); /* Slightly darker for distinction */
+    position: static;
+    /* Stays within the slide-out menu */
+    background: rgba(42, 42, 42, 0.9);
+    /* Slightly darker for distinction */
     backdrop-filter: blur(8px);
     width: 100%;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3); /* Inner shadow for depth */
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    /* Inner shadow for depth */
     padding: 10px 0;
 }
 
@@ -423,7 +444,8 @@ header h1.title-font a {
     font-family: 'Neon-Regular', sans-serif;
     font-size: 1.2rem;
     color: var(--text-primary);
-    padding: 12px 25px; /* Indented for hierarchy */
+    padding: 12px 25px;
+    /* Indented for hierarchy */
     text-transform: uppercase;
     text-decoration: none;
     display: block;
@@ -465,11 +487,13 @@ header h1.title-font a {
     }
 
     #menu ul li a {
-        font-size: 1rem; /* Slightly larger than paragraph max for navigation */
+        font-size: 1rem;
+        /* Slightly larger than paragraph max for navigation */
     }
 
     .dropdown-content a {
-        font-size: 0.8rem; /* Max paragraph size at 480px */
+        font-size: 0.8rem;
+        /* Max paragraph size at 480px */
         padding: 8px 15px;
     }
 
@@ -557,7 +581,8 @@ header h1.title-font a {
 
     .alert {
         padding: 10px 20px;
-        font-size: 0.8rem; /* Max paragraph size at 480px */
+        font-size: 0.8rem;
+        /* Max paragraph size at 480px */
         max-width: 100%;
     }
 }
@@ -626,7 +651,8 @@ footer p a:hover {
     }
 
     footer p {
-        font-size: 0.8rem; /* Max paragraph size at 480px */
+        font-size: 0.8rem;
+        /* Max paragraph size at 480px */
     }
 }
 
@@ -873,4 +899,237 @@ footer p a:hover {
     .calendar-box {
         padding: 15px;
     }
+}
+
+/* ============================================================================
+   Phase 6: Notification Bell & Dropdown Styles
+   ============================================================================ */
+
+.notification-icon {
+    position: relative;
+    margin-left: 15px;
+}
+
+.notification-icon>a {
+    color: var(--text-primary);
+    font-size: 1.4rem;
+    text-decoration: none;
+    position: relative;
+    display: block;
+    padding: 10px;
+    transition: color 0.3s ease;
+}
+
+.notification-icon>a:hover {
+    color: var(--accent-blue);
+}
+
+.notification-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: linear-gradient(90deg, #e74c3c, #c0392b);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 10px;
+    min-width: 18px;
+    text-align: center;
+    line-height: 1.2;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.notification-dropdown {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    width: 320px;
+    max-height: 400px;
+    background: rgba(42, 42, 42, 0.98);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(65, 105, 225, 0.3);
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    border-bottom: 1px solid rgba(65, 105, 225, 0.3);
+    background: rgba(31, 31, 31, 0.5);
+}
+
+.notification-header strong {
+    color: var(--text-primary);
+    font-family: 'Neon-Heavy', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.notification-header .see-all {
+    color: var(--accent-blue);
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.notification-header .see-all:hover {
+    color: var(--text-primary);
+}
+
+#notification-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+#notification-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+#notification-list::-webkit-scrollbar-track {
+    background: rgba(31, 31, 31, 0.5);
+}
+
+#notification-list::-webkit-scrollbar-thumb {
+    background: rgba(65, 105, 225, 0.5);
+    border-radius: 3px;
+}
+
+.notification-item {
+    border-bottom: 1px solid rgba(65, 105, 225, 0.1);
+    transition: background 0.2s ease;
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-item:hover {
+    background: rgba(65, 105, 225, 0.1);
+}
+
+.notification-item.unread {
+    background: rgba(65, 105, 225, 0.15);
+    border-left: 3px solid var(--accent-blue);
+}
+
+.notification-item.unread:hover {
+    background: rgba(65, 105, 225, 0.2);
+}
+
+.notification-link {
+    display: block;
+    padding: 12px 15px;
+    text-decoration: none;
+    color: var(--text-primary);
+}
+
+.notification-item .notification-title {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-bottom: 4px;
+    color: var(--text-primary);
+}
+
+.notification-item .notification-time {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.notification-empty {
+    padding: 30px 15px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+}
+
+.notification-footer {
+    padding: 10px 15px;
+    border-top: 1px solid rgba(65, 105, 225, 0.3);
+    background: rgba(31, 31, 31, 0.5);
+    text-align: center;
+}
+
+.notification-footer button {
+    background: transparent;
+    border: 1px solid rgba(65, 105, 225, 0.5);
+    color: var(--accent-blue);
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.notification-footer button:hover {
+    background: var(--btn-gradient);
+    border-color: transparent;
+    color: var(--text-primary);
+}
+
+/* Responsive Design for Notifications */
+@media (max-width: 768px) {
+    .notification-dropdown {
+        width: 280px;
+        right: -10px;
+    }
+
+    .notification-icon>a {
+        font-size: 1.2rem;
+        padding: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .notification-dropdown {
+        position: fixed;
+        width: 100%;
+        right: 0;
+        left: 0;
+        top: 60px;
+        max-height: 60vh;
+        border-radius: 0;
+    }
+
+    .notification-icon {
+        margin-left: 10px;
+    }
+}
+
+/* Accessibility Utilities */
+.skip-link {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+    z-index: 9999;
+    padding: 10px 15px;
+    background: var(--accent-blue);
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    font-family: 'Neon-Regular', sans-serif;
+    border-radius: 4px;
+    transition: top 0.3s ease;
+}
+
+.skip-link:focus {
+    top: 20px;
+    left: 20px;
+    outline: 2px solid white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Enhancing Global Focus Indicators */
+:focus-visible {
+    outline: 2px solid var(--accent-blue);
+    outline-offset: 2px;
 }

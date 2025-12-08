@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}Campaign Stats: {{ campaign.name }} - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a href="{{ url_for('email_admin.campaigns') }}" class="btn btn-outline-secondary btn-sm mb-2">
+                <i class="fas fa-arrow-left me-2"></i>Back to Campaigns
+            </a>
+            <h1 class="h3 mb-0">{{ campaign.name }}</h1>
+            <span
+                class="badge bg-{{ 'success' if campaign.status == 'sent' else 'info' if campaign.status == 'sending' else 'secondary' }}">
+                {{ campaign.status|title }}
+            </span>
+        </div>
+        {% if campaign.status in ['draft', 'scheduled', 'paused'] %}
+        <form method="POST" action="{{ url_for('email_admin.send_campaign', id=campaign.id) }}"
+            onsubmit="return confirm('Send this campaign now?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-paper-plane me-2"></i>Send Now
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h4 class="mb-0 text-primary">{{ stats.sent }}</h4>
+                    <small class="text-muted">Sent</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h4 class="mb-0 text-success">{{ stats.unique_opens }}</h4>
+                    <small class="text-muted">Opens ({{ stats.open_rate }}%)</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h4 class="mb-0 text-info">{{ stats.unique_clicks }}</h4>
+                    <small class="text-muted">Clicks ({{ stats.click_rate }}%)</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h4 class="mb-0 text-danger">{{ stats.bounces }}</h4>
+                    <small class="text-muted">Bounces ({{ stats.bounce_rate }}%)</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Detailed Stats -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Engagement Breakdown</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <tr>
+                                <td width="40%"><strong>Total Opens</strong></td>
+                                <td>{{ stats.opens }} (including multiple opens)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Unique Opens</strong></td>
+                                <td>{{ stats.unique_opens }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Total Clicks</strong></td>
+                                <td>{{ stats.clicks }} (including multiple clicks)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Unique Clicks</strong></td>
+                                <td>{{ stats.unique_clicks }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Unsubscribes</strong></td>
+                                <td>{{ stats.unsubscribes }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Spam Complaints</strong></td>
+                                <td>{{ stats.complaints }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Sends -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between">
+                    <h5 class="mb-0">Recent Recipients</h5>
+                    <span class="badge bg-secondary">{{ recent_sends|length }} shown</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Email</th>
+                                <th>Sent</th>
+                                <th>Opened</th>
+                                <th>Clicked</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for send in recent_sends %}
+                            <tr>
+                                <td>{{ send.recipient_email }}</td>
+                                <td>{{ send.sent_at.strftime('%m/%d %H:%M') if send.sent_at else '-' }}</td>
+                                <td>
+                                    {% if send.first_opened_at %}
+                                    <span class="text-success"><i class="fas fa-check"></i></span>
+                                    <small class="text-muted">{{ send.open_count }}x</small>
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if send.first_clicked_at %}
+                                    <span class="text-success"><i class="fas fa-check"></i></span>
+                                    <small class="text-muted">{{ send.click_count }}x</small>
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if send.bounced %}
+                                    <span class="badge bg-danger">{{ send.bounce_type or 'Bounced' }}</span>
+                                    {% elif send.unsubscribed %}
+                                    <span class="badge bg-warning">Unsubscribed</span>
+                                    {% elif send.complained %}
+                                    <span class="badge bg-danger">Complaint</span>
+                                    {% else %}
+                                    <span class="badge bg-success">Delivered</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-3">No recipients yet</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Campaign Info -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Campaign Details</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="mb-0">
+                        <dt>Template</dt>
+                        <dd>
+                            {% if campaign.template %}
+                            <a href="{{ url_for('email_admin.preview_template', id=campaign.template.id) }}">
+                                {{ campaign.template.name }}
+                            </a>
+                            {% else %}
+                            -
+                            {% endif %}
+                        </dd>
+
+                        <dt>Audience</dt>
+                        <dd>
+                            {% if campaign.audience %}
+                            {{ campaign.audience.name }}
+                            {% else %}
+                            All Subscribers
+                            {% endif %}
+                        </dd>
+
+                        {% if campaign.subject_line_a %}
+                        <dt>Subject Line A</dt>
+                        <dd>{{ campaign.subject_line_a }}</dd>
+                        {% endif %}
+
+                        {% if campaign.subject_line_b %}
+                        <dt>Subject Line B</dt>
+                        <dd>{{ campaign.subject_line_b }}</dd>
+                        {% endif %}
+
+                        <dt>Created</dt>
+                        <dd>{{ campaign.created_at.strftime('%Y-%m-%d %H:%M') if campaign.created_at else '-' }}</dd>
+
+                        {% if campaign.scheduled_at %}
+                        <dt>Scheduled For</dt>
+                        <dd>{{ campaign.scheduled_at.strftime('%Y-%m-%d %H:%M') }}</dd>
+                        {% endif %}
+
+                        {% if campaign.sent_at %}
+                        <dt>Sent At</dt>
+                        <dd>{{ campaign.sent_at.strftime('%Y-%m-%d %H:%M') }}</dd>
+                        {% endif %}
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Actions</h5>
+                </div>
+                <div class="card-body">
+                    {% if campaign.status in ['draft', 'scheduled'] %}
+                    <a href="{{ url_for('email_admin.edit_campaign', id=campaign.id) }}"
+                        class="btn btn-outline-primary w-100 mb-2">
+                        <i class="fas fa-edit me-2"></i>Edit Campaign
+                    </a>
+                    {% endif %}
+
+                    {% if campaign.status in ['draft', 'scheduled'] %}
+                    <form method="POST" action="{{ url_for('email_admin.delete_campaign', id=campaign.id) }}"
+                        onsubmit="return confirm('Delete this campaign?');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-outline-danger w-100">
+                            <i class="fas fa-trash me-2"></i>Delete Campaign
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

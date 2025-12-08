@@ -1,0 +1,247 @@
+{% extends "admin/dashboard_base.html" %}
+
+{% block title %}Review #{{ review.id }} - Admin{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-star me-2"></i>Review #{{ review.id }}</h2>
+    <a href="{{ url_for('forms_admin.list_reviews') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Back to Reviews
+    </a>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}
+<div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endfor %}
+{% endwith %}
+
+<div class="row">
+    <div class="col-md-8">
+        <!-- Review Content -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Review Content</h5>
+                {% if review.verified_purchase %}
+                <span class="badge bg-success"><i class="bi bi-patch-check me-1"></i>Verified Purchase</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label text-muted">Rating</label>
+                    <div class="text-warning fs-4">
+                        {% for i in range(5) %}
+                        <i class="bi bi-star{{ '-fill' if i < review.rating else '' }}"></i>
+                        {% endfor %}
+                        <span class="text-dark ms-2">{{ review.rating }}/5</span>
+                    </div>
+                </div>
+
+                {% if review.title %}
+                <div class="mb-3">
+                    <label class="form-label text-muted">Title</label>
+                    <h4>{{ review.title }}</h4>
+                </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    <label class="form-label text-muted">Review</label>
+                    <p class="lead">{{ review.body or 'No review text provided.' }}</p>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Helpfulness</label>
+                            <p>
+                                <i class="bi bi-hand-thumbs-up text-success"></i> {{ review.helpful_count }} helpful
+                                <span class="mx-2">|</span>
+                                <i class="bi bi-hand-thumbs-down text-danger"></i> {{ review.not_helpful_count }} not
+                                helpful
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Featured</label>
+                            <p>
+                                {% if review.is_featured %}
+                                <span class="badge bg-primary">Featured</span>
+                                {% else %}
+                                <span class="text-muted">Not featured</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Owner Response -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-reply me-2"></i>Owner Response</h5>
+            </div>
+            <div class="card-body">
+                {% if review.response %}
+                <div class="alert alert-light">
+                    <strong>Response from {{ review.response_by.username if review.response_by else 'Owner' }}:</strong>
+                    <p class="mb-0 mt-2">{{ review.response }}</p>
+                    <small class="text-muted">
+                        Posted {{ review.response_at.strftime('%Y-%m-%d %H:%M') if review.response_at else '' }}
+                    </small>
+                </div>
+                {% else %}
+                <form action="{{ url_for('forms_admin.respond_to_review', review_id=review.id) }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <textarea name="response" class="form-control" rows="4"
+                            placeholder="Write a response to this review..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-reply me-1"></i> Post Response
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <!-- Status & Actions -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    {% if review.status == 'pending' %}
+                    <span class="badge bg-warning fs-6">Pending Review</span>
+                    {% elif review.status == 'approved' %}
+                    <span class="badge bg-success fs-6">Approved</span>
+                    {% elif review.status == 'rejected' %}
+                    <span class="badge bg-danger fs-6">Rejected</span>
+                    {% endif %}
+                </div>
+
+                {% if review.status == 'pending' %}
+                <div class="d-grid gap-2">
+                    <form action="{{ url_for('forms_admin.approve_review', review_id=review.id) }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="bi bi-check-lg me-1"></i> Approve Review
+                        </button>
+                    </form>
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                        <i class="bi bi-x-lg me-1"></i> Reject Review
+                    </button>
+                </div>
+                {% endif %}
+
+                {% if review.rejection_reason %}
+                <div class="mt-3">
+                    <label class="form-label text-muted">Rejection Reason</label>
+                    <p>{{ review.rejection_reason }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Details -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-gear me-2"></i>Details</h5>
+            </div>
+            <div class="card-body">
+                <dl class="mb-0">
+                    <dt>Product</dt>
+                    <dd>
+                        {% if review.product %}
+                        <a href="{{ url_for('shop_admin.edit_product', product_id=review.product_id) }}">
+                            {{ review.product.name }}
+                        </a>
+                        {% else %}
+                        <span class="text-muted">Deleted</span>
+                        {% endif %}
+                    </dd>
+
+                    <dt>Reviewer</dt>
+                    <dd>
+                        {% if review.user %}
+                        <a href="{{ url_for('admin.edit_user', user_id=review.user_id) }}">
+                            {{ review.user.username }}
+                        </a>
+                        {% else %}
+                        <span class="text-muted">Anonymous</span>
+                        {% endif %}
+                    </dd>
+
+                    <dt>Submitted</dt>
+                    <dd>{{ review.created_at.strftime('%Y-%m-%d %H:%M') if review.created_at else '-' }}</dd>
+
+                    {% if review.order %}
+                    <dt>Order</dt>
+                    <dd>
+                        <a href="{{ url_for('orders_admin.view_order', order_id=review.order_id) }}">
+                            #{{ review.order_id }}
+                        </a>
+                    </dd>
+                    {% endif %}
+
+                    {% if review.moderated_by %}
+                    <dt>Moderated By</dt>
+                    <dd>{{ review.moderated_by.username }}</dd>
+                    <dt>Moderated At</dt>
+                    <dd>{{ review.moderated_at.strftime('%Y-%m-%d %H:%M') if review.moderated_at else '-' }}</dd>
+                    {% endif %}
+                </dl>
+            </div>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Danger Zone</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('forms_admin.delete_review', review_id=review.id) }}" method="POST"
+                    onsubmit="return confirm('Delete this review permanently?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-outline-danger w-100">
+                        <i class="bi bi-trash me-1"></i> Delete Review
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ url_for('forms_admin.reject_review', review_id=review.id) }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reject Review</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="reason" class="form-label">Rejection Reason (optional)</label>
+                        <textarea name="reason" id="reason" class="form-control" rows="3"
+                            placeholder="e.g., Review violates community guidelines..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Reject Review</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

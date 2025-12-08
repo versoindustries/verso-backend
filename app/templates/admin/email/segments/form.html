@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}{{ action }} Segment - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="mb-4">
+        <a href="{{ url_for('email_admin.segments') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-2"></i>Back to Segments
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0">{{ action }} Audience Segment</h4>
+        </div>
+        <div class="card-body">
+            <form method="POST" id="segment-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="filter_rules" id="filter_rules_input"
+                    value='{{ audience.filter_rules|tojson if audience and audience.filter_rules else "[]" }}'>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Segment Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="name" name="name" required
+                                value="{{ audience.name if audience else '' }}" placeholder="e.g., Active Customers">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="2"
+                                placeholder="Describe this segment...">{{ audience.description if audience else '' }}</textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="is_dynamic" name="is_dynamic" {% if
+                                    not audience or audience.is_dynamic %}checked{% endif %}>
+                                <label class="form-check-label" for="is_dynamic">
+                                    Dynamic Segment
+                                </label>
+                            </div>
+                            <small class="text-muted">Dynamic segments recalculate membership based on filter
+                                rules</small>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <!-- Filter Rules Builder -->
+                        <div class="card bg-light">
+                            <div class="card-header d-flex justify-content-between">
+                                <h6 class="mb-0">Filter Rules</h6>
+                                <button type="button" class="btn btn-sm btn-primary" onclick="addRule()">
+                                    <i class="fas fa-plus me-1"></i>Add Rule
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div id="rules-container">
+                                    <!-- Rules will be added here -->
+                                </div>
+                                <div id="no-rules"
+                                    class="text-center text-muted py-3 {% if audience and audience.filter_rules %}d-none{% endif %}">
+                                    <i class="fas fa-filter mb-2 d-block"></i>
+                                    No filter rules. Click "Add Rule" to start.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ url_for('email_admin.segments') }}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>{{ action }} Segment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<template id="rule-template">
+    <div class="rule-row mb-2 p-2 bg-white rounded border" data-index="{index}">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-4">
+                <select class="form-select form-select-sm rule-field" onchange="updateOperators(this)">
+                    <option value="">Select field...</option>
+                    {% for field in filter_fields %}
+                    <option value="{{ field.name }}" data-type="{{ field.type }}">{{ field.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select form-select-sm rule-operator">
+                    <option value="equals">Equals</option>
+                    <option value="not_equals">Not Equals</option>
+                    <option value="contains">Contains</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <input type="text" class="form-control form-control-sm rule-value" placeholder="Value">
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeRule(this)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+    let ruleIndex = 0;
+    const rules = JSON.parse(document.getElementById('filter_rules_input').value || '[]');
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Load existing rules
+        rules.forEach(rule => {
+            addRule(rule);
+        });
+    });
+
+    function addRule(existingRule) {
+        const container = document.getElementById('rules-container');
+        const template = document.getElementById('rule-template').innerHTML;
+        const html = template.replace(/{index}/g, ruleIndex++);
+
+        container.insertAdjacentHTML('beforeend', html);
+        document.getElementById('no-rules').classList.add('d-none');
+
+        // Set existing values if provided
+        if (existingRule) {
+            const row = container.lastElementChild;
+            const fieldSelect = row.querySelector('.rule-field');
+            const operatorSelect = row.querySelector('.rule-operator');
+            const valueInput = row.querySelector('.rule-value');
+
+            fieldSelect.value = existingRule.field || '';
+            operatorSelect.value = existingRule.operator || 'equals';
+            valueInput.value = existingRule.value || '';
+        }
+    }
+
+    function removeRule(btn) {
+        btn.closest('.rule-row').remove();
+
+        if (document.querySelectorAll('.rule-row').length === 0) {
+            document.getElementById('no-rules').classList.remove('d-none');
+        }
+    }
+
+    function updateOperators(select) {
+        const type = select.options[select.selectedIndex].dataset.type || 'string';
+        const operatorSelect = select.closest('.rule-row').querySelector('.rule-operator');
+
+        let options = '';
+
+        if (type === 'date') {
+            options = `
+            <option value="days_ago_lte">Within last X days</option>
+            <option value="days_ago_gte">More than X days ago</option>
+            <option value="equals">On date</option>
+        `;
+        } else if (type === 'number') {
+            options = `
+            <option value="equals">Equals</option>
+            <option value="not_equals">Not Equals</option>
+            <option value="gt">Greater Than</option>
+            <option value="gte">Greater or Equal</option>
+            <option value="lt">Less Than</option>
+            <option value="lte">Less or Equal</option>
+        `;
+        } else {
+            options = `
+            <option value="equals">Equals</option>
+            <option value="not_equals">Not Equals</option>
+            <option value="contains">Contains</option>
+            <option value="starts_with">Starts With</option>
+            <option value="ends_with">Ends With</option>
+            <option value="is_null">Is Empty</option>
+            <option value="is_not_null">Is Not Empty</option>
+        `;
+        }
+
+        operatorSelect.innerHTML = options;
+    }
+
+    // Update filter rules before submit
+    document.getElementById('segment-form').addEventListener('submit', function (e) {
+        const rules = [];
+        document.querySelectorAll('.rule-row').forEach(row => {
+            const field = row.querySelector('.rule-field').value;
+            const operator = row.querySelector('.rule-operator').value;
+            const value = row.querySelector('.rule-value').value;
+
+            if (field && operator) {
+                rules.push({ field, operator, value });
+            }
+        });
+
+        document.getElementById('filter_rules_input').value = JSON.stringify(rules);
+    });
+</script>
+{% endblock %}

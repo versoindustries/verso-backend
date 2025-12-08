@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}My Downloads{% endblock %}
+
+{% block content %}
+<div class="my-downloads">
+    <div class="container">
+        <h1>My Downloads</h1>
+
+        {% if tokens %}
+        <div class="downloads-list">
+            {% for token in tokens %}
+            <div class="download-item">
+                <div class="download-info">
+                    <h3>{{ token.order_item.product.name }}</h3>
+                    <p class="download-date">Purchased: {{ token.created_at.strftime('%B %d, %Y') }}</p>
+                    <p class="download-stats">
+                        <span>Downloads: {{ token.download_count }}/{{ token.max_downloads }}</span>
+                        {% if token.is_valid() %}
+                        <span class="badge badge-success">Available</span>
+                        {% else %}
+                        <span class="badge badge-expired">Expired</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="download-action">
+                    {% if token.is_valid() %}
+                    <a href="{{ url_for('cart.download_file', token=token.token) }}" class="btn btn-primary">
+                        <i class="fas fa-download"></i> Download
+                    </a>
+                    {% else %}
+                    <button class="btn btn-disabled" disabled>
+                        <i class="fas fa-ban"></i> Unavailable
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-downloads">
+            <i class="fas fa-folder-open"></i>
+            <h2>No Downloads Yet</h2>
+            <p>You haven't purchased any digital products yet.</p>
+            <a href="{{ url_for('shop.index') }}" class="btn btn-primary">Browse Products</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .my-downloads {
+        padding: 2rem 0;
+        min-height: 60vh;
+    }
+
+    .my-downloads h1 {
+        margin-bottom: 2rem;
+    }
+
+    .downloads-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .download-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--card-bg, #fff);
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .download-info h3 {
+        margin: 0 0 0.5rem 0;
+        color: var(--text-color, #333);
+    }
+
+    .download-date {
+        color: #666;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .download-stats {
+        display: flex;
+        gap: 1rem;
+        margin: 0.5rem 0 0 0;
+        font-size: 0.9rem;
+        color: #888;
+    }
+
+    .badge-success {
+        background: #d4edda;
+        color: #155724;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+    }
+
+    .badge-expired {
+        background: #f8d7da;
+        color: #721c24;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+    }
+
+    .btn-disabled {
+        background: #e9ecef;
+        color: #999;
+        cursor: not-allowed;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+    }
+
+    .no-downloads {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--card-bg, #fff);
+        border-radius: 8px;
+    }
+
+    .no-downloads i {
+        font-size: 4rem;
+        color: #ddd;
+        margin-bottom: 1rem;
+    }
+
+    .no-downloads h2 {
+        color: #666;
+        margin-bottom: 0.5rem;
+    }
+
+    .no-downloads p {
+        color: #999;
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .download-item {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}

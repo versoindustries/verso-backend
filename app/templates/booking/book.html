@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Book {{ type.name }}{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components/booking-page.css') }}">
+{% endblock %}
+
+{% block content %}
+<div data-react-component="BookingPage" data-react-props='{
+    "appointmentType": {{ appt_type_json | safe }},
+    "slotsApiUrl": "{{ slots_api_url }}",
+    "submitUrl": "{{ submit_url }}",
+    "csrfToken": "{{ csrf_token() }}"
+}'>
+    <!-- SSR Fallback / Loading State -->
+    <div class="booking-page py-5">
+        <div class="booking-page-grid">
+            <div class="booking-sidebar">
+                <div class="booking-page-card p-4">
+                    <h3 class="text-xl font-semibold mb-2">{{ type.name }}</h3>
+                    <p class="text-gray-500 mb-2">{{ type.duration_minutes }} Minutes</p>
+                    {% if type.price %}
+                    <p class="text-2xl font-bold text-primary mb-3">${{ "%.2f"|format(type.price) }}</p>
+                    {% endif %}
+                    <p>{{ type.description }}</p>
+                </div>
+            </div>
+            <div class="booking-main">
+                <div class="booking-page-card p-6">
+                    <div class="text-center py-8">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading booking form...</span>
+                        </div>
+                        <p class="mt-3 text-gray-500">Loading booking calendar...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request, redirect, Response
+from flask import Flask, render_template, url_for, request, redirect, Response, current_app
 import xml.etree.ElementTree as ET
 import os
 import requests
@@ -36,9 +36,9 @@ def submit_sitemap_to_bing(sitemap_url):
     submit_url = f'https://www.bing.com/indexnow?url={sitemap_url}&key={api_key}'
     response = requests.get(submit_url)
     if response.status_code == 200:
-        print("Sitemap successfully submitted to Bing")
+        current_app.logger.info("Sitemap successfully submitted to Bing")
     else:
-        print("Error submitting sitemap to Bing:", response.text)
+        current_app.logger.error(f"Error submitting sitemap to Bing: {response.text}")
 
 def check_and_submit_new_page(page):
     if page.is_public:  # Check if the page is not login restricted

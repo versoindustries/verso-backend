@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Revision History - {{ page.title }} | Admin{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/list_users.css') }}">
+<style>
+    .revision-content {
+        max-height: 200px;
+        overflow-y: auto;
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        white-space: pre-wrap;
+    }
+
+    .revision-card {
+        border-left: 4px solid #007bff;
+        margin-bottom: 1rem;
+    }
+
+    .revision-card.current {
+        border-left-color: #28a745;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="user-management-section">
+    <div class="container">
+        <header class="section-header">
+            <h1 class="section-title"><i class="fas fa-history"></i> Revision History</h1>
+            <p class="section-subtitle">
+                <a href="{{ url_for('admin.edit_page', page_id=page.id) }}">{{ page.title }}</a> –
+                {{ revisions | length }} revision(s)
+            </p>
+        </header>
+
+        <div class="action-buttons mb-4">
+            <a href="{{ url_for('admin.edit_page', page_id=page.id) }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Edit
+            </a>
+            <a href="{{ url_for('admin.page_custom_fields', page_id=page.id) }}" class="btn btn-info">
+                <i class="fas fa-cog"></i> Custom Fields
+            </a>
+        </div>
+
+        {% if revisions %}
+        <div class="revisions-list">
+            {% for revision in revisions %}
+            <div class="card revision-card {% if loop.first %}current{% endif %} mb-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>{{ revision.created_at.strftime('%Y-%m-%d %H:%M') }}</strong>
+                        {% if revision.user %}
+                        <span class="text-muted">by {{ revision.user.username }}</span>
+                        {% endif %}
+                        {% if loop.first %}<span class="badge badge-success ml-2">Current</span>{% endif %}
+                    </div>
+                    {% if not loop.first %}
+                    <form method="POST" action="{{ url_for('admin.restore_revision', revision_id=revision.id) }}"
+                        onsubmit="return confirm('Restore to this revision? Current content will be saved as a new revision.');">
+                        {{ form.csrf_token }}
+                        <button type="submit" class="btn btn-sm btn-warning">
+                            <i class="fas fa-undo"></i> Restore
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ revision.title | e }}</h5>
+                    {% if revision.revision_note %}
+                    <p class="text-muted"><em>{{ revision.revision_note }}</em></p>
+                    {% endif %}
+                    {% if revision.status %}
+                    <span class="badge 
+                        {% if revision.status == 'published' %}badge-success
+                        {% elif revision.status == 'review' %}badge-warning
+                        {% else %}badge-secondary
+                        {% endif %}">{{ revision.status | title }}</span>
+                    {% endif %}
+                    <details class="mt-2">
+                        <summary>View Content</summary>
+                        <div class="revision-content mt-2">{{ revision.html_content[:1000] | e }}{% if
+                            revision.html_content|length > 1000 %}...{% endif %}</div>
+                    </details>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-info">No revisions found for this page.</div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

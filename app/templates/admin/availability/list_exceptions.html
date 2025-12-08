@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}{{ estimator.name }} - Exception Dates{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('admin.admin_dashboard') }}">Admin</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('availability.list_estimators') }}">Availability</a></li>
+            <li class="breadcrumb-item"><a
+                    href="{{ url_for('availability.edit_availability', estimator_id=estimator.id) }}">{{ estimator.name
+                    }}</a></li>
+            <li class="breadcrumb-item active">Exceptions</li>
+        </ol>
+    </nav>
+
+    <h2 class="mb-4"><i class="fas fa-calendar-times"></i> {{ estimator.name }} - Exception Dates</h2>
+    <p class="text-muted">Add holidays, PTO, or custom hours for specific dates.</p>
+
+    <div class="row">
+        <!-- Exception List -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <strong>Scheduled Exceptions</strong>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Hours</th>
+                                <th>Reason</th>
+                                <th width="80">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ex in exceptions %}
+                            <tr>
+                                <td>{{ ex.date.strftime('%Y-%m-%d (%a)') }}</td>
+                                <td>
+                                    {% if ex.is_blocked %}
+                                    <span class="badge badge-danger">Blocked</span>
+                                    {% else %}
+                                    <span class="badge badge-warning">Custom Hours</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if ex.is_blocked %}
+                                    <span class="text-muted">N/A</span>
+                                    {% else %}
+                                    {{ ex.custom_start_time.strftime('%H:%M') }} - {{
+                                    ex.custom_end_time.strftime('%H:%M') }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ ex.reason or '-' }}</td>
+                                <td>
+                                    <form method="POST" class="d-inline"
+                                        action="{{ url_for('availability.delete_exception', exception_id=ex.id) }}">
+                                        {{ delete_form.csrf_token }}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                            onclick="return confirm('Delete this exception?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    No exception dates scheduled.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Exception Form -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <i class="fas fa-plus"></i> Add Exception
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('availability.add_exception', estimator_id=estimator.id) }}">
+                        {{ form.csrf_token }}
+
+                        <div class="form-group">
+                            <label>{{ form.date.label.text }}</label>
+                            {{ form.date(class="form-control", type="date") }}
+                        </div>
+
+                        <div class="form-group">
+                            <div class="custom-control custom-checkbox">
+                                {{ form.is_blocked(class="custom-control-input", id="is_blocked") }}
+                                <label class="custom-control-label" for="is_blocked">
+                                    {{ form.is_blocked.label.text }}
+                                </label>
+                            </div>
+                            <small class="text-muted">Check if completely unavailable</small>
+                        </div>
+
+                        <div id="custom-hours-section">
+                            <hr>
+                            <p class="text-muted small">Custom hours (if not fully blocked):</p>
+                            <div class="form-row">
+                                <div class="form-group col-6">
+                                    <label>Start</label>
+                                    {{ form.custom_start_time(class="form-control") }}
+                                </div>
+                                <div class="form-group col-6">
+                                    <label>End</label>
+                                    {{ form.custom_end_time(class="form-control") }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>{{ form.reason.label.text }}</label>
+                            {{ form.reason(class="form-control", placeholder="e.g., Holiday, PTO, Training") }}
+                        </div>
+
+                        <button type="submit" class="btn btn-warning btn-block">
+                            <i class="fas fa-save"></i> Add Exception
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const blockedCheckbox = document.getElementById('is_blocked');
+        const customHoursSection = document.getElementById('custom-hours-section');
+
+        function toggleCustomHours() {
+            if (blockedCheckbox.checked) {
+                customHoursSection.style.display = 'none';
+            } else {
+                customHoursSection.style.display = 'block';
+            }
+        }
+
+        blockedCheckbox.addEventListener('change', toggleCustomHours);
+        toggleCustomHours();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}{{ form.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">{{ form.name }}</h4>
+                </div>
+                <div class="card-body">
+                    {% if form.description %}
+                    <p class="text-muted mb-4">{{ form.description }}</p>
+                    {% endif %}
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                    {% endwith %}
+
+                    <form method="POST" action="{{ url_for('forms.submit_form', slug=form.slug) }}"
+                        enctype="multipart/form-data" id="dynamicForm" novalidate>
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <!-- Honeypot field -->
+                        {% if (form.settings or {}).get('honeypot', True) %}
+                        <div style="display:none;" aria-hidden="true">
+                            <label for="hp_field">Leave this empty</label>
+                            <input type="text" name="hp_field" id="hp_field" tabindex="-1" autocomplete="off">
+                        </div>
+                        {% endif %}
+
+                        {% for field in form.fields_schema %}
+                        {% set field_name = field.name %}
+                        {% set field_type = field.type %}
+                        {% set field_label = field.label %}
+                        {% set is_required = field.required %}
+                        {% set placeholder = field.placeholder or '' %}
+                        {% set description = field.description or '' %}
+                        {% set options = field.options or [] %}
+                        {% set validation = field.validation or {} %}
+                        {% set value = prefill_data.get(field_name) if prefill_data else '' %}
+                        {% set error = errors.get(field_name) if errors else None %}
+
+                        {% if field_type == 'heading' %}
+                        <h5 class="mt-4 mb-3 border-bottom pb-2">{{ field_label }}</h5>
+
+                        {% elif field_type == 'paragraph' %}
+                        <p class="text-muted">{{ description }}</p>
+
+                        {% elif field_type == 'textarea' %}
+                        <div class="mb-3">
+                            <label for="{{ field_name }}" class="form-label">
+                                {{ field_label }}{% if is_required %}<span class="text-danger">*</span>{% endif %}
+                            </label>
+                            {% if description %}<small class="form-text text-muted d-block mb-1">{{ description
+                                }}</small>{% endif %}
+                            <textarea name="{{ field_name }}" id="{{ field_name }}"
+                                class="form-control {{ 'is-invalid' if error }}" rows="{{ validation.rows or 4 }}"
+                                placeholder="{{ placeholder }}" {{ 'required' if is_required }}>{{ value }}</textarea>
+                            {% if error %}<div class="invalid-feedback">{{ error }}</div>{% endif %}
+                        </div>
+
+                        {% elif field_type in ('select', 'multi_select') %}
+                        <div class="mb-3">
+                            <label for="{{ field_name }}" class="form-label">
+                                {{ field_label }}{% if is_required %}<span class="text-danger">*</span>{% endif %}
+                            </label>
+                            {% if description %}<small class="form-text text-muted d-block mb-1">{{ description
+                                }}</small>{% endif %}
+                            <select name="{{ field_name }}" id="{{ field_name }}"
+                                class="form-select {{ 'is-invalid' if error }}" {{ 'multiple' if
+                                field_type=='multi_select' }} {{ 'required' if is_required }}>
+                                <option value="">-- Select --</option>
+                                {% for opt in options %}
+                                {% set opt_val = opt.value if opt is mapping else opt %}
+                                {% set opt_label = opt.label if opt is mapping else opt %}
+                                <option value="{{ opt_val }}" {{ 'selected' if value==opt_val }}>{{ opt_label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            {% if error %}<div class="invalid-feedback">{{ error }}</div>{% endif %}
+                        </div>
+
+                        {% elif field_type == 'radio' %}
+                        <div class="mb-3">
+                            <label class="form-label">
+                                {{ field_label }}{% if is_required %}<span class="text-danger">*</span>{% endif %}
+                            </label>
+                            {% if description %}<small class="form-text text-muted d-block mb-1">{{ description
+                                }}</small>{% endif %}
+                            {% for opt in options %}
+                            {% set opt_val = opt.value if opt is mapping else opt %}
+                            {% set opt_label = opt.label if opt is mapping else opt %}
+                            <div class="form-check">
+                                <input type="radio" name="{{ field_name }}" id="{{ field_name }}_{{ loop.index }}"
+                                    value="{{ opt_val }}" class="form-check-input" {{ 'checked' if value==opt_val }}>
+                                <label class="form-check-label" for="{{ field_name }}_{{ loop.index }}">{{ opt_label
+                                    }}</label>
+                            </div>
+                            {% endfor %}
+                            {% if error %}<div class="text-danger small">{{ error }}</div>{% endif %}
+                        </div>
+
+                        {% elif field_type == 'checkbox' %}
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input type="checkbox" name="{{ field_name }}" id="{{ field_name }}" value="1"
+                                    class="form-check-input {{ 'is-invalid' if error }}" {{ 'checked' if value }}
+                                    {{ 'required' if is_required }}>
+                                <label class="form-check-label" for="{{ field_name }}">
+                                    {{ field_label }}{% if is_required %}<span class="text-danger">*</span>{% endif %}
+                                </label>
+                                {% if error %}<div class="invalid-feedback">{{ error }}</div>{% endif %}
+                            </div>
+                            {% if description %}<small class="form-text text-muted">{{ description }}</small>{% endif %}
+                        </div>
+
+                        {% elif field_type == 'file' %}
+                        <div class="mb-3">
+                            <label for="{{ field_name }}" class="form-label">
+                                {{ field_label }}{% if is_required %}<span class="text-danger">*</span>{% endif %}
+                            </label>
+                            {% if description %}<small class="form-text text-muted d-block mb-1">{{ description
+                                }}</small>{% endif %}
+                            <input type="file" name="{{ field_name }}" id="{{ field_name }}"
+                                class="form-control {{ 'is-invalid' if error }}" {% if validation.allowed_types
+                                %}accept="{{ validation.allowed_types | join(',') }}" {% endif %} {{ 'required' if
+                                is_required }}>
+                            {% if error %}<div class="invalid-feedback">{{ error }}</div>{% endif %}
+                        </div>
+
+                        {% elif field_type == 'rating' %}
+                        <div class="mb-3">
+                            <label class="form-label">
+                                {{ field_label }}{% if is_required %}<span class="text-danger">*</span>{% endif %}
+                            </label>
+                            {% if description %}<small class="form-text text-muted d-block mb-1">{{ description
+                                }}</small>{% endif %}
+                            <div class="rating-input" id="{{ field_name }}_rating">
+                                {% for i in range(1, (validation.scale or 5) + 1) %}
+                                <div class="form-check form-check-inline">
+                                    <input type="radio" name="{{ field_name }}" id="{{ field_name }}_{{ i }}"
+                                        value="{{ i }}" class="form-check-input" {{ 'checked' if value|int==i }}>
+                                    <label class="form-check-label" for="{{ field_name }}_{{ i }}">{{ i }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% if error %}<div class="text-danger small">{{ error }}</div>{% endif %}
+                        </div>
+
+                        {% else %}
+                        {# Default: text, email, phone, number, date, etc. #}
+                        <div class="mb-3">
+                            <label for="{{ field_name }}" class="form-label">
+                                {{ field_label }}{% if is_required %}<span class="text-danger">*</span>{% endif %}
+                            </label>
+                            {% if description %}<small class="form-text text-muted d-block mb-1">{{ description
+                                }}</small>{% endif %}
+                            <input type="{{ field_type }}" name="{{ field_name }}" id="{{ field_name }}"
+                                class="form-control {{ 'is-invalid' if error }}" placeholder="{{ placeholder }}"
+                                value="{{ value }}" {% if validation.min %}min="{{ validation.min }}" {% endif %} {% if
+                                validation.max %}max="{{ validation.max }}" {% endif %} {% if validation.min_length
+                                %}minlength="{{ validation.min_length }}" {% endif %} {% if validation.max_length
+                                %}maxlength="{{ validation.max_length }}" {% endif %} {{ 'required' if is_required }}>
+                            {% if error %}<div class="invalid-feedback">{{ error }}</div>{% endif %}
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                {{ (form.settings or {}).get('submit_text', 'Submit') }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Client-side validation enhancement
+    document.getElementById('dynamicForm').addEventListener('submit', function (e) {
+        this.classList.add('was-validated');
+    });
+</script>
+{% endblock %}

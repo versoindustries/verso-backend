@@ -42,10 +42,20 @@
 {% block content %}
 <div class="spacer"></div>
 
+<!-- Preview Banner -->
+{% if is_preview %}
+<div class="bg-yellow-500 text-black text-center py-2 px-4">
+  <i class="fas fa-eye mr-2"></i>
+  <strong>Preview Mode</strong> - This post is not yet published.
+  <a href="{{ url_for('blog.edit_post', post_id=post.id) }}" class="underline ml-2">Edit Post</a>
+</div>
+{% endif %}
+
 <section class="hero-section" role="banner">
   <div class="hero-image-container">
     {% if post.image and post.image_mime_type %}
-    <img src="{{ url_for('blog.serve_image', post_id=post.id) }}" alt="{{ post.title | e }} hero image" class="hero-image">
+    <img src="{{ url_for('blog.serve_image', post_id=post.id) }}" alt="{{ post.title | e }} hero image"
+      class="hero-image">
     {% else %}
     <img src="{{ url_for('static', filename='images/hero-bg.jpg') }}" alt="Default hero background" class="hero-image">
     {% endif %}
@@ -61,12 +71,63 @@
 <section class="post-meta-section">
   <div class="meta-container">
     <span class="meta-item meta-author"><i class="fas fa-user"></i> {{ post.author.username | e }}</span>
-    <span class="meta-item meta-date"><i class="fas fa-calendar-alt"></i> {{ post.created_at.strftime('%B %d, %Y') }}</span>
-    {% if post.category %}
+    <span class="meta-item meta-date"><i class="fas fa-calendar-alt"></i> {{ post.created_at.strftime('%B %d, %Y')
+      }}</span>
+    {% if post.read_time_minutes %}
+    <span class="meta-item"><i class="fas fa-clock"></i> {{ post.read_time_minutes }} min read</span>
+    {% endif %}
+    {% if post.blog_category %}
+    <a href="{{ url_for('blog.posts_by_category', slug=post.blog_category.slug) }}" class="meta-item meta-category">
+      <i class="fas fa-folder"></i> {{ post.blog_category.name | e }}
+    </a>
+    {% elif post.category %}
     <span class="meta-item meta-category"><i class="fas fa-tag"></i> {{ post.category | e }}</span>
     {% endif %}
+    {% if post.is_featured %}
+    <span class="meta-item text-yellow-600"><i class="fas fa-star"></i> Featured</span>
+    {% endif %}
+  </div>
+
+  <!-- Tags -->
+  {% if post.tags %}
+  <div class="tags-container mt-2 flex flex-wrap gap-1 justify-center">
+    {% for tag in post.tags %}
+    <a href="{{ url_for('blog.posts_by_tag', slug=tag.slug) }}"
+      class="text-sm px-2 py-1 bg-gray-100 text-gray-600 rounded hover:bg-blue-100 hover:text-blue-600 transition-colors">
+      #{{ tag.name | e }}
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
+
+<!-- Series Navigation (if part of series) -->
+{% if post.series %}
+<section class="series-nav-section py-4">
+  <div class="container max-w-3xl mx-auto">
+    <div class="bg-blue-50 rounded-lg p-4">
+      <h3 class="font-bold text-blue-800 mb-2">
+        <i class="fas fa-layer-group mr-1"></i>
+        Part of: <a href="{{ url_for('blog.show_series', slug=post.series.slug) }}" class="hover:underline">{{
+          post.series.title | e }}</a>
+      </h3>
+      <div class="flex flex-wrap gap-2 text-sm">
+        {% for series_post in post.series.posts.filter_by(is_published=True).order_by('series_order').all() %}
+        {% if series_post.id == post.id %}
+        <span class="px-3 py-1 bg-blue-500 text-white rounded">{{ loop.index }}. {{ series_post.title | truncate(30) | e
+          }}</span>
+        {% else %}
+        <a href="{{ url_for('blog.show_post', slug=series_post.slug) }}"
+          class="px-3 py-1 bg-white border rounded hover:bg-blue-100">
+          {{ loop.index }}. {{ series_post.title | truncate(30) | e }}
+        </a>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </div>
   </div>
 </section>
+{% endif %}
 
 <div class="spacer"></div>
 
@@ -81,72 +142,126 @@
 <section class="share-section">
   <h2 class="share-title">Share This Post</h2>
   <div class="social-links">
-    <a href="https://x.com/intent/tweet?url={{ request.url | urlencode }}&text={{ post.title | urlencode }}" class="social-link" aria-label="Share on X"><i class="fab fa-x"></i></a>
-    <a href="mailto:?subject={{ post.title | urlencode }}&body={{ request.url }}" class="social-link" aria-label="Share via Email"><i class="fas fa-envelope"></i></a>
-    <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.url | urlencode }}" class="social-link" aria-label="Share on LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-    <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url | urlencode }}" class="social-link" aria-label="Share on Facebook"><i class="fab fa-facebook-f"></i></a>
+    <a href="https://x.com/intent/tweet?url={{ request.url | urlencode }}&text={{ post.title | urlencode }}"
+      class="social-link" aria-label="Share on X"><i class="fab fa-x"></i></a>
+    <a href="mailto:?subject={{ post.title | urlencode }}&body={{ request.url }}" class="social-link"
+      aria-label="Share via Email"><i class="fas fa-envelope"></i></a>
+    <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.url | urlencode }}" class="social-link"
+      aria-label="Share on LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+    <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url | urlencode }}" class="social-link"
+      aria-label="Share on Facebook"><i class="fab fa-facebook-f"></i></a>
   </div>
 </section>
 
 <div class="spacer"></div>
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <section class="notification-section">
-      {% for category, message in messages %}
-        <div class="notification {{ category }}">
-          <i class="fas fa-bell"></i>
-          <span class="notification-text">{{ message | e }}</span>
-          <button class="notification-close" aria-label="Dismiss notification">Close</button>
+<!-- Comments Section -->
+{% if not is_preview %}
+<section class="comments-section py-8">
+  <div class="container max-w-3xl mx-auto">
+    <h2 class="text-2xl font-bold mb-6"><i class="fas fa-comments mr-2"></i>Comments</h2>
+
+    <!-- Approved Comments -->
+    {% set approved_comments = post.comments.filter_by(status='approved', parent_id=None).order_by('created_at').all()
+    %}
+    {% if approved_comments %}
+    <div class="comments-list space-y-4 mb-8">
+      {% for comment in approved_comments %}
+      <div class="comment bg-white p-4 rounded-lg shadow" id="comment-{{ comment.id }}">
+        <div class="flex items-start gap-3">
+          <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+            <i class="fas fa-user text-gray-500"></i>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="font-medium">{{ comment.get_display_name() | e }}</span>
+              <span class="text-sm text-gray-500">{{ comment.created_at.strftime('%b %d, %Y at %I:%M %p') }}</span>
+            </div>
+            <p class="text-gray-700">{{ comment.content | e }}</p>
+
+            <!-- Replies -->
+            {% set replies = comment.replies.filter_by(status='approved').order_by('created_at').all() %}
+            {% if replies %}
+            <div class="replies ml-6 mt-3 space-y-3 border-l-2 border-gray-200 pl-4">
+              {% for reply in replies %}
+              <div class="reply">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="font-medium text-sm">{{ reply.get_display_name() | e }}</span>
+                  <span class="text-xs text-gray-500">{{ reply.created_at.strftime('%b %d, %Y') }}</span>
+                </div>
+                <p class="text-gray-600 text-sm">{{ reply.content | e }}</p>
+              </div>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
         </div>
+      </div>
       {% endfor %}
-    </section>
-  {% endif %}
+    </div>
+    {% else %}
+    <p class="text-gray-500 mb-6">No comments yet. Be the first to share your thoughts!</p>
+    {% endif %}
+
+    <!-- Comment Form -->
+    <div class="comment-form bg-gray-50 p-6 rounded-lg">
+      <h3 class="text-lg font-bold mb-4">Leave a Comment</h3>
+      <form action="{{ url_for('blog.submit_comment', slug=post.slug) }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="parent_id" value="">
+
+        {% if not current_user.is_authenticated %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+            <input type="text" name="author_name" required
+              class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+            <input type="email" name="author_email" required
+              class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Comment *</label>
+          <textarea name="content" rows="4" required minlength="10" maxlength="2000"
+            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            placeholder="Share your thoughts..."></textarea>
+        </div>
+
+        <button type="submit" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+          <i class="fas fa-paper-plane mr-1"></i>Post Comment
+        </button>
+        <p class="text-sm text-gray-500 mt-2">Comments are moderated and may take a while to appear.</p>
+      </form>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<section class="notification-section">
+  {% for category, message in messages %}
+  <div class="notification {{ category }}">
+    <i class="fas fa-bell"></i>
+    <span class="notification-text">{{ message | e }}</span>
+    <button class="notification-close" aria-label="Dismiss notification">Close</button>
+  </div>
+  {% endfor %}
+</section>
+{% endif %}
 {% endwith %}
 
 <div class="spacer"></div>
-{% endblock %}
 
-{% block scripts %}
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    // Fade-in animation for hero content
-    const heroContent = document.querySelector('.hero-content');
-    if (heroContent) {
-      heroContent.style.opacity = '0';
-      heroContent.style.transition = 'opacity 1s ease';
-      setTimeout(() => {
-        heroContent.style.opacity = '1';
-      }, 100);
-    }
-
-    // Copy button for code snippets
-    document.querySelectorAll('pre').forEach((pre) => {
-      const code = pre.querySelector('code');
-      if (code) {
-        const button = document.createElement('button');
-        button.className = 'copy-button';
-        button.innerHTML = '<i class="fas fa-copy"></i>';
-        button.setAttribute('aria-label', 'Copy code');
-        pre.style.position = 'relative';
-        pre.appendChild(button);
-        button.addEventListener('click', () => {
-          navigator.clipboard.writeText(code.textContent).then(() => {
-            button.innerHTML = '<i class="fas fa-check"></i>';
-            setTimeout(() => {
-              button.innerHTML = '<i class="fas fa-copy"></i>';
-            }, 2000);
-          });
-        });
-      }
-    });
-
-    // Dismiss notifications
-    document.querySelectorAll('.notification-close').forEach(button => {
-      button.addEventListener('click', () => {
-        button.parentElement.style.display = 'none';
-      });
-    });
-  });
-</script>
+{# React-powered blog post utilities #}
+<div data-react-component="BlogPostUtils" data-react-props='{
+        "heroAnimation": true,
+        "codeCopy": true,
+        "notificationDismiss": true
+    }'></div>
 {% endblock %}

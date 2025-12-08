@@ -2,96 +2,302 @@
 
 {% block additional_css %}
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/admindash.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/components/admin-dashboard.css') }}">
+<style>
+    /* Quick Actions - page-specific styles */
+    .quick-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-bottom: 2rem;
+    }
+
+    .quick-action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        background: var(--btn-gradient);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-decoration: none;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .quick-action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        color: #fff;
+    }
+
+    /* Admin Search Box */
+    .admin-search-box {
+        margin-bottom: 2rem;
+    }
+
+    .admin-search-box form {
+        display: flex;
+        gap: 0.5rem;
+        max-width: 500px;
+    }
+
+    .admin-search-box input {
+        flex: 1;
+        padding: 0.75rem 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        background: rgba(42, 42, 42, 0.9);
+        color: #fff;
+        font-size: 0.95rem;
+    }
+
+    .admin-search-box input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+    }
+
+    .admin-search-box button {
+        padding: 0.75rem 1.5rem;
+        background: var(--primary-color);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    /* Recent Data Section */
+    .recent-section {
+        margin-top: 2rem;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #fff;
+    }
+
+    .view-all-link {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: rgba(42, 42, 42, 0.9);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .data-table th {
+        background: rgba(0, 0, 0, 0.3);
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+    }
+
+    .data-table td {
+        color: #fff;
+        font-size: 0.9rem;
+    }
+
+    .data-table tr:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+</style>
 {% endblock %}
 
 {% block scripts %}
-<script>
-    function confirmDeletion() {
-        return confirm('Are you sure you want to delete this item?');
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        document.querySelectorAll('form').forEach(form => {
-            const hiddenInput = document.createElement('input');
-            hiddenInput.type = 'hidden';
-            hiddenInput.name = 'csrf_token';
-            hiddenInput.value = csrfToken;
-            form.appendChild(hiddenInput);
-        });
-    });
-</script>
+<!-- Chart.js loaded by React component -->
 {% endblock %}
 
 {% block content %}
 <div class="admin-dashboard">
     <h1>Admin Dashboard</h1>
 
-    <!-- Dashboard Statistics -->
-    <div class="dashboard-stats">
-        <p>Total Users: {{ total_users }}</p>
+    <!-- Global Search -->
+    <div class="admin-search-box">
+        <form action="{{ url_for('admin.admin_search') }}" method="GET">
+            <input type="text" name="q" placeholder="Search users, leads, orders, posts..." autocomplete="off">
+            <button type="submit"><i class="fas fa-search"></i> Search</button>
+        </form>
     </div>
 
-    <!-- Upcoming Appointments Section -->
-    <div class="appointments-section">
-        <h2>Upcoming Appointments</h2>
-        <div class="appointments-container">
-            {% for appointment in appointments %}
-            <div class="appointment-card">
-                <p><strong>Name:</strong> {{ appointment.first_name }} {{ appointment.last_name }}</p>
-                <p><strong>Email:</strong> {{ appointment.email }}</p>
-                <p><strong>Phone:</strong> {{ appointment.phone }}</p>
-                <p><strong>Preferred Date and Time:</strong>
-                    {{ appointment.local_time.strftime('%Y-%m-%d %I:%M %p') }} (America/Denver)
-                </p>
-                <p><strong>Estimator:</strong> {{ appointment.estimator.name }}</p>
-                <p><strong>Service:</strong> {{ appointment.service.name }}</p>
-                <form action="{{ url_for('admin.delete_appointment', appointment_id=appointment.id) }}" method="post" onsubmit="return confirm('Are you sure you want to delete this appointment?');">
-                    {{ form.csrf_token }}
-                    <button type="submit" class="danger-btn">Delete</button>
-                </form>
+    <!-- React AdminDashboard Component for KPI Cards and Charts -->
+    <div data-react-component="AdminDashboard" data-react-props='{
+            "kpis": {
+                "revenue_month": {{ kpis.revenue_month | default(0) }},
+                "revenue_today": {{ kpis.revenue_today | default(0) }},
+                "revenue_trend": {{ kpis.revenue_trend | default(0) }},
+                "leads_month": {{ kpis.leads_month | default(0) }},
+                "leads_today": {{ kpis.leads_today | default(0) }},
+                "leads_trend": {{ kpis.leads_trend | default(0) }},
+                "appointments_today": {{ kpis.appointments_today | default(0) }},
+                "active_users": {{ kpis.active_users | default(0) }},
+                "total_users": {{ kpis.total_users | default(0) }}
+            },
+            "metricsUrl": "{{ url_for(' admin.dashboard_metrics') }}" }'>
+        <!-- Fallback content while React loads -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-value">Loading...</div>
             </div>
-            {% endfor %}
         </div>
     </div>
 
-    <!-- Spacer -->
-    <div class="spacer"></div>
-
-    <!-- Contact Form Submissions Section -->
-    <div class="submissions-section">
-        <h3>Contact Form Submissions</h3>
-        <div class="submissions-container">
-            {% for submission in contact_form_submissions %}
-            <div class="submission-card">
-                <p><strong>First Name:</strong> {{ submission.first_name }}</p>
-                <p><strong>Last Name:</strong> {{ submission.last_name }}</p>
-                <p><strong>Email:</strong> {{ submission.email }}</p>
-                <p><strong>Phone:</strong> {{ submission.phone }}</p>
-                <p><strong>Message:</strong> {{ submission.message }}</p>
-                <p><strong>Submitted At:</strong> {{ submission.submitted_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
-                <form action="{{ url_for('admin.delete_contact_submission', id=submission.id) }}" method="post" onsubmit="return confirm('Are you sure you want to delete this submission?');">
-                    {{ form.csrf_token }}
-                    <button type="submit" class="danger-btn">Delete</button>
-                </form>
-            </div>
-            {% endfor %}
-        </div>
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <a href="{{ url_for('admin.admin_appointments') }}" class="quick-action-btn">
+            <i class="fas fa-calendar-plus"></i> View Calendar
+        </a>
+        <a href="{{ url_for('admin.hr_leave_requests') }}" class="quick-action-btn">
+            <i class="fas fa-user-clock"></i> Leave Requests
+        </a>
+        <a href="{{ url_for('crm.board') }}" class="quick-action-btn">
+            <i class="fas fa-kanban"></i> CRM Board
+        </a>
+        <a href="{{ url_for('orders_admin.orders_list') }}" class="quick-action-btn">
+            <i class="fas fa-shopping-cart"></i> View Orders
+        </a>
+        <a href="{{ url_for('blog.new_post') }}" class="quick-action-btn">
+            <i class="fas fa-pen"></i> New Post
+        </a>
     </div>
 
-    <!-- Spacer -->
-    <div class="spacer"></div>
+    <!-- Recent Appointments -->
+    <div class="recent-section">
+        <div class="section-header">
+            <span class="section-title">Upcoming Appointments</span>
+            <a href="{{ url_for('calendar.view_calendar') }}" class="view-all-link">View Calendar →</a>
+        </div>
+        {% if appointments %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Date & Time</th>
+                    <th>Service</th>
+                    <th>Estimator</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for appointment in appointments %}
+                <tr>
+                    <td>{{ appointment.first_name }} {{ appointment.last_name }}</td>
+                    <td>{{ appointment.email }}</td>
+                    <td>{{ appointment.local_time.strftime('%b %d, %Y %I:%M %p') if appointment.local_time else 'N/A' }}
+                    </td>
+                    <td>{{ appointment.service.name if appointment.service else 'N/A' }}</td>
+                    <td>{{ appointment.estimator.name if appointment.estimator else 'N/A' }}</td>
+                    <td>
+                        <form action="{{ url_for('admin.delete_appointment', appointment_id=appointment.id) }}"
+                            method="post" style="display:inline;"
+                            onsubmit="return confirm('Delete this appointment?');">
+                            {{ form.csrf_token }}
+                            <button type="submit" class="danger-btn"
+                                style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="color: rgba(255,255,255,0.6);">No upcoming appointments.</p>
+        {% endif %}
+    </div>
 
-    <!-- Admin Pages Links -->
-    <div class="admin-links">
+    <!-- Recent Contact Form Submissions -->
+    <div class="recent-section">
+        <div class="section-header">
+            <span class="section-title">Recent Leads</span>
+            <a href="{{ url_for('crm.board') }}" class="view-all-link">View All →</a>
+        </div>
+        {% if contact_form_submissions %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Message</th>
+                    <th>Submitted</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for submission in contact_form_submissions %}
+                <tr>
+                    <td>{{ submission.first_name }} {{ submission.last_name }}</td>
+                    <td>{{ submission.email }}</td>
+                    <td>{{ submission.phone }}</td>
+                    <td>{{ submission.message[:50] }}{{ '...' if submission.message|length > 50 else '' }}</td>
+                    <td>{{ submission.submitted_at.strftime('%b %d, %Y') if submission.submitted_at else 'N/A' }}</td>
+                    <td>
+                        <form action="{{ url_for('admin.delete_contact_submission', id=submission.id) }}" method="post"
+                            style="display:inline;" onsubmit="return confirm('Delete this submission?');">
+                            {{ form.csrf_token }}
+                            <button type="submit" class="danger-btn"
+                                style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="color: rgba(255,255,255,0.6);">No contact form submissions.</p>
+        {% endif %}
+    </div>
+
+    <!-- Admin Links -->
+    <div class="admin-links" style="margin-top: 2rem;">
         <h2>Admin Pages</h2>
-        <ul class="admin-pages-list">
-            <li><a href="{{ url_for('admin.business_config') }}">Manage Appointment Settings</a></li>
-            <li><a href="{{ url_for('admin.admin_estimator') }}">Estimator Management</a></li>
-            <li><a href="{{ url_for('admin.services') }}">Service Management</a></li>
-            <li><a href="{{ url_for('admin.generate_sitemap_route') }}">Generate Sitemap</a></li>
-            <li><a href="{{ url_for('admin.list_users') }}">Manage Users</a></li>
-            <li><a href="{{ url_for('admin.list_roles') }}">Manage Roles</a></li>
+        <ul class="admin-pages-list"
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; text-align: left; max-width: 800px; margin: 1rem auto;">
+            <li><a href="{{ url_for('admin.business_config') }}"><i class="fas fa-cog"></i> Business Settings</a></li>
+            <li><a href="{{ url_for('crm.board') }}"><i class="fas fa-funnel-dollar"></i> CRM / Lead Board</a></li>
+            <li><a href="{{ url_for('calendar.view_calendar') }}"><i class="fas fa-calendar"></i> Calendar</a></li>
+            <li><a href="{{ url_for('admin.admin_estimator') }}"><i class="fas fa-user-tie"></i> Estimators</a></li>
+            <li><a href="{{ url_for('admin.services') }}"><i class="fas fa-clipboard-list"></i> Services</a></li>
+            <li><a href="{{ url_for('admin.list_users') }}"><i class="fas fa-users"></i> Manage Users</a></li>
+            <li><a href="{{ url_for('admin.list_roles') }}"><i class="fas fa-user-shield"></i> Manage Roles</a></li>
+            <li><a href="{{ url_for('admin.list_locations') }}"><i class="fas fa-map-marker-alt"></i> Locations</a></li>
+            <li><a href="{{ url_for('admin.audit_logs') }}"><i class="fas fa-history"></i> Audit Logs</a></li>
+            <li><a href="{{ url_for('admin.data_management') }}"><i class="fas fa-database"></i> Data Management</a>
+            </li>
+            <li><a href="{{ url_for('admin.list_api_keys') }}"><i class="fas fa-key"></i> API Keys</a></li>
+            <li><a href="{{ url_for('admin.theme_editor') }}"><i class="fas fa-palette"></i> Theme Editor</a></li>
         </ul>
     </div>
 </div>

@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-dollar-sign me-2"></i>Revenue Report</h2>
+        <div class="d-flex gap-2">
+            <select id="presetSelect" class="form-select" style="width: auto;" onchange="applyPreset()">
+                <option value="last_7_days" {{ 'selected' if preset=='last_7_days' }}>Last 7 Days</option>
+                <option value="last_30_days" {{ 'selected' if preset=='last_30_days' }}>Last 30 Days</option>
+                <option value="last_90_days" {{ 'selected' if preset=='last_90_days' }}>Last 90 Days</option>
+                <option value="this_month" {{ 'selected' if preset=='this_month' }}>This Month</option>
+                <option value="last_month" {{ 'selected' if preset=='last_month' }}>Last Month</option>
+                <option value="this_year" {{ 'selected' if preset=='this_year' }}>This Year</option>
+            </select>
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="fas fa-download me-2"></i>Export
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item"
+                            href="{{ url_for('reports.export', report_type='revenue', format='csv', days=30) }}"><i
+                                class="fas fa-file-csv me-2"></i>CSV</a></li>
+                    <li><a class="dropdown-item"
+                            href="{{ url_for('reports.export', report_type='revenue', format='xlsx', days=30) }}"><i
+                                class="fas fa-file-excel me-2"></i>Excel</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-white-50">Total Revenue</h6>
+                            <h3 class="mb-0">${{ "{:,.2f}".format(metrics.total_revenue) }}</h3>
+                            {% if metrics.revenue_growth != 0 %}
+                            <small class="{{ 'text-white' if metrics.revenue_growth > 0 else 'text-warning' }}">
+                                <i class="fas fa-{{ 'arrow-up' if metrics.revenue_growth > 0 else 'arrow-down' }}"></i>
+                                {{ metrics.revenue_growth }}% vs prior period
+                            </small>
+                            {% endif %}
+                        </div>
+                        <i class="fas fa-dollar-sign fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-white-50">Orders</h6>
+                            <h3 class="mb-0">{{ "{:,}".format(metrics.order_count) }}</h3>
+                            {% if metrics.order_growth != 0 %}
+                            <small class="{{ 'text-white' if metrics.order_growth > 0 else 'text-warning' }}">
+                                <i class="fas fa-{{ 'arrow-up' if metrics.order_growth > 0 else 'arrow-down' }}"></i>
+                                {{ metrics.order_growth }}% vs prior period
+                            </small>
+                            {% endif %}
+                        </div>
+                        <i class="fas fa-shopping-cart fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-white-50">Avg Order Value</h6>
+                            <h3 class="mb-0">${{ "{:,.2f}".format(metrics.aov) }}</h3>
+                        </div>
+                        <i class="fas fa-chart-line fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-secondary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-white-50">Prior Period</h6>
+                            <h3 class="mb-0">${{ "{:,.2f}".format(metrics.prev_revenue) }}</h3>
+                            <small>{{ metrics.prev_order_count }} orders</small>
+                        </div>
+                        <i class="fas fa-history fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Chart -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card h-100">
+                <div class="card-header">
+                    <i class="fas fa-chart-area me-2"></i>Revenue Over Time
+                </div>
+                <div class="card-body">
+                    <canvas id="revenueChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <i class="fas fa-credit-card me-2"></i>Payment Methods
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for method in payment_methods %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>{{ method.currency | upper }}</span>
+                        <div class="text-end">
+                            <div class="fw-bold">${{ "{:,.2f}".format((method.total or 0) / 100) }}</div>
+                            <small class="text-muted">{{ method.count }} orders</small>
+                        </div>
+                    </li>
+                    {% else %}
+                    <li class="list-group-item text-muted">No data yet</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="card">
+        <div class="card-body">
+            <div class="row text-center">
+                <div class="col">
+                    <a href="{{ url_for('reports.products') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-box me-2"></i>Product Performance
+                    </a>
+                </div>
+                <div class="col">
+                    <a href="{{ url_for('reports.customers') }}" class="btn btn-outline-success">
+                        <i class="fas fa-users me-2"></i>Customer Analysis
+                    </a>
+                </div>
+                <div class="col">
+                    <a href="{{ url_for('reports.tax') }}" class="btn btn-outline-warning">
+                        <i class="fas fa-receipt me-2"></i>Tax Report
+                    </a>
+                </div>
+                <div class="col">
+                    <a href="{{ url_for('reports.saved') }}" class="btn btn-outline-info">
+                        <i class="fas fa-bookmark me-2"></i>Saved Reports
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    function applyPreset() {
+        const preset = document.getElementById('presetSelect').value;
+        window.location.href = "{{ url_for('reports.revenue') }}?preset=" + preset;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const dailyData = {{ daily_data | tojson
+    }};
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: dailyData.map(d => d.date),
+            datasets: [{
+                label: 'Revenue ($)',
+                data: dailyData.map(d => d.revenue),
+                borderColor: 'rgb(28, 200, 138)',
+                backgroundColor: 'rgba(28, 200, 138, 0.1)',
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function (value) {
+                            return '$' + value.toLocaleString();
+                        }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            return '$' + context.raw.toLocaleString(undefined, { minimumFractionDigits: 2 });
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,15 +1,152 @@
 {% extends "base.html" %}
 
+{% block title %}Commercial Dashboard{% endblock %}
+
 {% block additional_css %}
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/cdash.css') }}">
+<style>
+    .commercial-container {
+        max-width: 1100px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .commercial-header {
+        background: linear-gradient(135deg, #2c3e50, #34495e);
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        color: #fff;
+    }
+
+    .commercial-header h1 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.75rem;
+    }
+
+    .commercial-header .subtitle {
+        opacity: 0.8;
+    }
+
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-box {
+        background: rgba(42, 42, 42, 0.9);
+        border-radius: 10px;
+        padding: 1.5rem;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stat-box .value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .stat-box .label {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.9rem;
+    }
+
+    .orders-card {
+        background: rgba(42, 42, 42, 0.9);
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .orders-card-header {
+        padding: 1rem 1.25rem;
+        background: rgba(0, 0, 0, 0.3);
+    }
+
+    .orders-card-header h3 {
+        margin: 0;
+        color: #fff;
+    }
+
+    .orders-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .orders-table th,
+    .orders-table td {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .orders-table th {
+        color: rgba(255, 255, 255, 0.7);
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .orders-table td {
+        color: #fff;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
+<div class="section-spacer"></div>
 
+<div class="commercial-container">
+    <div class="commercial-header">
+        <h1><i class="fas fa-building"></i> Commercial Dashboard</h1>
+        <p class="subtitle">Business account overview for {{ current_user.username }}</p>
+    </div>
 
-{% endblock content %}
+    <div class="stats-row">
+        <div class="stat-box">
+            <div class="value">${{ '%.2f' % (total_spent / 100) }}</div>
+            <div class="label">Total Spend</div>
+        </div>
+        <div class="stat-box">
+            <div class="value">{{ orders|length }}</div>
+            <div class="label">Recent Orders</div>
+        </div>
+    </div>
 
-{% block scripts %}
+    <div class="orders-card">
+        <div class="orders-card-header">
+            <h3>Recent Orders</h3>
+        </div>
+        {% if orders %}
+        <table class="orders-table">
+            <thead>
+                <tr>
+                    <th>Order #</th>
+                    <th>Date</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>#{{ order.id }}</td>
+                    <td>{{ order.created_at.strftime('%b %d, %Y') if order.created_at else 'N/A' }}</td>
+                    <td>${{ '%.2f' % (order.total_amount / 100) }}</td>
+                    <td>{{ order.status|capitalize }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div style="padding: 2rem; text-align: center; color: rgba(255,255,255,0.6);">
+            <p>No orders yet</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
 
-
-{% endblock scripts %}
+<div class="section-spacer"></div>
+{% endblock %}

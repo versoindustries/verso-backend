@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Order Confirmed{% endblock %}
+
+{% block content %}
+<div class="checkout-success">
+    <div class="container">
+        <div class="success-card">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h1>Thank You!</h1>
+            <p class="lead">Your order has been placed successfully.</p>
+
+            {% if order_id %}
+            <p class="order-number">Order #{{ order_id }}</p>
+            {% endif %}
+
+            <div class="success-details">
+                <p>We've sent a confirmation email with your order details.</p>
+                <p>If you purchased any digital products, you can access them from your account.</p>
+            </div>
+
+            <div class="success-actions">
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('cart.my_downloads') }}" class="btn btn-primary">
+                    <i class="fas fa-download"></i> My Downloads
+                </a>
+                {% endif %}
+                <a href="{{ url_for('shop.index') }}" class="btn btn-outline">
+                    Continue Shopping
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .checkout-success {
+        padding: 4rem 0;
+        min-height: 60vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .success-card {
+        background: var(--card-bg, #fff);
+        border-radius: 12px;
+        padding: 3rem;
+        text-align: center;
+        max-width: 500px;
+        margin: 0 auto;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .success-icon {
+        font-size: 5rem;
+        color: #28a745;
+        margin-bottom: 1.5rem;
+    }
+
+    .success-card h1 {
+        color: var(--text-color, #333);
+        margin-bottom: 0.5rem;
+    }
+
+    .success-card .lead {
+        color: #666;
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+    }
+
+    .order-number {
+        font-size: 1.1rem;
+        color: var(--primary-color, #007bff);
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+    }
+
+    .success-details {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .success-details p {
+        margin: 0.5rem 0;
+        color: #666;
+        font-size: 0.95rem;
+    }
+
+    .success-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .success-actions .btn {
+        padding: 0.75rem 1.5rem;
+    }
+</style>
+{% endblock %}

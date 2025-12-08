@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Product Categories - Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Product Categories</h1>
+        <a href="{{ url_for('category_admin.create_category') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Category
+        </a>
+    </div>
+
+    {% if root_categories %}
+    <div data-react-component="AdminDataTable" data-react-props='{
+           "columns": [
+             {"accessorKey": "name", "header": "Name", "html": true},
+             {"accessorKey": "slug", "header": "Slug", "html": true},
+             {"accessorKey": "description", "header": "Description"},
+             {"accessorKey": "products", "header": "Products"},
+             {"accessorKey": "display_order", "header": "Order"},
+             {"accessorKey": "actions", "header": "Actions", "html": true}
+           ],
+           "data": {{ categories_json|safe }},
+           "emptyMessage": "No categories yet.",
+           "defaultPageSize": 25
+         }'>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        No categories yet. <a href="{{ url_for('category_admin.create_category') }}">Create your first category</a>.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

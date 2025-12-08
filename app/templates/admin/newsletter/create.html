@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Draft Newsletter</h2>
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <div class="form-group">
+            <label>Subject</label>
+            <input type="text" name="subject" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label>Recipient Tags (comma separated, e.g. 'all', 'leads', 'customers')</label>
+            <input type="text" name="tags" class="form-control" placeholder="all">
+        </div>
+        <div class="form-group">
+            <label>Content (Markdown support planned, currently text/HTML)</label>
+            <textarea name="content" class="form-control" rows="10" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Draft</button>
+    </form>
+</div>
+{% endblock %}

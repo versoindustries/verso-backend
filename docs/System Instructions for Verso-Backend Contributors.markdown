@@ -7,12 +7,13 @@ These instructions provide a comprehensive guide for contributors to ensure cons
 
 ---
 
-## 1. Coding Standards
+## 1. Coding Standards & Compliance
 
-- Write Python code that adheres to PEP 8 guidelines.
-- Use meaningful variable and function names to improve code readability.
-- Include docstrings for all functions and classes to document their purpose and usage.
-- Avoid hardcoding values; use configuration files (e.g., `config.py`) or environment variables for settings.
+- Adhere to PEP 8 plus enterprise secure coding norms: threat-model changes, avoid risky constructs, and keep functions small and auditable.
+- Align with OWASP ASVS/Top 10 for the backend: validate inputs, enforce authz on every route, output-encode, and protect against injection/XSS/CSRF/SSRF.
+- Use meaningful names and docstrings for all functions/classes; keep public interfaces documented and side effects explicit.
+- Avoid hardcoded values and secrets; source from configuration (`config.py`) or environment variables, and never commit keys or tokens.
+- Keep logging privacy-aware (no credentials/PII), add structured context for audits, and ensure errors do not leak stack traces in production.
 
 ---
 

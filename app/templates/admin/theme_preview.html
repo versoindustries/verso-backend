@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Preview</title>
+    <style>
+        :root {
+            --primary-color: {
+                    {
+                    preview_theme.primary_color
+                }
+            }
+
+            ;
+
+            --secondary-color: {
+                    {
+                    preview_theme.secondary_color
+                }
+            }
+
+            ;
+
+            --accent-color: {
+                    {
+                    preview_theme.accent_color
+                }
+            }
+
+            ;
+
+            --border-radius: {
+                    {
+                    preview_theme.border_radius
+                }
+            }
+
+            px;
+
+            --font-family: {
+                    {
+                    preview_theme.font_family
+                }
+            }
+
+            ;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .preview-header {
+            padding: 1.5rem 2rem;
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+        }
+
+        .preview-header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .preview-header p {
+            opacity: 0.9;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card h3 {
+            color: var(--primary-color);
+            margin-bottom: 0.75rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 500;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            border: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: #fff;
+        }
+
+        .btn-accent {
+            background: var(--accent-color);
+            color: #fff;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--border-radius);
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            font-family: var(--font-family);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: calc(var(--border-radius) / 2);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .badge-primary {
+            background: var(--primary-color);
+            color: #fff;
+        }
+
+        .badge-secondary {
+            background: var(--secondary-color);
+            color: #fff;
+        }
+
+        .badge-accent {
+            background: var(--accent-color);
+            color: #fff;
+        }
+
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+        }
+
+        .alert-primary {
+            background: rgba(var(--primary-color), 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .alert-accent {
+            background: rgba(40, 167, 69, 0.1);
+            border-color: var(--accent-color);
+        }
+
+        .preview-nav {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .nav-item {
+            padding: 0.5rem 1rem;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.2s;
+        }
+
+        .nav-item.active,
+        .nav-item:hover {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="preview-header">
+        <h1>Welcome to Your Website</h1>
+        <p>This is a preview of your theme settings</p>
+    </div>
+
+    <div class="preview-nav">
+        <div class="nav-item active">Home</div>
+        <div class="nav-item">About</div>
+        <div class="nav-item">Services</div>
+        <div class="nav-item">Contact</div>
+    </div>
+
+    <div class="card-grid">
+        <div class="card">
+            <h3>Feature One</h3>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor.</p>
+            <div style="margin-top: 1rem;">
+                <span class="badge badge-primary">New</span>
+                <span class="badge badge-accent">Featured</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Feature Two</h3>
+            <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi.</p>
+            <button class="btn btn-primary" style="margin-top: 1rem;">Learn More</button>
+        </div>
+
+        <div class="card">
+            <h3>Feature Three</h3>
+            <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.</p>
+            <button class="btn btn-outline" style="margin-top: 1rem;">Get Started</button>
+        </div>
+    </div>
+
+    <div style="margin-bottom: 2rem;">
+        <button class="btn btn-primary">Primary Button</button>
+        <button class="btn btn-secondary">Secondary Button</button>
+        <button class="btn btn-accent">Accent Button</button>
+        <button class="btn btn-outline">Outline Button</button>
+    </div>
+
+    <div class="card" style="max-width: 400px;">
+        <h3>Sample Form</h3>
+        <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" placeholder="you@example.com">
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" placeholder="••••••••">
+        </div>
+        <button class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">Sign In</button>
+    </div>
+</body>
+
+</html>

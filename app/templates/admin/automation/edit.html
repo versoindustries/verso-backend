@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Workflow{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Edit Workflow: {{ workflow.name }}</h1>
+        <a href="{{ url_for('automation.index') }}" class="btn btn-outline-secondary">Back to List</a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <!-- Workflow Settings -->
+            <div class="card mb-4">
+                <div class="card-header">Settings</div>
+                <div class="card-body">
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" class="form-control" name="name" value="{{ workflow.name }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="trigger_event" class="form-label">Trigger Event</label>
+                            <select class="form-select" name="trigger_event" required>
+                                <option value="lead.created" {% if workflow.trigger_event=='lead.created' %}selected{%
+                                    endif %}>Lead Created</option>
+                                <option value="lead.updated" {% if workflow.trigger_event=='lead.updated' %}selected{%
+                                    endif %}>Lead Updated</option>
+                                <option value="order.created" {% if workflow.trigger_event=='order.created' %}selected{%
+                                    endif %}>Order Created</option>
+                                <option value="order.updated" {% if workflow.trigger_event=='order.updated' %}selected{%
+                                    endif %}>Order Updated</option>
+                                <option value="product.created" {% if workflow.trigger_event=='product.created'
+                                    %}selected{% endif %}>Product Created</option>
+                                <option value="user.registered" {% if workflow.trigger_event=='user.registered'
+                                    %}selected{% endif %}>User Registered</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" name="description"
+                                rows="2">{{ workflow.description }}</textarea>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="is_active" name="is_active" {% if
+                                workflow.is_active %}checked{% endif %}>
+                            <label class="form-check-label" for="is_active">Active</label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Actions Reference -->
+            <div class="card">
+                <div class="card-header">Available Variables (Context)</div>
+                <div class="card-body small">
+                    <p>Use these in email templates or task descriptions.</p>
+                    <ul class="list-unstyled">
+                        <li><code>{{ '{' }}{{ '{' }}context.id{{ '}' }}{{ '}' }}</code> - Entity ID</li>
+                        <li><code>{{ '{' }}{{ '{' }}context.email{{ '}' }}{{ '}' }}</code> - Email Address</li>
+                        <li><code>{{ '{' }}{{ '{' }}context.first_name{{ '}' }}{{ '}' }}</code> - First Name</li>
+                        <li><code>{{ '{' }}{{ '{' }}context.total_amount{{ '}' }}{{ '}' }}</code> - Order Amount</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <!-- Steps -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Workflow Steps</span>
+                    <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#addStepModal">
+                        <i class="fas fa-plus"></i> Add Step
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    {% if workflow.steps.count() > 0 %}
+                    <ul class="list-group list-group-flush">
+                        {% for step in workflow.steps %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="badge bg-primary me-2">{{ step.order + 1 }}</span>
+                                <strong>{{ step.action_type|replace('_', ' ')|title }}</strong>
+                                <div class="small text-muted mt-1">
+                                    {% if step.action_type == 'send_email' %}
+                                    To: {{ step.config.recipient }} | Subject: {{ step.config.subject }}
+                                    {% elif step.action_type == 'log_activity' %}
+                                    Message: {{ step.config.message }}
+                                    {% else %}
+                                    {{ step.config }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div>
+                                <form action="{{ url_for('automation.delete_step', step_id=step.id) }}" method="POST"
+                                    class="d-inline" onsubmit="return confirm('Remove this step?');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <div class="p-4 text-center text-muted">
+                        No steps defined. Add actions to perform when the event triggers.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Step Modal -->
+<div class="modal fade" id="addStepModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Workflow Step</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addStepForm" action="{{ url_for('automation.add_step', workflow_id=workflow.id) }}"
+                    method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+                    <div class="mb-3">
+                        <label class="form-label">Action Type</label>
+                        <select class="form-select" name="action_type" id="actionTypeSelect"
+                            onchange="toggleConfigFields()" required>
+                            <option value="">Select action...</option>
+                            <option value="send_email">Send Email</option>
+                            <option value="log_activity">Log Activity</option>
+                            <!-- <option value="create_task">Create Task (Coming Soon)</option> -->
+                        </select>
+                    </div>
+
+                    <!-- Send Email Fields -->
+                    <div id="config_send_email" class="config-section" style="display:none;">
+                        <div class="mb-3">
+                            <label class="form-label">Recipient</label>
+                            <input type="text" class="form-control" name="recipient"
+                                placeholder="e.g. admin@example.com or {{ '{' }}{{ '{' }}context.email{{ '}' }}{{ '}' }}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Subject</label>
+                            <input type="text" class="form-control" name="subject" placeholder="Email Subject">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Body</label>
+                            <textarea class="form-control" name="body" rows="3"
+                                placeholder="Email body content..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Log Activity Fields -->
+                    <div id="config_log_activity" class="config-section" style="display:none;">
+                        <div class="mb-3">
+                            <label class="form-label">Log Message</label>
+                            <input type="text" class="form-control" name="message" placeholder="Message to log">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="addStepForm" class="btn btn-primary">Add Step</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleConfigFields() {
+        // Hide all sections
+        document.querySelectorAll('.config-section').forEach(el => el.style.display = 'none');
+
+        // Show selected section
+        const type = document.getElementById('actionTypeSelect').value;
+        if (type) {
+            const section = document.getElementById('config_' + type);
+            if (section) section.style.display = 'block';
+        }
+    }
+</script>
+{% endblock %}

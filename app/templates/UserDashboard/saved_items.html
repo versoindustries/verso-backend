@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Saved Items{% endblock %}
+
+{% block content %}
+<main class="dashboard-container" style="max-width: 900px; margin: 2rem auto; padding: 0 1rem;">
+    <div class="dashboard-header"
+        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <h1 style="font-size: 1.75rem; font-weight: 600;">Saved Items</h1>
+            <p style="color: #666;">Your wishlist and bookmarked items</p>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-tabs" style="display: flex; gap: 0.5rem;">
+            <a href="{{ url_for('user.saved_items', type='all') }}" class="{% if item_type == 'all' %}active{% endif %}"
+                style="padding: 0.5rem 1rem; border-radius: 20px; text-decoration: none; 
+                      {% if item_type == 'all' %}background: var(--primary-color); color: white;{% else %}background: #f8f9fa; color: #333;{% endif %}">
+                All
+            </a>
+            <a href="{{ url_for('user.saved_items', type='product') }}"
+                class="{% if item_type == 'product' %}active{% endif %}"
+                style="padding: 0.5rem 1rem; border-radius: 20px; text-decoration: none;
+                      {% if item_type == 'product' %}background: var(--primary-color); color: white;{% else %}background: #f8f9fa; color: #333;{% endif %}">
+                Products
+            </a>
+            <a href="{{ url_for('user.saved_items', type='post') }}"
+                class="{% if item_type == 'post' %}active{% endif %}"
+                style="padding: 0.5rem 1rem; border-radius: 20px; text-decoration: none;
+                      {% if item_type == 'post' %}background: var(--primary-color); color: white;{% else %}background: #f8f9fa; color: #333;{% endif %}">
+                Articles
+            </a>
+        </div>
+    </div>
+
+    {% if items %}
+    <div class="saved-items-grid"
+        style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">
+        {% for data in items %}
+        <div class="saved-item-card"
+            style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+            {% if data.saved_item.item_type == 'product' and data.item %}
+            <!-- Product Card -->
+            {% if data.item.image %}
+            <div style="height: 200px; overflow: hidden;">
+                <img src="{{ url_for('static', filename='uploads/' + data.item.image) }}" alt="{{ data.item.name }}"
+                    style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            {% else %}
+            <div
+                style="height: 200px; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-box" style="font-size: 3rem; color: #ccc;"></i>
+            </div>
+            {% endif %}
+            <div style="padding: 1rem;">
+                <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;">{{ data.item.name }}</h3>
+                <p style="color: var(--primary-color); font-weight: 600; margin-bottom: 0.75rem;">
+                    ${{ "%.2f"|format(data.item.price) }}
+                </p>
+                <div style="display: flex; gap: 0.5rem;">
+                    <a href="{{ url_for('shop.product_detail', product_id=data.item.id) }}"
+                        style="flex: 1; text-align: center; padding: 0.5rem; background: var(--primary-color); color: white; border-radius: 6px; text-decoration: none;">
+                        View
+                    </a>
+                    <button onclick="removeItem({{ data.saved_item.id }})"
+                        style="padding: 0.5rem 0.75rem; background: #f8f9fa; border: 1px solid #ddd; border-radius: 6px; cursor: pointer;">
+                        <i class="fas fa-trash-alt" style="color: #dc3545;"></i>
+                    </button>
+                </div>
+            </div>
+
+            {% elif data.saved_item.item_type == 'post' and data.item %}
+            <!-- Post Card -->
+            <div style="padding: 1.5rem;">
+                <div style="font-size: 0.75rem; color: #999; margin-bottom: 0.5rem;">
+                    <i class="fas fa-newspaper"></i> Article
+                </div>
+                <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;">{{ data.item.title }}</h3>
+                <p
+                    style="font-size: 0.875rem; color: #666; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                    {{ data.item.content|striptags|truncate(100) }}
+                </p>
+                <div style="display: flex; gap: 0.5rem;">
+                    <a href="{{ url_for('blog_blueprint.post', post_id=data.item.id) }}"
+                        style="flex: 1; text-align: center; padding: 0.5rem; background: var(--primary-color); color: white; border-radius: 6px; text-decoration: none;">
+                        Read
+                    </a>
+                    <button onclick="removeItem({{ data.saved_item.id }})"
+                        style="padding: 0.5rem 0.75rem; background: #f8f9fa; border: 1px solid #ddd; border-radius: 6px; cursor: pointer;">
+                        <i class="fas fa-trash-alt" style="color: #dc3545;"></i>
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Saved date -->
+            <div style="padding: 0.5rem 1rem; background: #f8f9fa; font-size: 0.75rem; color: #999;">
+                Saved {{ data.saved_item.created_at.strftime('%b %d, %Y') }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state" style="text-align: center; padding: 4rem 2rem; background: white; border-radius: 12px;">
+        <i class="fas fa-heart" style="font-size: 4rem; color: #f0f0f0; margin-bottom: 1.5rem;"></i>
+        <h3 style="color: #666; margin-bottom: 0.5rem;">No saved items yet</h3>
+        <p style="color: #999;">Items you save will appear here. Start browsing to save your favorites!</p>
+        <a href="{{ url_for('shop.shop_index') }}"
+            style="display: inline-block; margin-top: 1.5rem; padding: 0.75rem 1.5rem; background: var(--primary-color); color: white; border-radius: 8px; text-decoration: none;">
+            Browse Shop
+        </a>
+    </div>
+    {% endif %}
+
+    <div style="text-align: center; margin-top: 2rem;">
+        <a href="{{ url_for('user.dashboard') }}" style="color: var(--primary-color, #007bff); text-decoration: none;">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</main>
+
+<script>
+    function removeItem(savedId) {
+        if (!confirm('Remove this item from your saved items?')) return;
+
+        fetch('{{ url_for("user.remove_saved_item") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: JSON.stringify({ id: savedId })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message || 'Failed to remove item');
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                alert('Failed to remove item');
+            });
+    }
+</script>
+{% endblock %}

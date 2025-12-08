@@ -1,0 +1,145 @@
+{# Cart drawer partial for HTMX updates #}
+<div id="cart-container" class="cart-drawer-content">
+    {% if items %}
+    <div class="cart-drawer-items">
+        {% for item in items %}
+        <div class="drawer-item">
+            <div class="drawer-item-image">
+                {% if item.product.media_id %}
+                <img src="{{ url_for('media_bp.serve_media', media_id=item.product.media_id) }}"
+                    alt="{{ item.product.name }}">
+                {% else %}
+                <div class="placeholder-sm">
+                    <i class="fas fa-box"></i>
+                </div>
+                {% endif %}
+            </div>
+            <div class="drawer-item-info">
+                <h4>{{ item.product.name }}</h4>
+                <span class="drawer-qty">Qty: {{ item.quantity }}</span>
+                <span class="drawer-price">${{ '%.2f' % (item.item_total / 100) }}</span>
+            </div>
+            <form hx-post="{{ url_for('cart.remove_from_cart', product_id=item.product.id) }}"
+                hx-target="#cart-container" hx-swap="outerHTML">
+                <button type="submit" class="drawer-remove">&times;</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="cart-drawer-footer">
+        <div class="drawer-subtotal">
+            <span>Subtotal:</span>
+            <strong>${{ '%.2f' % (subtotal / 100) }}</strong>
+        </div>
+        <a href="{{ url_for('cart.view_cart') }}" class="btn btn-outline btn-sm">View Cart</a>
+        <a href="{{ url_for('cart.view_cart') }}" class="btn btn-primary btn-sm">Checkout</a>
+    </div>
+    {% else %}
+    <div class="cart-drawer-empty">
+        <i class="fas fa-shopping-cart"></i>
+        <p>Your cart is empty</p>
+        <a href="{{ url_for('shop.index') }}" class="btn btn-outline btn-sm">Shop Now</a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .cart-drawer-content {
+        padding: 1rem;
+    }
+
+    .cart-drawer-items {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .drawer-item {
+        display: flex;
+        gap: 0.75rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #eee;
+        align-items: center;
+    }
+
+    .drawer-item-image img,
+    .drawer-item-image .placeholder-sm {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+
+    .placeholder-sm {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f0f0f0;
+        color: #999;
+    }
+
+    .drawer-item-info {
+        flex: 1;
+    }
+
+    .drawer-item-info h4 {
+        margin: 0;
+        font-size: 0.9rem;
+        line-height: 1.2;
+    }
+
+    .drawer-qty {
+        font-size: 0.8rem;
+        color: #666;
+        display: block;
+    }
+
+    .drawer-price {
+        font-weight: 600;
+        color: var(--primary-color, #007bff);
+    }
+
+    .drawer-remove {
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        color: #999;
+        cursor: pointer;
+        padding: 0.25rem;
+    }
+
+    .drawer-remove:hover {
+        color: #dc3545;
+    }
+
+    .cart-drawer-footer {
+        padding-top: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .drawer-subtotal {
+        display: flex;
+        justify-content: space-between;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .cart-drawer-empty {
+        text-align: center;
+        padding: 2rem;
+        color: #666;
+    }
+
+    .cart-drawer-empty i {
+        font-size: 2rem;
+        color: #ddd;
+        margin-bottom: 0.5rem;
+    }
+
+    .btn-sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+</style>

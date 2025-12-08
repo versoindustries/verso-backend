@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} | Admin{% endblock %}
+
+{% block additional_css %}
+<!-- Reuse edit_user styles for form layout -->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/edit_user.css') }}">
+<style>
+    .seo-group {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .seo-group h3 {
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+        color: #495057;
+    }
+
+    .page-links {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="edit-user-section container mx-auto py-8 px-4">
+    <header class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">{{ title }}</h1>
+        {% if page %}
+        <div class="page-links mt-3">
+            <a href="{{ url_for('admin.page_revisions', page_id=page.id) }}" class="btn btn-sm btn-info">
+                <i class="fas fa-history"></i> Revision History
+            </a>
+            <a href="{{ url_for('admin.page_custom_fields', page_id=page.id) }}" class="btn btn-sm btn-secondary">
+                <i class="fas fa-cog"></i> Custom Fields
+            </a>
+            <a href="{{ url_for('pages.show_page', slug=page.slug) }}" target="_blank"
+                class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-external-link-alt"></i> View Page
+            </a>
+        </div>
+        {% endif %}
+    </header>
+
+    <article class="form-container max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        <form method="post" class="flex flex-col gap-4">
+            {{ form.hidden_tag() }}
+
+            <div class="form-group">
+                {{ form.title.label(class="block text-sm font-medium text-gray-700") }}
+                {{ form.title(class="mt-1 block w-full p-2 border border-gray-300 rounded-md") }}
+                {% for error in form.title.errors %}
+                <span class="text-red-500 text-sm">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                {{ form.slug.label(class="block text-sm font-medium text-gray-700") }}
+                {{ form.slug(class="mt-1 block w-full p-2 border border-gray-300 rounded-md") }}
+                {% for error in form.slug.errors %}
+                <span class="text-red-500 text-sm">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <!-- Staging Workflow Section -->
+            <div class="seo-group">
+                <h3><i class="fas fa-tasks"></i> Staging Workflow</h3>
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        {{ form.status.label(class="block text-sm font-medium text-gray-700") }}
+                        {{ form.status(class="mt-1 block w-full p-2 border border-gray-300 rounded-md") }}
+                    </div>
+                    <div class="col-md-6 form-group">
+                        {{ form.revision_note.label(class="block text-sm font-medium text-gray-700") }}
+                        {{ form.revision_note(class="mt-1 block w-full p-2 border border-gray-300 rounded-md",
+                        placeholder="Describe your changes...") }}
+                    </div>
+                </div>
+                <div class="form-group mt-2">
+                    <label class="inline-flex items-center">
+                        {{ form.is_published(class="form-checkbox h-5 w-5 text-blue-600") }}
+                        <span class="ml-2 text-gray-700">{{ form.is_published.label.text }}</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- SEO Section -->
+            <div class="seo-group">
+                <h3><i class="fas fa-search"></i> SEO Settings</h3>
+                <div class="form-group">
+                    {{ form.meta_description.label(class="block text-sm font-medium text-gray-700") }}
+                    {{ form.meta_description(class="mt-1 block w-full p-2 border border-gray-300 rounded-md", rows=3,
+                    placeholder="Brief description for search engines (max 300 chars)") }}
+                </div>
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        {{ form.canonical_url.label(class="block text-sm font-medium text-gray-700") }}
+                        {{ form.canonical_url(class="mt-1 block w-full p-2 border border-gray-300 rounded-md",
+                        placeholder="https://example.com/canonical-page") }}
+                        <small class="text-muted">Override the default canonical URL</small>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        {{ form.schema_type.label(class="block text-sm font-medium text-gray-700") }}
+                        {{ form.schema_type(class="mt-1 block w-full p-2 border border-gray-300 rounded-md") }}
+                        <small class="text-muted">Schema.org type for structured data</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Editor -->
+            <div class="form-group">
+                {{ form.content.label(class="block text-sm font-medium text-gray-700") }}
+                {{ form.content() }}
+                {% for error in form.content.errors %}
+                <span class="text-red-500 text-sm">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <div class="form-group mt-4">
+                {{ form.submit(class="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700 transition-colors
+                cursor-pointer") }}
+            </div>
+        </form>
+    </article>
+</section>
+{% endblock %}
+
+{% block scripts %}
+{{ ckeditor.load() }}
+{{ ckeditor.config(name='content') }}
+{% endblock %}

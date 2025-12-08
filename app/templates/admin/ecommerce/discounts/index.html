@@ -1,0 +1,84 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Discounts - Admin{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components/admin-data-table.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-tags me-2"></i>Discounts & Coupons</h1>
+        <a href="{{ url_for('ecommerce_admin.create_discount') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i> New Discount
+        </a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+    {% endwith %}
+
+    <div class="card">
+        <div class="card-body">
+            {% if discounts %}
+            {# React AdminDataTable Component #}
+            <div data-react-component="AdminDataTable" data-react-props='{
+                    "columns": [
+                        {"accessorKey": "code", "header": "Code", "html": true},
+                        {"accessorKey": "name", "header": "Name"},
+                        {"accessorKey": "type", "header": "Type", "html": true},
+                        {"accessorKey": "value", "header": "Value"},
+                        {"accessorKey": "uses", "header": "Uses"},
+                        {"accessorKey": "status", "header": "Status", "html": true},
+                        {"accessorKey": "actions", "header": "Actions", "sortable": false, "html": true}
+                    ],
+                    "data": {{ discounts_json | safe }},
+                    "defaultPageSize": 25,
+                    "emptyMessage": "No discounts found."
+                 }'>
+                <!-- Fallback table while React loads -->
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Value</th>
+                                <th>Uses</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for discount in discounts %}
+                            <tr>
+                                <td>{{ discount.code or 'Auto' }}</td>
+                                <td>{{ discount.name }}</td>
+                                <td>{{ discount.discount_type }}</td>
+                                <td>{{ discount.value }}</td>
+                                <td>{{ discount.used_count }}</td>
+                                <td>-</td>
+                                <td>-</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center text-muted py-4">
+                No discounts yet. <a href="{{ url_for('ecommerce_admin.create_discount') }}">Create your first
+                    discount</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

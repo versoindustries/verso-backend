@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block additional_css %}
+<link rel="stylesheet" type="text/css"
+    href="{{ url_for('static', filename='css/components/analytics-dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-chart-line me-2"></i>Analytics Dashboard</h2>
+        <div class="btn-group">
+            <a href="{{ url_for('analytics.dashboard', days=7) }}"
+                class="btn btn-{{ 'primary' if days == 7 else 'outline-secondary' }}">7 Days</a>
+            <a href="{{ url_for('analytics.dashboard', days=30) }}"
+                class="btn btn-{{ 'primary' if days == 30 else 'outline-secondary' }}">30 Days</a>
+            <a href="{{ url_for('analytics.dashboard', days=90) }}"
+                class="btn btn-{{ 'primary' if days == 90 else 'outline-secondary' }}">90 Days</a>
+        </div>
+    </div>
+
+    <!-- React AnalyticsDashboard Component for KPI Cards and Charts -->
+    <div data-react-component="AnalyticsDashboard" data-react-props='{
+            "metrics": {
+                "page_views": {{ metrics.page_views | default(0) }},
+                "unique_sessions": {{ metrics.unique_sessions | default(0) }},
+                "bounce_rate": {{ metrics.bounce_rate | default(0) }},
+                "avg_session_duration": {{ metrics.avg_session_duration | default(0) }}
+            },
+            "days": {{ days | default(30) }},
+            "trafficUrl": "{{ url_for(' analytics.daily_traffic', days=days) }}", "sourcesUrl"
+        : "{{ url_for('analytics.utm_breakdown', days=days) }}" , "devicesUrl"
+        : "{{ url_for('analytics.device_breakdown', days=days) }}" }'>
+        <!-- Fallback content while React loads -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white h-100">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-white-50">Page Views</h6>
+                        <h3 class="mb-0">{{ "{:,}".format(metrics.page_views) }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white h-100">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-white-50">Unique Sessions</h6>
+                        <h3 class="mb-0">{{ "{:,}".format(metrics.unique_sessions) }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-dark h-100">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2">Bounce Rate</h6>
+                        <h3 class="mb-0">{{ metrics.bounce_rate }}%</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white h-100">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-white-50">Avg. Duration</h6>
+                        <h3 class="mb-0">{{ (metrics.avg_session_duration // 60) }}m {{ metrics.avg_session_duration %
+                            60 }}s</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <p class="text-muted">Loading interactive charts...</p>
+    </div>
+
+    <div class="row mb-4">
+        <!-- Top Pages (server-rendered, kept as Jinja) -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between">
+                    <span><i class="fas fa-file me-2"></i>Top Pages</span>
+                    <a href="{{ url_for('analytics.traffic') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for page in top_pages[:10] %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span class="text-truncate" style="max-width: 400px;" title="{{ page.url }}">{{ page.url
+                            }}</span>
+                        <span class="badge bg-primary rounded-pill">{{ "{:,}".format(page.count) }}</span>
+                    </li>
+                    {% else %}
+                    <li class="list-group-item text-muted">No page views yet</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Conversion Goals (server-rendered, kept as Jinja) -->
+        <div class="col-lg-3">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between">
+                    <span><i class="fas fa-bullseye me-2"></i>Goals</span>
+                    <a href="{{ url_for('analytics.goals') }}" class="btn btn-sm btn-outline-primary">Manage</a>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for stat in goal_stats[:5] %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>{{ stat.goal.name }}</span>
+                        <span class="badge bg-success rounded-pill">{{ stat.conversions }}</span>
+                    </li>
+                    {% else %}
+                    <li class="list-group-item text-muted">
+                        <a href="{{ url_for('analytics.create_goal') }}">Create your first goal</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Devices placeholder - React renders this in the component above -->
+        <div class="col-lg-3">
+            <!-- Devices chart is rendered by React AnalyticsDashboard component -->
+        </div>
+    </div>
+
+    <!-- Quick Links (server-rendered, kept as Jinja) -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <a href="{{ url_for('analytics.traffic') }}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="fas fa-signal mb-2 d-block"></i>
+                                Traffic Details
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{{ url_for('analytics.visitors') }}" class="btn btn-outline-success btn-lg w-100">
+                                <i class="fas fa-user-friends mb-2 d-block"></i>
+                                Visitor Analysis
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{{ url_for('analytics.sessions') }}" class="btn btn-outline-info btn-lg w-100">
+                                <i class="fas fa-route mb-2 d-block"></i>
+                                Session Flow
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{{ url_for('analytics.funnels') }}" class="btn btn-outline-warning btn-lg w-100">
+                                <i class="fas fa-filter mb-2 d-block"></i>
+                                Funnels
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

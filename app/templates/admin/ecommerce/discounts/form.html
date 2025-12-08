@@ -1,0 +1,214 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{{ 'Edit' if discount else 'Create' }} Discount - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>
+            <i class="fas fa-tags me-2"></i>
+            {{ 'Edit' if discount else 'Create' }} Discount
+        </h1>
+        <a href="{{ url_for('ecommerce_admin.list_discounts') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back
+        </a>
+    </div>
+
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Discount Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Discount Name *</label>
+                            <input type="text" class="form-control" id="name" name="name"
+                                value="{{ discount.name if discount else '' }}" required>
+                        </div>
+
+                        {% if not discount %}
+                        <div class="mb-3">
+                            <label for="code" class="form-label">Discount Code</label>
+                            <input type="text" class="form-control text-uppercase" id="code" name="code" value=""
+                                placeholder="Leave empty to auto-generate">
+                            <small class="text-muted">Leave empty for auto-generated code. Not needed for automatic
+                                discounts.</small>
+                        </div>
+                        {% else %}
+                        <div class="mb-3">
+                            <label class="form-label">Discount Code</label>
+                            <input type="text" class="form-control" value="{{ discount.code or 'Auto-Apply' }}"
+                                disabled>
+                        </div>
+                        {% endif %}
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="discount_type" class="form-label">Discount Type *</label>
+                                <select class="form-select" id="discount_type" name="discount_type">
+                                    <option value="percentage" {% if discount and discount.discount_type=='percentage'
+                                        %}selected{% endif %}>
+                                        Percentage Off
+                                    </option>
+                                    <option value="fixed_amount" {% if discount and
+                                        discount.discount_type=='fixed_amount' %}selected{% endif %}>
+                                        Fixed Amount Off
+                                    </option>
+                                    <option value="free_shipping" {% if discount and
+                                        discount.discount_type=='free_shipping' %}selected{% endif %}>
+                                        Free Shipping
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="value" class="form-label">Value</label>
+                                <div class="input-group">
+                                    <span class="input-group-text" id="valuePrefix">%</span>
+                                    <input type="number" class="form-control" id="value" name="value"
+                                        value="{{ discount.value if discount else 10 }}" min="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="minimum_order" class="form-label">Minimum Order Amount</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="minimum_order" name="minimum_order"
+                                        value="{{ '%.2f'|format(discount.minimum_order_cents / 100) if discount else '' }}"
+                                        step="0.01" min="0">
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="maximum_discount" class="form-label">Maximum Discount</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="maximum_discount"
+                                        name="maximum_discount"
+                                        value="{{ '%.2f'|format(discount.maximum_discount_cents / 100) if discount and discount.maximum_discount_cents else '' }}"
+                                        step="0.01" min="0">
+                                </div>
+                                <small class="text-muted">Leave empty for no cap</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="maximum_uses" class="form-label">Maximum Uses</label>
+                            <input type="number" class="form-control" id="maximum_uses" name="maximum_uses"
+                                value="{{ discount.maximum_uses if discount else '' }}" min="1">
+                            <small class="text-muted">Leave empty for unlimited uses</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Validity Period</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="starts_at" class="form-label">Start Date</label>
+                                <input type="datetime-local" class="form-control" id="starts_at" name="starts_at"
+                                    value="{{ discount.starts_at.strftime('%Y-%m-%dT%H:%M') if discount and discount.starts_at else '' }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="ends_at" class="form-label">End Date</label>
+                                <input type="datetime-local" class="form-control" id="ends_at" name="ends_at"
+                                    value="{{ discount.ends_at.strftime('%Y-%m-%dT%H:%M') if discount and discount.ends_at else '' }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-check mb-3">
+                            <input type="checkbox" class="form-check-input" id="is_active" name="is_active" {% if not
+                                discount or discount.is_active %}checked{% endif %}>
+                            <label class="form-check-label" for="is_active">Active</label>
+                        </div>
+
+                        {% if not discount %}
+                        <div class="form-check mb-3">
+                            <input type="checkbox" class="form-check-input" id="is_automatic" name="is_automatic">
+                            <label class="form-check-label" for="is_automatic">Auto-apply (no code needed)</label>
+                            <small class="d-block text-muted">Automatically applies when conditions are met</small>
+                        </div>
+                        {% endif %}
+
+                        <div class="form-check mb-3">
+                            <input type="checkbox" class="form-check-input" id="combine_with_other_discounts"
+                                name="combine_with_other_discounts" {% if discount and
+                                discount.combine_with_other_discounts %}checked{% endif %}>
+                            <label class="form-check-label" for="combine_with_other_discounts">Combine with other
+                                discounts</label>
+                        </div>
+                    </div>
+                </div>
+
+                {% if discount %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Statistics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Times Used:</span>
+                            <strong>{{ discount.used_count }}</strong>
+                        </div>
+                        {% if discount.maximum_uses %}
+                        <div class="progress mb-3">
+                            <div class="progress-bar" role="progressbar"
+                                style="width: {{ (discount.used_count / discount.maximum_uses * 100)|int }}%">
+                                {{ discount.used_count }}/{{ discount.maximum_uses }}
+                            </div>
+                        </div>
+                        {% endif %}
+                        <a href="{{ url_for('ecommerce_admin.discount_usage', id=discount.id) }}"
+                            class="btn btn-outline-info btn-sm w-100">
+                            <i class="fas fa-chart-bar me-1"></i> View Usage Details
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+
+                <button type="submit" class="btn btn-primary btn-lg w-100">
+                    <i class="fas fa-save me-2"></i>
+                    {{ 'Update' if discount else 'Create' }} Discount
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        updateValuePrefix();
+        $('#discount_type').on('change', updateValuePrefix);
+    });
+
+    function updateValuePrefix() {
+        var type = $('#discount_type').val();
+        if (type === 'percentage') {
+            $('#valuePrefix').text('%');
+        } else if (type === 'fixed_amount') {
+            $('#valuePrefix').text('$');
+        } else {
+            $('#valuePrefix').text('-');
+        }
+    }
+</script>
+{% endblock %}

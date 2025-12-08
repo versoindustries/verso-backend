@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Offline - Verso Backend{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8 text-center">
+        <h1 class="display-4"><i class="fas fa-wifi-slash"></i> You are Offline</h1>
+        <p class="lead">It seems you have lost your internet connection.</p>
+        <p>Some features may not be available until you reconnect.</p>
+        <a href="{{ url_for('main_routes.index') }}" class="btn btn-primary mt-3">Try to Reconnect</a>
+    </div>
+</div>
+{% endblock %}

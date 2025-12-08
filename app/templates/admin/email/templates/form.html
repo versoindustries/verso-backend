@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}{{ action }} Email Template - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="mb-4">
+        <a href="{{ url_for('email_admin.templates') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-2"></i>Back to Templates
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0">{{ action }} Email Template</h4>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <!-- Basic Info -->
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Template Name <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="name" name="name" required
+                                value="{{ template.name if template else '' }}" placeholder="e.g., Welcome Email">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">Subject Line <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="subject" name="subject" required
+                                value="{{ template.subject if template else '' }}"
+                                placeholder="e.g., Welcome to {{company_name}}!">
+                            <small class="text-muted">Use {{variable}} for dynamic content</small>
+                        </div>
+
+                        <!-- HTML Content -->
+                        <div class="mb-3">
+                            <label for="body_html" class="form-label">HTML Content <span
+                                    class="text-danger">*</span></label>
+                            <textarea class="form-control" id="body_html" name="body_html" rows="15"
+                                placeholder="Enter HTML email content...">{{ template.body_html or template.body if template else '' }}</textarea>
+                            <small class="text-muted">Use {{first_name}}, {{email}}, {{unsubscribe_url}} for
+                                personalization</small>
+                        </div>
+
+                        <!-- Plain Text -->
+                        <div class="mb-3">
+                            <label for="body_text" class="form-label">Plain Text Version</label>
+                            <textarea class="form-control" id="body_text" name="body_text" rows="8"
+                                placeholder="Plain text fallback...">{{ template.body_text if template else '' }}</textarea>
+                            <small class="text-muted">Fallback for email clients that don't support HTML</small>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <!-- Settings -->
+                        <div class="card bg-light mb-3">
+                            <div class="card-header">Settings</div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="template_type" class="form-label">Template Type</label>
+                                    <select class="form-select" id="template_type" name="template_type">
+                                        <option value="general" {% if template and template.template_type=='general'
+                                            %}selected{% endif %}>General</option>
+                                        <option value="marketing" {% if template and template.template_type=='marketing'
+                                            %}selected{% endif %}>Marketing</option>
+                                        <option value="transactional" {% if template and
+                                            template.template_type=='transactional' %}selected{% endif %}>Transactional
+                                        </option>
+                                        <option value="notification" {% if template and
+                                            template.template_type=='notification' %}selected{% endif %}>Notification
+                                        </option>
+                                        <option value="welcome" {% if template and template.template_type=='welcome'
+                                            %}selected{% endif %}>Welcome</option>
+                                        <option value="follow_up" {% if template and template.template_type=='follow_up'
+                                            %}selected{% endif %}>Follow Up</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="category" class="form-label">Category (Optional)</label>
+                                    <input type="text" class="form-control" id="category" name="category"
+                                        value="{{ template.category if template else '' }}"
+                                        placeholder="e.g., newsletter, promotional">
+                                </div>
+
+                                {% if template %}
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="is_active" name="is_active"
+                                            {% if template.is_active %}checked{% endif %}>
+                                        <label class="form-check-label" for="is_active">Active</label>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Variables Schema -->
+                        <div class="card bg-light mb-3">
+                            <div class="card-header">Variable Defaults (JSON)</div>
+                            <div class="card-body">
+                                <textarea class="form-control font-monospace" id="variables_schema"
+                                    name="variables_schema" rows="6"
+                                    placeholder='{"first_name": {"default": "Friend"}}'>{{ template.variables_schema|tojson if template and template.variables_schema else '{}' }}</textarea>
+                                <small class="text-muted">Default values for template variables</small>
+                            </div>
+                        </div>
+
+                        <!-- Common Variables Reference -->
+                        <div class="card bg-light">
+                            <div class="card-header">Available Variables</div>
+                            <div class="card-body">
+                                <code class="d-block mb-1">{{first_name}}</code>
+                                <code class="d-block mb-1">{{last_name}}</code>
+                                <code class="d-block mb-1">{{email}}</code>
+                                <code class="d-block mb-1">{{company_name}}</code>
+                                <code class="d-block mb-1">{{unsubscribe_url}}</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ url_for('email_admin.templates') }}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>{{ action }} Template
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

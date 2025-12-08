@@ -1,38 +1,38 @@
-# Standard library imports
-import csv
-import os
+import hashlib
+from app.models import Media
+from app.database import db
+from werkzeug.utils import secure_filename
 
-# Third-party imports
-from flask import abort, g, make_response, send_file, current_user
-from flask_login import login_required
-import json
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf', 'txt', 'md'}
 
-# Local application imports
-from app.models import Campaign
-import app
-
-# For a given file, return whether it's an allowed type or not
 def allowed_file(filename):
     return '.' in filename and \
-           filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Utility Functions
-def load_json(file_path):
-    with open(file_path, 'r') as f:
-        return json.load(f)
+def save_media(file_storage, user_id=None):
+    """
+    Saves a FileStorage object to the database.
+    Returns the created Media object.
+    """
+    if not file_storage or not allowed_file(file_storage.filename):
+        return None
 
-# For a given file, return whether it's an allowed type or not
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
+    filename = secure_filename(file_storage.filename)
+    data = file_storage.read()
+    size = len(data)
+    checksum = hashlib.sha256(data).hexdigest()
+    mimetype = file_storage.mimetype
 
-@app.after_request
-def delete_file(response):
-    filename = getattr(g, 'filename', None)
-    if filename:
-        try:
-            os.remove(filename)
-        except Exception as error:
-            app.logger.error("Error removing or closing downloaded file handle", error)
-    return response
-        
+    media = Media(
+        filename=filename,
+        data=data,
+        mimetype=mimetype,
+        size=size,
+        checksum=checksum,
+        uploaded_by_id=user_id
+    )
+    
+    db.session.add(media)
+    db.session.commit()
+    
+    return media

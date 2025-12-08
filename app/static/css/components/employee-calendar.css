@@ -1,0 +1,77 @@
+/**
+ * Employee Calendar Styles
+ * 
+ * Component-specific styles for the employee calendar interface.
+ */
+
+.employee-calendar-container {
+    padding: 1rem;
+}
+
+/* Calendar customization */
+.employee-calendar-container #calendar {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.employee-calendar-container .fc-event {
+    cursor: pointer;
+}
+
+/* Appointment panel */
+.appointment-panel {
+    border-left: 4px solid var(--bs-primary, #0d6efd);
+}
+
+.appointment-panel .card-header {
+    font-weight: 600;
+}
+
+/* Status badges in the panel */
+.appointment-panel .badge {
+    font-size: 0.75rem;
+}
+
+/* Check-in/out buttons */
+.checkin-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* Staff notes textarea */
+.appointment-panel textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Reschedule form */
+.appointment-panel form .form-group label {
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .employee-calendar-container .fc-toolbar-title {
+        font-size: 1rem !important;
+    }
+
+    .employee-calendar-container .fc-button {
+        padding: 0.25rem 0.5rem !important;
+        font-size: 0.8rem !important;
+    }
+
+    .employee-calendar-container .col-lg-8,
+    .employee-calendar-container .col-lg-4 {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Color legend styles */
+.employee-calendar-container .card-body.bg-light h6 {
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}

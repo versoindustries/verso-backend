@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Members - {{ channel.name }} - Verso{% endblock %}
+
+{% block additional_css %}
+<style>
+    .members-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .members-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .member-list {
+        background: rgba(42, 42, 42, 0.9);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .member-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px 20px;
+        border-bottom: 1px solid rgba(65, 105, 225, 0.2);
+    }
+
+    .member-item:last-child {
+        border-bottom: none;
+    }
+
+    .member-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .member-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--btn-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+
+    .member-name {
+        font-weight: 600;
+    }
+
+    .member-role {
+        font-size: 0.8rem;
+        opacity: 0.6;
+    }
+
+    .member-actions form {
+        display: inline;
+    }
+
+    .add-member-section {
+        margin-top: 30px;
+        background: rgba(42, 42, 42, 0.9);
+        border-radius: 10px;
+        padding: 20px;
+    }
+
+    .add-member-section h4 {
+        margin-bottom: 15px;
+    }
+
+    .add-member-form {
+        display: flex;
+        gap: 10px;
+    }
+
+    .add-member-form select {
+        flex: 1;
+        padding: 10px;
+        background: rgba(31, 31, 31, 0.8);
+        border: 1px solid rgba(65, 105, 225, 0.3);
+        border-radius: 5px;
+        color: var(--text-primary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="members-container">
+    <div class="members-header">
+        <h2><i class="fas fa-users"></i> {{ channel.name }} Members</h2>
+        <a href="{{ url_for('messaging.channel', channel_id=channel.id) }}" class="btn btn-secondary btn-sm">
+            <i class="fas fa-arrow-left"></i> Back to Channel
+        </a>
+    </div>
+
+    <div class="member-list">
+        {% for member in channel.members %}
+        <div class="member-item">
+            <div class="member-info">
+                <div class="member-avatar">{{ member.username[0].upper() }}</div>
+                <div>
+                    <div class="member-name">{{ member.username }}</div>
+                    <div class="member-role">
+                        {% if member.id == channel.created_by_id %}
+                        <i class="fas fa-crown" style="color: gold;"></i> Owner
+                        {% else %}
+                        Member
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="member-actions">
+                {% if member.id != channel.created_by_id and member.id != current_user.id %}
+                <form action="{{ url_for('messaging.manage_members', channel_id=channel.id) }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="action" value="remove">
+                    <input type="hidden" name="user_id" value="{{ member.id }}">
+                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                        onclick="return confirm('Remove this member?')">
+                        <i class="fas fa-user-minus"></i> Remove
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if available_users %}
+    <div class="add-member-section">
+        <h4><i class="fas fa-user-plus"></i> Add Member</h4>
+        <form action="{{ url_for('messaging.manage_members', channel_id=channel.id) }}" method="POST"
+            class="add-member-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="add">
+            <select name="user_id" required>
+                <option value="">Select a user...</option>
+                {% for user in available_users %}
+                <option value="{{ user.id }}">{{ user.username }} ({{ user.email }})</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add
+            </button>
+        </form>
+    </div>
+    {% else %}
+    <div class="add-member-section">
+        <p style="text-align: center; opacity: 0.6;">All users are already members of this channel.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

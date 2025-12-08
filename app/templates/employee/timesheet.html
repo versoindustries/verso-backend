@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}Timesheet - {{ month }}/{{ year }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-clock me-2"></i>My Timesheet</h1>
+        <a href="{{ url_for('employee.dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Month Navigation -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+                {% set prev_month = month - 1 if month > 1 else 12 %}
+                {% set prev_year = year if month > 1 else year - 1 %}
+                {% set next_month = month + 1 if month < 12 else 1 %} {% set next_year=year if month < 12 else year + 1
+                    %} <a href="{{ url_for('employee.time_history', month=prev_month, year=prev_year) }}"
+                    class="btn btn-outline-primary">
+                    <i class="fas fa-chevron-left"></i> Previous
+                    </a>
+                    <h4 class="mb-0">{{ ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
+                        'September', 'October', 'November', 'December'][month-1] }} {{ year }}</h4>
+                    <a href="{{ url_for('employee.time_history', month=next_month, year=next_year) }}"
+                        class="btn btn-outline-primary">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h3>{{ "%.1f"|format(total_hours) }}</h3>
+                    <p class="mb-0">Total Hours</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h3>{{ entries|length }}</h3>
+                    <p class="mb-0">Days Worked</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h3>{{ "%.1f"|format((total_hours / entries|length) if entries|length else 0) }}</h3>
+                    <p class="mb-0">Avg Hours/Day</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Time Entries Table -->
+    {% if entries %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Clock In</th>
+                    <th>Clock Out</th>
+                    <th>Duration</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in entries %}
+                <tr>
+                    <td>{{ entry.date.strftime('%a, %b %d') }}</td>
+                    <td>{{ entry.clock_in.strftime('%H:%M') if entry.clock_in else '-' }}</td>
+                    <td>{{ entry.clock_out.strftime('%H:%M') if entry.clock_out else '<span
+                            class="badge bg-success">Active</span>'|safe }}</td>
+                    <td>
+                        {% if entry.duration_minutes %}
+                        {{ (entry.duration_minutes // 60) }}h {{ (entry.duration_minutes % 60) }}m
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                    <td>{{ entry.notes or '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>No time entries for this month.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

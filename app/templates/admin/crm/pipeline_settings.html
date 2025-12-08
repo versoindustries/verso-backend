@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Pipeline Settings{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Pipeline Settings</h2>
+            <p class="text-muted">Configure pipeline stages for your CRM board.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Stages List -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Pipeline Stages</span>
+                    <select class="form-control form-control-sm w-auto" id="pipelineSelect"
+                        onchange="changePipeline(this.value)">
+                        <option value="default" {% if pipeline_name=='default' %}selected{% endif %}>Default Pipeline
+                        </option>
+                        <option value="sales" {% if pipeline_name=='sales' %}selected{% endif %}>Sales Pipeline</option>
+                        <option value="support" {% if pipeline_name=='support' %}selected{% endif %}>Support Pipeline
+                        </option>
+                    </select>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush" id="stagesList">
+                        {% for stage in stages %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center"
+                            data-stage-id="{{ stage.id }}">
+                            <div class="d-flex align-items-center">
+                                <span class="btn btn-sm mr-3"
+                                    style="background-color: {{ stage.color }}; width: 30px; height: 30px;"></span>
+                                <div>
+                                    <strong>{{ stage.name }}</strong>
+                                    <small class="d-block text-muted">
+                                        Order: {{ stage.order }} | Probability: {{ stage.probability }}%
+                                        {% if stage.is_won_stage %}<span class="badge badge-success">Won Stage</span>{%
+                                        endif %}
+                                        {% if stage.is_lost_stage %}<span class="badge badge-danger">Lost Stage</span>{%
+                                        endif %}
+                                    </small>
+                                </div>
+                            </div>
+                            <div>
+                                <button class="btn btn-sm btn-outline-primary"
+                                    onclick="editStage({{ stage.id }}, '{{ stage.name }}', '{{ stage.color }}', {{ stage.order }}, {{ stage.probability }}, {{ 'true' if stage.is_won_stage else 'false' }}, {{ 'true' if stage.is_lost_stage else 'false' }})">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <form method="POST" action="{{ url_for('crm.delete_stage', stage_id=stage.id) }}"
+                                    class="d-inline" onsubmit="return confirm('Delete this stage?');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i
+                                            class="fas fa-trash"></i></button>
+                                </form>
+                            </div>
+                        </li>
+                        {% else %}
+                        <li class="list-group-item text-muted">No stages configured. Add one below.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add/Edit Stage Form -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header" id="formHeader">Add New Stage</div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('crm.create_stage') }}">
+                        {{ form.hidden_tag() }}
+                        <input type="hidden" name="stage_id" id="stageId" value="">
+
+                        <div class="form-group">
+                            <label>Stage Name</label>
+                            {{ form.name(class="form-control", id="stageName") }}
+                        </div>
+
+                        <div class="form-group">
+                            <label>Pipeline</label>
+                            {{ form.pipeline_name(class="form-control", id="stagePipeline") }}
+                        </div>
+
+                        <div class="form-group">
+                            <label>Display Order</label>
+                            {{ form.order(class="form-control", id="stageOrder") }}
+                        </div>
+
+                        <div class="form-group">
+                            <label>Color</label>
+                            <div class="input-group">
+                                {{ form.color(class="form-control", id="stageColor") }}
+                                <div class="input-group-append">
+                                    <span class="input-group-text p-0">
+                                        <input type="color" id="colorPicker"
+                                            style="width: 40px; height: 100%; border: none;"
+                                            onchange="document.getElementById('stageColor').value = this.value">
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Conversion Probability (%)</label>
+                            {{ form.probability(class="form-control", id="stageProbability") }}
+                        </div>
+
+                        <div class="form-check mb-2">
+                            {{ form.is_won_stage(class="form-check-input", id="stageWon") }}
+                            <label class="form-check-label">This stage marks lead as Won</label>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            {{ form.is_lost_stage(class="form-check-input", id="stageLost") }}
+                            <label class="form-check-label">This stage marks lead as Lost</label>
+                        </div>
+
+                        {{ form.submit(class="btn btn-primary btn-block") }}
+                        <button type="button" class="btn btn-secondary btn-block" onclick="resetForm()">Cancel /
+                            New</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function changePipeline(pipeline) {
+        window.location.href = '{{ url_for("crm.pipeline_settings") }}?pipeline=' + pipeline;
+    }
+
+    function editStage(id, name, color, order, probability, isWon, isLost) {
+        document.getElementById('stageId').value = id;
+        document.getElementById('stageName').value = name;
+        document.getElementById('stageColor').value = color;
+        document.getElementById('colorPicker').value = color;
+        document.getElementById('stageOrder').value = order;
+        document.getElementById('stageProbability').value = probability;
+        document.getElementById('stageWon').checked = isWon;
+        document.getElementById('stageLost').checked = isLost;
+        document.getElementById('formHeader').textContent = 'Edit Stage: ' + name;
+    }
+
+    function resetForm() {
+        document.getElementById('stageId').value = '';
+        document.getElementById('stageName').value = '';
+        document.getElementById('stageColor').value = '#6c757d';
+        document.getElementById('colorPicker').value = '#6c757d';
+        document.getElementById('stageOrder').value = '';
+        document.getElementById('stageProbability').value = '';
+        document.getElementById('stageWon').checked = false;
+        document.getElementById('stageLost').checked = false;
+        document.getElementById('formHeader').textContent = 'Add New Stage';
+    }
+</script>
+{% endblock %}

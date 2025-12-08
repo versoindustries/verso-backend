@@ -5,7 +5,8 @@ Business Configuration
 {% endblock %}
 
 {% block description %}
-Configure your business settings, including operating hours, buffer time, and timezone, to optimize scheduling and operations.
+Configure your business settings, including operating hours, buffer time, and timezone, to optimize scheduling and
+operations.
 {% endblock %}
 
 {% block head %}
@@ -37,7 +38,8 @@ Configure your business settings, including operating hours, buffer time, and ti
 <section class="business-config-section">
     <header class="section-header">
         <h1>Business Configuration</h1>
-        <p>Configure your business settings, including operating hours, buffer time, and timezone, to optimize scheduling and operations.</p>
+        <p>Configure your business settings, including operating hours, buffer time, and timezone, to optimize
+            scheduling and operations.</p>
     </header>
     <article class="config-form-container">
         <form method="POST" class="business-config-form">
@@ -49,7 +51,7 @@ Configure your business settings, including operating hours, buffer time, and ti
                 </label>
                 {{ form.business_start_time(class="form-control", type="time") }}
                 {% for error in form.business_start_time.errors %}
-                    <span class="error-message">{{ error|e }}</span>
+                <span class="error-message">{{ error|e }}</span>
                 {% endfor %}
             </div>
             <div class="form-group">
@@ -59,7 +61,7 @@ Configure your business settings, including operating hours, buffer time, and ti
                 </label>
                 {{ form.business_end_time(class="form-control", type="time") }}
                 {% for error in form.business_end_time.errors %}
-                    <span class="error-message">{{ error|e }}</span>
+                <span class="error-message">{{ error|e }}</span>
                 {% endfor %}
             </div>
             <div class="form-group">
@@ -69,7 +71,7 @@ Configure your business settings, including operating hours, buffer time, and ti
                 </label>
                 {{ form.buffer_time_minutes(class="form-control", type="number", min="0") }}
                 {% for error in form.buffer_time_minutes.errors %}
-                    <span class="error-message">{{ error|e }}</span>
+                <span class="error-message">{{ error|e }}</span>
                 {% endfor %}
             </div>
             <div class="form-group">
@@ -79,7 +81,40 @@ Configure your business settings, including operating hours, buffer time, and ti
                 </label>
                 {{ form.company_timezone(class="form-control custom-select") }}
                 {% for error in form.company_timezone.errors %}
-                    <span class="error-message">{{ error|e }}</span>
+                <span class="error-message">{{ error|e }}</span>
+                {% endfor %}
+                {% for error in form.company_timezone.errors %}
+                <span class="error-message">{{ error|e }}</span>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.primary_color.id }}">
+                    {{ form.primary_color.label.text }}
+                    <i class="fas fa-palette"></i>
+                </label>
+                {{ form.primary_color(class="form-control", type="color") }}
+                {% for error in form.primary_color.errors %}
+                <span class="error-message">{{ error|e }}</span>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.secondary_color.id }}">
+                    {{ form.secondary_color.label.text }}
+                    <i class="fas fa-palette"></i>
+                </label>
+                {{ form.secondary_color(class="form-control", type="color") }}
+                {% for error in form.secondary_color.errors %}
+                <span class="error-message">{{ error|e }}</span>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.font_family.id }}">
+                    {{ form.font_family.label.text }}
+                    <i class="fas fa-font"></i>
+                </label>
+                {{ form.font_family(class="form-control") }}
+                {% for error in form.font_family.errors %}
+                <span class="error-message">{{ error|e }}</span>
                 {% endfor %}
             </div>
             <button type="submit" class="btn btn-primary">

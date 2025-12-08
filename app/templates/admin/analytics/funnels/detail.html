@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-filter me-2"></i>{{ funnel.name }}</h2>
+        <div class="btn-group">
+            <a href="{{ url_for('analytics.funnel_detail', funnel_id=funnel.id, days=7) }}"
+                class="btn btn-{{ 'primary' if days == 7 else 'outline-secondary' }}">7 Days</a>
+            <a href="{{ url_for('analytics.funnel_detail', funnel_id=funnel.id, days=30) }}"
+                class="btn btn-{{ 'primary' if days == 30 else 'outline-secondary' }}">30 Days</a>
+            <a href="{{ url_for('analytics.funnel_detail', funnel_id=funnel.id, days=90) }}"
+                class="btn btn-{{ 'primary' if days == 90 else 'outline-secondary' }}">90 Days</a>
+        </div>
+    </div>
+
+    {% if funnel.description %}
+    <p class="text-muted mb-4">{{ funnel.description }}</p>
+    {% endif %}
+
+    <!-- Funnel Visualization -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-chart-bar me-2"></i>Funnel Visualization
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for rate in rates %}
+                <div class="col">
+                    <div class="funnel-step text-center">
+                        <!-- Step bar -->
+                        <div class="position-relative mb-3" style="height: 200px;">
+                            <div class="bg-primary rounded" style="
+                                position: absolute;
+                                bottom: 0;
+                                left: 50%;
+                                transform: translateX(-50%);
+                                width: {{ 60 + (40 * (1 - loop.index0 / (rates|length or 1))) }}%;
+                                height: {{ rate.rate }}%;
+                                min-height: 20px;
+                                opacity: {{ 1 - (loop.index0 * 0.15) }};
+                            ">
+                            </div>
+                        </div>
+
+                        <!-- Step info -->
+                        <h5>{{ rate.step.name }}</h5>
+                        <div class="fs-2 fw-bold text-primary">{{ "{:,}".format(rate.count) }}</div>
+                        <div class="text-muted">{{ rate.rate }}% conversion</div>
+
+                        {% if rate.drop_off > 0 %}
+                        <div class="text-danger small mt-2">
+                            <i class="fas fa-arrow-down me-1"></i>{{ "{:,}".format(rate.drop_off) }} dropped
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if not loop.last %}
+                    <!-- Arrow between steps -->
+                    <div class="text-center d-none d-lg-block" style="position: absolute; top: 50%; right: -15px;">
+                        <i class="fas fa-chevron-right fa-2x text-muted"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted">No steps defined in this funnel</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Stats Table -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-table me-2"></i>Step Details
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Step</th>
+                        <th>Goal</th>
+                        <th class="text-end">Users</th>
+                        <th class="text-end">Conversion Rate</th>
+                        <th class="text-end">Drop-off</th>
+                        <th class="text-end">Drop-off Rate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rate in rates %}
+                    <tr>
+                        <td>
+                            <span class="badge bg-secondary me-2">{{ loop.index }}</span>
+                            {{ rate.step.name }}
+                        </td>
+                        <td>{{ rate.step.goal.name }}</td>
+                        <td class="text-end">{{ "{:,}".format(rate.count) }}</td>
+                        <td class="text-end">
+                            <span
+                                class="badge bg-{{ 'success' if rate.rate >= 50 else 'warning' if rate.rate >= 20 else 'danger' }}">
+                                {{ rate.rate }}%
+                            </span>
+                        </td>
+                        <td class="text-end">{{ "{:,}".format(rate.drop_off) }}</td>
+                        <td class="text-end">
+                            {% if loop.index0 > 0 and rates[loop.index0 - 1].count > 0 %}
+                            {{ "%.1f"|format(rate.drop_off / rates[loop.index0 - 1].count * 100) }}%
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a href="{{ url_for('analytics.funnels') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Funnels
+        </a>
+    </div>
+</div>
+{% endblock %}

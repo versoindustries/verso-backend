@@ -1,0 +1,181 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Compliance Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">Compliance Dashboard</h1>
+            <p class="text-muted mb-0">GDPR/CCPA compliance and data privacy management</p>
+        </div>
+        <div>
+            <a href="{{ url_for('compliance.consent_list') }}" class="btn btn-outline-primary me-2">
+                <i class="bi bi-shield-check"></i> Consents
+            </a>
+            <a href="{{ url_for('compliance.export_list') }}" class="btn btn-outline-success me-2">
+                <i class="bi bi-file-earmark-arrow-down"></i> Exports
+            </a>
+            <a href="{{ url_for('compliance.audit_log') }}" class="btn btn-outline-info">
+                <i class="bi bi-file-text"></i> Audit Log
+            </a>
+        </div>
+    </div>
+
+    <!-- Overview Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 bg-primary bg-opacity-10 rounded-3 p-3">
+                            <i class="bi bi-shield-check text-primary fs-4"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Consent Records</h6>
+                            <h3 class="mb-0">{{ total_consents | default(0) }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 bg-warning bg-opacity-10 rounded-3 p-3">
+                            <i class="bi bi-file-earmark-arrow-down text-warning fs-4"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Pending Exports</h6>
+                            <h3 class="mb-0">{{ pending_exports | default(0) }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 bg-success bg-opacity-10 rounded-3 p-3">
+                            <i class="bi bi-clock-history text-success fs-4"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Active Retention Policies</h6>
+                            <h3 class="mb-0">{{ active_policies | default(0) }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Recent Consent Activity -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Consent Activity</h5>
+                    <a href="{{ url_for('compliance.consent_list') }}" class="btn btn-sm btn-outline-primary">View
+                        All</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Source</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for consent in recent_consents %}
+                                <tr>
+                                    <td>{{ consent.consent_type }}</td>
+                                    <td>
+                                        {% if consent.granted %}
+                                        <span class="badge bg-success">Granted</span>
+                                        {% else %}
+                                        <span class="badge bg-warning">Withdrawn</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ consent.consent_source }}</td>
+                                    <td>{{ consent.created_at.strftime('%m/%d %H:%M') }}</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-3">No recent activity</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Audit Log -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Audit Log</h5>
+                    <a href="{{ url_for('compliance.audit_log') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Action</th>
+                                    <th>Entity</th>
+                                    <th>User</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for log in recent_audits %}
+                                <tr>
+                                    <td>{{ log.action }}</td>
+                                    <td>{{ log.entity_type }}</td>
+                                    <td>{{ log.user.username if log.user else 'System' }}</td>
+                                    <td>{{ log.timestamp.strftime('%m/%d %H:%M') if log.timestamp else '-' }}</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-3">No recent activity</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Retention Policies -->
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Data Retention</h5>
+            <div>
+                <form action="{{ url_for('compliance.run_all_retention') }}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-sm btn-outline-warning me-2">
+                        <i class="bi bi-play"></i> Run All Due
+                    </button>
+                </form>
+                <a href="{{ url_for('compliance.retention_policies') }}" class="btn btn-sm btn-outline-primary">Manage
+                    Policies</a>
+            </div>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-0">
+                Data retention policies automatically clean up old data according to your configured schedules.
+                <a href="{{ url_for('compliance.retention_history') }}">View execution history</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

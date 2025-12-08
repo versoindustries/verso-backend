@@ -1,0 +1,175 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block title %}Leave Request Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h1 class="mb-4"><i class="fas fa-calendar-check me-2"></i>Leave Request Management</h1>
+
+    <!-- Pending Requests -->
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Pending Requests ({{ pending|length }})</h5>
+        </div>
+        <div class="card-body">
+            {% if pending %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Type</th>
+                            <th>Dates</th>
+                            <th>Days</th>
+                            <th>Reason</th>
+                            <th>Submitted</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for leave in pending %}
+                        <tr>
+                            <td>{{ leave.user.first_name or '' }} {{ leave.user.last_name or leave.user.username }}</td>
+                            <td><span class="badge bg-info">{{ leave.leave_type }}</span></td>
+                            <td>{{ leave.start_date.strftime('%b %d') }} - {{ leave.end_date.strftime('%b %d, %Y') }}
+                            </td>
+                            <td>{{ leave.days_requested() }}</td>
+                            <td>{{ leave.reason[:50] if leave.reason else '-' }}{{ '...' if leave.reason and
+                                leave.reason|length > 50 else '' }}</td>
+                            <td>{{ leave.created_at.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-success" data-bs-toggle="modal"
+                                    data-bs-target="#approveModal{{ leave.id }}">
+                                    <i class="fas fa-check"></i> Approve
+                                </button>
+                                <button class="btn btn-sm btn-danger" data-bs-toggle="modal"
+                                    data-bs-target="#rejectModal{{ leave.id }}">
+                                    <i class="fas fa-times"></i> Reject
+                                </button>
+
+                                <!-- Approve Modal -->
+                                <div class="modal fade" id="approveModal{{ leave.id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <form action="{{ url_for('admin.approve_leave', request_id=leave.id) }}"
+                                                method="post">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Approve Leave Request</h5>
+                                                    <button type="button" class="btn-close"
+                                                        data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p><strong>Employee:</strong> {{ leave.user.first_name }} {{
+                                                        leave.user.last_name }}</p>
+                                                    <p><strong>Dates:</strong> {{ leave.start_date.strftime('%b %d') }}
+                                                        - {{ leave.end_date.strftime('%b %d, %Y') }}</p>
+                                                    <p><strong>Days:</strong> {{ leave.days_requested() }}</p>
+                                                    <div class="mb-3">
+                                                        <label for="admin_notes" class="form-label">Notes
+                                                            (optional)</label>
+                                                        <textarea name="admin_notes" class="form-control"
+                                                            rows="2"></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary"
+                                                        data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-success">Approve</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Reject Modal -->
+                                <div class="modal fade" id="rejectModal{{ leave.id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <form action="{{ url_for('admin.reject_leave', request_id=leave.id) }}"
+                                                method="post">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Reject Leave Request</h5>
+                                                    <button type="button" class="btn-close"
+                                                        data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p><strong>Employee:</strong> {{ leave.user.first_name }} {{
+                                                        leave.user.last_name }}</p>
+                                                    <p><strong>Dates:</strong> {{ leave.start_date.strftime('%b %d') }}
+                                                        - {{ leave.end_date.strftime('%b %d, %Y') }}</p>
+                                                    <div class="mb-3">
+                                                        <label for="admin_notes" class="form-label">Reason for
+                                                            rejection</label>
+                                                        <textarea name="admin_notes" class="form-control" rows="2"
+                                                            required></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary"
+                                                        data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-danger">Reject</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted mb-0">No pending leave requests.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Recent Decisions -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Decisions</h5>
+        </div>
+        <div class="card-body">
+            {% if recent %}
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Type</th>
+                            <th>Dates</th>
+                            <th>Status</th>
+                            <th>Decided By</th>
+                            <th>Decision Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for leave in recent %}
+                        <tr>
+                            <td>{{ leave.user.first_name or '' }} {{ leave.user.last_name or leave.user.username }}</td>
+                            <td><span class="badge bg-secondary">{{ leave.leave_type }}</span></td>
+                            <td>{{ leave.start_date.strftime('%b %d') }} - {{ leave.end_date.strftime('%b %d') }}</td>
+                            <td>
+                                {% if leave.status == 'approved' %}
+                                <span class="badge bg-success">Approved</span>
+                                {% else %}
+                                <span class="badge bg-danger">Rejected</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ leave.approved_by.username if leave.approved_by else 'N/A' }}</td>
+                            <td>{{ leave.approved_at.strftime('%Y-%m-%d') if leave.approved_at else 'N/A' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted mb-0">No recent decisions.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

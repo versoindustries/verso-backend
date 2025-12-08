@@ -1,0 +1,96 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Gift Cards - Admin{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components/gift-cards.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-gift me-2"></i>Gift Cards</h1>
+        <a href="{{ url_for('ecommerce_admin.create_gift_card') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i> Issue Gift Card
+        </a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+    {% endwith %}
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h6>Total Issued</h6>
+                    <h3>${{ "%.2f"|format(total_issued) }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h6>Outstanding Balance</h6>
+                    <h3>${{ "%.2f"|format(outstanding) }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h6>Active Cards</h6>
+                    <h3>{{ active_count }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-secondary text-white">
+                <div class="card-body">
+                    <h6>Total Cards</h6>
+                    <h3>{{ gift_cards|length }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div data-react-component="AdminDataTable" data-react-props='{
+                     "columns": [
+                         {"accessorKey": "code", "header": "Code", "html": true},
+                         {"accessorKey": "recipient", "header": "Recipient", "html": true},
+                         {"accessorKey": "initial", "header": "Initial", "sortable": true},
+                         {"accessorKey": "balance", "header": "Balance", "html": true, "sortable": true},
+                         {"accessorKey": "status", "header": "Status", "html": true},
+                         {"accessorKey": "expires", "header": "Expires", "html": true, "sortable": true},
+                         {"accessorKey": "actions", "header": "Actions", "html": true, "sortable": false}
+                     ],
+                     "data": {{ gift_cards_json | safe }},
+                     "idKey": "id",
+                     "defaultPageSize": 25,
+                     "emptyMessage": "No gift cards yet."
+                 }'>
+                <!-- Loading fallback -->
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+            {% if not gift_cards %}
+            <div class="text-center text-muted py-4">
+                No gift cards yet. <a href="{{ url_for('ecommerce_admin.create_gift_card') }}">Issue your first gift
+                    card</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Estimator Availability - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h2 class="mb-4">Manage Availability</h2>
+    <p class="text-muted">Configure weekly schedule and exception dates for each estimator.</p>
+    
+    <div class="row">
+        {% for estimator in estimators %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-user-clock"></i> {{ estimator.name }}
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        <strong>{{ estimator.availabilities|length }}</strong> availability slots<br>
+                        <strong>{{ estimator.availability_exceptions|length }}</strong> exception dates
+                    </p>
+                </div>
+                <div class="card-footer bg-light">
+                    <a href="{{ url_for('availability.edit_availability', estimator_id=estimator.id) }}" 
+                       class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-clock"></i> Weekly Schedule
+                    </a>
+                    <a href="{{ url_for('availability.list_exceptions', estimator_id=estimator.id) }}" 
+                       class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-calendar-times"></i> Exceptions
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                No estimators found. <a href="{{ url_for('admin.admin_estimator') }}">Add estimators</a> first.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Products</h2>
+        <a href="{{ url_for('shop_admin.create_product') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Product
+        </a>
+    </div>
+
+    <div data-react-component="AdminDataTable" data-react-props='{
+        "columns": [
+            {"accessorKey": "image", "header": "Image", "html": true},
+            {"accessorKey": "name", "header": "Name", "sortable": true},
+            {"accessorKey": "price", "header": "Price", "sortable": true},
+            {"accessorKey": "inventory", "header": "Inventory", "sortable": true},
+            {"accessorKey": "type", "header": "Type", "html": true},
+            {"accessorKey": "actions", "header": "Actions", "html": true}
+        ],
+        "data": {{ products_json | safe }},
+        "idKey": "id",
+        "emptyMessage": "No products found"
+    }'></div>
+</div>
+{% endblock %}

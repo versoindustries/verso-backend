@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Audience Segments - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">Audience Segments</h1>
+            <p class="text-muted mb-0">Create targeted audience groups for your campaigns</p>
+        </div>
+        <a href="{{ url_for('email_admin.new_segment') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>New Segment
+        </a>
+    </div>
+
+    <div class="row">
+        {% for audience in audiences %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ audience.name }}</h5>
+                    <span class="badge bg-{{ 'primary' if audience.is_dynamic else 'secondary' }}">
+                        {{ 'Dynamic' if audience.is_dynamic else 'Static' }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    {% if audience.description %}
+                    <p class="text-muted small">{{ audience.description }}</p>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0">{{ audience.member_count }}</h3>
+                            <small class="text-muted">Members</small>
+                        </div>
+                        {% if audience.last_calculated_at %}
+                        <small class="text-muted">
+                            Updated {{ audience.last_calculated_at.strftime('%m/%d %H:%M') }}
+                        </small>
+                        {% endif %}
+                    </div>
+
+                    {% if audience.filter_rules and audience.filter_rules|length > 0 %}
+                    <hr>
+                    <small class="text-muted">
+                        <strong>Filters:</strong> {{ audience.filter_rules|length }} rule(s)
+                    </small>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-transparent">
+                    <div class="btn-group w-100">
+                        <a href="{{ url_for('email_admin.preview_segment', id=audience.id) }}"
+                            class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-users me-1"></i>Preview
+                        </a>
+                        <form method="POST" action="{{ url_for('email_admin.refresh_segment', id=audience.id) }}"
+                            class="d-inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-sm btn-outline-info" title="Refresh count">
+                                <i class="fas fa-sync"></i>
+                            </button>
+                        </form>
+                        <a href="{{ url_for('email_admin.edit_segment', id=audience.id) }}"
+                            class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <form method="POST" action="{{ url_for('email_admin.delete_segment', id=audience.id) }}"
+                            onsubmit="return confirm('Delete this segment?');" class="d-inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                No audience segments found. <a href="{{ url_for('email_admin.new_segment') }}">Create your first
+                    segment</a>.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

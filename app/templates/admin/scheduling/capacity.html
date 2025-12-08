@@ -1,0 +1,44 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Capacity Dashboard{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Capacity Dashboard</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                Resource Utilization (Today)
+            </div>
+            <div class="card-body">
+                <canvas id="resourceChart" width="400" height="200"></canvas>
+                <div class="text-center text-muted mt-3">
+                    <small>Chart implementation coming in future update</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                Waitlist Metrics
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h3>0</h3>
+                        <p class="text-muted">Total Waiting</p>
+                    </div>
+                    <div class="col-6">
+                        <h3>0h</h3>
+                        <p class="text-muted">Avg Wait Time</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

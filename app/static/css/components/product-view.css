@@ -1,0 +1,439 @@
+/**
+ * ProductView Component Styles
+ * 
+ * Styles for the React ProductView component (product display, variants, gallery).
+ * Import this in templates that use the ProductView component.
+ */
+
+/* =============================================================================
+   Product View Container
+   ============================================================================= */
+.product-view {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+/* =============================================================================
+   Product Gallery
+   ============================================================================= */
+.product-gallery {
+    position: relative;
+}
+
+.product-main-image {
+    width: 100%;
+    aspect-ratio: 1;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--component-border-radius, 0.375rem);
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.product-main-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.product-main-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.product-thumbnails {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding: 0.25rem 0;
+}
+
+.product-thumbnail {
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+    border-radius: var(--component-border-radius, 0.375rem);
+    overflow: hidden;
+    cursor: pointer;
+    opacity: 0.6;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.product-thumbnail:hover {
+    opacity: 0.9;
+}
+
+.product-thumbnail.active {
+    opacity: 1;
+    border-color: var(--primary-color, #4169e1);
+}
+
+.product-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.product-wishlist-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    color: #fff;
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.product-wishlist-btn:hover {
+    background: rgba(0, 0, 0, 0.7);
+    transform: scale(1.05);
+}
+
+.product-wishlist-btn.in-wishlist {
+    background: var(--danger-color, #dc3545);
+}
+
+/* =============================================================================
+   Product Details
+   ============================================================================= */
+.product-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.product-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    line-height: 1.3;
+}
+
+.product-price {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--primary-color, #4169e1);
+}
+
+.product-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #ffc107;
+}
+
+.product-rating-count {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+}
+
+.product-description {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* =============================================================================
+   Product Badges
+   ============================================================================= */
+.product-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.product-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--component-border-radius, 0.375rem);
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.product-badge-digital {
+    background: rgba(23, 162, 184, 0.15);
+    color: var(--info-color, #17a2b8);
+}
+
+.product-badge-physical {
+    background: rgba(108, 117, 125, 0.15);
+    color: #6c757d;
+}
+
+.product-badge-instock {
+    background: rgba(40, 167, 69, 0.15);
+    color: var(--success-color, #28a745);
+}
+
+.product-badge-lowstock {
+    background: rgba(255, 193, 7, 0.15);
+    color: var(--warning-color, #ffc107);
+}
+
+.product-badge-outofstock {
+    background: rgba(220, 53, 69, 0.15);
+    color: var(--danger-color, #dc3545);
+}
+
+/* =============================================================================
+   Variant Selector
+   ============================================================================= */
+.product-variants {
+    border-top: 1px solid var(--component-border-color, rgba(255, 255, 255, 0.1));
+    padding-top: 1rem;
+}
+
+.product-variants-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 0.75rem;
+}
+
+.product-variants-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.product-variant-btn {
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: 1px solid var(--component-border-color, rgba(255, 255, 255, 0.2));
+    border-radius: var(--component-border-radius, 0.375rem);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.product-variant-btn:hover {
+    border-color: var(--primary-color, #4169e1);
+    color: #fff;
+}
+
+.product-variant-btn.active {
+    background: var(--primary-color, #4169e1);
+    border-color: var(--primary-color, #4169e1);
+    color: #fff;
+}
+
+.product-variant-adjustment {
+    font-size: 0.75rem;
+    opacity: 0.7;
+    margin-left: 0.25rem;
+}
+
+/* =============================================================================
+   Quantity Selector
+   ============================================================================= */
+.product-quantity {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.product-quantity-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.product-quantity-input {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--component-border-color, rgba(255, 255, 255, 0.2));
+    border-radius: var(--component-border-radius, 0.375rem);
+    overflow: hidden;
+}
+
+.product-quantity-input button {
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.product-quantity-input button:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.product-quantity-input button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.product-quantity-input input {
+    width: 60px;
+    height: 40px;
+    background: transparent;
+    border: none;
+    border-left: 1px solid var(--component-border-color, rgba(255, 255, 255, 0.2));
+    border-right: 1px solid var(--component-border-color, rgba(255, 255, 255, 0.2));
+    color: #fff;
+    text-align: center;
+    font-size: 1rem;
+}
+
+.product-quantity-input input:focus {
+    outline: none;
+}
+
+/* =============================================================================
+   Action Buttons
+   ============================================================================= */
+.product-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.btn-add-to-cart {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    background: var(--primary-color, #4169e1);
+    border: none;
+    border-radius: var(--component-border-radius, 0.375rem);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-add-to-cart:hover:not(:disabled) {
+    background: #3458c5;
+    transform: translateY(-1px);
+}
+
+.btn-add-to-cart:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.btn-buy-now {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    background: transparent;
+    border: 1px solid var(--primary-color, #4169e1);
+    border-radius: var(--component-border-radius, 0.375rem);
+    color: var(--primary-color, #4169e1);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-buy-now:hover {
+    background: rgba(65, 105, 225, 0.1);
+}
+
+.btn-sold-out {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    background: rgba(108, 117, 125, 0.3);
+    border: none;
+    border-radius: var(--component-border-radius, 0.375rem);
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: not-allowed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+/* =============================================================================
+   Product Messages
+   ============================================================================= */
+.product-message {
+    padding: 0.75rem 1rem;
+    border-radius: var(--component-border-radius, 0.375rem);
+    font-size: 0.9rem;
+}
+
+.product-message.success {
+    background: rgba(40, 167, 69, 0.15);
+    color: #71c386;
+    border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.product-message.error {
+    background: rgba(220, 53, 69, 0.15);
+    color: #e77681;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+/* =============================================================================
+   Product Meta
+   ============================================================================= */
+.product-meta {
+    padding-top: 1rem;
+    border-top: 1px solid var(--component-border-color, rgba(255, 255, 255, 0.1));
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.product-meta p {
+    margin: 0.25rem 0;
+}
+
+.product-meta strong {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* =============================================================================
+   Responsive
+   ============================================================================= */
+@media (max-width: 768px) {
+    .product-view {
+        grid-template-columns: 1fr;
+    }
+
+    .product-title {
+        font-size: 1.5rem;
+    }
+
+    .product-price {
+        font-size: 1.5rem;
+    }
+
+    .product-actions {
+        position: sticky;
+        bottom: 0;
+        background: var(--component-bg, rgba(42, 42, 42, 0.95));
+        margin: 1rem -1rem -1rem;
+        padding: 1rem;
+        border-top: 1px solid var(--component-border-color, rgba(255, 255, 255, 0.1));
+    }
+}

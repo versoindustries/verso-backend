@@ -1,0 +1,96 @@
+{% extends "shop/base.html" %}
+
+{% block title %}My Wishlist - {{ business_config.company_name|default('Shop') }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-heart text-danger me-2"></i>My Wishlist</h1>
+        <a href="{{ url_for('shop.index') }}" class="btn btn-outline-primary">
+            <i class="fas fa-shopping-bag me-1"></i> Continue Shopping
+        </a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+    {% endwith %}
+
+    {% if wishlist_items %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        {% for item in wishlist_items %}
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <a href="{{ url_for('shop.product_detail', product_id=item.product.id) }}" class="text-decoration-none">
+                    {% if item.product.media_id %}
+                    <img src="{{ url_for('media_bp.serve_media', media_id=item.product.media_id) }}"
+                        class="card-img-top" alt="{{ item.product.name }}" style="height: 180px; object-fit: cover;">
+                    {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
+                        style="height: 180px;">
+                        <i class="fas fa-image fa-3x text-muted"></i>
+                    </div>
+                    {% endif %}
+                </a>
+
+                <div class="card-body">
+                    <a href="{{ url_for('shop.product_detail', product_id=item.product.id) }}"
+                        class="text-decoration-none">
+                        <h6 class="card-title text-dark">{{ item.product.name }}</h6>
+                    </a>
+                    {% if item.variant %}
+                    <p class="text-muted small mb-1">{{ item.variant.name }}</p>
+                    {% endif %}
+                    <p class="card-text">
+                        <span class="fw-bold text-primary">${{ "%.2f"|format(item.product.price / 100) }}</span>
+                    </p>
+                    <p class="text-muted small mb-0">
+                        Added {{ item.added_at.strftime('%b %d, %Y') }}
+                    </p>
+                </div>
+
+                <div class="card-footer bg-transparent border-0">
+                    <div class="d-grid gap-2">
+                        {% if item.product.inventory_count > 0 %}
+                        <form method="POST" action="{{ url_for('ecommerce.move_wishlist_to_cart', id=item.id) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-shopping-cart me-1"></i> Move to Cart
+                            </button>
+                        </form>
+                        {% else %}
+                        <button class="btn btn-secondary w-100" disabled>Out of Stock</button>
+                        {% endif %}
+
+                        <form method="POST"
+                            action="{{ url_for('ecommerce.remove_from_wishlist', product_id=item.product.id) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            {% if item.variant_id %}
+                            <input type="hidden" name="variant_id" value="{{ item.variant_id }}">
+                            {% endif %}
+                            <button type="submit" class="btn btn-outline-danger w-100">
+                                <i class="fas fa-trash me-1"></i> Remove
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-heart fa-5x text-muted mb-4"></i>
+        <h3>Your wishlist is empty</h3>
+        <p class="text-muted mb-4">Start adding items you love to your wishlist!</p>
+        <a href="{{ url_for('shop.index') }}" class="btn btn-primary btn-lg">
+            <i class="fas fa-shopping-bag me-2"></i> Start Shopping
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Shopping Cart{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components/cart-page.css') }}">
+{% endblock %}
+
+{% block content %}
+<div data-react-component="CartPage" data-react-props='{
+        "items": {{ items_json | safe }},
+        "subtotal": {{ subtotal }},
+        "updateQuantityUrlPattern": "{{ url_for(' cart.update_cart_quantity', product_id=0) |
+    replace('/0', '/{productId}' ) }}", "removeItemUrlPattern"
+    : "{{ url_for('cart.remove_from_cart', product_id=0) | replace('/0', '/{productId}') }}" , "checkoutUrl"
+    : "{{ url_for('cart.checkout') }}" , "clearCartUrl" : "{{ url_for('cart.clear_cart') }}" , "shopUrl"
+    : "{{ url_for('shop.index') }}" , "csrfToken" : "{{ csrf_token() }}" }'>
+    <!-- Loading fallback -->
+    <div class="cart-page">
+        <div class="container">
+            <h1>Shopping Cart</h1>
+            {% if items %}
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+            {% else %}
+            <div class="cart-empty">
+                <i class="fas fa-shopping-cart"></i>
+                <h2>Your cart is empty</h2>
+                <p>Looks like you haven't added anything to your cart yet.</p>
+                <a href="{{ url_for('shop.index') }}" class="btn btn-primary">
+                    Continue Shopping
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

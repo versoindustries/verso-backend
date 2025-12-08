@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Email Preferences{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fas fa-envelope-open me-2"></i>Email Preferences</h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        Manage email preferences for <strong>{{ email }}</strong>
+                    </p>
+
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <!-- Current Status -->
+                        <div
+                            class="alert alert-{{ 'danger' if is_unsubscribed else 'success' }} d-flex align-items-center">
+                            <i
+                                class="fas fa-{{ 'times-circle' if is_unsubscribed else 'check-circle' }} me-3 fa-2x"></i>
+                            <div>
+                                {% if is_unsubscribed %}
+                                <strong>You are currently unsubscribed</strong><br>
+                                <small>You won't receive marketing emails from us.</small>
+                                {% else %}
+                                <strong>You are subscribed to our emails</strong><br>
+                                <small>You'll receive marketing and promotional emails.</small>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Actions -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {% if is_unsubscribed %}
+                                <button type="submit" name="action" value="resubscribe"
+                                    class="btn btn-success btn-lg w-100">
+                                    <i class="fas fa-envelope me-2"></i>Resubscribe
+                                </button>
+                                <small class="text-muted d-block mt-2">
+                                    Start receiving our emails again
+                                </small>
+                                {% else %}
+                                <button type="submit" name="action" value="unsubscribe_all"
+                                    class="btn btn-danger btn-lg w-100">
+                                    <i class="fas fa-times me-2"></i>Unsubscribe from All
+                                </button>
+                                <small class="text-muted d-block mt-2">
+                                    Stop receiving all marketing emails
+                                </small>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <a href="/" class="btn btn-outline-secondary btn-lg w-100">
+                                    <i class="fas fa-home me-2"></i>Return to Homepage
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Privacy Notice -->
+            <div class="text-center mt-4 text-muted small">
+                <p>
+                    <i class="fas fa-shield-alt me-1"></i>
+                    We respect your privacy. You can change your preferences at any time.
+                </p>
+                <p>
+                    Even if you unsubscribe, you may still receive transactional emails
+                    (order confirmations, password resets, etc.)
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

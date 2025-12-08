@@ -1,0 +1,162 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block title %}Organization Chart{% endblock %}
+
+{% block extra_css %}
+<style>
+    .org-chart {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow-x: auto;
+        padding: 2rem;
+    }
+
+    .org-node {
+        background: var(--bs-light);
+        border: 2px solid var(--bs-primary);
+        border-radius: 8px;
+        padding: 1rem;
+        text-align: center;
+        min-width: 180px;
+        margin: 0.5rem;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .org-node:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .org-node .name {
+        font-weight: bold;
+        color: var(--bs-dark);
+    }
+
+    .org-node .title {
+        font-size: 0.85rem;
+        color: var(--bs-secondary);
+    }
+
+    .org-node .dept {
+        font-size: 0.75rem;
+        color: var(--bs-info);
+    }
+
+    .org-node .email {
+        font-size: 0.7rem;
+        color: var(--bs-muted);
+    }
+
+    .org-children {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        padding-top: 1.5rem;
+    }
+
+    .org-branch {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h1 class="mb-4"><i class="fas fa-sitemap me-2"></i>Organization Chart</h1>
+
+    <!-- Add/Edit Reporting -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Update Reporting Structure</h5>
+        </div>
+        <div class="card-body">
+            <form action="" method="post" id="reportingForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Employee</label>
+                        <select name="user_id" id="userSelect" class="form-select" required>
+                            <option value="">Select Employee</option>
+                            {% for user in users %}
+                            <option value="{{ user.id }}">{{ user.first_name or '' }} {{ user.last_name or user.username
+                                }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Reports To</label>
+                        <select name="reports_to_id" class="form-select">
+                            <option value="0">No Manager (Top Level)</option>
+                            {% for user in users %}
+                            <option value="{{ user.id }}">{{ user.first_name or '' }} {{ user.last_name or user.username
+                                }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Job Title</label>
+                        <input type="text" name="job_title" class="form-control">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Department</label>
+                        <input type="text" name="department" class="form-control">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">Update</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Org Chart Visualization -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-project-diagram me-2"></i>Organization Hierarchy</h5>
+        </div>
+        <div class="card-body">
+            <div class="org-chart">
+                {% for root in org_data %}
+                {{ render_org_node(root) }}
+                {% else %}
+                <div class="alert alert-info">No organization structure defined yet. Use the form above to set up
+                    reporting relationships.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('userSelect').addEventListener('change', function () {
+        var userId = this.value;
+        if (userId) {
+            document.getElementById('reportingForm').action = '{{ url_for("admin.update_reporting", user_id=0) }}'.replace('0', userId);
+        }
+    });
+</script>
+
+{% macro render_org_node(node) %}
+<div class="org-branch">
+    <div class="org-node" onclick="editUser({{ node.id }})">
+        <div class="name">{{ node.name }}</div>
+        <div class="title">{{ node.title }}</div>
+        {% if node.department %}
+        <div class="dept">{{ node.department }}</div>
+        {% endif %}
+        <div class="email">{{ node.email }}</div>
+    </div>
+    {% if node.children %}
+    <div class="org-children">
+        {% for child in node.children %}
+        {{ render_org_node(child) }}
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endmacro %}
+{% endblock %}

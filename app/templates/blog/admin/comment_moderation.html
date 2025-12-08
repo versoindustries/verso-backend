@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Comment Moderation{% endblock %}
+
+{% block content %}
+<div class="container py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold"><i class="fas fa-comments mr-2"></i>Comment Moderation</h1>
+        <a href="{{ url_for('blog.manage_posts') }}" class="text-blue-500 hover:underline">
+            <i class="fas fa-arrow-left mr-1"></i>Back to Posts
+        </a>
+    </div>
+
+    <!-- Status Filter Tabs -->
+    <div class="flex gap-2 mb-6">
+        <a href="{{ url_for('blog.comment_moderation', status='pending') }}"
+            class="px-4 py-2 rounded-lg {% if current_status == 'pending' %}bg-blue-500 text-white{% else %}bg-gray-100 hover:bg-gray-200{% endif %}">
+            Pending
+        </a>
+        <a href="{{ url_for('blog.comment_moderation', status='approved') }}"
+            class="px-4 py-2 rounded-lg {% if current_status == 'approved' %}bg-blue-500 text-white{% else %}bg-gray-100 hover:bg-gray-200{% endif %}">
+            Approved
+        </a>
+        <a href="{{ url_for('blog.comment_moderation', status='spam') }}"
+            class="px-4 py-2 rounded-lg {% if current_status == 'spam' %}bg-blue-500 text-white{% else %}bg-gray-100 hover:bg-gray-200{% endif %}">
+            Spam
+        </a>
+        <a href="{{ url_for('blog.comment_moderation', status='rejected') }}"
+            class="px-4 py-2 rounded-lg {% if current_status == 'rejected' %}bg-blue-500 text-white{% else %}bg-gray-100 hover:bg-gray-200{% endif %}">
+            Rejected
+        </a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div
+        class="alert {% if category == 'success' %}bg-green-100 text-green-700{% elif category == 'danger' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %} p-4 rounded-lg mb-4">
+        {{ message|e }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    {% if comments and comments.items %}
+    <form method="POST" action="{{ url_for('blog.comment_action') }}">
+        {{ form.hidden_tag() }}
+
+        <!-- Bulk Actions -->
+        <div class="flex gap-2 mb-4">
+            {{ form.action(class="px-4 py-2 border rounded-lg") }}
+            {{ form.submit(class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600") }}
+        </div>
+
+        <!-- Comments Table -->
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left">
+                            <input type="checkbox" id="select-all" class="rounded">
+                        </th>
+                        <th class="px-4 py-3 text-left">Author</th>
+                        <th class="px-4 py-3 text-left">Comment</th>
+                        <th class="px-4 py-3 text-left">Post</th>
+                        <th class="px-4 py-3 text-left">Date</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y">
+                    {% for comment in comments.items %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3">
+                            <input type="checkbox" name="comment_ids" value="{{ comment.id }}"
+                                class="comment-checkbox rounded">
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="font-medium">{{ comment.get_display_name()|e }}</div>
+                            <div class="text-sm text-gray-500">{{ comment.author_email or (comment.user.email if
+                                comment.user else 'N/A') }}</div>
+                        </td>
+                        <td class="px-4 py-3">
+                            <p class="text-gray-700 line-clamp-2">{{ comment.content|e }}</p>
+                            {% if comment.parent_id %}
+                            <span class="text-xs text-gray-400">Reply to #{{ comment.parent_id }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3">
+                            <a href="{{ url_for('blog.show_post', slug=comment.post.slug) }}"
+                                class="text-blue-500 hover:underline" target="_blank">
+                                {{ comment.post.title|truncate(30)|e }}
+                            </a>
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-500">
+                            {{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </form>
+
+    <!-- Pagination -->
+    {% if comments.pages > 1 %}
+    <div class="flex justify-center gap-2 mt-6">
+        {% if comments.has_prev %}
+        <a href="{{ url_for('blog.comment_moderation', status=current_status, page=comments.prev_num) }}"
+            class="px-4 py-2 border rounded-lg hover:bg-gray-100">Previous</a>
+        {% endif %}
+        <span class="px-4 py-2">Page {{ comments.page }} of {{ comments.pages }}</span>
+        {% if comments.has_next %}
+        <a href="{{ url_for('blog.comment_moderation', status=current_status, page=comments.next_num) }}"
+            class="px-4 py-2 border rounded-lg hover:bg-gray-100">Next</a>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="text-center py-10 bg-white rounded-lg shadow">
+        <i class="fas fa-check-circle text-4xl text-green-500 mb-4"></i>
+        <p class="text-lg text-gray-600">No {{ current_status }} comments.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('select-all').addEventListener('change', function () {
+        document.querySelectorAll('.comment-checkbox').forEach(cb => cb.checked = this.checked);
+    });
+</script>
+{% endblock %}

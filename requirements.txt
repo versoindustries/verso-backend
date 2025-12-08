@@ -25,3 +25,39 @@ dnspython
 email-validator
 flask-ckeditor 
 bleach
+Flask-DebugToolbar
+cryptography
+stripe
+openpyxl
+weasyprint
+pywebpush>=2.0.0
+Flask-Babel
+Authlib>=1.0
+Flask-Caching>=2.0
+flask-compress
+PyYAML
+
+# Phase 24: Observability (optional - install as needed)
+# sentry-sdk[flask]>=1.0
+# opentelemetry-api
+# opentelemetry-sdk
+# opentelemetry-exporter-otlp
+# opentelemetry-instrumentation-flask
+# opentelemetry-instrumentation-sqlalchemy
+# opentelemetry-instrumentation-requests
+# boto3  # For CloudWatch logging
+
+# Phase 25-30: Infrastructure, Security, Testing
+Flask-Limiter>=3.0
+pyotp>=2.0
+qrcode[pil]>=7.0
+argon2-cffi>=21.0
+scikit-learn>=1.0
+pytest>=7.0
+pytest-cov>=4.0
+pytest-flask>=1.0
+pip-audit>=2.0
+bandit>=1.7
+redis>=4.0
+# boto3>=1.0  # For S3 backups (uncomment if needed)
+

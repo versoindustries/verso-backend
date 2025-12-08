@@ -1,0 +1,84 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block title %}Timesheets - {{ month }}/{{ year }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h1 class="mb-4"><i class="fas fa-clock me-2"></i>Employee Timesheets</h1>
+
+    <!-- Month Navigation -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+                {% set prev_month = month - 1 if month > 1 else 12 %}
+                {% set prev_year = year if month > 1 else year - 1 %}
+                {% set next_month = month + 1 if month < 12 else 1 %} {% set next_year=year if month < 12 else year + 1
+                    %} <a href="{{ url_for('admin.hr_timesheets', month=prev_month, year=prev_year) }}"
+                    class="btn btn-outline-primary">
+                    <i class="fas fa-chevron-left"></i> Previous
+                    </a>
+                    <h4 class="mb-0">{{ ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
+                        'September', 'October', 'November', 'December'][month-1] }} {{ year }}</h4>
+                    <a href="{{ url_for('admin.hr_timesheets', month=next_month, year=next_year) }}"
+                        class="btn btn-outline-primary">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Employee Timesheets -->
+    {% if users_entries %}
+    {% for user_id, data in users_entries.items() %}
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-user me-2"></i>
+                {{ data.user.first_name or '' }} {{ data.user.last_name or data.user.username }}
+            </h5>
+            <span class="badge bg-primary">
+                {{ "%.1f"|format(data.total_minutes / 60) }} hours this month
+            </span>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Clock In</th>
+                            <th>Clock Out</th>
+                            <th>Duration</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in data.entries %}
+                        <tr>
+                            <td>{{ entry.date.strftime('%a, %b %d') }}</td>
+                            <td>{{ entry.clock_in.strftime('%H:%M') if entry.clock_in else '-' }}</td>
+                            <td>{{ entry.clock_out.strftime('%H:%M') if entry.clock_out else '<span
+                                    class="badge bg-success">Active</span>'|safe }}</td>
+                            <td>
+                                {% if entry.duration_minutes %}
+                                {{ (entry.duration_minutes // 60) }}h {{ (entry.duration_minutes % 60) }}m
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td>{{ entry.notes or '-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>No time entries for this month.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

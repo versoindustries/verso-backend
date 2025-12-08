@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}{{ collection.seo_title or collection.name }} - {{ business_config.company_name|default('Shop') }}{%
+endblock %}
+{% block meta_description %}{{ collection.seo_description or collection.description|default('Browse products in this
+collection') }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Collection Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('shop.index') }}">Shop</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('ecommerce.list_collections') }}">Collections</a>
+                    </li>
+                    <li class="breadcrumb-item active">{{ collection.name }}</li>
+                </ol>
+            </nav>
+
+            <div class="text-center">
+                <h1 class="display-5 fw-bold">{{ collection.name }}</h1>
+                {% if collection.description %}
+                <p class="lead text-muted">{{ collection.description }}</p>
+                {% endif %}
+                <p class="text-muted">{{ products|length }} products</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sorting & Filters -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <span class="text-muted">Showing {{ products|length }} products</span>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <div class="btn-group">
+                <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="fas fa-sort me-1"></i> Sort by
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item {% if current_sort == 'manual' %}active{% endif %}"
+                            href="?sort=manual">Featured</a></li>
+                    <li><a class="dropdown-item {% if current_sort == 'newest' %}active{% endif %}"
+                            href="?sort=newest">Newest</a></li>
+                    <li><a class="dropdown-item {% if current_sort == 'price_asc' %}active{% endif %}"
+                            href="?sort=price_asc">Price: Low to High</a></li>
+                    <li><a class="dropdown-item {% if current_sort == 'price_desc' %}active{% endif %}"
+                            href="?sort=price_desc">Price: High to Low</a></li>
+                    <li><a class="dropdown-item {% if current_sort == 'alpha' %}active{% endif %}"
+                            href="?sort=alpha">A-Z</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        {% for product in products %}
+        <div class="col">
+            <div class="card h-100 product-card shadow-sm">
+                <a href="{{ url_for('shop.product_detail', product_id=product.id) }}" class="text-decoration-none">
+                    {% if product.media_id %}
+                    <img src="{{ url_for('media_bp.serve_media', media_id=product.media_id) }}" class="card-img-top"
+                        alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
+                        style="height: 200px;">
+                        <i class="fas fa-image fa-3x text-muted"></i>
+                    </div>
+                    {% endif %}
+                </a>
+
+                <!-- Wishlist Button -->
+                {% if current_user.is_authenticated %}
+                <form method="POST" action="{{ url_for('ecommerce.add_to_wishlist', product_id=product.id) }}"
+                    class="position-absolute" style="top: 10px; right: 10px;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-sm btn-light rounded-circle shadow-sm">
+                        <i class="far fa-heart"></i>
+                    </button>
+                </form>
+                {% endif %}
+
+                <div class="card-body">
+                    <a href="{{ url_for('shop.product_detail', product_id=product.id) }}" class="text-decoration-none">
+                        <h6 class="card-title text-dark">{{ product.name }}</h6>
+                    </a>
+                    <p class="card-text">
+                        <span class="fw-bold text-primary">${{ "%.2f"|format(product.price / 100) }}</span>
+                    </p>
+                    {% if product.inventory_count <= 0 %} <span class="badge bg-danger">Out of Stock</span>
+                        {% elif product.inventory_count <= 5 %} <span class="badge bg-warning">Low Stock</span>
+                            {% endif %}
+                </div>
+
+                <div class="card-footer bg-transparent border-0">
+                    {% if product.inventory_count > 0 %}
+                    <form method="POST" action="{{ url_for('cart.add_to_cart', product_id=product.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-shopping-cart me-1"></i> Add to Cart
+                        </button>
+                    </form>
+                    {% else %}
+                    <button class="btn btn-secondary w-100" disabled>Out of Stock</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+            <i class="fas fa-search fa-4x text-muted mb-3"></i>
+            <p class="text-muted">No products in this collection yet.</p>
+            <a href="{{ url_for('shop.index') }}" class="btn btn-primary">Browse All Products</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .product-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border: none;
+    }
+
+    .product-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12) !important;
+    }
+</style>
+{% endblock %}

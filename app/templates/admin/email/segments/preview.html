@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Preview: {{ audience.name }} - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="mb-4">
+        <a href="{{ url_for('email_admin.segments') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-2"></i>Back to Segments
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="mb-0">{{ audience.name }}</h4>
+                <small class="text-muted">
+                    {{ total_count }} total members
+                    {% if members|length < total_count %}(showing first {{ members|length }}){% endif %} </small>
+            </div>
+            <span class="badge bg-{{ 'primary' if audience.is_dynamic else 'secondary' }}">
+                {{ 'Dynamic' if audience.is_dynamic else 'Static' }}
+            </span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Email</th>
+                        <th>Name</th>
+                        <th>Registered</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user, email in members %}
+                    <tr>
+                        <td>{{ email }}</td>
+                        <td>
+                            {% if user %}
+                            {{ user.username }}
+                            {% else %}
+                            <span class="text-muted">External subscriber</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user and user.created_at %}
+                            {{ user.created_at.strftime('%Y-%m-%d') }}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center text-muted py-4">
+                            No members match this segment's criteria.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

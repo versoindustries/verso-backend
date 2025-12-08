@@ -1,0 +1,367 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block title %}Order #{{ order.id }} - Admin{% endblock %}
+
+{% block content %}
+<div class="order-detail">
+    <div class="page-header">
+        <div class="header-left">
+            <a href="{{ url_for('orders_admin.orders_list') }}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Back to Orders
+            </a>
+            <h1>Order #{{ order.id }}</h1>
+        </div>
+        <div class="header-right">
+            <span class="status-badge status-{{ order.status }}">
+                {{ order.status|capitalize }}
+            </span>
+        </div>
+    </div>
+
+    <div class="order-grid">
+        <!-- Order Info -->
+        <div class="order-card">
+            <h3>Order Information</h3>
+            <div class="info-row">
+                <span class="label">Order ID:</span>
+                <span class="value">#{{ order.id }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Date:</span>
+                <span class="value">{{ order.created_at.strftime('%B %d, %Y at %H:%M') }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Status:</span>
+                <span class="value">
+                    <form action="{{ url_for('orders_admin.update_order_status', order_id=order.id) }}" method="POST"
+                        class="status-form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <select name="status" onchange="this.form.submit()">
+                            <option value="pending" {% if order.status=='pending' %}selected{% endif %}>Pending</option>
+                            <option value="paid" {% if order.status=='paid' %}selected{% endif %}>Paid</option>
+                            <option value="processing" {% if order.status=='processing' %}selected{% endif %}>Processing
+                            </option>
+                            <option value="shipped" {% if order.status=='shipped' %}selected{% endif %}>Shipped</option>
+                            <option value="delivered" {% if order.status=='delivered' %}selected{% endif %}>Delivered
+                            </option>
+                            <option value="cancelled" {% if order.status=='cancelled' %}selected{% endif %}>Cancelled
+                            </option>
+                        </select>
+                    </form>
+                </span>
+            </div>
+            {% if order.stripe_payment_intent_id %}
+            <div class="info-row">
+                <span class="label">Payment ID:</span>
+                <span class="value code">{{ order.stripe_payment_intent_id }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Customer Info -->
+        <div class="order-card">
+            <h3>Customer</h3>
+            {% if customer %}
+            <div class="info-row">
+                <span class="label">Name:</span>
+                <span class="value">{{ customer.first_name or '' }} {{ customer.last_name or customer.username }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Email:</span>
+                <span class="value">{{ customer.email }}</span>
+            </div>
+            {% if customer.phone %}
+            <div class="info-row">
+                <span class="label">Phone:</span>
+                <span class="value">{{ customer.phone }}</span>
+            </div>
+            {% endif %}
+            {% else %}
+            <div class="info-row">
+                <span class="label">Email:</span>
+                <span class="value">{{ order.email or 'Guest Checkout' }}</span>
+            </div>
+            <p class="guest-note">This was a guest checkout.</p>
+            {% endif %}
+        </div>
+
+        <!-- Shipping Info -->
+        {% if order.shipping_address %}
+        <div class="order-card">
+            <h3>Shipping Address</h3>
+            <p class="address">{{ order.shipping_address }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Order Items -->
+    <div class="order-card full-width">
+        <h3>Order Items</h3>
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Type</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order.items %}
+                <tr>
+                    <td>
+                        <div class="product-info">
+                            {% if item.product.media_id %}
+                            <img src="{{ url_for('media_bp.serve_media', media_id=item.product.media_id) }}"
+                                class="product-thumb" alt="">
+                            {% endif %}
+                            <span>{{ item.product.name }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        {% if item.product.is_digital %}
+                        <span class="badge badge-digital">Digital</span>
+                        {% else %}
+                        <span class="badge badge-physical">Physical</span>
+                        {% endif %}
+                    </td>
+                    <td>${{ '%.2f' % (item.price_at_purchase / 100) }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>${{ '%.2f' % ((item.price_at_purchase * item.quantity) / 100) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" class="text-right"><strong>Total:</strong></td>
+                    <td><strong>${{ '%.2f' % (order.total_amount / 100) }}</strong></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Actions -->
+    <div class="order-actions">
+        {% if order.status == 'paid' and order.stripe_payment_intent_id %}
+        <form action="{{ url_for('orders_admin.refund_order', order_id=order.id) }}" method="POST"
+            onsubmit="return confirm('Are you sure you want to refund this order?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="reason" value="requested_by_customer">
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-undo"></i> Process Refund
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .order-detail {
+        padding: 1.5rem;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+    }
+
+    .back-link {
+        color: #666;
+        text-decoration: none;
+        font-size: 0.9rem;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    .back-link:hover {
+        color: var(--primary-color);
+    }
+
+    .page-header h1 {
+        margin: 0;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-paid {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-processing {
+        background: #cce5ff;
+        color: #004085;
+    }
+
+    .status-shipped {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+
+    .status-delivered {
+        background: #c3e6cb;
+        color: #155724;
+    }
+
+    .status-cancelled {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .status-refunded {
+        background: #e2e3e5;
+        color: #383d41;
+    }
+
+    .order-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .order-card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .order-card.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .order-card h3 {
+        margin: 0 0 1rem 0;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #eee;
+        color: #333;
+        font-size: 1rem;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f5f5f5;
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-row .label {
+        color: #666;
+    }
+
+    .info-row .value {
+        font-weight: 500;
+    }
+
+    .info-row .value.code {
+        font-family: monospace;
+        font-size: 0.85rem;
+    }
+
+    .status-form select {
+        padding: 0.25rem 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .guest-note {
+        color: #999;
+        font-style: italic;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+
+    .items-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .items-table th,
+    .items-table td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+
+    .items-table th {
+        color: #666;
+        font-weight: 500;
+    }
+
+    .items-table tfoot td {
+        border-top: 2px solid #eee;
+        border-bottom: none;
+    }
+
+    .product-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .product-thumb {
+        width: 40px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+
+    .badge-digital {
+        background: #e3f2fd;
+        color: #1976d2;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+    }
+
+    .badge-physical {
+        background: #f3e5f5;
+        color: #7b1fa2;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+    }
+
+    .text-right {
+        text-align: right;
+    }
+
+    .order-actions {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #eee;
+    }
+
+    .btn-danger {
+        background: #dc3545;
+        color: #fff;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn-danger:hover {
+        background: #c82333;
+    }
+</style>
+{% endblock %}

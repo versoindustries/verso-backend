@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Email Campaigns - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">Email Campaigns</h1>
+            <p class="text-muted mb-0">Create and manage email marketing campaigns</p>
+        </div>
+        <a href="{{ url_for('email_admin.new_campaign') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>New Campaign
+        </a>
+    </div>
+
+    <!-- Status Filters -->
+    <div class="card mb-4">
+        <div class="card-body py-2">
+            <div class="btn-group" role="group">
+                <a href="{{ url_for('email_admin.campaigns') }}"
+                    class="btn btn-sm btn-{{ 'primary' if not current_status else 'outline-primary' }}">All</a>
+                <a href="{{ url_for('email_admin.campaigns', status='draft') }}"
+                    class="btn btn-sm btn-{{ 'primary' if current_status == 'draft' else 'outline-primary' }}">Draft</a>
+                <a href="{{ url_for('email_admin.campaigns', status='scheduled') }}"
+                    class="btn btn-sm btn-{{ 'primary' if current_status == 'scheduled' else 'outline-primary' }}">Scheduled</a>
+                <a href="{{ url_for('email_admin.campaigns', status='sending') }}"
+                    class="btn btn-sm btn-{{ 'primary' if current_status == 'sending' else 'outline-primary' }}">Sending</a>
+                <a href="{{ url_for('email_admin.campaigns', status='sent') }}"
+                    class="btn btn-sm btn-{{ 'primary' if current_status == 'sent' else 'outline-primary' }}">Sent</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Campaigns Table -->
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Campaign</th>
+                        <th>Template</th>
+                        <th>Audience</th>
+                        <th>Status</th>
+                        <th>Sent</th>
+                        <th>Opens</th>
+                        <th>Clicks</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for campaign in campaigns %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('email_admin.campaign_stats', id=campaign.id) }}" class="fw-bold">
+                                {{ campaign.name }}
+                            </a>
+                        </td>
+                        <td>
+                            {% if campaign.template %}
+                            <small>{{ campaign.template.name }}</small>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if campaign.audience %}
+                            <span class="badge bg-secondary">{{ campaign.audience.name }}</span>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% set status_colors = {'draft': 'secondary', 'scheduled': 'info', 'sending': 'warning',
+                            'sent': 'success', 'paused': 'danger', 'cancelled': 'dark'} %}
+                            <span class="badge bg-{{ status_colors.get(campaign.status, 'secondary') }}">
+                                {{ campaign.status|title }}
+                            </span>
+                        </td>
+                        <td>{{ campaign.sent_count }}</td>
+                        <td>
+                            {{ campaign.unique_open_count }}
+                            {% if campaign.sent_count > 0 %}
+                            <small class="text-muted">({{ campaign.open_rate() }}%)</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ campaign.unique_click_count }}
+                            {% if campaign.sent_count > 0 %}
+                            <small class="text-muted">({{ campaign.click_rate() }}%)</small>
+                            {% endif %}
+                        </td>
+                        <td>{{ campaign.created_at.strftime('%m/%d/%y') if campaign.created_at else '-' }}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                {% if campaign.status in ['draft', 'scheduled', 'paused'] %}
+                                <form method="POST" action="{{ url_for('email_admin.send_campaign', id=campaign.id) }}"
+                                    class="d-inline" onsubmit="return confirm('Send this campaign now?');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-success" title="Send Now">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+
+                                {% if campaign.status == 'sending' %}
+                                <form method="POST" action="{{ url_for('email_admin.pause_campaign', id=campaign.id) }}"
+                                    class="d-inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-warning" title="Pause">
+                                        <i class="fas fa-pause"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+
+                                <a href="{{ url_for('email_admin.campaign_stats', id=campaign.id) }}"
+                                    class="btn btn-outline-primary" title="Stats">
+                                    <i class="fas fa-chart-bar"></i>
+                                </a>
+
+                                {% if campaign.status in ['draft', 'scheduled'] %}
+                                <a href="{{ url_for('email_admin.edit_campaign', id=campaign.id) }}"
+                                    class="btn btn-outline-secondary" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center py-4 text-muted">
+                            <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
+                            No campaigns found. <a href="{{ url_for('email_admin.new_campaign') }}">Create your first
+                                campaign</a>.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

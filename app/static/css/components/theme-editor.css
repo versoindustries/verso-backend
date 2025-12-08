@@ -1,0 +1,286 @@
+/**
+ * Theme Editor Component Styles
+ * 
+ * Styles for the admin theme editor with color pickers and live preview.
+ */
+
+.theme-editor {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.theme-editor h1 {
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.theme-editor .inline-icon {
+    width: 1.25em;
+    height: 1.25em;
+    vertical-align: middle;
+}
+
+.editor-layout {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 2rem;
+}
+
+@media (max-width: 1024px) {
+    .editor-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.editor-panel {
+    background: rgba(42, 42, 42, 0.95);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.panel-section {
+    margin-bottom: 2rem;
+}
+
+.panel-section h3 {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.theme-editor .form-group {
+    margin-bottom: 1.25rem;
+}
+
+.theme-editor .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+}
+
+.theme-editor .form-group input[type="text"],
+.theme-editor .form-group input[type="color"],
+.theme-editor .form-group select,
+.theme-editor .form-group input[type="number"] {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.3);
+    color: #fff;
+    font-size: 0.95rem;
+}
+
+.theme-editor .form-group input[type="color"] {
+    height: 50px;
+    padding: 0.25rem;
+    cursor: pointer;
+}
+
+.theme-editor .form-group select:focus,
+.theme-editor .form-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.theme-editor .form-hint {
+    display: block;
+    margin-top: 0.25rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
+}
+
+.color-picker-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.color-picker-row input[type="color"] {
+    width: 60px;
+    flex-shrink: 0;
+}
+
+.color-picker-row input[type="text"] {
+    flex: 1;
+}
+
+.logo-section {
+    margin-top: 2rem;
+}
+
+.current-logo {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    text-align: center;
+}
+
+.current-logo img {
+    max-width: 200px;
+    max-height: 80px;
+}
+
+.logo-upload-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.logo-upload-form input[type="file"] {
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    color: #fff;
+}
+
+.btn-save {
+    width: 100%;
+    padding: 1rem;
+    background: var(--btn-gradient);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.btn-secondary {
+    background: rgba(108, 117, 125, 0.5);
+    padding: 0.75rem 1rem;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-secondary:hover {
+    background: rgba(108, 117, 125, 0.7);
+}
+
+.btn-danger {
+    background: rgba(220, 53, 69, 0.5);
+    padding: 0.5rem 1rem;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s;
+}
+
+.btn-danger:hover {
+    background: rgba(220, 53, 69, 0.7);
+}
+
+/* Preview Panel */
+.preview-panel {
+    background: rgba(42, 42, 42, 0.95);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.preview-header h3 {
+    margin: 0;
+    color: #fff;
+}
+
+.preview-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.preview-controls button {
+    padding: 0.5rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: transparent;
+    color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s;
+}
+
+.preview-controls button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.preview-controls button.active {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.preview-frame-container {
+    height: 600px;
+    overflow: hidden;
+}
+
+.preview-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+    transform-origin: top left;
+}
+
+/* Live Preview Sample */
+.live-preview-sample {
+    padding: 2rem;
+}
+
+.live-preview-sample .preview-card {
+    padding: 1.5rem;
+    color: #fff;
+    margin-bottom: 1rem;
+}
+
+.live-preview-sample .preview-btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    color: #fff;
+    text-decoration: none;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.live-preview-sample .preview-btn:hover {
+    opacity: 0.85;
+}

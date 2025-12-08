@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Task Details{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-info-circle"></i> Task #{{ task.id }}</h1>
+        <div>
+            <a href="{{ url_for('tasks_admin.queue') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Queue
+            </a>
+            {% if task.status in ['failed', 'dead_letter'] %}
+            <form action="{{ url_for('tasks_admin.retry_task', task_id=task.id) }}" method="POST"
+                style="display:inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-redo"></i> Retry Task
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">Task Information</div>
+                <div class="card-body">
+                    <table class="table table-borderless mb-0">
+                        <tr>
+                            <th width="150">Name</th>
+                            <td><strong>{{ task.name }}</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Status</th>
+                            <td>
+                                {% if task.status == 'completed' %}
+                                <span class="badge bg-success">{{ task.status }}</span>
+                                {% elif task.status == 'processing' %}
+                                <span class="badge bg-warning text-dark">{{ task.status }}</span>
+                                {% elif task.status == 'pending' %}
+                                <span class="badge bg-info">{{ task.status }}</span>
+                                {% elif task.status == 'dead_letter' %}
+                                <span class="badge bg-danger">dead letter</span>
+                                {% else %}
+                                <span class="badge bg-secondary">{{ task.status }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Priority</th>
+                            <td>
+                                {% if task.priority > 0 %}
+                                <span class="badge bg-danger">High ({{ task.priority }})</span>
+                                {% elif task.priority < 0 %} <span class="badge bg-secondary">Low ({{ task.priority
+                                    }})</span>
+                                    {% else %}
+                                    <span class="badge bg-light text-dark">Normal (0)</span>
+                                    {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Retry Count</th>
+                            <td>{{ task.retry_count }} / {{ task.max_retries }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">Timeline</div>
+                <div class="card-body">
+                    <table class="table table-borderless mb-0">
+                        <tr>
+                            <th width="150">Created</th>
+                            <td>{{ task.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        </tr>
+                        <tr>
+                            <th>Started</th>
+                            <td>{{ task.started_at.strftime('%Y-%m-%d %H:%M:%S') if task.started_at else '-' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Completed</th>
+                            <td>{{ task.completed_at.strftime('%Y-%m-%d %H:%M:%S') if task.completed_at else '-' }}</td>
+                        </tr>
+                        {% if task.next_retry_at %}
+                        <tr>
+                            <th>Next Retry</th>
+                            <td>{{ task.next_retry_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">Payload</div>
+                <div class="card-body">
+                    <pre class="bg-light p-3"
+                        style="max-height: 300px; overflow: auto;">{{ task.payload | tojson(indent=2) if task.payload else '{}' }}</pre>
+                </div>
+            </div>
+
+            {% if task.error %}
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <i class="fas fa-exclamation-triangle"></i> Error
+                </div>
+                <div class="card-body">
+                    <pre class="bg-light p-3" style="max-height: 400px; overflow: auto;">{{ task.error }}</pre>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

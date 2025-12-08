@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Preferences{% endblock %}
+
+{% block content %}
+<main class="dashboard-container" style="max-width: 700px; margin: 2rem auto; padding: 0 1rem;">
+    <div class="dashboard-header" style="margin-bottom: 2rem;">
+        <h1 style="font-size: 1.75rem; font-weight: 600;">Account Preferences</h1>
+        <p style="color: #666;">Manage your notifications, privacy, and display settings</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="flash-message flash-{{ category }}"
+        style="padding: 1rem; margin-bottom: 1rem; border-radius: 8px; background: {% if category == 'success' %}#d4edda{% elif category == 'warning' %}#fff3cd{% else %}#f8d7da{% endif %};">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('user.preferences') }}">
+        {{ form.hidden_tag() }}
+
+        <!-- Email Notifications -->
+        <div class="preference-section"
+            style="background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+            <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">
+                <i class="fas fa-envelope" style="color: var(--primary-color);"></i> Email Notifications
+            </h2>
+
+            <label class="preference-toggle"
+                style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
+                {{ form.email_order_updates(style="width: 18px; height: 18px;") }}
+                <div>
+                    <strong>Order Updates</strong>
+                    <span style="display: block; font-size: 0.875rem; color: #666;">Receive updates about your orders
+                        and shipments</span>
+                </div>
+            </label>
+
+            <label class="preference-toggle"
+                style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
+                {{ form.email_appointment_reminders(style="width: 18px; height: 18px;") }}
+                <div>
+                    <strong>Appointment Reminders</strong>
+                    <span style="display: block; font-size: 0.875rem; color: #666;">Get reminded before your scheduled
+                        appointments</span>
+                </div>
+            </label>
+
+            <label class="preference-toggle"
+                style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
+                {{ form.email_newsletter(style="width: 18px; height: 18px;") }}
+                <div>
+                    <strong>Newsletter</strong>
+                    <span style="display: block; font-size: 0.875rem; color: #666;">Stay updated with our latest
+                        news</span>
+                </div>
+            </label>
+
+            <label class="preference-toggle"
+                style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
+                {{ form.email_marketing(style="width: 18px; height: 18px;") }}
+                <div>
+                    <strong>Marketing & Promotions</strong>
+                    <span style="display: block; font-size: 0.875rem; color: #666;">Receive exclusive offers and
+                        deals</span>
+                </div>
+            </label>
+
+            <label class="preference-toggle" style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem 0;">
+                {{ form.email_digest_weekly(style="width: 18px; height: 18px;") }}
+                <div>
+                    <strong>Weekly Digest</strong>
+                    <span style="display: block; font-size: 0.875rem; color: #666;">Weekly summary of your account
+                        activity</span>
+                </div>
+            </label>
+        </div>
+
+        <!-- Other Notifications -->
+        <div class="preference-section"
+            style="background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+            <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">
+                <i class="fas fa-bell" style="color: var(--primary-color);"></i> Other Notifications
+            </h2>
+
+            <label class="preference-toggle"
+                style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
+                {{ form.push_enabled(style="width: 18px; height: 18px;") }}
+                <div>
+                    <strong>Push Notifications</strong>
+                    <span style="display: block; font-size: 0.875rem; color: #666;">Receive browser push
+                        notifications</span>
+                </div>
+            </label>
+
+            <label class="preference-toggle" style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem 0;">
+                {{ form.sms_enabled(style="width: 18px; height: 18px;") }}
+                <div>
+                    <strong>SMS Notifications</strong>
+                    <span style="display: block; font-size: 0.875rem; color: #666;">Receive text message
+                        notifications</span>
+                </div>
+            </label>
+        </div>
+
+        <!-- Privacy Settings -->
+        <div class="preference-section"
+            style="background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+            <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">
+                <i class="fas fa-shield-alt" style="color: var(--primary-color);"></i> Privacy
+            </h2>
+
+            <label class="preference-toggle"
+                style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
+                {{ form.show_activity_status(style="width: 18px; height: 18px;") }}
+                <div>
+                    <strong>Show Activity Status</strong>
+                    <span style="display: block; font-size: 0.875rem; color: #666;">Let others see when you're
+                        online</span>
+                </div>
+            </label>
+
+            <label class="preference-toggle" style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem 0;">
+                {{ form.show_profile_publicly(style="width: 18px; height: 18px;") }}
+                <div>
+                    <strong>Public Profile</strong>
+                    <span style="display: block; font-size: 0.875rem; color: #666;">Make your profile visible to
+                        others</span>
+                </div>
+            </label>
+        </div>
+
+        <!-- Display Settings -->
+        <div class="preference-section"
+            style="background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+            <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">
+                <i class="fas fa-palette" style="color: var(--primary-color);"></i> Display
+            </h2>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <label style="display: block; font-weight: 500; margin-bottom: 0.5rem;">Theme</label>
+                    {{ form.theme(style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 6px;") }}
+                </div>
+                <div>
+                    <label style="display: block; font-weight: 500; margin-bottom: 0.5rem;">Language</label>
+                    {{ form.language(style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 6px;")
+                    }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Export -->
+        <div class="preference-section"
+            style="background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+            <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">
+                <i class="fas fa-download" style="color: var(--primary-color);"></i> Your Data
+            </h2>
+            <p style="color: #666; margin-bottom: 1rem;">Download a copy of all your account data.</p>
+            <form method="POST" action="{{ url_for('user.export_data') }}" style="display: inline;">
+                {{ csrf_token() }}
+                <button type="submit"
+                    style="background: #f8f9fa; border: 1px solid #ddd; padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer;">
+                    <i class="fas fa-file-archive"></i> Request Data Export
+                </button>
+            </form>
+            {% if user_prefs.data_export_completed_at %}
+            <p style="font-size: 0.875rem; color: #28a745; margin-top: 0.5rem;">
+                <i class="fas fa-check"></i> Last export: {{ user_prefs.data_export_completed_at.strftime('%b %d, %Y')
+                }}
+            </p>
+            {% endif %}
+        </div>
+
+        <!-- Save Button -->
+        <div style="text-align: center;">
+            <button type="submit"
+                style="background: var(--primary-color, #007bff); color: white; border: none; padding: 1rem 3rem; border-radius: 8px; font-size: 1rem; cursor: pointer;">
+                <i class="fas fa-save"></i> Save Preferences
+            </button>
+        </div>
+    </form>
+
+    <div style="text-align: center; margin-top: 2rem;">
+        <a href="{{ url_for('user.dashboard') }}" style="color: var(--primary-color, #007bff); text-decoration: none;">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</main>
+{% endblock %}

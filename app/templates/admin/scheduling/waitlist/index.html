@@ -1,0 +1,27 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Waitlist{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Waitlist</h1>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div data-react-component="AdminDataTable" data-react-props='{
+            "columns": [
+                {"accessorKey": "created_at", "header": "Date Added", "sortable": true},
+                {"accessorKey": "customer", "header": "Customer", "html": true, "sortable": true},
+                {"accessorKey": "type", "header": "Type", "sortable": true},
+                {"accessorKey": "priority", "header": "Priority", "html": true},
+                {"accessorKey": "status", "header": "Status", "html": true},
+                {"accessorKey": "actions", "header": "Actions", "html": true}
+            ],
+            "data": {{ entries_json | safe }},
+            "idKey": "id",
+            "emptyStateMessage": "No one is currently waiting."
+        }'></div>
+    </div>
+</div>
+{% endblock %}

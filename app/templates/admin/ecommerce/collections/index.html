@@ -1,0 +1,81 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Collections - Admin{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components/admin-data-table.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-layer-group me-2"></i>Collections</h1>
+        <a href="{{ url_for('ecommerce_admin.create_collection') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i> New Collection
+        </a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+    {% endwith %}
+
+    <div class="card">
+        <div class="card-body">
+            {% if collections %}
+            {# React AdminDataTable Component #}
+            <div data-react-component="AdminDataTable" data-react-props='{
+                    "columns": [
+                        {"accessorKey": "name", "header": "Name", "html": true},
+                        {"accessorKey": "type", "header": "Type", "html": true},
+                        {"accessorKey": "products", "header": "Products"},
+                        {"accessorKey": "status", "header": "Status", "html": true},
+                        {"accessorKey": "homepage", "header": "Homepage", "html": true},
+                        {"accessorKey": "actions", "header": "Actions", "sortable": false, "html": true}
+                    ],
+                    "data": {{ collections_json | safe }},
+                    "defaultPageSize": 25,
+                    "emptyMessage": "No collections found."
+                 }'>
+                <!-- Fallback table while React loads -->
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Products</th>
+                                <th>Status</th>
+                                <th>Homepage</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for collection in collections %}
+                            <tr>
+                                <td>{{ collection.name }}</td>
+                                <td>{{ collection.collection_type }}</td>
+                                <td>{{ collection.products.count() }}</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center text-muted py-4">
+                No collections yet. <a href="{{ url_for('ecommerce_admin.create_collection') }}">Create your first
+                    collection</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

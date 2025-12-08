@@ -1,0 +1,217 @@
+/* BookingPage Component Styles */
+.booking-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.booking-page-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 2rem;
+}
+
+@media (max-width: 768px) {
+    .booking-page-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .booking-sidebar {
+        order: 1;
+    }
+
+    .booking-main {
+        order: 0;
+    }
+}
+
+.booking-page-card {
+    background: var(--card-bg, #fff);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.booking-page-card.booking-success {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* Step Number Badge */
+.step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: var(--primary-color, #4169e1);
+    color: white;
+    border-radius: 50%;
+    font-size: 0.875rem;
+    font-weight: bold;
+    margin-right: 0.75rem;
+}
+
+/* Date/Time Picker Grid */
+.date-time-picker-grid {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.calendar-container {
+    flex: 0 0 auto;
+    padding: 1rem;
+    background: var(--surface-bg, #f8f9fa);
+    border-radius: 8px;
+}
+
+.slots-container {
+    flex: 1;
+    min-width: 200px;
+}
+
+/* React Day Picker Overrides */
+.booking-page .rdp {
+    --rdp-cell-size: 40px;
+    --rdp-accent-color: var(--primary-color, #4169e1);
+}
+
+.booking-page .rdp-day_selected:not([disabled]) {
+    background-color: var(--primary-color, #4169e1);
+    color: white;
+}
+
+.booking-page .rdp-day_selected:hover:not([disabled]) {
+    background-color: var(--primary-color-dark, #3559c9);
+}
+
+.booking-page .rdp-day_today:not(.rdp-day_selected) {
+    font-weight: bold;
+    color: var(--primary-color, #4169e1);
+}
+
+/* Slots Grid */
+.slots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 0.5rem;
+}
+
+.slot-button {
+    min-width: 80px;
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+}
+
+/* Form Styles */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 480px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-group {
+    margin-bottom: 0;
+}
+
+.form-label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary, #6c757d);
+    font-size: 0.875rem;
+}
+
+.booking-page .form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color, #dee2e6);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.booking-page .form-control:focus {
+    outline: none;
+    border-color: var(--primary-color, #4169e1);
+    box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.15);
+}
+
+/* Button Group */
+.button-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.button-group .btn-lg {
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
+}
+
+/* Success State */
+.booking-success .success-icon svg {
+    color: #28a745;
+}
+
+.booking-summary {
+    text-align: left;
+    display: inline-block;
+}
+
+.booking-summary p {
+    margin: 0.25rem 0;
+}
+
+/* Selected Slot Info in Sidebar */
+.selected-slot-info {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading State */
+.booking-page .spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.15em;
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .booking-page-card {
+        background: var(--card-bg-dark, #1f2937);
+    }
+
+    .calendar-container {
+        background: var(--surface-bg-dark, #374151);
+    }
+
+    .booking-page .form-control {
+        background: var(--input-bg-dark, #374151);
+        border-color: var(--border-color-dark, #4b5563);
+        color: var(--text-primary-dark, #f3f4f6);
+    }
+
+    .booking-page .form-control:focus {
+        border-color: var(--primary-color, #4169e1);
+    }
+}

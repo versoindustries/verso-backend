@@ -1,25 +1,29 @@
 // app/static/js/calendar.js
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.debug('DOMContentLoaded event fired.');
 
     const calendarEl = document.getElementById('calendar');
+    if (!calendarEl) {
+        console.debug('No calendar element found, skipping calendar init.');
+        return;
+    }
     console.debug('Calendar element:', calendarEl);
-    
+
     const calendarContainer = document.getElementById('calendar-container');
     console.debug('Calendar container element:', calendarContainer);
-    
+
     const step1 = document.getElementById('step-1');
     console.debug('Step 1 element:', step1);
-    
+
     const step2 = document.getElementById('step-2');
     console.debug('Step 2 element:', step2);
-    
+
     const nextButton = document.getElementById('next-button');
     console.debug('Next button element:', nextButton);
-    
+
     const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     console.debug('User Timezone detected:', userTimezone);
-    
+
     const csrfToken = getCsrfToken();
     console.debug('CSRF Token fetched:', csrfToken);
 
@@ -33,28 +37,28 @@ document.addEventListener('DOMContentLoaded', function() {
             'Content-Type': 'application/json'
         }
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Failed to fetch business configuration');
-        }
-        return response.json();
-    })
-    .then(data => {
-        companyConfig = data;
-        console.debug('Business configuration loaded:', companyConfig);
-        initializeCalendar();
-    })
-    .catch(error => {
-        console.error('Error fetching business configuration:', error);
-        // Fallback to defaults
-        companyConfig = {
-            company_timezone: 'America/Denver',
-            business_start_time: '08:00',
-            business_end_time: '17:00',
-            buffer_time_minutes: 30
-        };
-        initializeCalendar();
-    });
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch business configuration');
+            }
+            return response.json();
+        })
+        .then(data => {
+            companyConfig = data;
+            console.debug('Business configuration loaded:', companyConfig);
+            initializeCalendar();
+        })
+        .catch(error => {
+            console.error('Error fetching business configuration:', error);
+            // Fallback to defaults
+            companyConfig = {
+                company_timezone: 'America/Denver',
+                business_start_time: '08:00',
+                business_end_time: '17:00',
+                buffer_time_minutes: 30
+            };
+            initializeCalendar();
+        });
 
     function initializeCalendar() {
         if (typeof FullCalendar !== 'undefined') {
@@ -71,13 +75,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     eventColor: '#378006',
                     timeZone: companyConfig.company_timezone, // Use company timezone
 
-                    select: function(info) {
+                    select: function (info) {
                         console.debug('Date selected:', info.startStr);
                         highlightDate(info.startStr);
                         handleDateSelection(info.startStr);
                     },
 
-                    dateClick: function(info) {
+                    dateClick: function (info) {
                         console.debug('Date clicked:', info.dateStr);
                         highlightDate(info.dateStr);
                         handleDateSelection(info.dateStr);
@@ -96,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Touch event listener for date selection on mobile
-    calendarEl.addEventListener('touchstart', function(event) {
+    calendarEl.addEventListener('touchstart', function (event) {
         console.debug('Touchstart event detected:', event);
         const touch = event.touches[0];
         const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
@@ -116,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function addDateInputListener() {
         const dateInput = document.getElementById('preferred_date');
-        dateInput.addEventListener('change', function() {
+        dateInput.addEventListener('change', function () {
             const selectedDate = this.value;
             if (selectedDate) {
                 handleDateInputChange(selectedDate);
@@ -158,22 +162,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 timezone: userTimezone
             })
         })
-        .then(response => {
-            console.debug('Fetch response:', response);
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.debug('Time slots data received:', data);
-            populateTimeSlots(data, userTimezone, companyConfig.company_timezone);
-        })
-        .catch(error => {
-            console.error('Error fetching time slots:', error);
-            const timeDropdown = document.getElementById('preferred_time');
-            timeDropdown.innerHTML = '<option disabled>Error loading time slots</option>';
-        });
+            .then(response => {
+                console.debug('Fetch response:', response);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.debug('Time slots data received:', data);
+                populateTimeSlots(data, userTimezone, companyConfig.company_timezone);
+            })
+            .catch(error => {
+                console.error('Error fetching time slots:', error);
+                const timeDropdown = document.getElementById('preferred_time');
+                timeDropdown.innerHTML = '<option disabled>Error loading time slots</option>';
+            });
     }
 
     nextButton.addEventListener('click', handleNextButtonClick);

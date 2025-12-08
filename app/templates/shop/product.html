@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} - {{ business_config.company_name|default('Shop') }}{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/components/product-view.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('shop.index') }}">Shop</a></li>
+            {% if product.category %}
+            <li class="breadcrumb-item"><a href="#">{{ product.category.name }}</a></li>
+            {% endif %}
+            <li class="breadcrumb-item active">{{ product.name }}</li>
+        </ol>
+    </nav>
+
+    <!-- React ProductView Component -->
+    {% set images_list = [] %}
+    {% set product_images = product.images.all() if product.images else [] %}
+    {% for img in product_images %}
+    {% set _ = images_list.append({
+    'id': img.id|string,
+    'src': url_for('media_bp.serve_media', media_id=img.media_id),
+    'alt': img.alt_text or product.name,
+    'variantId': img.variant_id|string if img.variant_id else '',
+    'isPrimary': img.is_primary
+    }) %}
+    {% endfor %}
+
+    {% set variants_list = [] %}
+    {% for variant in product.variants %}
+    {% if variant.is_active %}
+    {% set _ = variants_list.append({
+    'id': variant.id|string,
+    'name': variant.name,
+    'sku': variant.sku,
+    'price': variant.get_price(),
+    'priceAdjustment': variant.price_adjustment,
+    'inventoryCount': variant.inventory_count,
+    'isActive': variant.is_active
+    }) %}
+    {% endif %}
+    {% endfor %}
+
+    {% set in_wishlist = false %}
+    {% if current_user.is_authenticated %}
+    {% set in_wishlist = current_user.wishlist_items.filter_by(product_id=product.id).first() is not none %}
+    {% endif %}
+
+    <div data-react-component="ProductView" data-react-props='{
+            "productId": {{ product.id }},
+            "name": {{ product.name | tojson }},
+            "description": {{ (product.description or "") | tojson }},
+            "price": {{ product.price }},
+            "images": {{ images_list | tojson }},
+            "variants": {{ variants_list | tojson }},
+            "inventoryCount": {{ product.inventory_count }},
+            "isDigital": {{ product.is_digital | tojson }},
+            "category": {{ (product.category.name if product.category else "") | tojson }},
+            "inWishlist": {{ in_wishlist | tojson }},
+            "addToCartUrl": "{{ url_for(' cart.add_to_cart', product_id=product.id) }}", "buyNowUrl"
+        : "{{ url_for('shop.checkout_session', product_id=product.id) }}" , "wishlistUrl"
+        : "{{ url_for('ecommerce.add_to_wishlist', product_id=product.id) if current_user.is_authenticated else '' }}"
+        }'>
+        <!-- Fallback content while React loads -->
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                {% if product.media_id %}
+                <img src="{{ url_for('media_bp.serve_media', media_id=product.media_id) }}" class="img-fluid rounded"
+                    alt="{{ product.name }}">
+                {% endif %}
+            </div>
+            <div class="col-lg-6">
+                <h1>{{ product.name }}</h1>
+                <p class="fs-2 text-primary">${{ "%.2f"|format(product.price / 100) }}</p>
+                <p>{{ product.description }}</p>
+                <p class="text-muted">Loading interactive features...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products (server-rendered) -->
+    {% set related = [] %}
+    {% if related %}
+    <div class="mt-5 pt-5 border-top">
+        <h3 class="mb-4">You May Also Like</h3>
+        <div class="row row-cols-2 row-cols-md-4 g-4">
+            {% for item in related[:4] %}
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <a href="{{ url_for('shop.product_detail', product_id=item.id) }}">
+                        {% if item.media_id %}
+                        <img src="{{ url_for('media_bp.serve_media', media_id=item.media_id) }}" class="card-img-top"
+                            style="height: 150px; object-fit: cover;">
+                        {% endif %}
+                    </a>
+                    <div class="card-body">
+                        <h6 class="card-title">{{ item.name }}</h6>
+                        <p class="text-primary fw-bold">${{ "%.2f"|format(item.price / 100) }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

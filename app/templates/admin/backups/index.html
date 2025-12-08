@@ -1,0 +1,200 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Backup Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">Backup Management</h1>
+            <p class="text-muted mb-0">Manage database and media backups</p>
+        </div>
+        <div>
+            <a href="{{ url_for('backup.list_schedules') }}" class="btn btn-outline-primary me-2">
+                <i class="bi bi-clock"></i> Schedules
+            </a>
+            <a href="{{ url_for('backup.list_feature_flags') }}" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-toggles"></i> Feature Flags
+            </a>
+            <a href="{{ url_for('backup.list_deployments') }}" class="btn btn-outline-info">
+                <i class="bi bi-rocket"></i> Deployments
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Database Backup</h6>
+                    <p class="small text-muted mb-3">Create a backup of the database</p>
+                    <form action="{{ url_for('backup.create_backup') }}" method="post">
+                        <input type="hidden" name="backup_type" value="database">
+                        <input type="hidden" name="compress" value="true">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="bi bi-database"></i> Backup Database
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Media Backup</h6>
+                    <p class="small text-muted mb-3">Backup uploaded files and media</p>
+                    <form action="{{ url_for('backup.create_backup') }}" method="post">
+                        <input type="hidden" name="backup_type" value="media">
+                        <input type="hidden" name="compress" value="true">
+                        <button type="submit" class="btn btn-success btn-sm">
+                            <i class="bi bi-images"></i> Backup Media
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Full Backup</h6>
+                    <p class="small text-muted mb-3">Complete backup of database and media</p>
+                    <form action="{{ url_for('backup.create_backup') }}" method="post">
+                        <input type="hidden" name="backup_type" value="full">
+                        <input type="hidden" name="compress" value="true">
+                        <button type="submit" class="btn btn-warning btn-sm">
+                            <i class="bi bi-archive"></i> Full Backup
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body py-2">
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('backup.list_backups') }}"
+                    class="btn btn-sm {{ 'btn-primary' if not current_type else 'btn-outline-secondary' }}">
+                    All
+                </a>
+                <a href="{{ url_for('backup.list_backups', type='database') }}"
+                    class="btn btn-sm {{ 'btn-primary' if current_type == 'database' else 'btn-outline-secondary' }}">
+                    Database
+                </a>
+                <a href="{{ url_for('backup.list_backups', type='media') }}"
+                    class="btn btn-sm {{ 'btn-primary' if current_type == 'media' else 'btn-outline-secondary' }}">
+                    Media
+                </a>
+                <a href="{{ url_for('backup.list_backups', type='full') }}"
+                    class="btn btn-sm {{ 'btn-primary' if current_type == 'full' else 'btn-outline-secondary' }}">
+                    Full
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Backups Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Size</th>
+                        <th>Started</th>
+                        <th>Verified</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for backup in backups.items %}
+                    <tr>
+                        <td>#{{ backup.id }}</td>
+                        <td>
+                            <span
+                                class="badge bg-{{ 'primary' if backup.backup_type == 'database' else 'success' if backup.backup_type == 'media' else 'warning' }}">
+                                {{ backup.backup_type }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if backup.status == 'completed' %}
+                            <span class="badge bg-success">Completed</span>
+                            {% elif backup.status == 'in_progress' %}
+                            <span class="badge bg-info">In Progress</span>
+                            {% elif backup.status == 'failed' %}
+                            <span class="badge bg-danger">Failed</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ backup.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if backup.file_size_bytes %}
+                            {{ (backup.file_size_bytes / 1024 / 1024) | round(2) }} MB
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td>{{ backup.started_at.strftime('%Y-%m-%d %H:%M') if backup.started_at else '-' }}</td>
+                        <td>
+                            {% if backup.verified %}
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            {% else %}
+                            <i class="bi bi-x-circle text-muted"></i>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('backup.backup_detail', backup_id=backup.id) }}"
+                                    class="btn btn-outline-primary">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                {% if backup.status == 'completed' and backup.file_path %}
+                                <a href="{{ url_for('backup.download_backup', backup_id=backup.id) }}"
+                                    class="btn btn-outline-success">
+                                    <i class="bi bi-download"></i>
+                                </a>
+                                {% endif %}
+                                <form action="{{ url_for('backup.delete_backup', backup_id=backup.id) }}" method="post"
+                                    class="d-inline" onsubmit="return confirm('Are you sure?')">
+                                    <button type="submit" class="btn btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            No backups found. Create your first backup above.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if backups.pages > 1 %}
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% for page_num in backups.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if page_num %}
+            <li class="page-item {{ 'active' if page_num == backups.page else '' }}">
+                <a class="page-link" href="{{ url_for('backup.list_backups', page=page_num, type=current_type) }}">{{
+                    page_num }}</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+            {% endfor %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

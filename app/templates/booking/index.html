@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Book an Appointment{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4">Book Your Appointment</h1>
+        <p class="lead text-muted">Select a service below to get started</p>
+    </div>
+
+    <div class="row justify-content-center">
+        {% for type in types %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm transition-hover">
+                <div class="card-body text-center d-flex flex-column">
+                    <h3 class="card-title">{{ type.name }}</h3>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ type.duration_minutes }} Minutes</h6>
+
+                    {% if type.price %}
+                    <div class="my-3">
+                        <span class="h4 text-primary">${{ "%.2f"|format(type.price) }}</span>
+                    </div>
+                    {% endif %}
+
+                    <p class="card-text flex-grow-1">{{ type.description }}</p>
+
+                    <a href="{{ url_for('scheduling.booking_wizard', slug=type.slug) }}"
+                        class="btn btn-primary btn-lg mt-3">
+                        Book Now
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center">
+            <div class="alert alert-info">
+                No appointment types are currently available for booking.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .transition-hover {
+        transition: transform 0.2s;
+    }
+
+    .transition-hover:hover {
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock %}

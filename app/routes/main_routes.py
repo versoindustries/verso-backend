@@ -13,7 +13,8 @@ from pytz import UTC
 
 from app import csrf, db, mail
 from app.forms import AcceptTOSForm, EstimateRequestForm, ContactForm
-from app.models import Appointment, Estimator, Service, User, ContactFormSubmission, BusinessConfig
+from app.forms import AcceptTOSForm, EstimateRequestForm, ContactForm
+from app.models import Appointment, Estimator, Service, User, ContactFormSubmission, BusinessConfig, Task, UnsubscribedEmail
 from app.modules.locations import get_locations
 import random
 
@@ -82,18 +83,20 @@ def accept_terms():
         return redirect(url_for('main_routes.index'))
     return render_template('accept_terms.html', form=form)
 
-@main.route('/about')
-def about():
-    return render_template('aboutus.html')
 
-@main.route('/services')
-def services():
-    return render_template('services.html')
+
+
 
 @main.route('/contact', methods=['GET', 'POST'])
 def contact():
     form = ContactForm()
     if form.validate_on_submit():
+        # Honeypot check
+        if form.hp_field.data:
+            current_app.logger.warning(f"Honeypot caught spam from {request.remote_addr}")
+            # Silent fail (or redirect as if success)
+            return redirect(url_for('main_routes.contact_confirmation'))
+
         submission = ContactFormSubmission(
             first_name=form.first_name.data,
             last_name=form.last_name.data,
@@ -103,12 +106,32 @@ def contact():
         )
         db.session.add(submission)
         db.session.commit()
+        
+        # Trigger notification task
+        task = Task(name='new_lead_notification', payload={'submission_id': submission.id})
+        db.session.add(task)
+        db.session.commit()
+        
         return redirect(url_for('main_routes.contact_confirmation'))
     return render_template('contact.html', form=form)
 
 @main.route('/contact-confirmation')
 def contact_confirmation():
     return render_template('contact_confirmation.html')   
+
+@main.route('/about')
+def about():
+    # If aboutus.html exists, render it, otherwise render a placeholder or the index
+    # Assuming aboutus.html exists based on logs
+    return render_template('aboutus.html')
+   
+@main.route('/accessibility')
+def accessibility():
+    return render_template('accessibility.html')
+
+@main.route('/services')
+def services():
+    return render_template('services.html')
 
 @main.route('/request_estimate', methods=['POST'])
 def request_estimate():
@@ -369,3 +392,52 @@ def get_business_config():
     except Exception as e:
         current_app.logger.error(f"Error fetching business config: {e}")
         return jsonify({'error': 'Failed to fetch business configuration'}), 500
+
+@main.route('/unsubscribe')
+def unsubscribe():
+    email = request.args.get('email')
+    if not email:
+        return "Invalid unsubscribe request.", 400
+    
+    # Check if already unsubscribed
+    existing = UnsubscribedEmail.query.filter_by(email=email).first()
+    if not existing:
+        unsub = UnsubscribedEmail(email=email)
+        db.session.add(unsub)
+        db.session.commit()
+        
+    return render_template('unsubscribe_success.html', email=email)
+
+
+# ============================================================================
+# Phase 12: SEO Routes
+# ============================================================================
+
+@main.route('/sitemap.xml')
+def sitemap_xml():
+    """Generate and serve dynamic XML sitemap."""
+    from app.modules.seo import generate_dynamic_sitemap
+    
+    sitemap_content = generate_dynamic_sitemap()
+    return Response(sitemap_content, mimetype='application/xml')
+
+
+@main.route('/robots.txt')
+def robots_txt():
+    """Serve robots.txt with sitemap reference."""
+    from app.modules.seo import get_robots_txt_content
+    
+    sitemap_url = url_for('main_routes.sitemap_xml', _external=True)
+    robots_content = get_robots_txt_content(sitemap_url=sitemap_url)
+    return Response(robots_content, mimetype='text/plain')
+
+@main.route('/set_language/<language>')
+def set_language(language=None):
+    current_app.logger.info(f"Setting language to: {language}")
+    if language not in current_app.config['LANGUAGES']:
+        current_app.logger.warning(f"Invalid language requested: {language}")
+        return redirect(request.referrer or url_for('main_routes.index'))
+    
+    session['lang'] = language
+    flash(f"Language changed to {current_app.config['LANGUAGES'][language]}")
+    return redirect(request.referrer or url_for('main_routes.index'))

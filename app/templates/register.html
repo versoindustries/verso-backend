@@ -39,74 +39,107 @@
 </section>
 
 {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <section class="flash-message-section">
-      <div class="flash-message-container">
-        {% for category, message in messages %}
-          <div class="flash-message flash-{{ category }}">
-            <i class="fas fa-exclamation-circle flash-icon"></i>
-            <span class="flash-text">{{ message | e }}</span>
-          </div>
-        {% endfor %}
-      </div>
-    </section>
-  {% endif %}
+{% if messages %}
+<section class="flash-message-section">
+  <div class="flash-message-container">
+    {% for category, message in messages %}
+    <div class="flash-message flash-{{ category }}">
+      <i class="fas fa-exclamation-circle flash-icon"></i>
+      <span class="flash-text">{{ message | e }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
 {% endwith %}
 
 <section class="form-section">
   <div class="form-container">
-    <form method="POST" action="{{ url_for('auth.register') }}" class="registration-form">
+    <!-- Social Login Section -->
+    {% if config.get('GOOGLE_CLIENT_ID') %}
+    <div class="social-login-section" style="margin-bottom: 2rem; text-align: center;">
+      <p style="color: #666; margin-bottom: 1rem;">Sign up with</p>
+      <a href="{{ url_for('oauth.google_login') }}" class="social-btn google-btn" style="display: inline-flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1.5rem; 
+                background: #fff; border: 1px solid #ddd; border-radius: 8px; color: #333; 
+                text-decoration: none; font-weight: 500; transition: box-shadow 0.2s;">
+        <svg width="20" height="20" viewBox="0 0 24 24">
+          <path fill="#4285F4"
+            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+          <path fill="#34A853"
+            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+          <path fill="#FBBC05"
+            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+          <path fill="#EA4335"
+            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+        </svg>
+        Continue with Google
+      </a>
+      <div style="display: flex; align-items: center; margin: 1.5rem 0;">
+        <hr style="flex: 1; border: none; border-top: 1px solid #ddd;">
+        <span style="padding: 0 1rem; color: #999; font-size: 0.875rem;">or register with email</span>
+        <hr style="flex: 1; border: none; border-top: 1px solid #ddd;">
+      </div>
+    </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('auth.register') }}" class="registration-form" id="registration-form">
       {{ form.hidden_tag() }}
       <div class="form-group">
         <label for="{{ form.username.id }}" class="form-label">Username</label>
-        {{ form.username(class="form-input", placeholder="Choose a username") }}
+        {{ form.username(class="form-input", placeholder="Choose a username", aria_required="true",
+        aria_describedby="username-error" if form.username.errors else None) }}
         {% if form.username.errors %}
-          <span class="form-error">{{ form.username.errors[0] | e }}</span>
+        <span class="form-error" id="username-error">{{ form.username.errors[0] | e }}</span>
         {% endif %}
       </div>
       <div class="form-group">
         <label for="{{ form.first_name.id }}" class="form-label">First Name</label>
-        {{ form.first_name(class="form-input", placeholder="Enter your first name") }}
+        {{ form.first_name(class="form-input", placeholder="Enter your first name", aria_required="true",
+        aria_describedby="firstname-error" if form.first_name.errors else None) }}
         {% if form.first_name.errors %}
-          <span class="form-error">{{ form.first_name.errors[0] | e }}</span>
+        <span class="form-error" id="firstname-error">{{ form.first_name.errors[0] | e }}</span>
         {% endif %}
       </div>
       <div class="form-group">
         <label for="{{ form.last_name.id }}" class="form-label">Last Name</label>
-        {{ form.last_name(class="form-input", placeholder="Enter your last name") }}
+        {{ form.last_name(class="form-input", placeholder="Enter your last name", aria_required="true",
+        aria_describedby="lastname-error" if form.last_name.errors else None) }}
         {% if form.last_name.errors %}
-          <span class="form-error">{{ form.last_name.errors[0] | e }}</span>
+        <span class="form-error" id="lastname-error">{{ form.last_name.errors[0] | e }}</span>
         {% endif %}
       </div>
       <div class="form-group">
         <label for="{{ form.email.id }}" class="form-label">Email</label>
-        {{ form.email(class="form-input", placeholder="Enter your email") }}
+        {{ form.email(class="form-input", placeholder="Enter your email", aria_required="true",
+        aria_describedby="email-error" if form.email.errors else None) }}
         {% if form.email.errors %}
-          <span class="form-error">{{ form.email.errors[0] | e }}</span>
+        <span class="form-error" id="email-error">{{ form.email.errors[0] | e }}</span>
         {% endif %}
       </div>
       <div class="form-group">
         <label for="{{ form.password.id }}" class="form-label">Password</label>
-        {{ form.password(class="form-input", placeholder="Enter your password") }}
+        {{ form.password(class="form-input", placeholder="Enter your password", aria_required="true",
+        aria_describedby="password-error" if form.password.errors else None) }}
         {% if form.password.errors %}
-          <span class="form-error">{{ form.password.errors[0] | e }}</span>
+        <span class="form-error" id="password-error">{{ form.password.errors[0] | e }}</span>
         {% endif %}
       </div>
       <div class="form-group">
         <label for="{{ form.confirm_password.id }}" class="form-label">Confirm Password</label>
-        {{ form.confirm_password(class="form-input", placeholder="Confirm your password") }}
+        {{ form.confirm_password(class="form-input", placeholder="Confirm your password", aria_required="true",
+        aria_describedby="confirm-password-error" if form.confirm_password.errors else None) }}
         {% if form.confirm_password.errors %}
-          <span class="form-error">{{ form.confirm_password.errors[0] | e }}</span>
+        <span class="form-error" id="confirm-password-error">{{ form.confirm_password.errors[0] | e }}</span>
         {% endif %}
       </div>
       <div class="form-group">
         <label for="{{ form.role.id }}" class="form-label">Role</label>
         <div class="select-wrapper">
-          {{ form.role(class="form-select") }}
+          {{ form.role(class="form-select", aria_required="true") }}
           <i class="fas fa-chevron-down select-icon"></i>
         </div>
         {% if form.role.errors %}
-          <span class="form-error">{{ form.role.errors[0] | e }}</span>
+        <span class="form-error">{{ form.role.errors[0] | e }}</span>
         {% endif %}
       </div>
       <div class="form-group form-checkbox">
@@ -115,7 +148,7 @@
           I agree to the <a href="{{ url_for('main_routes.accept_terms') }}" class="terms-link">Terms and Conditions</a>
         </label>
         {% if form.accept_tos.errors %}
-          <span class="form-error">{{ form.accept_tos.errors[0] | e }}</span>
+        <span class="form-error">{{ form.accept_tos.errors[0] | e }}</span>
         {% endif %}
       </div>
       {{ form.submit(class="submit-button") }}

@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-users me-2"></i>Customer Analysis</h2>
+        <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+                <i class="fas fa-download me-2"></i>Export
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item"
+                        href="{{ url_for('reports.export', report_type='customers', format='csv') }}"><i
+                            class="fas fa-file-csv me-2"></i>CSV</a></li>
+                <li><a class="dropdown-item"
+                        href="{{ url_for('reports.export', report_type='customers', format='xlsx') }}"><i
+                            class="fas fa-file-excel me-2"></i>Excel</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-white-50">Total Customers</h6>
+                    <h3 class="mb-0">{{ "{:,}".format(total_customers) }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-white-50">Customers with Orders</h6>
+                    <h3 class="mb-0">{{ "{:,}".format(customers_with_orders) }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-white-50">Average CLV</h6>
+                    <h3 class="mb-0">${{ "{:,.2f}".format(avg_clv) }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2">Repeat Purchase Rate</h6>
+                    <h3 class="mb-0">{{ repeat_rate }}%</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CLV Distribution Chart -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card h-100">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar me-2"></i>Top Customers by Lifetime Value
+                </div>
+                <div class="card-body">
+                    <canvas id="clvChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <i class="fas fa-chart-pie me-2"></i>Order Frequency
+                </div>
+                <div class="card-body">
+                    <canvas id="frequencyChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customers Table -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-table me-2"></i>Customer Lifetime Value
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th class="text-end">Orders</th>
+                        <th class="text-end">Total Spent</th>
+                        <th class="text-end">Avg Order</th>
+                        <th class="text-center">First Purchase</th>
+                        <th class="text-center">Last Purchase</th>
+                        <th class="text-end">Tenure (days)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for customer in customers %}
+                    <tr>
+                        <td>
+                            <div>{{ customer.username or 'Guest' }}</div>
+                            <small class="text-muted">{{ customer.email }}</small>
+                        </td>
+                        <td class="text-end">{{ customer.order_count }}</td>
+                        <td class="text-end fw-bold">${{ "{:,.2f}".format(customer.total_spent) }}</td>
+                        <td class="text-end">${{ "{:,.2f}".format(customer.avg_order_value) }}</td>
+                        <td class="text-center">
+                            {% if customer.first_purchase %}
+                            {{ customer.first_purchase.strftime('%Y-%m-%d') }}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if customer.last_purchase %}
+                            {{ customer.last_purchase.strftime('%Y-%m-%d') }}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td class="text-end">{{ customer.tenure_days }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-muted text-center py-4">No customer data available</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a href="{{ url_for('reports.revenue') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Revenue
+        </a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const customers = {{ customers[:10] | tojson
+    }};
+
+    // CLV Bar Chart
+    const clvCtx = document.getElementById('clvChart').getContext('2d');
+    new Chart(clvCtx, {
+        type: 'bar',
+        data: {
+            labels: customers.map(c => c.email.split('@')[0]),
+            datasets: [{
+                label: 'Lifetime Value ($)',
+                data: customers.map(c => c.total_spent),
+                backgroundColor: 'rgba(28, 200, 138, 0.8)'
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function (value) {
+                            return '$' + value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Order Frequency Pie
+    const orderCounts = customers.map(c => c.order_count);
+    const oneOrder = orderCounts.filter(c => c === 1).length;
+    const twoToFive = orderCounts.filter(c => c >= 2 && c <= 5).length;
+    const sixPlus = orderCounts.filter(c => c > 5).length;
+
+    const freqCtx = document.getElementById('frequencyChart').getContext('2d');
+    new Chart(freqCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['1 Order', '2-5 Orders', '6+ Orders'],
+            datasets: [{
+                data: [oneOrder, twoToFive, sixPlus],
+                backgroundColor: ['#f6c23e', '#4e73df', '#1cc88a']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Collections - {{ business_config.company_name|default('Shop') }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold">Collections</h1>
+        <p class="lead text-muted">Browse our curated product collections</p>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for collection in collections %}
+        <div class="col">
+            <a href="{{ url_for('ecommerce.view_collection', slug=collection.slug) }}" class="text-decoration-none">
+                <div class="card h-100 collection-card shadow-sm hover-shadow">
+                    {% if collection.image %}
+                    <img src="{{ url_for('media_bp.serve_media', media_id=collection.image_id) }}" class="card-img-top"
+                        alt="{{ collection.name }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
+                        style="height: 200px;">
+                        <i class="fas fa-layer-group fa-3x text-muted"></i>
+                    </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title text-dark">{{ collection.name }}</h5>
+                        {% if collection.description %}
+                        <p class="card-text text-muted small">{{ collection.description|truncate(100) }}</p>
+                        {% endif %}
+                        <span class="badge bg-primary">{{ collection.products.count() }} Products</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+            <i class="fas fa-layer-group fa-4x text-muted mb-3"></i>
+            <p class="text-muted">No collections available at the moment.</p>
+            <a href="{{ url_for('shop.index') }}" class="btn btn-primary">Browse Products</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .collection-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border: none;
+    }
+
+    .collection-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+    }
+</style>
+{% endblock %}

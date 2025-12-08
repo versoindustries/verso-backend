@@ -1,0 +1,241 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{{ 'Edit' if collection else 'Create' }} Collection - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>
+            <i class="fas fa-layer-group me-2"></i>
+            {{ 'Edit' if collection else 'Create' }} Collection
+        </h1>
+        <a href="{{ url_for('ecommerce_admin.list_collections') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back
+        </a>
+    </div>
+
+    <form method="POST"
+        action="{{ url_for('ecommerce_admin.edit_collection', id=collection.id) if collection else url_for('ecommerce_admin.create_collection') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Collection Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Name *</label>
+                            <input type="text" class="form-control" id="name" name="name"
+                                value="{{ collection.name if collection else '' }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="slug" class="form-label">Slug</label>
+                            <div class="input-group">
+                                <span class="input-group-text">/collections/</span>
+                                <input type="text" class="form-control" id="slug" name="slug"
+                                    value="{{ collection.slug if collection else '' }}"
+                                    placeholder="auto-generated-from-name">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description"
+                                rows="3">{{ collection.description if collection else '' }}</textarea>
+                        </div>
+
+                        {% if not collection or collection.collection_type == 'manual' %}
+                        <div class="mb-3" id="productSelection">
+                            <label class="form-label">Products</label>
+                            <select id="productSelect" class="form-select" multiple>
+                                {% for product in products %}
+                                <option value="{{ product.id }}" {% if collection and product.id in
+                                    collection_product_ids|default([]) %}selected{% endif %}>
+                                    {{ product.name }} - ${{ "%.2f"|format(product.price / 100) }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">Hold Ctrl/Cmd to select multiple products</small>
+                            <div id="selectedProducts" class="mt-2"></div>
+                        </div>
+                        {% endif %}
+
+                        {% if not collection %}
+                        <div class="mb-3">
+                            <label for="collection_type" class="form-label">Collection Type</label>
+                            <select class="form-select" id="collection_type" name="collection_type">
+                                <option value="manual">Manual - Hand-pick products</option>
+                                <option value="smart">Smart - Auto-populate by rules</option>
+                            </select>
+                        </div>
+                        {% endif %}
+
+                        {% if collection and collection.collection_type == 'smart' %}
+                        <div class="mb-3" id="rulesSection">
+                            <label class="form-label">Collection Rules</label>
+                            <div id="rules">
+                                {% for rule in collection.rules %}
+                                <div class="row mb-2 rule-row">
+                                    <div class="col-4">
+                                        <select name="rule_field[]" class="form-select">
+                                            <option value="category" {% if rule.field=='category' %}selected{% endif %}>
+                                                Category</option>
+                                            <option value="price" {% if rule.field=='price' %}selected{% endif %}>Price
+                                            </option>
+                                            <option value="in_stock" {% if rule.field=='in_stock' %}selected{% endif %}>
+                                                In Stock</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-3">
+                                        <select name="rule_condition[]" class="form-select">
+                                            <option value="equals" {% if rule.condition=='equals' %}selected{% endif %}>
+                                                Equals</option>
+                                            <option value="greater_than" {% if rule.condition=='greater_than'
+                                                %}selected{% endif %}>Greater than</option>
+                                            <option value="less_than" {% if rule.condition=='less_than' %}selected{%
+                                                endif %}>Less than</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-4">
+                                        <input type="text" name="rule_value[]" class="form-control"
+                                            value="{{ rule.value }}">
+                                    </div>
+                                    <div class="col-1">
+                                        <button type="button" class="btn btn-outline-danger btn-sm"
+                                            onclick="this.closest('.rule-row').remove()">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addRule()">
+                                <i class="fas fa-plus"></i> Add Rule
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">SEO Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="seo_title" class="form-label">SEO Title</label>
+                            <input type="text" class="form-control" id="seo_title" name="seo_title"
+                                value="{{ collection.seo_title if collection else '' }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="seo_description" class="form-label">SEO Description</label>
+                            <textarea class="form-control" id="seo_description" name="seo_description"
+                                rows="2">{{ collection.seo_description if collection else '' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-check mb-3">
+                            <input type="checkbox" class="form-check-input" id="is_published" name="is_published" {% if
+                                not collection or collection.is_published %}checked{% endif %}>
+                            <label class="form-check-label" for="is_published">Published</label>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input type="checkbox" class="form-check-input" id="show_on_homepage"
+                                name="show_on_homepage" {% if collection and collection.show_on_homepage %}checked{%
+                                endif %}>
+                            <label class="form-check-label" for="show_on_homepage">Show on Homepage</label>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="sort_order" class="form-label">Sort Products By</label>
+                            <select class="form-select" id="sort_order" name="sort_order">
+                                <option value="manual" {% if collection and collection.sort_order=='manual' %}selected{%
+                                    endif %}>Manual Order</option>
+                                <option value="best_selling" {% if collection and collection.sort_order=='best_selling'
+                                    %}selected{% endif %}>Best Selling</option>
+                                <option value="newest" {% if collection and collection.sort_order=='newest' %}selected{%
+                                    endif %}>Newest First</option>
+                                <option value="price_asc" {% if collection and collection.sort_order=='price_asc'
+                                    %}selected{% endif %}>Price: Low to High</option>
+                                <option value="price_desc" {% if collection and collection.sort_order=='price_desc'
+                                    %}selected{% endif %}>Price: High to Low</option>
+                                <option value="alpha" {% if collection and collection.sort_order=='alpha' %}selected{%
+                                    endif %}>Alphabetically</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg w-100">
+                    <i class="fas fa-save me-2"></i>
+                    {{ 'Update' if collection else 'Create' }} Collection
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        // Handle product selection for manual collections
+        $('#productSelect').on('change', function () {
+            updateSelectedProducts();
+        });
+        updateSelectedProducts();
+    });
+
+    function updateSelectedProducts() {
+        var selected = $('#productSelect').val() || [];
+        var html = '';
+        selected.forEach(function (id) {
+            var option = $('#productSelect option[value="' + id + '"]');
+            html += '<input type="hidden" name="product_ids[]" value="' + id + '">';
+        });
+        $('#selectedProducts').html(html);
+    }
+
+    function addRule() {
+        var html = `
+        <div class="row mb-2 rule-row">
+            <div class="col-4">
+                <select name="rule_field[]" class="form-select">
+                    <option value="category">Category</option>
+                    <option value="price">Price</option>
+                    <option value="in_stock">In Stock</option>
+                </select>
+            </div>
+            <div class="col-3">
+                <select name="rule_condition[]" class="form-select">
+                    <option value="equals">Equals</option>
+                    <option value="greater_than">Greater than</option>
+                    <option value="less_than">Less than</option>
+                </select>
+            </div>
+            <div class="col-4">
+                <input type="text" name="rule_value[]" class="form-control">
+            </div>
+            <div class="col-1">
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.rule-row').remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    `;
+        $('#rules').append(html);
+    }
+</script>
+{% endblock %}

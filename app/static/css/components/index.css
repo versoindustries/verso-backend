@@ -1,0 +1,43 @@
+/**
+ * React Component CSS Index
+ * 
+ * Master import file for all React component CSS.
+ * Import this single file to get all component styles, or import individual files as needed.
+ * 
+ * Directory Structure:
+ *   components/
+ *   ├── index.css              <- This file (imports all component CSS)
+ *   ├── components.css         <- Shared base styles (modals, toasts, dropdowns, forms)
+ *   ├── admin-dashboard.css    <- AdminDashboard component styles
+ *   ├── admin-data-table.css   <- AdminDataTable component styles
+ *   ├── analytics-dashboard.css <- AnalyticsDashboard component styles
+ *   └── product-view.css       <- ProductView component styles
+ * 
+ * Usage in Jinja2 templates:
+ *   Option 1: Import all component styles
+ *     <link rel="stylesheet" href="{{ url_for('static', filename='css/components/index.css') }}">
+ * 
+ *   Option 2: Import only what you need (recommended)
+ *     <link rel="stylesheet" href="{{ url_for('static', filename='css/components/components.css') }}">
+ *     <link rel="stylesheet" href="{{ url_for('static', filename='css/components/admin-dashboard.css') }}">
+ */
+
+/* Base shared component styles (modals, toasts, dropdowns, tabs, forms, badges, etc.) */
+@import url('./components.css');
+
+/* Feature-specific component styles */
+@import url('./admin-dashboard.css');
+@import url('./admin-data-table.css');
+@import url('./analytics-dashboard.css');
+@import url('./product-view.css');
+@import url('./gift-cards.css');
+@import url('./orders-admin.css');
+@import url('./employee-calendar.css');
+@import url('./messaging-channel.css');
+@import url('./admin-calendar.css');
+@import url('./blog-manage-posts.css');
+@import url('./theme-editor.css');
+@import url('./cart-page.css');
+@import url('./booking-page.css');
+@import url('./kanban-board.css');
+@import url('./email-template-cards.css');

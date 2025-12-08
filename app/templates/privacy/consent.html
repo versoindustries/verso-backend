@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Cookie Preferences{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-0 shadow">
+                <div class="card-header bg-white border-0 pt-4 pb-0">
+                    <h3 class="mb-0">Cookie Preferences</h3>
+                    <p class="text-muted">Manage your privacy settings</p>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('privacy.save_consent') }}" method="post">
+                        <!-- Necessary Cookies -->
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="necessary" checked disabled>
+                                <label class="form-check-label fw-bold" for="necessary">
+                                    Necessary Cookies
+                                </label>
+                            </div>
+                            <p class="text-muted small ms-4 mb-0">
+                                Essential for the website to function. Cannot be disabled.
+                            </p>
+                        </div>
+
+                        <!-- Functional Cookies -->
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="functional" name="functional"
+                                    value="true" {{ 'checked' if consent.get('functional') }}>
+                                <label class="form-check-label fw-bold" for="functional">
+                                    Functional Cookies
+                                </label>
+                            </div>
+                            <p class="text-muted small ms-4 mb-0">
+                                Enable enhanced functionality and personalization.
+                            </p>
+                        </div>
+
+                        <!-- Analytics Cookies -->
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="analytics" name="analytics"
+                                    value="true" {{ 'checked' if consent.get('analytics') }}>
+                                <label class="form-check-label fw-bold" for="analytics">
+                                    Analytics Cookies
+                                </label>
+                            </div>
+                            <p class="text-muted small ms-4 mb-0">
+                                Help us understand how visitors interact with our site.
+                            </p>
+                        </div>
+
+                        <!-- Marketing Cookies -->
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="marketing" name="marketing"
+                                    value="true" {{ 'checked' if consent.get('marketing') }}>
+                                <label class="form-check-label fw-bold" for="marketing">
+                                    Marketing Cookies
+                                </label>
+                            </div>
+                            <p class="text-muted small ms-4 mb-0">
+                                Used to deliver relevant advertisements and track campaigns.
+                            </p>
+                        </div>
+
+                        <hr>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">Save Preferences</button>
+                            <a href="{{ url_for('privacy.policy') }}" class="btn btn-link">Privacy Policy</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card border-0 shadow mt-4">
+                <div class="card-body">
+                    <h5 class="mb-3">Quick Options</h5>
+                    <div class="d-flex gap-2">
+                        <form action="{{ url_for('privacy.accept_all_cookies') }}" method="post">
+                            <button type="submit" class="btn btn-success">Accept All</button>
+                        </form>
+                        <form action="{{ url_for('privacy.reject_optional_cookies') }}" method="post">
+                            <button type="submit" class="btn btn-outline-secondary">Reject Optional</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            {% if current_user.is_authenticated %}
+            <!-- Data Rights -->
+            <div class="card border-0 shadow mt-4">
+                <div class="card-body">
+                    <h5 class="mb-3">Your Data Rights</h5>
+                    <p class="text-muted small">Under GDPR and CCPA, you have the right to access, export, and delete
+                        your personal data.</p>
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('privacy.data_export_page') }}" class="btn btn-outline-primary">
+                            <i class="bi bi-download"></i> Export My Data
+                        </a>
+                        <a href="{{ url_for('privacy.delete_account_page') }}" class="btn btn-outline-danger">
+                            <i class="bi bi-trash"></i> Delete Account
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

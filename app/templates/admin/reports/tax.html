@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-receipt me-2"></i>Tax Report</h2>
+        <div class="d-flex gap-2">
+            <select id="presetSelect" class="form-select" style="width: auto;" onchange="applyPreset()">
+                <option value="this_month" {{ 'selected' if preset=='this_month' }}>This Month</option>
+                <option value="last_month" {{ 'selected' if preset=='last_month' }}>Last Month</option>
+                <option value="last_90_days" {{ 'selected' if preset=='last_90_days' }}>Last 90 Days</option>
+                <option value="this_year" {{ 'selected' if preset=='this_year' }}>This Year</option>
+            </select>
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="fas fa-download me-2"></i>Export
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item"
+                            href="{{ url_for('reports.export', report_type='tax', format='csv', days=30) }}"><i
+                                class="fas fa-file-csv me-2"></i>CSV</a></li>
+                    <li><a class="dropdown-item"
+                            href="{{ url_for('reports.export', report_type='tax', format='xlsx', days=30) }}"><i
+                                class="fas fa-file-excel me-2"></i>Excel</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2">Total Tax Collected</h6>
+                    <h3 class="mb-0">${{ "{:,.2f}".format(tax_data.total_tax) }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-white-50">Orders</h6>
+                    <h3 class="mb-0">{{ "{:,}".format(tax_data.total_orders) }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-white-50">Reporting Period</h6>
+                    <h3 class="mb-0">{{ tax_data.period_start.strftime('%b %d') }} - {{ tax_data.period_end.strftime('%b
+                        %d, %Y') }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tax by Jurisdiction -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-map-marker-alt me-2"></i>Tax by Jurisdiction
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>State/Region</th>
+                        <th class="text-end">Orders</th>
+                        <th class="text-end">Revenue</th>
+                        <th class="text-end">Tax Collected</th>
+                        <th class="text-end">Effective Rate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for state, stats in tax_data.by_state.items() %}
+                    <tr>
+                        <td>
+                            <i class="fas fa-map-pin text-muted me-2"></i>
+                            {{ state }}
+                        </td>
+                        <td class="text-end">{{ stats.orders }}</td>
+                        <td class="text-end">${{ "{:,.2f}".format(stats.revenue) }}</td>
+                        <td class="text-end fw-bold">${{ "{:,.2f}".format(stats.tax) }}</td>
+                        <td class="text-end">
+                            {% if stats.revenue > 0 %}
+                            {{ "%.2f"|format(stats.tax / stats.revenue * 100) }}%
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-muted text-center py-4">No tax data for this period</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="table-light">
+                    <tr class="fw-bold">
+                        <td>Total</td>
+                        <td class="text-end">{{ tax_data.total_orders }}</td>
+                        <td class="text-end">
+                            ${{ "{:,.2f}".format(tax_data.by_state.values() | sum(attribute='revenue') if
+                            tax_data.by_state else 0) }}
+                        </td>
+                        <td class="text-end">${{ "{:,.2f}".format(tax_data.total_tax) }}</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <div class="alert alert-info mt-4">
+        <i class="fas fa-info-circle me-2"></i>
+        <strong>Note:</strong> Tax calculations shown are estimates based on an 8% rate. For accurate tax reporting,
+        integrate with a tax compliance service like Avalara or TaxJar.
+    </div>
+
+    <div class="mt-3">
+        <a href="{{ url_for('reports.revenue') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Revenue
+        </a>
+    </div>
+</div>
+
+<script>
+    function applyPreset() {
+        const preset = document.getElementById('presetSelect').value;
+        window.location.href = "{{ url_for('reports.tax') }}?preset=" + preset;
+    }
+</script>
+{% endblock %}

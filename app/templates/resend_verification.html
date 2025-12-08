@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Resend Verification Email{% endblock %}
+
+{% block content %}
+<section class="header-section">
+    <div class="header-container">
+        <h1 class="header-title">Resend Verification Email</h1>
+        <p class="header-subtitle">Enter your email to receive a new verification link</p>
+    </div>
+</section>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<section class="flash-message-section">
+    <div class="flash-message-container">
+        {% for category, message in messages %}
+        <div class="flash-message flash-{{ category }}">
+            <i class="fas fa-info-circle flash-icon"></i>
+            <span class="flash-text">{{ message | e }}</span>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+{% endwith %}
+
+<section class="form-section">
+    <div class="form-container"
+        style="max-width: 400px; margin: 2rem auto; padding: 2rem; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+        <form method="POST" action="{{ url_for('auth.resend_verification') }}">
+            {{ form.hidden_tag() }}
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label for="{{ form.email.id }}"
+                    style="display: block; font-weight: 500; margin-bottom: 0.5rem;">Email</label>
+                {{ form.email(class="form-input", placeholder="Enter your email address", style="width: 100%; padding:
+                0.75rem; border: 1px solid #ddd; border-radius: 8px;") }}
+                {% if form.email.errors %}
+                <span class="form-error" style="color: #dc3545; font-size: 0.875rem;">{{ form.email.errors[0] }}</span>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn-primary"
+                style="width: 100%; padding: 0.75rem; background: var(--primary-color, #007bff); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem;">
+                {{ form.submit.label.text }}
+            </button>
+        </form>
+
+        <p style="text-align: center; margin-top: 1.5rem; color: #666;">
+            <a href="{{ url_for('auth.login') }}" style="color: var(--primary-color, #007bff);">Back to Login</a>
+        </p>
+    </div>
+</section>
+{% endblock %}

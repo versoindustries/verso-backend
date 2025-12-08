@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Cron Tasks{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-clock"></i> Scheduled Tasks</h1>
+        <a href="{{ url_for('tasks_admin.dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-0">
+            <div data-react-component="AdminDataTable" data-react-props='{
+                "columns": [
+                    {"accessorKey": "name", "header": "Name", "html": true, "sortable": true},
+                    {"accessorKey": "handler", "header": "Handler", "html": true},
+                    {"accessorKey": "schedule", "header": "Schedule", "html": true},
+                    {"accessorKey": "last_run", "header": "Last Run", "sortable": true},
+                    {"accessorKey": "next_run", "header": "Next Run", "sortable": true},
+                    {"accessorKey": "status", "header": "Status", "html": true},
+                    {"accessorKey": "actions", "header": "Actions", "html": true}
+                ],
+                "data": {{ cron_tasks_json | safe }},
+                "idKey": "id",
+                "emptyMessage": "No scheduled tasks configured"
+            }'></div>
+        </div>
+    </div>
+</div>
+{% endblock %}

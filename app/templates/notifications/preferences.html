@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Notification Preferences - Verso{% endblock %}
+
+{% block additional_css %}
+<style>
+    .preferences-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .preference-section {
+        background: #fff;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .preference-section h4 {
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .form-check {
+        margin-bottom: 10px;
+    }
+
+    .notification-type-list {
+        margin-top: 15px;
+    }
+
+    .notification-type-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .notification-type-item:last-child {
+        border-bottom: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="preferences-container">
+    <h2><i class="fas fa-cog"></i> Notification Preferences</h2>
+    <p class="text-muted">Control how you receive notifications.</p>
+
+    <form method="POST" action="{{ url_for('notifications.preferences') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="preference-section">
+            <h4><i class="fas fa-envelope"></i> Email Digest</h4>
+
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="email_digest_enabled" id="email_digest_enabled" {%
+                    if prefs.email_digest_enabled %}checked{% endif %}>
+                <label class="form-check-label" for="email_digest_enabled">
+                    Send email digests of unread notifications
+                </label>
+            </div>
+
+            <div class="mt-3">
+                <label for="email_digest_frequency" class="form-label">Digest Frequency</label>
+                <select class="form-control" name="email_digest_frequency" id="email_digest_frequency">
+                    <option value="daily" {% if prefs.email_digest_frequency=='daily' %}selected{% endif %}>Daily
+                    </option>
+                    <option value="weekly" {% if prefs.email_digest_frequency=='weekly' %}selected{% endif %}>Weekly
+                    </option>
+                    <option value="never" {% if prefs.email_digest_frequency=='never' %}selected{% endif %}>Never
+                    </option>
+                </select>
+            </div>
+        </div>
+
+        <div class="preference-section">
+            <h4><i class="fas fa-bell-slash"></i> Muted Notification Types</h4>
+            <p class="text-muted small">Select notification types to mute. You won't receive these notifications.</p>
+
+            <div class="notification-type-list">
+                {% for type_value, type_label in notification_types %}
+                <div class="notification-type-item">
+                    <label for="mute_{{ type_value }}">{{ type_label }}</label>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="muted_types" value="{{ type_value }}"
+                            id="mute_{{ type_value }}" {% if type_value in (prefs.muted_types or []) %}checked{% endif
+                            %}>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <a href="{{ url_for('notifications.index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Notifications
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Preferences
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

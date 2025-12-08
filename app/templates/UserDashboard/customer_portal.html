@@ -1,0 +1,611 @@
+{% extends "base.html" %}
+
+{% block title %}My Account - Customer Portal{% endblock %}
+
+{% block additional_css %}
+<style>
+    /* Customer Portal Styles */
+    .portal-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .portal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, rgba(42, 42, 42, 0.95), rgba(30, 30, 30, 0.95));
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .portal-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0;
+        color: #fff;
+    }
+
+    .portal-header .user-info {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+    }
+
+    /* Tab Navigation */
+    .portal-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        background: rgba(42, 42, 42, 0.8);
+        padding: 0.5rem;
+        border-radius: 8px;
+    }
+
+    .portal-tabs a {
+        padding: 0.75rem 1.25rem;
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .portal-tabs a:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+    }
+
+    .portal-tabs a.active {
+        background: var(--primary-color, #4169e1);
+        color: #fff;
+    }
+
+    .portal-tabs a .badge {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.15rem 0.5rem;
+        border-radius: 10px;
+        font-size: 0.75rem;
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: rgba(42, 42, 42, 0.9);
+        border-radius: 10px;
+        padding: 1.25rem;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stat-card .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .stat-card .stat-label {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.6);
+        margin-top: 0.25rem;
+    }
+
+    /* Content Cards */
+    .portal-card {
+        background: rgba(42, 42, 42, 0.9);
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .portal-card-header {
+        padding: 1rem 1.25rem;
+        background: rgba(0, 0, 0, 0.3);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .portal-card-header h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        color: #fff;
+    }
+
+    .portal-card-body {
+        padding: 1.25rem;
+    }
+
+    /* Table Styles */
+    .portal-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .portal-table th,
+    .portal-table td {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .portal-table th {
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+    }
+
+    .portal-table td {
+        color: #fff;
+        font-size: 0.9rem;
+    }
+
+    .portal-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .portal-table tr:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Status Badges */
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-badge.paid,
+    .status-badge.active,
+    .status-badge.delivered {
+        background: rgba(40, 167, 69, 0.2);
+        color: #28a745;
+    }
+
+    .status-badge.pending,
+    .status-badge.trialing {
+        background: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+    }
+
+    .status-badge.shipped,
+    .status-badge.processing {
+        background: rgba(23, 162, 184, 0.2);
+        color: #17a2b8;
+    }
+
+    .status-badge.cancelled,
+    .status-badge.canceled,
+    .status-badge.past_due {
+        background: rgba(220, 53, 69, 0.2);
+        color: #dc3545;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-state h4 {
+        color: #fff;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Action Buttons */
+    .btn-portal {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+        border-radius: 6px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        transition: all 0.2s;
+    }
+
+    .btn-portal-primary {
+        background: var(--primary-color, #4169e1);
+        color: #fff;
+        border: none;
+    }
+
+    .btn-portal-primary:hover {
+        opacity: 0.9;
+        color: #fff;
+    }
+
+    .btn-portal-outline {
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .btn-portal-outline:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+    }
+
+    @media (max-width: 768px) {
+        .portal-tabs {
+            flex-direction: column;
+        }
+
+        .portal-header {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="section-spacer"></div>
+
+<div class="portal-container">
+    <!-- Header -->
+    <div class="portal-header">
+        <div>
+            <h1>Welcome back, {{ current_user.first_name or current_user.username }}!</h1>
+            <div class="user-info">{{ current_user.email }}</div>
+        </div>
+        <a href="{{ url_for('user.settings') }}" class="btn-portal btn-portal-outline">
+            <i class="fas fa-cog"></i> Account Settings
+        </a>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="portal-tabs">
+        <a href="{{ url_for('user.my_account', tab='overview') }}" class="{{ 'active' if tab == 'overview' else '' }}">
+            <i class="fas fa-home"></i> Overview
+        </a>
+        <a href="{{ url_for('user.my_account', tab='orders') }}" class="{{ 'active' if tab == 'orders' else '' }}">
+            <i class="fas fa-shopping-bag"></i> Orders
+            {% if stats.total_orders %}<span class="badge">{{ stats.total_orders }}</span>{% endif %}
+        </a>
+        <a href="{{ url_for('user.my_account', tab='appointments') }}"
+            class="{{ 'active' if tab == 'appointments' else '' }}">
+            <i class="fas fa-calendar-alt"></i> Appointments
+            {% if stats.upcoming_appointments %}<span class="badge">{{ stats.upcoming_appointments }}</span>{% endif %}
+        </a>
+        <a href="{{ url_for('user.my_account', tab='subscriptions') }}"
+            class="{{ 'active' if tab == 'subscriptions' else '' }}">
+            <i class="fas fa-sync-alt"></i> Subscriptions
+            {% if stats.active_subscriptions %}<span class="badge">{{ stats.active_subscriptions }}</span>{% endif %}
+        </a>
+        <a href="{{ url_for('user.my_account', tab='downloads') }}"
+            class="{{ 'active' if tab == 'downloads' else '' }}">
+            <i class="fas fa-download"></i> Downloads
+            {% if stats.total_downloads %}<span class="badge">{{ stats.total_downloads }}</span>{% endif %}
+        </a>
+    </div>
+
+    {% if tab == 'overview' %}
+    <!-- Overview Tab -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.total_orders }}</div>
+            <div class="stat-label">Total Orders</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.upcoming_appointments }}</div>
+            <div class="stat-label">Upcoming Appointments</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.active_subscriptions }}</div>
+            <div class="stat-label">Active Subscriptions</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.total_downloads }}</div>
+            <div class="stat-label">Digital Downloads</div>
+        </div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="portal-card">
+        <div class="portal-card-header">
+            <h3><i class="fas fa-shopping-bag"></i> Recent Orders</h3>
+            <a href="{{ url_for('user.my_account', tab='orders') }}" class="btn-portal btn-portal-outline">View All</a>
+        </div>
+        <div class="portal-card-body">
+            {% if recent_orders %}
+            <table class="portal-table">
+                <thead>
+                    <tr>
+                        <th>Order #</th>
+                        <th>Date</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in recent_orders %}
+                    <tr>
+                        <td>#{{ order.id }}</td>
+                        <td>{{ order.created_at.strftime('%b %d, %Y') if order.created_at else 'N/A' }}</td>
+                        <td>${{ '%.2f' % (order.total_amount / 100) }}</td>
+                        <td><span class="status-badge {{ order.status }}">{{ order.status|capitalize }}</span></td>
+                        <td><a href="{{ url_for('user.order_detail', order_id=order.id) }}"
+                                class="btn-portal btn-portal-primary">View</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-shopping-bag"></i>
+                <h4>No orders yet</h4>
+                <p>Your order history will appear here.</p>
+                <a href="{{ url_for('shop.index') }}" class="btn-portal btn-portal-primary">Browse Shop</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Upcoming Appointments -->
+    <div class="portal-card">
+        <div class="portal-card-header">
+            <h3><i class="fas fa-calendar-alt"></i> Upcoming Appointments</h3>
+            <a href="{{ url_for('user.my_account', tab='appointments') }}" class="btn-portal btn-portal-outline">View
+                All</a>
+        </div>
+        <div class="portal-card-body">
+            {% if upcoming_appointments %}
+            <table class="portal-table">
+                <thead>
+                    <tr>
+                        <th>Service</th>
+                        <th>Date & Time</th>
+                        <th>With</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appt in upcoming_appointments %}
+                    <tr>
+                        <td>{{ appt.service.name if appt.service else 'Consultation' }}</td>
+                        <td>{{ appt.preferred_date_time.strftime('%b %d, %Y at %I:%M %p') if appt.preferred_date_time
+                            else 'TBD' }}</td>
+                        <td>{{ appt.estimator.name if appt.estimator else 'TBA' }}</td>
+                        <td><span class="status-badge {{ appt.status or 'pending' }}">{{ (appt.status or
+                                'Scheduled')|capitalize }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-calendar-alt"></i>
+                <h4>No upcoming appointments</h4>
+                <p>Schedule an appointment to get started.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% elif tab == 'orders' %}
+    <!-- Orders Tab -->
+    <div class="portal-card">
+        <div class="portal-card-header">
+            <h3><i class="fas fa-shopping-bag"></i> Order History</h3>
+        </div>
+        <div class="portal-card-body">
+            {% if all_orders %}
+            <table class="portal-table">
+                <thead>
+                    <tr>
+                        <th>Order #</th>
+                        <th>Date</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Tracking</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in all_orders %}
+                    <tr>
+                        <td>#{{ order.id }}</td>
+                        <td>{{ order.created_at.strftime('%b %d, %Y') if order.created_at else 'N/A' }}</td>
+                        <td>{{ order.items|length }} item(s)</td>
+                        <td>${{ '%.2f' % (order.total_amount / 100) }}</td>
+                        <td><span class="status-badge {{ order.status }}">{{ order.status|capitalize }}</span></td>
+                        <td>{{ order.tracking_number or '-' }}</td>
+                        <td><a href="{{ url_for('user.order_detail', order_id=order.id) }}"
+                                class="btn-portal btn-portal-primary">View</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-shopping-bag"></i>
+                <h4>No orders yet</h4>
+                <p>Your order history will appear here.</p>
+                <a href="{{ url_for('shop.index') }}" class="btn-portal btn-portal-primary">Browse Shop</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% elif tab == 'appointments' %}
+    <!-- Appointments Tab -->
+    <div class="portal-card">
+        <div class="portal-card-header">
+            <h3><i class="fas fa-calendar-alt"></i> My Appointments</h3>
+        </div>
+        <div class="portal-card-body">
+            {% if all_appointments %}
+            <table class="portal-table">
+                <thead>
+                    <tr>
+                        <th>Service</th>
+                        <th>Date & Time</th>
+                        <th>With</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appt in all_appointments %}
+                    <tr>
+                        <td>{{ appt.service.name if appt.service else 'Consultation' }}</td>
+                        <td>
+                            {{ appt.preferred_date_time.strftime('%b %d, %Y at %I:%M %p') if appt.preferred_date_time
+                            else 'TBD' }}
+                            {% if appt.preferred_date_time and appt.preferred_date_time < now %} <span
+                                class="text-muted" style="font-size: 0.75rem;">(Past)</span>
+                                {% endif %}
+                        </td>
+                        <td>{{ appt.estimator.name if appt.estimator else 'TBA' }}</td>
+                        <td><span class="status-badge {{ appt.status or 'pending' }}">{{ (appt.status or
+                                'Scheduled')|capitalize }}</span></td>
+                        <td>{{ (appt.notes[:50] + '...' if appt.notes and appt.notes|length > 50 else appt.notes) or '-'
+                            }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-calendar-alt"></i>
+                <h4>No appointments</h4>
+                <p>Schedule an appointment to get started.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% elif tab == 'subscriptions' %}
+    <!-- Subscriptions Tab -->
+    <div class="portal-card">
+        <div class="portal-card-header">
+            <h3><i class="fas fa-sync-alt"></i> My Subscriptions</h3>
+            {% if subscriptions %}
+            <a href="{{ url_for('subscriptions.customer_portal') }}" class="btn-portal btn-portal-outline">
+                <i class="fas fa-external-link-alt"></i> Manage in Stripe
+            </a>
+            {% endif %}
+        </div>
+        <div class="portal-card-body">
+            {% if subscriptions %}
+            <table class="portal-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Status</th>
+                        <th>Next Billing</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sub in subscriptions %}
+                    <tr>
+                        <td>{{ sub.product.name if sub.product else 'Subscription' }}</td>
+                        <td>
+                            <span class="status-badge {{ sub.status }}">{{ sub.status|capitalize }}</span>
+                            {% if sub.cancel_at_period_end %}
+                            <span class="status-badge cancelled" style="margin-left: 0.5rem;">Canceling</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ sub.current_period_end.strftime('%b %d, %Y') if sub.current_period_end else 'N/A' }}</td>
+                        <td>{{ sub.created_at.strftime('%b %d, %Y') if sub.created_at else 'N/A' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-sync-alt"></i>
+                <h4>No active subscriptions</h4>
+                <p>Your subscriptions will appear here.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% elif tab == 'downloads' %}
+    <!-- Downloads Tab -->
+    <div class="portal-card">
+        <div class="portal-card-header">
+            <h3><i class="fas fa-download"></i> My Downloads</h3>
+        </div>
+        <div class="portal-card-body">
+            {% if download_tokens %}
+            <table class="portal-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Purchased</th>
+                        <th>Downloads</th>
+                        <th>Expires</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for token in download_tokens %}
+                    <tr>
+                        <td>{{ token.order_item.product.name if token.order_item and token.order_item.product else
+                            'Digital Product' }}</td>
+                        <td>{{ token.created_at.strftime('%b %d, %Y') if token.created_at else 'N/A' }}</td>
+                        <td>{{ token.download_count }}/{{ token.max_downloads }}</td>
+                        <td>{{ token.expires_at.strftime('%b %d, %Y') if token.expires_at else 'N/A' }}</td>
+                        <td>
+                            {% if token.is_valid() %}
+                            <a href="{{ url_for('cart.download_file', token=token.token) }}"
+                                class="btn-portal btn-portal-primary">
+                                <i class="fas fa-download"></i> Download
+                            </a>
+                            {% else %}
+                            <span class="text-muted">Unavailable</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-download"></i>
+                <h4>No digital downloads</h4>
+                <p>Your purchased digital products will appear here.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div class="section-spacer"></div>
+{% endblock %}

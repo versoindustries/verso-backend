@@ -1,0 +1,438 @@
+{
+    "info": {
+        "name": "Verso-Backend API",
+        "description": "REST API collection for Verso-Backend sovereign business operating system.\n\n## Authentication\nAll requests require Bearer token authentication.\n\n## Setup\n1. Create an API key in Admin → API Keys\n2. Add the key to the `api_key` environment variable\n3. Set `base_url` to your server URL",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "version": "1.0.0"
+    },
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{api_key}}",
+                "type": "string"
+            }
+        ]
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:5000",
+            "type": "string"
+        },
+        {
+            "key": "api_key",
+            "value": "sk_test_your_api_key_here",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "Leads",
+            "item": [
+                {
+                    "name": "List Leads",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/leads?page=1&per_page=25",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "leads"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number"
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "25",
+                                    "description": "Items per page (max 100)"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "New",
+                                    "description": "Filter by status",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "created_after",
+                                    "value": "2024-01-01T00:00:00Z",
+                                    "description": "Filter by date",
+                                    "disabled": true
+                                }
+                            ]
+                        },
+                        "description": "Get all leads with optional filtering, sorting, and pagination."
+                    }
+                },
+                {
+                    "name": "Get Lead",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/leads/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "leads",
+                                "1"
+                            ]
+                        },
+                        "description": "Get a single lead by ID."
+                    }
+                },
+                {
+                    "name": "Create Lead",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"email\": \"john@example.com\",\n    \"phone\": \"+1-555-123-4567\",\n    \"message\": \"Interested in your services\",\n    \"source\": \"api\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/leads",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "leads"
+                            ]
+                        },
+                        "description": "Create a new lead."
+                    }
+                },
+                {
+                    "name": "Update Lead",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"Contacted\",\n    \"notes\": \"Called and left voicemail\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/leads/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "leads",
+                                "1"
+                            ]
+                        },
+                        "description": "Update an existing lead."
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Orders",
+            "item": [
+                {
+                    "name": "List Orders",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/orders?page=1&per_page=25",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "orders"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "25"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "paid",
+                                    "disabled": true
+                                }
+                            ]
+                        },
+                        "description": "Get all orders with optional filtering."
+                    }
+                },
+                {
+                    "name": "Get Order",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/orders/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "orders",
+                                "1"
+                            ]
+                        },
+                        "description": "Get a single order with full details including items."
+                    }
+                },
+                {
+                    "name": "Update Order",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"shipped\",\n    \"tracking_number\": \"1Z999AA10123456784\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/orders/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "orders",
+                                "1"
+                            ]
+                        },
+                        "description": "Update order status or fulfillment details."
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Products",
+            "item": [
+                {
+                    "name": "List Products",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/products?page=1&per_page=25",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "products"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "25"
+                                },
+                                {
+                                    "key": "is_digital",
+                                    "value": "false",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "in_stock",
+                                    "value": "true",
+                                    "disabled": true
+                                }
+                            ]
+                        },
+                        "description": "Get all products with optional filtering."
+                    }
+                },
+                {
+                    "name": "Get Product",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/products/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "products",
+                                "1"
+                            ]
+                        },
+                        "description": "Get a single product by ID."
+                    }
+                },
+                {
+                    "name": "Create Product",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Premium Widget\",\n    \"description\": \"A high-quality widget for professionals\",\n    \"price\": 4999,\n    \"inventory_count\": 50,\n    \"is_digital\": false\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/products",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "products"
+                            ]
+                        },
+                        "description": "Create a new product. Price is in cents."
+                    }
+                },
+                {
+                    "name": "Update Product",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"price\": 3999,\n    \"inventory_count\": 100\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/products/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "products",
+                                "1"
+                            ]
+                        },
+                        "description": "Update an existing product."
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Webhooks",
+            "item": [
+                {
+                    "name": "List Webhooks",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/webhooks",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "webhooks"
+                            ]
+                        },
+                        "description": "Get all configured outbound webhooks."
+                    }
+                },
+                {
+                    "name": "Create Webhook",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Order Notifications\",\n    \"url\": \"https://your-server.com/webhooks/verso\",\n    \"events\": [\"order.created\", \"order.updated\"]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/webhooks",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "webhooks"
+                            ]
+                        },
+                        "description": "Create a new outbound webhook. Returns the signing secret."
+                    }
+                },
+                {
+                    "name": "Delete Webhook",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/webhooks/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "webhooks",
+                                "1"
+                            ]
+                        },
+                        "description": "Delete an existing webhook."
+                    }
+                }
+            ]
+        }
+    ]
+}

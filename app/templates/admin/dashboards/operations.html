@@ -1,0 +1,346 @@
+{% extends "base.html" %}
+
+{% block title %}Operations Dashboard{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/admindash.css') }}">
+<style>
+    .ops-container {
+        max-width: 1300px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .ops-header {
+        background: linear-gradient(135deg, #0d7377, #14919b);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .ops-header h1 {
+        color: #fff;
+        margin: 0;
+        font-size: 1.75rem;
+    }
+
+    .ops-header .today {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1rem;
+    }
+
+    .dashboard-nav {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .dashboard-nav a {
+        padding: 0.6rem 1.25rem;
+        background: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.8);
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+    .dashboard-nav a:hover,
+    .dashboard-nav a.active {
+        background: rgba(255, 255, 255, 0.25);
+        color: #fff;
+    }
+
+    .ops-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .ops-card {
+        background: rgba(42, 42, 42, 0.9);
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .ops-card-header {
+        padding: 1rem 1.25rem;
+        background: rgba(0, 0, 0, 0.3);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .ops-card-header h3 {
+        margin: 0;
+        font-size: 1rem;
+        color: #fff;
+    }
+
+    .ops-card-header .count {
+        background: var(--primary-color, #4169e1);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        color: #fff;
+    }
+
+    .ops-card-body {
+        padding: 1rem;
+        max-height: 350px;
+        overflow-y: auto;
+    }
+
+    .ops-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .ops-list-item {
+        padding: 0.75rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .ops-list-item:last-child {
+        border-bottom: none;
+    }
+
+    .ops-list-item .info {
+        flex: 1;
+    }
+
+    .ops-list-item .title {
+        color: #fff;
+        font-weight: 500;
+    }
+
+    .ops-list-item .meta {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .ops-list-item .time {
+        color: var(--primary-color, #4169e1);
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .status-tag {
+        padding: 0.2rem 0.6rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-tag.pending {
+        background: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+    }
+
+    .status-tag.failed {
+        background: rgba(220, 53, 69, 0.2);
+        color: #dc3545;
+    }
+
+    .status-tag.urgent {
+        background: rgba(220, 53, 69, 0.3);
+        color: #dc3545;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .action-btn {
+        padding: 0.4rem 0.8rem;
+        background: var(--primary-color, #4169e1);
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        text-decoration: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="section-spacer"></div>
+
+<div class="ops-container">
+    <div class="ops-header">
+        <div>
+            <h1><i class="fas fa-cogs"></i> Operations Dashboard</h1>
+            <p class="today">{{ data.today }}</p>
+        </div>
+        <div class="dashboard-nav">
+            <a href="{{ url_for('admin.owner_dashboard') }}">Owner</a>
+            <a href="{{ url_for('admin.operations_dashboard') }}" class="active">Operations</a>
+            <a href="{{ url_for('admin.sales_dashboard') }}">Sales</a>
+            <a href="{{ url_for('admin.admin_dashboard') }}">Main</a>
+        </div>
+    </div>
+
+    <div class="ops-grid">
+        <!-- Today's Appointments -->
+        <div class="ops-card">
+            <div class="ops-card-header">
+                <h3><i class="fas fa-calendar-day"></i> Today's Appointments</h3>
+                <span class="count">{{ data.todays_appointments|length }}</span>
+            </div>
+            <div class="ops-card-body">
+                {% if data.todays_appointments %}
+                <ul class="ops-list">
+                    {% for appt in data.todays_appointments %}
+                    <li class="ops-list-item">
+                        <div class="info">
+                            <div class="title">{{ appt.first_name }} {{ appt.last_name }}</div>
+                            <div class="meta">{{ appt.service.name if appt.service else 'Consultation' }} • {{
+                                appt.estimator.name if appt.estimator else 'TBA' }}</div>
+                        </div>
+                        <span class="time">{{ appt.local_time.strftime('%I:%M %p') if appt.local_time else 'TBD'
+                            }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state">No appointments today</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Unfulfilled Orders -->
+        <div class="ops-card">
+            <div class="ops-card-header">
+                <h3><i class="fas fa-box-open"></i> Orders to Fulfill</h3>
+                <span class="count">{{ data.unfulfilled_orders|length }}</span>
+            </div>
+            <div class="ops-card-body">
+                {% if data.unfulfilled_orders %}
+                <ul class="ops-list">
+                    {% for order in data.unfulfilled_orders %}
+                    <li class="ops-list-item">
+                        <div class="info">
+                            <div class="title">Order #{{ order.id }}</div>
+                            <div class="meta">${{ '%.2f' % (order.total_amount / 100) }} • {{ order.items|length }}
+                                items</div>
+                        </div>
+                        <a href="{{ url_for('orders_admin.order_detail', order_id=order.id) }}"
+                            class="action-btn">Process</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state">All orders fulfilled! 🎉</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Pending Leave Requests -->
+        <div class="ops-card">
+            <div class="ops-card-header">
+                <h3><i class="fas fa-user-clock"></i> Leave Requests</h3>
+                <span class="count">{{ data.pending_leave|length }}</span>
+            </div>
+            <div class="ops-card-body">
+                {% if data.pending_leave %}
+                <ul class="ops-list">
+                    {% for leave in data.pending_leave %}
+                    <li class="ops-list-item">
+                        <div class="info">
+                            <div class="title">{{ leave.user.username if leave.user else 'Employee' }}</div>
+                            <div class="meta">{{ leave.start_date.strftime('%b %d') }} - {{ leave.end_date.strftime('%b
+                                %d') }} ({{ leave.leave_type }})</div>
+                        </div>
+                        <span class="status-tag pending">Pending</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state">No pending requests</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Staff on Leave Today -->
+        <div class="ops-card">
+            <div class="ops-card-header">
+                <h3><i class="fas fa-umbrella-beach"></i> Staff Out Today</h3>
+                <span class="count">{{ data.staff_on_leave|length }}</span>
+            </div>
+            <div class="ops-card-body">
+                {% if data.staff_on_leave %}
+                <ul class="ops-list">
+                    {% for user in data.staff_on_leave %}
+                    <li class="ops-list-item">
+                        <div class="info">
+                            <div class="title">{{ user.first_name or user.username }} {{ user.last_name or '' }}</div>
+                            <div class="meta">{{ user.email }}</div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state">All staff available</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Failed Tasks -->
+        {% if data.failed_tasks %}
+        <div class="ops-card">
+            <div class="ops-card-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Failed Tasks</h3>
+                <span class="count" style="background: #dc3545;">{{ data.failed_tasks|length }}</span>
+            </div>
+            <div class="ops-card-body">
+                <ul class="ops-list">
+                    {% for task in data.failed_tasks %}
+                    <li class="ops-list-item">
+                        <div class="info">
+                            <div class="title">{{ task.name }}</div>
+                            <div class="meta">{{ task.error_message[:50] if task.error_message else 'No error message'
+                                }}...</div>
+                        </div>
+                        <span class="status-tag failed">Failed</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Reschedule Requests -->
+        {% if data.pending_reschedules %}
+        <div class="ops-card">
+            <div class="ops-card-header">
+                <h3><i class="fas fa-calendar-alt"></i> Reschedule Requests</h3>
+                <span class="count">{{ data.pending_reschedules|length }}</span>
+            </div>
+            <div class="ops-card-body">
+                <ul class="ops-list">
+                    {% for req in data.pending_reschedules %}
+                    <li class="ops-list-item">
+                        <div class="info">
+                            <div class="title">Appointment #{{ req.appointment_id }}</div>
+                            <div class="meta">{{ req.reason[:40] if req.reason else 'No reason given' }}...</div>
+                        </div>
+                        <a href="{{ url_for('admin.list_reschedule_requests') }}" class="action-btn">Review</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="section-spacer"></div>
+{% endblock %}

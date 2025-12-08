@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}API Keys{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components/admin-data-table.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">API Keys</h1>
+        <a href="{{ url_for('admin.new_api_key') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i> Generate New Key
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h6 class="mb-0 fw-bold text-primary">Active API Keys</h6>
+        </div>
+        <div class="card-body">
+            <div data-react-component="AdminDataTable" data-react-props='{
+                "columns": [
+                    {"accessorKey": "name", "header": "Name", "sortable": true},
+                    {"accessorKey": "prefix", "header": "Prefix", "html": true},
+                    {"accessorKey": "scopes", "header": "Scopes", "html": true},
+                    {"accessorKey": "created", "header": "Created", "sortable": true},
+                    {"accessorKey": "last_used", "header": "Last Used", "sortable": true},
+                    {"accessorKey": "status", "header": "Status", "html": true},
+                    {"accessorKey": "actions", "header": "Actions", "html": true, "sortable": false}
+                ],
+                "data": {{ keys_json | safe }},
+                "idKey": "id",
+                "defaultPageSize": 25,
+                "emptyMessage": "No API keys found."
+            }'>
+                <!-- Loading fallback -->
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

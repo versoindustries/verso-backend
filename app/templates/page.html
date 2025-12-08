@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title }} | {{ config['SITE_NAME'] | default('Verso') }}{% endblock %}
+
+{% block description %}{{ page.meta_description | default('') }}{% endblock %}
+
+{% block body %}
+<!-- Dynamic Page Content -->
+<div class="page-content-wrapper">
+    <div class="container section-spacer">
+        <h1 class="page-title">{{ page.title }}</h1>
+        <div class="page-content">
+            {{ page_content | safe }}
+        </div>
+    </div>
+</div>
+{% endblock %}

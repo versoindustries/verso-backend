@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h2><i class="fas fa-plus me-2"></i>Create Conversion Funnel</h2>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <form method="POST" id="funnelForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Funnel Name *</label>
+                            <input type="text" name="name" class="form-control" required
+                                placeholder="e.g., Purchase Funnel">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea name="description" class="form-control" rows="2"
+                        placeholder="Optional description"></textarea>
+                </div>
+
+                <hr>
+
+                <h5 class="mb-3"><i class="fas fa-list-ol me-2"></i>Funnel Steps</h5>
+                <p class="text-muted">Add conversion goals in order. Users must complete each step to progress through
+                    the funnel.</p>
+
+                <div id="stepsContainer">
+                    <div class="step-row mb-3 d-flex align-items-center gap-3">
+                        <span class="badge bg-primary rounded-circle"
+                            style="width: 30px; height: 30px; line-height: 22px;">1</span>
+                        <input type="text" name="step_name[]" class="form-control"
+                            placeholder="Step name (e.g., Homepage Visit)" style="max-width: 300px;">
+                        <select name="step_goal[]" class="form-select" style="max-width: 300px;">
+                            <option value="">Select Goal...</option>
+                            {% for goal in goals %}
+                            <option value="{{ goal.id }}">{{ goal.name }} ({{ goal.goal_type }})</option>
+                            {% endfor %}
+                        </select>
+                        <button type="button" class="btn btn-outline-danger btn-remove-step" onclick="removeStep(this)"
+                            style="display: none;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-outline-primary mb-4" onclick="addStep()">
+                    <i class="fas fa-plus me-2"></i>Add Step
+                </button>
+
+                {% if not goals %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    No conversion goals defined yet. <a href="{{ url_for('analytics.create_goal') }}">Create goals
+                        first</a> before building a funnel.
+                </div>
+                {% endif %}
+
+                <hr>
+
+                <div class="d-flex justify-content-between">
+                    <a href="{{ url_for('analytics.funnels') }}" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary" {% if not goals %}disabled{% endif %}>
+                        <i class="fas fa-save me-2"></i>Create Funnel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    let stepCount = 1;
+
+    function addStep() {
+        stepCount++;
+        const container = document.getElementById('stepsContainer');
+        const stepHtml = `
+        <div class="step-row mb-3 d-flex align-items-center gap-3">
+            <span class="badge bg-primary rounded-circle" style="width: 30px; height: 30px; line-height: 22px;">${stepCount}</span>
+            <input type="text" name="step_name[]" class="form-control" placeholder="Step name" style="max-width: 300px;">
+            <select name="step_goal[]" class="form-select" style="max-width: 300px;">
+                <option value="">Select Goal...</option>
+                {% for goal in goals %}
+                <option value="{{ goal.id }}">{{ goal.name }} ({{ goal.goal_type }})</option>
+                {% endfor %}
+            </select>
+            <button type="button" class="btn btn-outline-danger btn-remove-step" onclick="removeStep(this)">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+        container.insertAdjacentHTML('beforeend', stepHtml);
+        updateRemoveButtons();
+    }
+
+    function removeStep(btn) {
+        btn.closest('.step-row').remove();
+        renumberSteps();
+        updateRemoveButtons();
+    }
+
+    function renumberSteps() {
+        const steps = document.querySelectorAll('.step-row');
+        stepCount = steps.length;
+        steps.forEach((step, index) => {
+            step.querySelector('.badge').textContent = index + 1;
+        });
+    }
+
+    function updateRemoveButtons() {
+        const steps = document.querySelectorAll('.step-row');
+        steps.forEach((step, index) => {
+            const btn = step.querySelector('.btn-remove-step');
+            btn.style.display = steps.length > 1 ? 'inline-block' : 'none';
+        });
+    }
+</script>
+{% endblock %}

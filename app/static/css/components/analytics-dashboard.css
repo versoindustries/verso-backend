@@ -1,0 +1,174 @@
+/**
+ * AnalyticsDashboard Component Styles
+ * 
+ * Styles for the React AnalyticsDashboard component.
+ * Import this in templates that use the AnalyticsDashboard component.
+ */
+
+/* =============================================================================
+   Analytics KPI Grid
+   ============================================================================= */
+.analytics-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.analytics-kpi-card {
+    padding: 1.25rem;
+    border-radius: var(--component-border-radius, 0.375rem);
+    color: #fff;
+}
+
+.analytics-kpi-primary {
+    background: linear-gradient(135deg, #4169e1, #3458c5);
+}
+
+.analytics-kpi-success {
+    background: linear-gradient(135deg, #28a745, #1e7e34);
+}
+
+.analytics-kpi-warning {
+    background: linear-gradient(135deg, #ffc107, #e0a800);
+    color: #212529;
+}
+
+.analytics-kpi-info {
+    background: linear-gradient(135deg, #17a2b8, #138496);
+}
+
+.analytics-kpi-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.analytics-kpi-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.analytics-kpi-title {
+    font-size: 0.8rem;
+    opacity: 0.85;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+}
+
+.analytics-kpi-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+}
+
+.analytics-kpi-icon {
+    opacity: 0.5;
+}
+
+/* =============================================================================
+   Analytics Charts
+   ============================================================================= */
+.analytics-charts-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.analytics-chart-card {
+    background: var(--component-bg, rgba(42, 42, 42, 0.95));
+    border: 1px solid var(--component-border-color, rgba(255, 255, 255, 0.1));
+    border-radius: var(--component-border-radius, 0.375rem);
+    overflow: hidden;
+}
+
+.analytics-chart-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--component-border-color, rgba(255, 255, 255, 0.1));
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.analytics-chart-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #fff;
+    display: flex;
+    align-items: center;
+}
+
+.analytics-chart-body {
+    padding: 1.25rem;
+    min-height: 300px;
+    position: relative;
+}
+
+.analytics-chart-large .analytics-chart-body {
+    min-height: 320px;
+}
+
+.analytics-chart-small .analytics-chart-body {
+    min-height: 270px;
+}
+
+.analytics-chart-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+}
+
+/* =============================================================================
+   Devices Section
+   ============================================================================= */
+.analytics-devices-section {
+    margin-bottom: 1.5rem;
+}
+
+.analytics-chart-devices {
+    max-width: 300px;
+}
+
+.analytics-chart-devices .analytics-chart-body {
+    min-height: 220px;
+}
+
+/* =============================================================================
+   Canvas Charts
+   ============================================================================= */
+.analytics-chart-body canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* =============================================================================
+   Responsive
+   ============================================================================= */
+@media (max-width: 1200px) {
+    .analytics-kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .analytics-charts-row {
+        grid-template-columns: 1fr;
+    }
+
+    .analytics-chart-devices {
+        max-width: none;
+    }
+}
+
+@media (max-width: 576px) {
+    .analytics-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .analytics-kpi-value {
+        font-size: 1.5rem;
+    }
+}

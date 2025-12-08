@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block additional_css %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/blog.css') }}">
+{% endblock %}
+
+{% block title %}{{ series.title|e }} - Post Series{% endblock %}
+
+{% block description %}{{ series.description or 'A series of posts: ' + series.title }}{% endblock %}
+
+{% block content %}
+<section class="header-section">
+    <div class="container text-center py-10">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">
+            <i class="fas fa-layer-group mr-2"></i>{{ series.title|e }}
+        </h1>
+        {% if series.description %}
+        <p class="text-lg md:text-xl font-light text-gray-600 max-w-2xl mx-auto">{{ series.description|e }}</p>
+        {% endif %}
+        <p class="text-md text-gray-500 mt-2">
+            {{ posts|length }} post{{ 's' if posts|length != 1 else '' }} in this series
+        </p>
+        <hr class="w-24 mx-auto mt-6 border-gray-300">
+    </div>
+</section>
+
+<section class="series-posts py-8">
+    <div class="container max-w-4xl mx-auto">
+        {% if posts %}
+        <ol class="space-y-4">
+            {% for post in posts %}
+            <li class="flex items-start gap-4 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <!-- Order Number -->
+                <div
+                    class="flex-shrink-0 w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-lg">
+                    {{ loop.index }}
+                </div>
+
+                <!-- Post Content -->
+                <div class="flex-1">
+                    <h2 class="text-xl font-bold hover:text-blue-600 transition-colors">
+                        <a href="{{ url_for('blog.show_post', slug=post.slug) }}">{{ post.title|e }}</a>
+                    </h2>
+                    <p class="text-gray-600 text-sm mt-1">
+                        {{ post.meta_description or post.content[:150]|striptags|e }}...
+                    </p>
+                    <div class="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                        <time datetime="{{ post.created_at.isoformat() }}">
+                            {{ post.created_at.strftime('%B %d, %Y') }}
+                        </time>
+                        {% if post.read_time_minutes %}
+                        <span><i class="fas fa-clock mr-1"></i>{{ post.read_time_minutes }} min read</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Read Button -->
+                <a href="{{ url_for('blog.show_post', slug=post.slug) }}"
+                    class="flex-shrink-0 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                    Read <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </li>
+            {% endfor %}
+        </ol>
+        {% else %}
+        <div class="text-center py-10">
+            <i class="fas fa-layer-group text-4xl text-gray-400 mb-4"></i>
+            <p class="text-lg text-gray-600">No posts in this series yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="back-link py-4">
+    <div class="container text-center">
+        <a href="{{ url_for('blog.show_blog') }}" class="text-blue-500 hover:underline">
+            <i class="fas fa-arrow-left mr-1"></i>Back to Blog
+        </a>
+    </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Shared Documents{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-share-alt me-2"></i>Documents Shared With Me</h1>
+        <a href="{{ url_for('employee.dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+        </a>
+    </div>
+
+    {% if shares %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Document</th>
+                    <th>Category</th>
+                    <th>Shared By</th>
+                    <th>Shared On</th>
+                    <th>Permissions</th>
+                    <th>Signature</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for share in shares %}
+                <tr>
+                    <td>
+                        <i class="fas fa-file-alt me-1"></i>
+                        {{ share.document.title }}
+                    </td>
+                    <td>
+                        <span class="badge bg-secondary">{{ share.document.category }}</span>
+                    </td>
+                    <td>{{ share.shared_by.first_name or '' }} {{ share.shared_by.last_name or share.shared_by.username
+                        }}</td>
+                    <td>{{ share.shared_at.strftime('%Y-%m-%d') if share.shared_at else 'N/A' }}</td>
+                    <td>
+                        {% if share.permissions == 'download' %}
+                        <span class="badge bg-success">View & Download</span>
+                        {% else %}
+                        <span class="badge bg-info">View Only</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if share.document.requires_signature %}
+                        {% if share.document.signed_by_id %}
+                        <span class="badge bg-success"><i class="fas fa-check me-1"></i>Signed</span>
+                        {% else %}
+                        <span class="badge bg-warning"><i class="fas fa-pen me-1"></i>Required</span>
+                        {% endif %}
+                        {% else %}
+                        <span class="text-muted">N/A</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('employee.view_doc', doc_id=share.document.id) }}"
+                            class="btn btn-sm btn-primary" title="View">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        {% if share.document.requires_signature and not share.document.signed_by_id %}
+                        <form action="{{ url_for('employee.sign_doc', doc_id=share.document.id) }}" method="post"
+                            class="d-inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-sm btn-warning" title="Sign Document">
+                                <i class="fas fa-signature"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>No documents have been shared with you yet.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

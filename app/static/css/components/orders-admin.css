@@ -1,0 +1,107 @@
+/**
+ * Orders Admin Styles
+ * 
+ * Component-specific styles for the orders admin interface.
+ */
+
+.admin-orders {
+    padding: 1.5rem;
+}
+
+.admin-orders .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.admin-orders .page-header h1 {
+    margin: 0;
+}
+
+.admin-orders .filter-form select {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+/* Status badges */
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-paid {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-processing {
+    background: #cce5ff;
+    color: #004085;
+}
+
+.status-shipped {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.status-delivered {
+    background: #c3e6cb;
+    color: #155724;
+}
+
+.status-cancelled {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-refunded {
+    background: #e2e3e5;
+    color: #383d41;
+}
+
+/* Pagination */
+.admin-orders .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.admin-orders .page-info {
+    color: #666;
+}
+
+/* Empty state */
+.admin-orders .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: #fff;
+    border-radius: 8px;
+}
+
+.admin-orders .empty-state i {
+    font-size: 3rem;
+    color: #ddd;
+    margin-bottom: 1rem;
+}
+
+.admin-orders .empty-state h3 {
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.admin-orders .empty-state p {
+    color: #999;
+}

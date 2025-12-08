@@ -1,0 +1,87 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block title %}Orders - Admin{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components/orders-admin.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-orders">
+    <div class="page-header">
+        <h1>Orders</h1>
+        <div class="header-actions">
+            <form action="{{ url_for('orders_admin.orders_list') }}" method="GET" class="filter-form">
+                <select name="status" onchange="this.form.submit()">
+                    <option value="">All Orders ({{ status_counts.all }})</option>
+                    <option value="pending" {% if current_status=='pending' %}selected{% endif %}>
+                        Pending ({{ status_counts.pending }})
+                    </option>
+                    <option value="paid" {% if current_status=='paid' %}selected{% endif %}>
+                        Paid ({{ status_counts.paid }})
+                    </option>
+                    <option value="shipped" {% if current_status=='shipped' %}selected{% endif %}>
+                        Shipped ({{ status_counts.shipped }})
+                    </option>
+                    <option value="delivered" {% if current_status=='delivered' %}selected{% endif %}>
+                        Delivered ({{ status_counts.delivered }})
+                    </option>
+                    <option value="cancelled" {% if current_status=='cancelled' %}selected{% endif %}>
+                        Cancelled ({{ status_counts.cancelled }})
+                    </option>
+                </select>
+            </form>
+        </div>
+    </div>
+
+    {% if orders.items %}
+    <div data-react-component="AdminDataTable" data-react-props='{
+             "columns": [
+                 {"accessorKey": "order_num", "header": "Order #", "html": true, "sortable": true},
+                 {"accessorKey": "date", "header": "Date", "sortable": true},
+                 {"accessorKey": "customer", "header": "Customer", "sortable": true},
+                 {"accessorKey": "items", "header": "Items"},
+                 {"accessorKey": "total", "header": "Total", "sortable": true},
+                 {"accessorKey": "status", "header": "Status", "html": true},
+                 {"accessorKey": "actions", "header": "Actions", "html": true, "sortable": false}
+             ],
+             "data": {{ orders_json | safe }},
+             "idKey": "id",
+             "bulkActions": {{ bulk_actions | safe }},
+             "bulkActionUrl": "{{ url_for(' orders_admin.bulk_update_status') }}", "csrfToken" : "{{ csrf_token() }}"
+        , "defaultPageSize" : 20, "emptyMessage" : "No orders found." }'>
+        <!-- Loading fallback -->
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if orders.pages > 1 %}
+    <nav class="pagination">
+        {% if orders.has_prev %}
+        <a href="{{ url_for('orders_admin.orders_list', page=orders.prev_num, status=current_status) }}"
+            class="btn btn-sm">&laquo; Previous</a>
+        {% endif %}
+
+        <span class="page-info">Page {{ orders.page }} of {{ orders.pages }}</span>
+
+        {% if orders.has_next %}
+        <a href="{{ url_for('orders_admin.orders_list', page=orders.next_num, status=current_status) }}"
+            class="btn btn-sm">Next &raquo;</a>
+        {% endif %}
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-shopping-bag"></i>
+        <h3>No Orders Found</h3>
+        <p>{% if current_status %}No {{ current_status }} orders.{% else %}No orders have been placed yet.{% endif %}
+        </p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

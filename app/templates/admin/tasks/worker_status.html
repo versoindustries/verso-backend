@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Worker Status{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-server"></i> Worker Status</h1>
+        <a href="{{ url_for('tasks_admin.dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i>
+        Workers send heartbeats every ~1 minute. A worker is considered active if its last heartbeat was within 2
+        minutes.
+    </div>
+
+    <div class="card">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Status</th>
+                        <th>Worker ID</th>
+                        <th>Hostname</th>
+                        <th>Started</th>
+                        <th>Last Heartbeat</th>
+                        <th>Tasks Processed</th>
+                        <th>Tasks Failed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for worker in workers %}
+                    <tr>
+                        <td>
+                            {% if worker.is_alive(120) %}
+                            <span class="badge bg-success"><i class="fas fa-circle"></i> Active</span>
+                            {% elif worker.status == 'stopped' %}
+                            <span class="badge bg-secondary"><i class="fas fa-circle"></i> Stopped</span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark"><i class="fas fa-circle"></i> Stale</span>
+                            {% endif %}
+                        </td>
+                        <td><code>{{ worker.worker_id }}</code></td>
+                        <td>{{ worker.hostname or '-' }}</td>
+                        <td>{{ worker.started_at.strftime('%Y-%m-%d %H:%M') if worker.started_at else '-' }}</td>
+                        <td>
+                            {{ worker.last_heartbeat.strftime('%Y-%m-%d %H:%M:%S') if worker.last_heartbeat else '-' }}
+                            {% if worker.last_heartbeat %}
+                            <br>
+                            <small class="text-muted">
+                                {{ ((now - worker.last_heartbeat).total_seconds() / 60)|int }} min ago
+                            </small>
+                            {% endif %}
+                        </td>
+                        <td><span class="badge bg-success">{{ worker.tasks_processed }}</span></td>
+                        <td><span class="badge bg-danger">{{ worker.tasks_failed }}</span></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            <i class="fas fa-exclamation-triangle text-warning fa-2x mb-2"></i><br>
+                            No workers have registered yet. Start a worker with <code>flask run-worker</code>.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

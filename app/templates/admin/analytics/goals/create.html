@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h2><i class="fas fa-plus me-2"></i>Create Conversion Goal</h2>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <form method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Goal Name *</label>
+                            <input type="text" name="name" class="form-control" required
+                                placeholder="e.g., Contact Form Submission">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Goal Type *</label>
+                            <select name="goal_type" class="form-select" required>
+                                <option value="page_visit">Page Visit</option>
+                                <option value="form_submit">Form Submission</option>
+                                <option value="purchase">Purchase</option>
+                                <option value="signup">Signup / Registration</option>
+                                <option value="custom">Custom Event</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea name="description" class="form-control" rows="2"
+                        placeholder="Optional description of this goal"></textarea>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Target Path</label>
+                            <input type="text" name="target_path" class="form-control"
+                                placeholder="e.g., /thank-you or /checkout/success">
+                            <small class="text-muted">For page visit goals, the URL path that triggers
+                                conversion</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Conversion Value ($)</label>
+                            <input type="number" name="target_value" class="form-control" step="0.01" min="0"
+                                placeholder="0.00">
+                            <small class="text-muted">Monetary value assigned to each conversion</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input type="checkbox" name="count_once_per_session" class="form-check-input" id="countOnce"
+                            checked>
+                        <label class="form-check-label" for="countOnce">
+                            Count only once per session
+                        </label>
+                        <small class="form-text text-muted d-block">If checked, multiple conversions in the same session
+                            will only be counted once</small>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="d-flex justify-content-between">
+                    <a href="{{ url_for('analytics.goals') }}" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Create Goal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

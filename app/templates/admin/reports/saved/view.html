@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            {% if report.report_type == 'revenue' %}
+            <i class="fas fa-dollar-sign text-success me-2"></i>
+            {% elif report.report_type == 'products' %}
+            <i class="fas fa-box text-primary me-2"></i>
+            {% elif report.report_type == 'customers' %}
+            <i class="fas fa-users text-info me-2"></i>
+            {% elif report.report_type == 'traffic' %}
+            <i class="fas fa-chart-line text-warning me-2"></i>
+            {% else %}
+            <i class="fas fa-file-alt text-secondary me-2"></i>
+            {% endif %}
+            {{ report.name }}
+        </h2>
+        <span class="badge bg-secondary">{{ report.report_type | title }}</span>
+    </div>
+
+    {% if report.description %}
+    <p class="text-muted mb-4">{{ report.description }}</p>
+    {% endif %}
+
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-table me-2"></i>Report Results
+        </div>
+        <div class="card-body">
+            {% if data.error %}
+            <div class="alert alert-danger">{{ data.error }}</div>
+
+            {% elif report.report_type == 'revenue' %}
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="text-center p-3 border rounded">
+                        <div class="text-muted small">Total Revenue</div>
+                        <div class="fs-4 fw-bold text-success">${{ "{:,.2f}".format(data.total_revenue) }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center p-3 border rounded">
+                        <div class="text-muted small">Orders</div>
+                        <div class="fs-4 fw-bold">{{ "{:,}".format(data.order_count) }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center p-3 border rounded">
+                        <div class="text-muted small">Avg Order Value</div>
+                        <div class="fs-4 fw-bold">${{ "{:,.2f}".format(data.aov) }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center p-3 border rounded">
+                        <div class="text-muted small">Growth</div>
+                        <div class="fs-4 fw-bold {{ 'text-success' if data.revenue_growth > 0 else 'text-danger' }}">
+                            {{ data.revenue_growth }}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% elif report.report_type == 'products' %}
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th class="text-end">Units</th>
+                            <th class="text-end">Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in data.products[:20] %}
+                        <tr>
+                            <td>{{ product.product_name }}</td>
+                            <td class="text-end">{{ product.units_sold }}</td>
+                            <td class="text-end">${{ "{:,.2f}".format(product.total_revenue) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% elif report.report_type == 'customers' %}
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th class="text-end">Orders</th>
+                            <th class="text-end">Total Spent</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for customer in data.customers[:20] %}
+                        <tr>
+                            <td>{{ customer.email }}</td>
+                            <td class="text-end">{{ customer.order_count }}</td>
+                            <td class="text-end">${{ "{:,.2f}".format(customer.total_spent) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% elif report.report_type == 'tax' %}
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <div class="text-center p-3 border rounded">
+                        <div class="text-muted small">Total Tax</div>
+                        <div class="fs-4 fw-bold text-warning">${{ "{:,.2f}".format(data.total_tax) }}</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center p-3 border rounded">
+                        <div class="text-muted small">Orders</div>
+                        <div class="fs-4 fw-bold">{{ data.total_orders }}</div>
+                    </div>
+                </div>
+            </div>
+
+            {% elif report.report_type == 'traffic' %}
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="text-center p-3 border rounded">
+                        <div class="text-muted small">Page Views</div>
+                        <div class="fs-4 fw-bold">{{ "{:,}".format(data.page_views) }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center p-3 border rounded">
+                        <div class="text-muted small">Sessions</div>
+                        <div class="fs-4 fw-bold">{{ "{:,}".format(data.unique_sessions) }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center p-3 border rounded">
+                        <div class="text-muted small">Bounce Rate</div>
+                        <div class="fs-4 fw-bold">{{ data.bounce_rate }}%</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center p-3 border rounded">
+                        <div class="text-muted small">Avg Duration</div>
+                        <div class="fs-4 fw-bold">{{ data.avg_session_duration }}s</div>
+                    </div>
+                </div>
+            </div>
+
+            {% else %}
+            <pre>{{ data | tojson(indent=2) }}</pre>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a href="{{ url_for('reports.saved') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Saved Reports
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Lead Management{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components/kanban-board.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Lead Management (Kanban)</h2>
+        </div>
+        <div class="col text-right">
+            <a href="{{ url_for('crm.analytics') }}" class="btn btn-outline-info mr-2">
+                <i class="fas fa-chart-bar"></i> Analytics
+            </a>
+            <a href="{{ url_for('crm.pipeline_settings') }}" class="btn btn-outline-secondary mr-2">
+                <i class="fas fa-cog"></i> Pipeline Settings
+            </a>
+            <a href="{{ url_for('crm.email_templates') }}" class="btn btn-outline-secondary mr-2">
+                <i class="fas fa-envelope"></i> Templates
+            </a>
+            <a href="{{ url_for('crm.duplicates') }}" class="btn btn-outline-warning">
+                <i class="fas fa-clone"></i> Duplicates
+            </a>
+        </div>
+    </div>
+
+    <div data-react-component="KanbanBoard" data-react-props='{
+        "columns": {{ columns_json | safe }},
+        "updateStatusUrl": "{{ update_status_url }}",
+        "leadDetailUrl": "{{ lead_detail_url }}",
+        "csrfToken": "{{ csrf_token() }}"
+    }'>
+        <!-- SSR Fallback / Loading State -->
+        <div class="kanban-board">
+            <div class="kanban-columns">
+                {% for stage_name, data in columns.items() %}
+                <div class="kanban-column">
+                    <div class="kanban-column-header" style="border-top-color: {{ data.stage.color }};">
+                        <span class="stage-name">{{ stage_name }}</span>
+                        <span class="lead-count" style="background-color: {{ data.stage.color }};">{{ data.leads|length
+                            }}</span>
+                    </div>
+                    <div class="kanban-column-body">
+                        <div class="text-center py-4 text-muted">
+                            <div class="spinner-border spinner-border-sm" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Activity Feed{% endblock %}
+
+{% block content %}
+<main class="dashboard-container" style="max-width: 800px; margin: 2rem auto; padding: 0 1rem;">
+    <div class="dashboard-header" style="margin-bottom: 2rem;">
+        <h1 style="font-size: 1.75rem; font-weight: 600;">Activity Feed</h1>
+        <p style="color: #666;">Your recent account activity</p>
+    </div>
+
+    <div class="activity-timeline">
+        {% if activities.items %}
+        {% for activity in activities.items %}
+        <div class="activity-item"
+            style="display: flex; gap: 1rem; padding: 1rem; margin-bottom: 0.5rem; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <div class="activity-icon"
+                style="width: 40px; height: 40px; border-radius: 50%; background: #e9ecef; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <i class="fas {{ activity.icon }}" style="color: var(--primary-color, #007bff);"></i>
+            </div>
+            <div class="activity-content" style="flex: 1;">
+                <div class="activity-title" style="font-weight: 500; color: #333;">
+                    {{ activity.title }}
+                </div>
+                {% if activity.description %}
+                <div class="activity-description" style="font-size: 0.875rem; color: #666; margin-top: 0.25rem;">
+                    {{ activity.description }}
+                </div>
+                {% endif %}
+                <div class="activity-time" style="font-size: 0.75rem; color: #999; margin-top: 0.5rem;">
+                    {{ activity.created_at.strftime('%b %d, %Y at %I:%M %p') }}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Pagination -->
+        {% if activities.has_prev or activities.has_next %}
+        <nav style="display: flex; justify-content: center; gap: 1rem; margin-top: 2rem;">
+            {% if activities.has_prev %}
+            <a href="{{ url_for('user.activity_feed', page=activities.prev_num) }}"
+                style="padding: 0.5rem 1rem; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333;">
+                <i class="fas fa-chevron-left"></i> Previous
+            </a>
+            {% endif %}
+            <span style="padding: 0.5rem 1rem; color: #666;">Page {{ activities.page }} of {{ activities.pages }}</span>
+            {% if activities.has_next %}
+            <a href="{{ url_for('user.activity_feed', page=activities.next_num) }}"
+                style="padding: 0.5rem 1rem; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333;">
+                Next <i class="fas fa-chevron-right"></i>
+            </a>
+            {% endif %}
+        </nav>
+        {% endif %}
+        {% else %}
+        <div class="empty-state" style="text-align: center; padding: 3rem; background: white; border-radius: 8px;">
+            <i class="fas fa-history" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
+            <h3 style="color: #666;">No activity yet</h3>
+            <p style="color: #999;">Your activity will appear here as you use the platform.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div style="text-align: center; margin-top: 2rem;">
+        <a href="{{ url_for('user.dashboard') }}" style="color: var(--primary-color, #007bff); text-decoration: none;">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</main>
+{% endblock %}

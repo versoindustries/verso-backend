@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}{{ survey.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4 class="mb-0">{{ survey.name }}</h4>
+                </div>
+                <div class="card-body">
+                    {% if survey.description %}
+                    <p class="text-muted text-center mb-4">{{ survey.description }}</p>
+                    {% endif %}
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                    {% endwith %}
+
+                    {% if already_responded %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
+                        <p class="lead mt-3">You've already submitted a response.</p>
+                        <p class="text-muted">Thank you for your feedback!</p>
+                    </div>
+                    {% else %}
+                    <form method="POST" action="{{ url_for('forms.submit_survey', survey_id=survey.id) }}"
+                        id="surveyForm">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        {% for question in survey.questions_schema %}
+                        {% set q_id = question.id %}
+                        {% set q_type = question.type %}
+                        {% set q_text = question.text %}
+                        {% set q_required = question.required | default(false) %}
+                        {% set q_scale = question.scale | default(5) %}
+
+                        <div class="mb-4">
+                            {% if q_type == 'rating' %}
+                            <!-- Rating Question -->
+                            <label class="form-label fs-5">
+                                {{ q_text }}
+                                {% if q_required %}<span class="text-danger">*</span>{% endif %}
+                            </label>
+
+                            {% if survey.survey_type == 'nps' %}
+                            <!-- NPS Scale (0-10) -->
+                            <div class="d-flex justify-content-center flex-wrap gap-1 my-3">
+                                {% for i in range(q_scale + 1) %}
+                                <div class="form-check form-check-inline">
+                                    <input type="radio" class="btn-check" name="{{ q_id }}" id="{{ q_id }}_{{ i }}"
+                                        value="{{ i }}" {{ 'required' if q_required }}>
+                                    <label class="btn btn-outline-primary" for="{{ q_id }}_{{ i }}">{{ i }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="d-flex justify-content-between text-muted small mb-2">
+                                <span>Not at all likely</span>
+                                <span>Extremely likely</span>
+                            </div>
+                            {% else %}
+                            <!-- Standard Rating (1-5) -->
+                            <div class="d-flex justify-content-center gap-2 my-3">
+                                {% for i in range(1, q_scale + 1) %}
+                                <div class="form-check form-check-inline">
+                                    <input type="radio" class="btn-check" name="{{ q_id }}" id="{{ q_id }}_{{ i }}"
+                                        value="{{ i }}" {{ 'required' if q_required }}>
+                                    <label class="btn btn-outline-primary btn-lg" for="{{ q_id }}_{{ i }}">{{ i
+                                        }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+
+                            {% elif q_type == 'textarea' %}
+                            <!-- Text Question -->
+                            <label for="{{ q_id }}" class="form-label fs-5">
+                                {{ q_text }}
+                                {% if q_required %}<span class="text-danger">*</span>{% endif %}
+                            </label>
+                            <textarea name="{{ q_id }}" id="{{ q_id }}" class="form-control" rows="4"
+                                placeholder="Share your thoughts..." {{ 'required' if q_required }}></textarea>
+
+                            {% elif q_type == 'text' %}
+                            <label for="{{ q_id }}" class="form-label fs-5">
+                                {{ q_text }}
+                                {% if q_required %}<span class="text-danger">*</span>{% endif %}
+                            </label>
+                            <input type="text" name="{{ q_id }}" id="{{ q_id }}" class="form-control" {{ 'required' if
+                                q_required }}>
+
+                            {% elif q_type == 'select' %}
+                            <label for="{{ q_id }}" class="form-label fs-5">
+                                {{ q_text }}
+                                {% if q_required %}<span class="text-danger">*</span>{% endif %}
+                            </label>
+                            <select name="{{ q_id }}" id="{{ q_id }}" class="form-select" {{ 'required' if q_required
+                                }}>
+                                <option value="">-- Select --</option>
+                                {% for opt in question.options | default([]) %}
+                                <option value="{{ opt }}">{{ opt }}</option>
+                                {% endfor %}
+                            </select>
+
+                            {% elif q_type == 'checkbox' %}
+                            <div class="form-check">
+                                <input type="checkbox" name="{{ q_id }}" id="{{ q_id }}" class="form-check-input"
+                                    value="1" {{ 'required' if q_required }}>
+                                <label class="form-check-label fs-5" for="{{ q_id }}">
+                                    {{ q_text }}
+                                    {% if q_required %}<span class="text-danger">*</span>{% endif %}
+                                </label>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                Submit Feedback
+                            </button>
+                        </div>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
