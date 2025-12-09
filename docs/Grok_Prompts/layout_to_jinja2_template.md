@@ -1,86 +1,381 @@
+### Prompt for Generating Jinja2 Templates with React Islands
 
-**Prompt for Generating Jinja2 Template from Written Layout Description**
+**Objective**: Generate a Jinja2 template that extends `base.html` based on a provided layout description, implementing the **React Islands Architecture** for interactive components while maintaining SEO compliance and server-rendered static content.
 
-**Objective**: Generate a Jinja2 template that extends `base.html` based on a provided written layout description, implementing a modern, responsive, and SEO-friendly web page layout for use in a web application.
+---
 
-**Instructions**:
+## Architecture Overview
 
-**Input**: A written layout description detailing sections of a web page, including their purpose, content, design, and placement (e.g., generated from the "Prompt for Generating Modern Layouts from Written Copy").
+Verso templates use a hybrid approach:
 
-**Output**: A Jinja2 template that:
-
-- Extends `base.html` using `{% extends "base.html" %}`.
-- Fills in the following blocks, assumed to be available in `base.html`:
-  - `title`: Set to the heading of the first section in the layout description.
-  - `description`: Set to the first paragraph of the first section in the layout description.
-  - `additional_css`: Include a link to a custom CSS file specific to the page, using `{{ url_for('static', filename='css/[page-name].css') }}`, where `[page-name]` is derived from the page's purpose or title (e.g., `edit-user.css` for an edit user page).
-  - `head`: Include SEO meta tags (e.g., Open Graph, Twitter cards, canonical link) and a simple JSON-LD schema.
-  - `content`: Implement the described sections with semantic HTML5 structure and custom CSS classes.
-  - `scripts`: Include vanilla JavaScript for any interactive elements mentioned in the description.
-- Uses semantic HTML5 elements (e.g., `<section>`, `<article>`, `<nav>`) where appropriate.
-- Applies custom CSS classes reflecting the design elements (e.g., `introduction-section`, `features-grid`) for styling, assuming styles are defined in the external CSS file linked in `additional_css`.
-- Ensures responsiveness using flexible layouts (e.g., flexbox, grid) that adapt to different screen sizes, optimized for 768px and 480px viewports with a mobile-first approach.
-- Includes placeholders for images, icons, or visuals (e.g., `{{ url_for('static', filename='images/placeholder.jpg') }}`) as described, assuming they reside in the `static/images` folder.
-- Implements interactive elements (e.g., galleries, forms) with necessary HTML and JavaScript, using placeholders where applicable.
-- Uses Font Awesome icons (free version) for icon usage, assuming inclusion in `base.html`.
-
-**SEO Implementation**:
-
-In the `head` block, include:
-```html
-<meta name="description" content="{{ description | e }}">
-<meta property="og:title" content="{{ title | e }}">
-<meta property="og:description" content="{{ description | e }}">
-<meta property="og:image" content="{{ url_for('static', filename='images/logo.png') }}">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="{{ title | e }}">
-<meta name="twitter:description" content="{{ description | e }}">
-<meta name="twitter:image" content="{{ url_for('static', filename='images/logo.png') }}">
-<link rel="canonical" href="{{ request.url }}">
-<meta name="robots" content="index, follow">
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Jinja2 Template (base.html)                                 │
+│ ┌─────────────────────────────────────────────────────────┐ │
+│ │ <div data-react-component="Header"></div>               │ │ ← React Island
+│ └─────────────────────────────────────────────────────────┘ │
+│                                                             │
+│ <main class="container">                                    │
+│   <h1>Server-Rendered SEO Content</h1>                      │ ← Jinja2 (static)
+│   <p>{{ page.description }}</p>                             │
+│                                                             │
+│   ┌───────────────────────────────────────────────────────┐ │
+│   │ <div data-react-component="ImageGallery"              │ │ ← React Island
+│   │      data-react-props='{"images": [...]}'></div>      │ │
+│   └───────────────────────────────────────────────────────┘ │
+│                                                             │
+│   <section class="static-content">                          │ ← Jinja2 (static)
+│     {% for item in items %}...{% endfor %}                  │
+│   </section>                                                │
+│ </main>                                                     │
+│                                                             │
+│ ┌─────────────────────────────────────────────────────────┐ │
+│ │ <div data-react-component="Footer"></div>               │ │ ← React Island
+│ └─────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-Add a simple JSON-LD schema:
+---
+
+## Instructions
+
+### Input
+A layout description specifying:
+- Sections with their content
+- Render method (Jinja2 static vs React Island)
+- React component names for interactive sections
+- SEO requirements
+
+### Output
+A complete Jinja2 template that:
+1. Extends `base.html`
+2. Fills all required blocks (`title`, `description`, `head`, `content`, `scripts`)
+3. Uses React Islands for interactive components via `data-react-component`
+4. Includes SEO meta tags and structured data
+5. Links to component-specific CSS
+
+---
+
+## Template Structure
+
+### Base Template Blocks
+
 ```html
+{% extends "base.html" %}
+
+{# Page Title - SEO critical #}
+{% block title %}Page Title - Brand Name{% endblock %}
+
+{# Meta Description - SEO critical #}
+{% block description %}Compelling description of page content for search results.{% endblock %}
+
+{# Additional CSS - Component styles #}
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/page-name.css') }}">
+{% endblock %}
+
+{# Head - SEO meta tags and structured data #}
+{% block head %}
+<!-- Open Graph -->
+<meta property="og:title" content="Page Title">
+<meta property="og:description" content="Page description">
+<meta property="og:image" content="{{ url_for('static', filename='images/og-image.jpg', _external=True) }}">
+<meta property="og:url" content="{{ request.url }}">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Page Title">
+<meta name="twitter:description" content="Page description">
+
+<!-- Canonical URL -->
+<link rel="canonical" href="{{ request.url }}">
+
+<!-- Structured Data -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  "name": "{{ title | e }}",
-  "description": "{{ description | e }}"
+  "name": "Page Title",
+  "description": "Page description"
 }
 </script>
+{% endblock %}
+
+{# Main Content #}
+{% block content %}
+<!-- Content sections here -->
+{% endblock %}
+
+{# Additional Scripts #}
+{% block scripts %}
+<script>
+// Page-specific JavaScript (if needed beyond React)
+</script>
+{% endblock %}
 ```
 
-**Guidelines for `base.html`**:
+---
 
-Assume `base.html` provides:
-- A `<head>` section with basic meta tags (e.g., charset, viewport), links to main CSS (e.g., `styles.css`), and common JavaScript files.
-- A `<body>` with blocks: `title`, `description`, `additional_css`, `head`, `content`, and `scripts`.
-- Placeholder structure that the generated template will override or extend.
+## React Island Mount Point Patterns
 
-The generated template only needs to fill these blocks, not redefine the full HTML structure.
-
-**Design and Responsiveness**:
-
-- Map each section from the description to an HTML structure (e.g., a two-column layout becomes `<div class="two-column-layout">` with flexbox children).
-- Use descriptive CSS classes (e.g., `feature-list`, `gallery-container`) that a developer can style in the linked CSS file to match the described design.
-- Structure content to stack or adjust on smaller screens (e.g., flexbox with `flex-wrap` or grid with media queries) using a mobile-first approach.
-- Optimize for 768px and 480px viewports, ensuring compatibility with smaller screens.
-
-**Interactive Elements**:
-
-- For galleries, include HTML (e.g., `<div class="gallery-grid">`) and basic JavaScript (e.g., lightbox functionality) in the `scripts` block.
-- For forms, use Jinja2 syntax (e.g., `{{ form.field_name }}`) and assume CSRF protection is handled by `base.html` or the form object.
-- Place JavaScript in the `scripts` block, ensuring it is lightweight and stored in `static/js` if external files are needed.
-
-**Security**:
-
-- Sanitize any dynamic content with Jinja2 filters (e.g., `|e`) if user inputs are implied in the description.
-- Avoid inline styles or scripts; use the `additional_css` block for CSS and `scripts` block for JavaScript.
-
-**Prompt Template**:
+### Basic Mount Point
+```html
+<div data-react-component="ComponentName"></div>
 ```
-Generate a Jinja2 template that extends 'base.html' based on the following written layout description. Implement the described sections with semantic HTML structure, custom CSS classes, and vanilla JavaScript for interactive elements. Always include an 'additional_css' block linking to a page-specific CSS file (e.g., {{ url_for('static', filename='css/[page-name].css') }}). Include SEO meta tags in the 'head' block and ensure the template is responsive with a mobile-first approach, optimized for 768px and 480px viewports. Use Font Awesome icons where appropriate.
 
-[Insert the written layout description here]
+### With Props from Flask
+```html
+{# In Flask route: items_json = json.dumps([...]) #}
+<div data-react-component="AdminDataTable"
+     data-react-props='{
+       "columns": {{ columns_json|safe }},
+       "data": {{ items_json|safe }}
+     }'>
+</div>
+```
+
+### With Inline Props
+```html
+<div data-react-component="ImageGallery"
+     data-react-props='{
+       "images": [
+         {"src": "/static/images/1.jpg", "alt": "Image 1"},
+         {"src": "/static/images/2.jpg", "alt": "Image 2"}
+       ]
+     }'>
+</div>
+```
+
+### With SSR Fallback (for graceful degradation)
+```html
+<div data-react-component="DataTable"
+     data-react-props='{"data": {{ data_json|safe }}}'>
+    <!-- Fallback content shown while React loads -->
+    <noscript>
+        <table class="static-table">
+            {% for item in items %}
+            <tr><td>{{ item.name }}</td></tr>
+            {% endfor %}
+        </table>
+    </noscript>
+</div>
+```
+
+---
+
+## Available React Components
+
+| Component | Purpose | Required Props |
+|-----------|---------|----------------|
+| `Header` | Site header/nav | None (uses `window.versoContext`) |
+| `Footer` | Site footer | None |
+| `AlertBar` | Promotional banner | `message`, `ctaText`, `ctaUrl` |
+| `FlashAlerts` | Flash messages | `messages` |
+| `ImageGallery` | Image carousel | `images` array |
+| `BookingWizard` | Multi-step booking | None |
+| `BookingPage` | Full booking page | Service/date data |
+| `AdminDataTable` | Sortable data table | `columns`, `data`, `bulkActions` |
+| `KanbanBoard` | Drag-drop board | `stages`, `leads` |
+| `Chart` | Data visualization | `type`, `data`, `options` |
+| `Calendar` | Event calendar | `events` |
+| `EmployeeCalendar` | Employee schedule | Calendar data |
+| `AdminCalendar` | Admin calendar | Calendar data |
+| `ProductView` | Product details | `product` object |
+| `CartPage` | Shopping cart | None |
+| `NotificationBell` | Notifications | None |
+| `ShoppingCartWidget` | Cart drawer | None |
+| `ThemeEditor` | Theme customization | Theme config |
+| `AnalyticsDashboard` | Analytics view | Analytics data |
+| `MessagingChannel` | Chat interface | Channel data |
+
+---
+
+## Complete Template Example
+
+### Flask Route
+```python
+import json
+from flask import render_template
+
+@bp.route('/products')
+def product_list():
+    products = Product.query.filter_by(active=True).all()
+    
+    # Serialize data for React component
+    products_json = json.dumps([{
+        'id': p.id,
+        'name': p.name,
+        'price': str(p.price),
+        'image': p.image_url,
+        'category': p.category.name if p.category else 'Uncategorized'
+    } for p in products])
+    
+    columns_json = json.dumps([
+        {'key': 'name', 'label': 'Product', 'sortable': True},
+        {'key': 'price', 'label': 'Price', 'sortable': True},
+        {'key': 'category', 'label': 'Category', 'sortable': True}
+    ])
+    
+    return render_template(
+        'shop/products.html',
+        products=products,  # For static content
+        products_json=products_json,  # For React
+        columns_json=columns_json
+    )
+```
+
+### Jinja2 Template
+```html
+{% extends "base.html" %}
+
+{% block title %}Products - {{ business_config.get('business_name', 'Our Store') }}{% endblock %}
+
+{% block description %}Browse our collection of products. Quality items at competitive prices with fast shipping.{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/products.css') }}">
+{% endblock %}
+
+{% block head %}
+<!-- Breadcrumb Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ url_for('main_routes.index', _external=True) }}"},
+    {"@type": "ListItem", "position": 2, "name": "Products", "item": "{{ request.url }}"}
+  ]
+}
+</script>
+
+<!-- Product List Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "itemListElement": [
+    {% for product in products[:10] %}
+    {
+      "@type": "ListItem",
+      "position": {{ loop.index }},
+      "item": {
+        "@type": "Product",
+        "name": "{{ product.name }}",
+        "url": "{{ url_for('shop.product', slug=product.slug, _external=True) }}"
+      }
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="products-page">
+    <!-- Static SEO Content -->
+    <header class="page-header">
+        <h1>Our Products</h1>
+        <p class="lead">Discover our curated selection of quality products.</p>
+    </header>
+
+    <!-- Breadcrumbs (static, SEO-visible) -->
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol>
+            <li><a href="{{ url_for('main_routes.index') }}">Home</a></li>
+            <li aria-current="page">Products</li>
+        </ol>
+    </nav>
+
+    <!-- React Island: Interactive Product Table -->
+    <section class="products-table-section">
+        <div data-react-component="AdminDataTable"
+             data-react-props='{
+               "columns": {{ columns_json|safe }},
+               "data": {{ products_json|safe }},
+               "searchable": true,
+               "pageSize": 20
+             }'>
+            <!-- Fallback for SEO/no-JS -->
+            <noscript>
+                <ul class="product-list-fallback">
+                    {% for product in products %}
+                    <li>
+                        <a href="{{ url_for('shop.product', slug=product.slug) }}">
+                            {{ product.name }} - ${{ product.price }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </noscript>
+        </div>
+    </section>
+
+    <!-- Static CTA Section -->
+    <section class="cta-section">
+        <h2>Need Help Finding Something?</h2>
+        <p>Our team is here to assist you.</p>
+        <a href="{{ url_for('main_routes.contact') }}" class="btn-primary">Contact Us</a>
+    </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Optional: Page-specific analytics or interactions
+document.addEventListener('DOMContentLoaded', function() {
+    // Track page view
+    if (window.gtag) {
+        gtag('event', 'view_item_list', {
+            'item_list_name': 'Products'
+        });
+    }
+});
+</script>
+{% endblock %}
+```
+
+---
+
+## SEO Checklist for Generated Templates
+
+- [ ] Unique, descriptive `{% block title %}`
+- [ ] Compelling `{% block description %}` (150-160 chars)
+- [ ] Single `<h1>` tag matching page topic
+- [ ] Proper heading hierarchy (H1 → H2 → H3)
+- [ ] Breadcrumb structured data
+- [ ] Page-specific structured data (Article, Product, etc.)
+- [ ] Open Graph meta tags
+- [ ] Twitter Card meta tags
+- [ ] Canonical URL
+- [ ] Alt text on all images
+- [ ] SEO-critical content in Jinja2 (not React-only)
+- [ ] `<noscript>` fallback for React components with critical content
+
+---
+
+## Prompt Template
+
+```
+Generate a Jinja2 template with React Islands based on the following layout description. 
+Use the pattern of extending base.html and mounting React components via data-react-component attributes.
+
+Layout Description:
+[paste layout specification here]
+
+Flask Route Data:
+[describe what data the route will pass to the template]
+
+SEO Requirements:
+- Page title: [title]
+- Meta description: [description]
+- Structured data type: [WebPage, Product, Article, etc.]
+
+React Components Needed:
+[list components from the registry that should be used]
+```
+
+||
+
+{Replace with your layout description, Flask route data, and SEO requirements.}

@@ -24,14 +24,17 @@ class TestPhase5(unittest.TestCase):
         self.app_context.push()
         db.create_all()
         
-        # Create Admin Role & User
-        admin_role = Role(name='admin')
-        db.session.add(admin_role)
-        db.session.commit()
+        # Create Admin Role & User (get-or-create pattern)
+        admin_role = Role.query.filter_by(name='admin').first()
+        if not admin_role:
+            admin_role = Role(name='admin')
+            db.session.add(admin_role)
+            db.session.commit()
         
         admin = User(username='admin', email='admin@example.com', password='password')
         admin.roles.append(admin_role)
         admin.tos_accepted = True
+        admin.confirmed = True
         db.session.add(admin)
         db.session.commit()
         

@@ -1,11 +1,13 @@
 from flask import Blueprint, jsonify, request
 from app.models import Estimator, Service, Availability, db, Order, OrderItem
 from app.modules.availability_service import get_available_slots
+from app.modules.security import rate_limiter
 from datetime import datetime, date
 
 booking_api_bp = Blueprint('booking_api', __name__, url_prefix='/api/booking')
 
 @booking_api_bp.route('/estimators')
+@rate_limiter.exempt
 def get_estimators():
     estimators = Estimator.query.filter_by(is_active=True).all()
     return jsonify([{
@@ -15,16 +17,18 @@ def get_estimators():
     } for e in estimators])
 
 @booking_api_bp.route('/services')
+@rate_limiter.exempt
 def get_services():
     services = Service.query.all()
     return jsonify([{
         'id': s.id,
         'name': s.name,
-        'duration': s.duration_minutes,
-        'price': s.price
+        'duration': getattr(s, 'duration_minutes', 60),
+        'price': getattr(s, 'price', None)
     } for s in services])
 
 @booking_api_bp.route('/slots')
+@rate_limiter.exempt
 def get_slots():
     estimator_id = request.args.get('estimator_id', type=int)
     date_str = request.args.get('date')
@@ -47,6 +51,7 @@ def get_slots():
         return jsonify({'error': str(e)}), 500
 
 @booking_api_bp.route('/create', methods=['POST'])
+@rate_limiter.exempt
 def create_booking():
     data = request.json
     # Basic validation and creation logic would go here

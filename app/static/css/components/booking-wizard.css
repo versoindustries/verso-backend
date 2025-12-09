@@ -1,0 +1,495 @@
+/* booking-wizard.css - Premium Booking Flow Styling */
+/* Follows base.css design system: dark theme, glassmorphism, Neon fonts */
+
+/* ============================================================================
+   BOOKING WIZARD CONTAINER
+   ============================================================================ */
+
+.booking-wizard {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    font-family: 'Neon-Regular', sans-serif;
+}
+
+.booking-wizard__title {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--text-primary);
+    text-shadow: 0 0 20px rgba(65, 105, 225, 0.3);
+    letter-spacing: 1px;
+}
+
+/* ============================================================================
+   STEP INDICATOR
+   ============================================================================ */
+
+.booking-wizard__steps {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.booking-wizard__step {
+    display: flex;
+    align-items: center;
+}
+
+.booking-wizard__step-number {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 1.2rem;
+    font-weight: bold;
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.booking-wizard__step-number--inactive {
+    background: rgba(42, 42, 42, 0.8);
+    color: rgba(255, 255, 255, 0.4);
+    border: 2px solid rgba(65, 105, 225, 0.2);
+}
+
+.booking-wizard__step-number--active {
+    background: var(--btn-gradient);
+    color: var(--text-primary);
+    border: 2px solid var(--accent-blue);
+    box-shadow: 0 0 20px rgba(65, 105, 225, 0.5),
+                0 0 40px rgba(65, 105, 225, 0.2);
+    animation: stepPulse 2s infinite ease-in-out;
+}
+
+.booking-wizard__step-number--completed {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: var(--text-primary);
+    border: 2px solid #28a745;
+}
+
+.booking-wizard__step-connector {
+    width: 60px;
+    height: 4px;
+    margin: 0 0.5rem;
+    border-radius: 2px;
+    transition: background 0.4s ease;
+}
+
+.booking-wizard__step-connector--inactive {
+    background: rgba(65, 105, 225, 0.2);
+}
+
+.booking-wizard__step-connector--active {
+    background: var(--btn-gradient);
+    box-shadow: 0 0 8px rgba(65, 105, 225, 0.4);
+}
+
+@keyframes stepPulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(65, 105, 225, 0.5); }
+    50% { box-shadow: 0 0 30px rgba(65, 105, 225, 0.8); }
+}
+
+/* ============================================================================
+   CARD CONTAINER
+   ============================================================================ */
+
+.booking-wizard__card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    border: 1px solid rgba(65, 105, 225, 0.2);
+    padding: 2.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.booking-wizard__card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--btn-gradient);
+}
+
+.booking-wizard__section-title {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.booking-wizard__section-icon {
+    color: var(--accent-blue);
+}
+
+/* ============================================================================
+   SERVICE SELECTION GRID
+   ============================================================================ */
+
+.booking-wizard__services {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+.booking-wizard__service-card {
+    background: rgba(31, 31, 31, 0.6);
+    border: 2px solid rgba(65, 105, 225, 0.15);
+    border-radius: 12px;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.booking-wizard__service-card:hover {
+    border-color: rgba(65, 105, 225, 0.5);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.booking-wizard__service-card--selected {
+    border-color: var(--accent-blue);
+    background: rgba(65, 105, 225, 0.1);
+    box-shadow: 0 0 20px rgba(65, 105, 225, 0.3);
+}
+
+.booking-wizard__service-card--selected::after {
+    content: '✓';
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 24px;
+    height: 24px;
+    background: var(--btn-gradient);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.booking-wizard__service-name {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.booking-wizard__service-meta {
+    display: flex;
+    gap: 1rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+}
+
+.booking-wizard__service-price {
+    color: var(--accent-blue);
+    font-weight: bold;
+}
+
+/* ============================================================================
+   FORM ELEMENTS
+   ============================================================================ */
+
+.booking-wizard__field {
+    margin-bottom: 1.5rem;
+}
+
+.booking-wizard__label {
+    display: block;
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.booking-wizard__select,
+.booking-wizard__input {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 1rem;
+    color: var(--text-primary);
+    background: rgba(31, 31, 31, 0.8);
+    border: 2px solid rgba(65, 105, 225, 0.2);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    appearance: none;
+    outline: none;
+}
+
+.booking-wizard__select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%234169e1' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 3rem;
+    cursor: pointer;
+}
+
+.booking-wizard__select:focus,
+.booking-wizard__input:focus {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.2);
+}
+
+.booking-wizard__input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* Form Grid for Contact Info */
+.booking-wizard__form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+}
+
+@media (max-width: 600px) {
+    .booking-wizard__form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================================================
+   REVIEW SUMMARY
+   ============================================================================ */
+
+.booking-wizard__summary {
+    background: rgba(31, 31, 31, 0.6);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid rgba(65, 105, 225, 0.2);
+}
+
+.booking-wizard__summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(65, 105, 225, 0.1);
+}
+
+.booking-wizard__summary-row:last-child {
+    border-bottom: none;
+}
+
+.booking-wizard__summary-label {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.95rem;
+}
+
+.booking-wizard__summary-value {
+    color: var(--text-primary);
+    font-family: 'Neon-Heavy', sans-serif;
+    text-align: right;
+}
+
+/* ============================================================================
+   BUTTONS
+   ============================================================================ */
+
+.booking-wizard__actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(65, 105, 225, 0.2);
+}
+
+.booking-wizard__btn {
+    padding: 1rem 2rem;
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.booking-wizard__btn--primary {
+    background: var(--btn-gradient);
+    color: var(--text-primary);
+    box-shadow: 0 4px 15px rgba(65, 105, 225, 0.4);
+}
+
+.booking-wizard__btn--primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(65, 105, 225, 0.5);
+}
+
+.booking-wizard__btn--primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.booking-wizard__btn--outline {
+    background: transparent;
+    color: var(--text-primary);
+    border: 2px solid rgba(65, 105, 225, 0.4);
+}
+
+.booking-wizard__btn--outline:hover {
+    border-color: var(--accent-blue);
+    background: rgba(65, 105, 225, 0.1);
+}
+
+/* ============================================================================
+   SUCCESS STATE
+   ============================================================================ */
+
+.booking-wizard__success {
+    text-align: center;
+    padding: 3rem 2rem;
+}
+
+.booking-wizard__success-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    animation: successPop 0.5s ease;
+}
+
+.booking-wizard__success-title {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 2rem;
+    color: #28a745;
+    margin-bottom: 1rem;
+}
+
+.booking-wizard__success-message {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+@keyframes successPop {
+    0% { transform: scale(0); opacity: 0; }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* ============================================================================
+   DATE/TIME PICKER INTEGRATION
+   ============================================================================ */
+
+.booking-wizard__datetime {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+@media (max-width: 768px) {
+    .booking-wizard__datetime {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================================================
+   LOADING STATE
+   ============================================================================ */
+
+.booking-wizard__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.booking-wizard__spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(65, 105, 225, 0.3);
+    border-top-color: var(--accent-blue);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ============================================================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================================================ */
+
+@media (max-width: 768px) {
+    .booking-wizard {
+        margin: 1rem auto;
+    }
+
+    .booking-wizard__title {
+        font-size: 1.8rem;
+    }
+
+    .booking-wizard__card {
+        padding: 1.5rem;
+    }
+
+    .booking-wizard__step-number {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+
+    .booking-wizard__step-connector {
+        width: 40px;
+    }
+
+    .booking-wizard__actions {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .booking-wizard__btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .booking-wizard__step-connector {
+        width: 24px;
+    }
+
+    .booking-wizard__services {
+        grid-template-columns: 1fr;
+    }
+
+    .booking-wizard__section-title {
+        font-size: 1.25rem;
+    }
+}

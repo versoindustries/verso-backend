@@ -1,47 +1,62 @@
 # AGENTS: Verso-Backend
 
 ## Mission
-Give agents a fast way to spin up, extend, and harden the Verso Flask monolith without breaking sovereignty or shipping untested changes.
+Give agents a fast way to spin up, extend, and harden the Verso Flask monolith + React Islands without breaking sovereignty, omitting compliance checks, or shipping untested changes.
 
 ## Stack & Layout
-- Python 3.10.11, Flask app factory in `app/__init__.py` (creates the app used by `run.py` and `flask --app app run`).
-- Data layer: SQLAlchemy + Flask-Migrate; default SQLite via `dbl.py`, Postgres via `DATABASE_URL` (psycopg2-binary is installed).
-- Blueprints live in `app/routes/` (auth, admin, blog, main, user); models in `app/models.py`; helpers in `app/modules/`; templates/static under `app/templates/` and `app/static/`.
-- Config comes from env vars in `app/config.py` and `.env`; mail via Flask-Mail; auth via Flask-Login + RBAC decorators.
-- Docs worth skimming: `README.md` for setup, `docs/System Instructions for Verso-Backend Contributors.markdown` for coding standards, `docs/enhancement-roadmap.md` for future work.
+- **Backend**: Python 3.10.11, Flask App Factory (`app/__init__.py`).
+- **Frontend**: React 18, TypeScript, Vite. React "Islands" mounted in Jinja2 templates via `app/templates` and `app/static/src`.
+- **Data**: SQLAlchemy + Flask-Migrate. SQLite (`verso.sqlite`) / Postgres.
+- **Structure**:
+  - Blueprints: `app/routes/` (auth, admin, blog, main, user)
+  - Models: `app/models.py`
+  - Helpers: `app/modules/`
+  - React Entry: `app/static/src/` (configured in `vite.config.js` and `package.json`)
+- **Config**: `app/config.py` and `.env`.
 
 ## Local Setup
-1. `python3 -m venv env && source env/bin/activate && pip install -r requirements.txt`
-2. Create `.env` (example):
+1. **Backend**:
+   ```bash
+   python3 -m venv env && source env/bin/activate && pip install -r requirements.txt
+   # Setup .env (see README)
+   python dbl.py
+   flask db upgrade
+   flask create-roles
+   flask seed-business-config
    ```
-   FLASK_APP=app
-   SECRET_KEY=replace_me
-   DATABASE_URL=sqlite:///verso.sqlite
-   MAIL_SERVER=smtp.example.com
-   MAIL_PORT=587
-   MAIL_USE_TLS=True
-   MAIL_USERNAME=you@example.com
-   MAIL_PASSWORD=your_password
-   MAIL_DEFAULT_SENDER=you@example.com
+2. **Frontend**:
+   ```bash
+   npm install
+   npm run build  # or npm run dev for HMR
    ```
-3. Bootstrap DB (SQLite path is `verso.sqlite`): `python dbl.py`; first-time migrations `flask db init`; ongoing `flask db migrate -m "msg"` + `flask db upgrade`.
-4. Seed basics when needed: `flask create-roles` then `flask seed-business-config`.
-5. Run dev server: `flask run --host=0.0.0.0 --debug` (or `python run.py`; honors `PORT`).
+3. **Run**:
+   ```bash
+   flask run --host=0.0.0.0 --debug
+   ```
+
+## Compliance Directives (SOC2 & OWASP)
+**CRITICAL**: All changes must adhere to the following security and compliance standards.
+
+### OWASP Top 10 (Security)
+- **Injection**: Use SQLAlchemy ORM for all queries. Sanitize all other inputs.
+- **Broken Access Control**: Ensure every route has `@login_required` or `@role_required(...)` unless explicitly public. verify ownership of resources before access.
+- **XSS**: Jinja2 auto-escapes by default. For React, avoid `dangerouslySetInnerHTML`; use `bleach` for allowed HTML if necessary.
+- **Cryptographic Failures**: Never store secrets in code. Use env vars.
+- **Logging**: Log security events (login/fail, sensitive access) but **NEVER** log credentials or PII.
+
+### SOC2 (Process & Privacy)
+- **Change Management**: All schema changes must be migrated (`flask db migrate`). No ad-hoc SQL.
+- **Access Control**: Respect Role-Based Access Control (RBAC). Use defined roles (Admin, Manager, User).
+- **Data Privacy**: Treat user data as sensitive. Do not expose PII in logs or error messages.
 
 ## Testing & QA
-- No automated suite yet (`app/tests/` holds a placeholder). Add pytest-based tests for routes, models, and forms before merging meaningful changes.
-- For manual QA: exercise auth flows, blog CRUD, appointment scheduling/calendar UTC handling, and file uploads (see `modules/file_manager.py`).
-
-## Coding Standards
-- Follow PEP 8, include docstrings, and keep templates extending `base.html`. Sanitize user content (CKEditor + `bleach`) and keep CSRF enabled.
-- Use migrations for schema changes; do not edit the SQLite file directly. Keep seeds aligned with new roles/config.
-- Never commit secrets; prefer env vars. Keep mail and DB credentials out of code and logs.
-- Prefer `rg` for searching; keep new dependencies lean and Lindy-friendly.
+- **Automated**: Run `pytest` for backend coverage. React components should be type-checked (`tsc`).
+- **Manual**: Verify auth flows, role boundaries, and "Happy Path" for new features.
 
 ## Useful Commands
-```
+```bash
 flask db migrate -m "message"
 flask db upgrade
-flask create-roles
-flask seed-business-config
+npm run build
+pytest
 ```

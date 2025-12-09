@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Create Support Ticket{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('support.index') }}">Support</a></li>
+                    <li class="breadcrumb-item active">New Ticket</li>
+                </ol>
+            </nav>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0"><i class="fas fa-ticket-alt me-2"></i>Submit a Support Ticket</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('support.create_ticket') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        {% if not current_user.is_authenticated %}
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="name" class="form-label">Your Name <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="email" class="form-label">Email Address <span
+                                        class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">Subject <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="subject" name="subject" required
+                                placeholder="Brief summary of your issue">
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="category" class="form-label">Category</label>
+                                <select class="form-select" id="category" name="category">
+                                    <option value="general">General Question</option>
+                                    <option value="technical">Technical Issue</option>
+                                    <option value="billing">Billing / Payment</option>
+                                    <option value="account">Account Issue</option>
+                                    <option value="feature_request">Feature Request</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="priority" class="form-label">Priority</label>
+                                <select class="form-select" id="priority" name="priority">
+                                    <option value="low">Low</option>
+                                    <option value="normal" selected>Normal</option>
+                                    <option value="high">High</option>
+                                    <option value="urgent">Urgent</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="description" class="form-label">Description <span
+                                    class="text-danger">*</span></label>
+                            <textarea class="form-control" id="description" name="description" rows="6" required
+                                placeholder="Please describe your issue in detail. Include any error messages or steps to reproduce the problem."></textarea>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('support.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-2"></i>Submit Ticket
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

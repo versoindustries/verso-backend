@@ -1,6 +1,4 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Button } from '../../ui/button'
-import { Card, CardContent } from '../../ui/card'
 import DateTimePicker from './DateTimePicker'
 import { format } from 'date-fns'
 import { useToastApi } from '../../../hooks/useToastApi'
@@ -84,171 +82,281 @@ export default function BookingWizard() {
 
     if (submitted) {
         return (
-            <Card className="max-w-2xl mx-auto my-8">
-                <CardContent className="p-8 text-center">
-                    <h2 className="text-2xl font-bold text-green-600 mb-4">Request Received!</h2>
-                    <p className="text-gray-600">
-                        Thank you for booking with us. We have received your request and will contact you shortly to confirm.
-                    </p>
-                    <Button className="mt-6" onClick={() => window.location.reload()}>Book Another</Button>
-                </CardContent>
-            </Card>
+            <div className="booking-wizard">
+                <div className="booking-wizard__card">
+                    <div className="booking-wizard__success">
+                        <div className="booking-wizard__success-icon">✓</div>
+                        <h2 className="booking-wizard__success-title">Request Received!</h2>
+                        <p className="booking-wizard__success-message">
+                            Thank you for booking with us. We have received your request and will contact you shortly to confirm your appointment.
+                        </p>
+                        <button
+                            className="booking-wizard__btn booking-wizard__btn--primary"
+                            onClick={() => window.location.reload()}
+                        >
+                            Book Another Appointment
+                        </button>
+                    </div>
+                </div>
+            </div>
         )
     }
 
+    const getStepClass = (stepNumber: number) => {
+        if (step > stepNumber) return 'booking-wizard__step-number--completed'
+        if (step === stepNumber) return 'booking-wizard__step-number--active'
+        return 'booking-wizard__step-number--inactive'
+    }
+
+    const getConnectorClass = (afterStep: number) => {
+        return step > afterStep
+            ? 'booking-wizard__step-connector--active'
+            : 'booking-wizard__step-connector--inactive'
+    }
+
     return (
-        <div className="max-w-4xl mx-auto my-8 font-sans">
-            <h2 className="text-2xl font-bold mb-6 text-center">Book an Appointment</h2>
+        <div className="booking-wizard">
+            <h2 className="booking-wizard__title">Book an Appointment</h2>
 
             {/* Steps Indicator */}
-            <div className="flex justify-center mb-8">
-                {[1, 2, 3, 4].map(s => (
-                    <div key={s} className={`flex items-center ${s < 4 ? 'w-full md:w-auto' : ''}`}>
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${step >= s ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'
-                            }`}>
-                            {s}
+            <div className="booking-wizard__steps">
+                {[1, 2, 3, 4].map((s) => (
+                    <div key={s} className="booking-wizard__step">
+                        <div className={`booking-wizard__step-number ${getStepClass(s)}`}>
+                            {step > s ? '✓' : s}
                         </div>
-                        {s < 4 && <div className={`h-1 w-12 mx-2 ${step > s ? 'bg-blue-600' : 'bg-gray-200'}`} />}
+                        {s < 4 && (
+                            <div className={`booking-wizard__step-connector ${getConnectorClass(s)}`} />
+                        )}
                     </div>
                 ))}
             </div>
 
-            <Card>
-                <CardContent className="p-6">
-                    {step === 1 && (
-                        <div className="space-y-6">
-                            <h3 className="text-xl font-semibold">Select Service & Estimator</h3>
+            <div className="booking-wizard__card">
+                {/* Step 1: Service & Estimator Selection */}
+                {step === 1 && (
+                    <div>
+                        <h3 className="booking-wizard__section-title">
+                            <span className="booking-wizard__section-icon">📋</span>
+                            Select Service & Estimator
+                        </h3>
 
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Service</label>
-                                <div className="grid md:grid-cols-2 gap-4">
-                                    {services.map(s => (
+                        <div className="booking-wizard__field">
+                            <label className="booking-wizard__label">Choose a Service</label>
+                            <div className="booking-wizard__services">
+                                {services.length === 0 ? (
+                                    <div className="booking-wizard__loading">
+                                        <div className="booking-wizard__spinner"></div>
+                                        <span>Loading services...</span>
+                                    </div>
+                                ) : (
+                                    services.map(s => (
                                         <div
                                             key={s.id}
-                                            className={`p-4 border rounded-lg cursor-pointer transition-colors ${selectedService === s.id ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/10' : 'hover:border-gray-300'
+                                            className={`booking-wizard__service-card ${selectedService === s.id ? 'booking-wizard__service-card--selected' : ''
                                                 }`}
                                             onClick={() => setSelectedService(s.id)}
                                         >
-                                            <div className="font-semibold">{s.name}</div>
-                                            <div className="text-sm text-gray-500">${s.price} • {s.duration} mins</div>
+                                            <div className="booking-wizard__service-name">{s.name}</div>
+                                            <div className="booking-wizard__service-meta">
+                                                <span className="booking-wizard__service-price">${s.price}</span>
+                                                <span>{s.duration} mins</span>
+                                            </div>
                                         </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Estimator</label>
-                                <select
-                                    className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700"
-                                    value={selectedEstimator || ''}
-                                    onChange={(e) => setSelectedEstimator(Number(e.target.value))}
-                                >
-                                    <option value="">Any Available Estimator</option>
-                                    {estimators.map(e => (
-                                        <option key={e.id} value={e.id}>{e.name}</option>
-                                    ))}
-                                </select>
+                                    ))
+                                )}
                             </div>
                         </div>
-                    )}
 
-                    {step === 2 && (
-                        <div className="space-y-6">
-                            <h3 className="text-xl font-semibold">Select Date & Time</h3>
+                        <div className="booking-wizard__field">
+                            <label className="booking-wizard__label">Preferred Estimator</label>
+                            <select
+                                className="booking-wizard__select"
+                                value={selectedEstimator || ''}
+                                onChange={(e) => setSelectedEstimator(Number(e.target.value))}
+                            >
+                                <option value="">Any Available Estimator</option>
+                                {estimators.map(e => (
+                                    <option key={e.id} value={e.id}>{e.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                )}
+
+                {/* Step 2: Date & Time Selection */}
+                {step === 2 && (
+                    <div>
+                        <h3 className="booking-wizard__section-title">
+                            <span className="booking-wizard__section-icon">📅</span>
+                            Select Date & Time
+                        </h3>
+                        <div className="booking-wizard__datetime">
                             <DateTimePicker
                                 selectedDate={selectedDate}
                                 onDateSelect={setSelectedDate}
                                 selectedTime={selectedTime}
                                 onTimeSelect={setSelectedTime}
-                                estimatorId={selectedEstimator || estimators[0]?.id} // Fallback to first if any
+                                estimatorId={selectedEstimator || estimators[0]?.id}
                                 serviceId={selectedService}
                             />
                         </div>
-                    )}
+                    </div>
+                )}
 
-                    {step === 3 && (
-                        <div className="space-y-6">
-                            <h3 className="text-xl font-semibold">Your Information</h3>
-                            <div className="grid md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">First Name</label>
-                                    <input
-                                        type="text"
-                                        className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700"
-                                        value={contactInfo.firstName}
-                                        onChange={e => setContactInfo({ ...contactInfo, firstName: e.target.value })}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Last Name</label>
-                                    <input
-                                        type="text"
-                                        className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700"
-                                        value={contactInfo.lastName}
-                                        onChange={e => setContactInfo({ ...contactInfo, lastName: e.target.value })}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Email</label>
-                                    <input
-                                        type="email"
-                                        className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700"
-                                        value={contactInfo.email}
-                                        onChange={e => setContactInfo({ ...contactInfo, email: e.target.value })}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Phone</label>
-                                    <input
-                                        type="tel"
-                                        className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700"
-                                        value={contactInfo.phone}
-                                        onChange={e => setContactInfo({ ...contactInfo, phone: e.target.value })}
-                                    />
-                                </div>
+                {/* Step 3: Contact Information */}
+                {step === 3 && (
+                    <div>
+                        <h3 className="booking-wizard__section-title">
+                            <span className="booking-wizard__section-icon">👤</span>
+                            Your Information
+                        </h3>
+                        <div className="booking-wizard__form-grid">
+                            <div className="booking-wizard__field">
+                                <label className="booking-wizard__label">First Name</label>
+                                <input
+                                    type="text"
+                                    className="booking-wizard__input"
+                                    placeholder="Enter your first name"
+                                    value={contactInfo.firstName}
+                                    onChange={e => setContactInfo({ ...contactInfo, firstName: e.target.value })}
+                                />
                             </div>
-                        </div>
-                    )}
-
-                    {step === 4 && (
-                        <div className="space-y-6">
-                            <h3 className="text-xl font-semibold">Review & Submit</h3>
-                            <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg space-y-2">
-                                <p><strong>Service:</strong> {services.find(s => s.id === selectedService)?.name}</p>
-                                <p><strong>Estimator:</strong> {selectedEstimator ? estimators.find(e => e.id === selectedEstimator)?.name : 'Any Available'}</p>
-                                <p><strong>Date:</strong> {selectedDate ? format(selectedDate, 'PPP') : ''}</p>
-                                <p><strong>Time:</strong> {selectedTime}</p>
-                                <p><strong>Name:</strong> {contactInfo.firstName} {contactInfo.lastName}</p>
-                                <p><strong>Email:</strong> {contactInfo.email}</p>
+                            <div className="booking-wizard__field">
+                                <label className="booking-wizard__label">Last Name</label>
+                                <input
+                                    type="text"
+                                    className="booking-wizard__input"
+                                    placeholder="Enter your last name"
+                                    value={contactInfo.lastName}
+                                    onChange={e => setContactInfo({ ...contactInfo, lastName: e.target.value })}
+                                />
                             </div>
-                        </div>
-                    )}
-
-                    <div className="flex justify-between mt-8">
-                        {step > 1 && (
-                            <Button variant="outline" onClick={handleBack} disabled={loading}>Back</Button>
-                        )}
-                        <div className="ml-auto">
-                            {step < 4 ? (
-                                <Button
-                                    onClick={handleNext}
-                                    disabled={
-                                        (step === 1 && !selectedService) ||
-                                        (step === 2 && (!selectedDate || !selectedTime)) ||
-                                        (step === 3 && (!contactInfo.firstName || !contactInfo.email))
-                                    }
-                                >
-                                    Next
-                                </Button>
-                            ) : (
-                                <Button onClick={handleSubmit} disabled={loading}>
-                                    {loading ? 'Submitting...' : 'Confirm Booking'}
-                                </Button>
-                            )}
+                            <div className="booking-wizard__field">
+                                <label className="booking-wizard__label">Email</label>
+                                <input
+                                    type="email"
+                                    className="booking-wizard__input"
+                                    placeholder="your.email@example.com"
+                                    value={contactInfo.email}
+                                    onChange={e => setContactInfo({ ...contactInfo, email: e.target.value })}
+                                />
+                            </div>
+                            <div className="booking-wizard__field">
+                                <label className="booking-wizard__label">Phone</label>
+                                <input
+                                    type="tel"
+                                    className="booking-wizard__input"
+                                    placeholder="(555) 123-4567"
+                                    value={contactInfo.phone}
+                                    onChange={e => setContactInfo({ ...contactInfo, phone: e.target.value })}
+                                />
+                            </div>
                         </div>
                     </div>
-                </CardContent>
-            </Card>
+                )}
+
+                {/* Step 4: Review & Submit */}
+                {step === 4 && (
+                    <div>
+                        <h3 className="booking-wizard__section-title">
+                            <span className="booking-wizard__section-icon">✅</span>
+                            Review & Confirm
+                        </h3>
+                        <div className="booking-wizard__summary">
+                            <div className="booking-wizard__summary-row">
+                                <span className="booking-wizard__summary-label">Service</span>
+                                <span className="booking-wizard__summary-value">
+                                    {services.find(s => s.id === selectedService)?.name}
+                                </span>
+                            </div>
+                            <div className="booking-wizard__summary-row">
+                                <span className="booking-wizard__summary-label">Estimator</span>
+                                <span className="booking-wizard__summary-value">
+                                    {selectedEstimator
+                                        ? estimators.find(e => e.id === selectedEstimator)?.name
+                                        : 'Any Available'}
+                                </span>
+                            </div>
+                            <div className="booking-wizard__summary-row">
+                                <span className="booking-wizard__summary-label">Date</span>
+                                <span className="booking-wizard__summary-value">
+                                    {selectedDate ? format(selectedDate, 'PPP') : '—'}
+                                </span>
+                            </div>
+                            <div className="booking-wizard__summary-row">
+                                <span className="booking-wizard__summary-label">Time</span>
+                                <span className="booking-wizard__summary-value">
+                                    {selectedTime || '—'}
+                                </span>
+                            </div>
+                            <div className="booking-wizard__summary-row">
+                                <span className="booking-wizard__summary-label">Name</span>
+                                <span className="booking-wizard__summary-value">
+                                    {contactInfo.firstName} {contactInfo.lastName}
+                                </span>
+                            </div>
+                            <div className="booking-wizard__summary-row">
+                                <span className="booking-wizard__summary-label">Email</span>
+                                <span className="booking-wizard__summary-value">
+                                    {contactInfo.email}
+                                </span>
+                            </div>
+                            <div className="booking-wizard__summary-row">
+                                <span className="booking-wizard__summary-label">Phone</span>
+                                <span className="booking-wizard__summary-value">
+                                    {contactInfo.phone || '—'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Navigation Buttons */}
+                <div className="booking-wizard__actions">
+                    <div>
+                        {step > 1 && (
+                            <button
+                                className="booking-wizard__btn booking-wizard__btn--outline"
+                                onClick={handleBack}
+                                disabled={loading}
+                            >
+                                ← Back
+                            </button>
+                        )}
+                    </div>
+                    <div>
+                        {step < 4 ? (
+                            <button
+                                className="booking-wizard__btn booking-wizard__btn--primary"
+                                onClick={handleNext}
+                                disabled={
+                                    (step === 1 && !selectedService) ||
+                                    (step === 2 && (!selectedDate || !selectedTime)) ||
+                                    (step === 3 && (!contactInfo.firstName || !contactInfo.email))
+                                }
+                            >
+                                Next →
+                            </button>
+                        ) : (
+                            <button
+                                className="booking-wizard__btn booking-wizard__btn--primary"
+                                onClick={handleSubmit}
+                                disabled={loading}
+                            >
+                                {loading ? (
+                                    <>
+                                        <div className="booking-wizard__spinner"></div>
+                                        Submitting...
+                                    </>
+                                ) : (
+                                    'Confirm Booking'
+                                )}
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </div>
         </div>
     )
 }

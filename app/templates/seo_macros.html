@@ -1,0 +1,139 @@
+{# SEO Utility Macros for Verso Backend #}
+{# Import with: {% from 'seo_macros.html' import seo_meta, product_schema, breadcrumb_schema %} #}
+
+{% macro seo_meta(title, description, image=None, canonical=None, noindex=False) %}
+<meta name="description" content="{{ description | e }}">
+<meta property="og:title" content="{{ title | e }}">
+<meta property="og:description" content="{{ description | e }}">
+<meta property="og:url" content="{{ canonical or request.url }}">
+{% if image %}
+<meta property="og:image" content="{{ image }}">
+<meta name="twitter:image" content="{{ image }}">
+{% endif %}
+<meta name="twitter:title" content="{{ title | e }}">
+<meta name="twitter:description" content="{{ description | e }}">
+<link rel="canonical" href="{{ canonical or request.url }}">
+{% if noindex %}
+<meta name="robots" content="noindex, nofollow">
+{% else %}
+<meta name="robots" content="index, follow">
+{% endif %}
+{% endmacro %}
+
+{% macro product_schema(product) %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "{{ product.name | e }}",
+  "description": "{{ (product.description or '') | e | truncate(500) }}",
+  {% if product.sku %}"sku": "{{ product.sku }}",{% endif %}
+  "offers": {
+    "@type": "Offer",
+    "price": "{{ '%.2f' | format(product.price / 100) }}",
+    "priceCurrency": "USD",
+    "availability": "{{ 'https://schema.org/InStock' if product.inventory_count > 0 else 'https://schema.org/OutOfStock' }}",
+    "url": "{{ request.url }}"
+  }
+  {% if product.media_id %}
+  ,"image": "{{ url_for('media_bp.serve_media', media_id=product.media_id, _external=True) }}"
+  {% endif %}
+}
+</script>
+{% endmacro %}
+
+{% macro breadcrumb_schema(items) %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {% for item in items %}
+    {
+      "@type": "ListItem",
+      "position": {{ loop.index }},
+      "name": "{{ item.name | e }}",
+      "item": "{{ item.url }}"
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endmacro %}
+
+{% macro article_schema(post) %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "{{ post.title | e }}",
+  "description": "{{ (post.content | striptags | truncate(160)) | e }}",
+  "datePublished": "{{ post.created_at.isoformat() }}",
+  {% if post.updated_at %}
+  "dateModified": "{{ post.updated_at.isoformat() }}",
+  {% endif %}
+  {% if post.author %}
+  "author": {
+    "@type": "Person",
+    "name": "{{ post.author.username | e }}"
+  },
+  {% endif %}
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ request.url }}"
+  }
+  {% if post.image and post.image_mime_type %}
+  ,"image": "{{ url_for('blog.serve_image', post_id=post.id, _external=True) }}"
+  {% endif %}
+}
+</script>
+{% endmacro %}
+
+{% macro local_business_schema(business_config) %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "{{ business_config.get('business_name', 'Business Name') }}",
+  "url": "{{ request.url_root }}",
+  "logo": "{{ url_for('static', filename='images/logo.png', _external=True) }}"
+  {% if business_config.get('phone') %}
+  ,"telephone": "{{ business_config.get('phone') }}"
+  {% endif %}
+  {% if business_config.get('address') %}
+  ,"address": {
+    "@type": "PostalAddress",
+    "streetAddress": "{{ business_config.get('address', '') }}",
+    "addressLocality": "{{ business_config.get('city', '') }}",
+    "addressRegion": "{{ business_config.get('state', '') }}",
+    "postalCode": "{{ business_config.get('zip', '') }}",
+    "addressCountry": "US"
+  }
+  {% endif %}
+}
+</script>
+{% endmacro %}
+
+{% macro contact_page_schema() %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ContactPage",
+  "name": "Contact Us",
+  "description": "Get in touch with our team",
+  "url": "{{ request.url }}"
+}
+</script>
+{% endmacro %}
+
+{% macro collection_page_schema(title, description) %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "{{ title | e }}",
+  "description": "{{ description | e }}",
+  "url": "{{ request.url }}"
+}
+</script>
+{% endmacro %}

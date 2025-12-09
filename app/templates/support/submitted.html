@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Ticket Submitted{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 text-center">
+            <div class="card">
+                <div class="card-body py-5">
+                    <i class="fas fa-check-circle fa-5x text-success mb-4"></i>
+                    <h2>Ticket Submitted!</h2>
+                    <p class="lead text-muted">Your support ticket has been created successfully.</p>
+
+                    <div class="bg-light rounded p-3 mb-4">
+                        <strong>Ticket Number:</strong>
+                        <h3 class="mb-0 text-primary">{{ ticket.ticket_number }}</h3>
+                    </div>
+
+                    <p class="text-muted">
+                        Please save this ticket number for your records. We've sent a confirmation
+                        to <strong>{{ ticket.email }}</strong> and will respond within 24 hours.
+                    </p>
+
+                    <hr class="my-4">
+
+                    <a href="{{ url_for('support.index') }}" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-home me-2"></i>Support Center
+                    </a>
+                    <a href="{{ url_for('main_routes.index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

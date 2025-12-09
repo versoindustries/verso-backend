@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from 'seo_macros.html' import seo_meta, collection_page_schema, breadcrumb_schema %}
 
 {% block additional_css %}
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/blog.css') }}">
@@ -7,6 +8,22 @@
 {% block title %}{{ tag.name|e }} - Blog Tags{% endblock %}
 
 {% block description %}Posts tagged with "{{ tag.name|e }}"{% endblock %}
+
+{% block og_description %}Posts tagged with "{{ tag.name|e }}"{% endblock %}
+
+{% block head %}
+{{ seo_meta(tag.name ~ ' - Blog Tags', 'Posts tagged with "' ~ tag.name ~ '"', url_for('static',
+filename='images/logo.png', _external=True)) }}
+{% endblock %}
+
+{% block schema %}
+{{ collection_page_schema(tag.name, 'Posts tagged with "' ~ tag.name ~ '"') }}
+{{ breadcrumb_schema([
+{'name': 'Home', 'url': url_for('main_routes.index', _external=True)},
+{'name': 'Blog', 'url': url_for('blog.show_blog', _external=True)},
+{'name': tag.name, 'url': request.url}
+]) }}
+{% endblock %}
 
 {% block content %}
 <section class="header-section">

@@ -2,6 +2,8 @@
 
 {% block title %}Shopping Cart{% endblock %}
 
+{% block robots %}noindex, nofollow{% endblock %}
+
 {% block additional_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/components/cart-page.css') }}">
 {% endblock %}
@@ -10,7 +12,7 @@
 <div data-react-component="CartPage" data-react-props='{
         "items": {{ items_json | safe }},
         "subtotal": {{ subtotal }},
-        "updateQuantityUrlPattern": "{{ url_for(' cart.update_cart_quantity', product_id=0) |
+        "updateQuantityUrlPattern": "{{ url_for('cart.update_cart_quantity', product_id=0) |
     replace('/0', '/{productId}' ) }}", "removeItemUrlPattern"
     : "{{ url_for('cart.remove_from_cart', product_id=0) | replace('/0', '/{productId}') }}" , "checkoutUrl"
     : "{{ url_for('cart.checkout') }}" , "clearCartUrl" : "{{ url_for('cart.clear_cart') }}" , "shopUrl"

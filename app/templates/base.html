@@ -13,13 +13,30 @@
         gtag('config', "{{ business_config.get('ga4_tracking_id') }}");
     </script>
     {% endif %}
+    {# Dynamic logo URL: Use theme-uploaded logo if available, otherwise static #}
+    {% if business_config.get('logo_media_id') %}
+    {% set site_logo_url = url_for('media_bp.serve_media', media_id=business_config.get('logo_media_id'),
+    _external=True) %}
+    {% else %}
+    {% set site_logo_url = url_for('static', filename='images/logo.png', _external=True) %}
+    {% endif %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
         content="{% block description %}At Verso, we're not merely developing software; we're architecting an entire ecosystem.{% endblock %}">
     <meta property="og:type" content="website">
-    <meta property="og:image" content="{{ url_for('static', filename='images/logo.png') }}">
+    <meta property="og:image" content="{{ site_logo_url }}">
+    <meta property="og:title"
+        content="{% block og_title %}{{ business_config.get('site_name', business_config.get('business_name', 'Verso Industries')) }}{% endblock %}">
+    <meta property="og:description"
+        content="{% block og_description %}At Verso, we're architecting sovereign software systems.{% endblock %}">
+    <meta property="og:url" content="{% block og_url %}{{ request.url }}{% endblock %}">
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% block twitter_title %}{{ self.og_title() }}{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}{{ self.og_description() }}{% endblock %}">
+    <meta name="twitter:image" content="{{ site_logo_url }}">
+    <link rel="canonical" href="{% block canonical %}{{ request.url }}{% endblock %}">
+    <meta name="robots" content="{% block robots %}index, follow{% endblock %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/favicon-32x32.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='images/favicon-16x16.png') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}">
@@ -33,41 +50,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         :root {
-
             /* Dynamic theme variables from BusinessConfig */
-            --primary-color: {
-                    {
-                    business_config.get('primary_color', '#4169e1')
-                }
-            }
-
-            ;
-
-            --secondary-color: {
-                    {
-                    business_config.get('secondary_color', '#6c757d')
-                }
-            }
-
-            ;
-
-            --accent-color: {
-                    {
-                    business_config.get('accent_color', '#28a745')
-                }
-            }
-
-            ;
-
-            --font-family: {
-                    {
-                    business_config.get('font_family', "'Neon-Regular', sans-serif")
-                }
-            }
-
-            ;
-
-            ;
+            --primary-color: {{ business_config.get('primary_color', '#4169e1') }};
+            --secondary-color: {{ business_config.get('secondary_color', '#6c757d') }};
+            --accent-color: {{ business_config.get('accent_color', '#28a745') }};
+            --font-family: {{ business_config.get('font_family', "'Neon-Regular', sans-serif") }};
 
             /* Override base.css aliases with dynamic values */
             --accent-blue: var(--primary-color);
@@ -98,11 +85,10 @@
             user: {
                 isAuthenticated: {{ current_user.is_authenticated | tojson }}{% if current_user.is_authenticated %},
                 firstName: {{ current_user.first_name | tojson }},
-                roles: [{% for role in current_user.roles %}"{{ role.name }}"{% if not loop.last %}, {% endif %}{% endfor %}]
-            {% endif %}
+                roles: [{% for role in current_user.roles %}"{{ role.name }}"{% if not loop.last %}, {% endif %} {% endfor %}]{% endif %}
             },
             config: {
-                site_name: "Verso Backend",
+                site_name: "{{ business_config.get('site_name', business_config.get('business_name', 'Verso Backend')) }}",
                 primary_color: "{{ business_config.get('primary_color', '#4169e1') }}",
                 secondary_color: "{{ business_config.get('secondary_color', '#6c757d') }}",
                 accent_color: "{{ business_config.get('accent_color', '#28a745') }}",
@@ -127,6 +113,10 @@
                 setLanguageEs: "{{ url_for('main_routes.set_language', language='es') }}"
             },
             unreadNotificationsCount: {{ unread_notifications_count | default(0) }},
+            featureFlags: {
+                ecommerceEnabled: {{ feature_flags.ecommerce_enabled | tojson }},
+                bookingEnabled: {{ feature_flags.booking_enabled | tojson }}
+            },
             year: new Date().getFullYear(),
             version: "{{ current_version }}"
         };
@@ -165,6 +155,27 @@
     </script>
     {% block additional_css %}{% endblock %}
     {% block head %}{% endblock %} <!-- Additional head content -->
+
+    <!-- Site-wide Organization Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "{{ business_config.get('site_name', business_config.get('business_name', 'Verso Industries')) }}",
+      "url": "{{ request.url_root }}",
+      "logo": "{{ site_logo_url }}"
+    }
+    </script>
+    <!-- Site-wide WebSite Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "{{ business_config.get('site_name', business_config.get('business_name', 'Verso Industries')) }}",
+      "url": "{{ request.url_root }}"
+    }
+    </script>
+    {% block schema %}{% endblock %}
     {{ vite_tags() }}
 </head>
 
@@ -185,40 +196,40 @@
         {% block body %}{% endblock %}
         <!-- Main content will be overridden in child templates -->
         {% endblock %}
-        </div>
+    </main>
 
-        <div class="section-spacer"></div>
+    <div class="section-spacer"></div>
 
-        {% if not hide_estimate_form %}
-        <div data-react-component="BookingWizard"></div>
-        {% endif %}
+    {% if not hide_estimate_form %}
+    <div data-react-component="BookingWizard"></div>
+    {% endif %}
 
-        {% block scripts %}{% endblock %}
+    {% block scripts %}{% endblock %}
 
-        <div class="section-spacer"></div>
+    <div class="section-spacer"></div>
 
-        <div data-react-component="Footer"></div>
+    <div data-react-component="Footer"></div>
 
-        <script>
-            if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                    navigator.serviceWorker.register("{{ url_for('static', filename='sw.js') }}")
-                        .then(registration => {
-                            console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                        })
-                        .catch(err => {
-                            console.log('ServiceWorker registration failed: ', err);
-                        });
-                });
-            }
-        </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register("{{ url_for('static', filename='sw.js') }}")
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
 
-        <script src="{{ url_for('static', filename='js/calendar.js') }}"> defer</script>
+    <script src="{{ url_for('static', filename='js/calendar.js') }}" defer></script>
 
-        {# Phase 24: Real User Monitoring (RUM) Script Injection #}
-        {% if rum_script %}
-        {{ rum_script|safe }}
-        {% endif %}
+    {# Phase 24: Real User Monitoring (RUM) Script Injection #}
+    {% if rum_script %}
+    {{ rum_script|safe }}
+    {% endif %}
 
 </body>
 

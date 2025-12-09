@@ -37,7 +37,7 @@
         <div data-react-component="AdminDataTable" data-react-props='{
                "columns": {{ columns_json|safe }},
                "data": {{ campaigns_json|safe }},
-               "emptyMessage": "No campaigns found. <a href=\"{{ url_for(' email_admin.new_campaign') }}\">Create your
+               "emptyMessage": "No campaigns found. <a href=\"{{ url_for('email_admin.new_campaign') }}\">Create your
             first campaign</a>."
             }'>
         </div>

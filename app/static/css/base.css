@@ -6,6 +6,8 @@
 @import url('./components/layout-footer.css');
 @import url('./components/layout-navigation.css');
 @import url('./components/layout-alertbar.css');
+@import url('./components/header-dropdowns.css');
+@import url('./components/booking-wizard.css');
 
 /* Font Face Definitions */
 @font-face {

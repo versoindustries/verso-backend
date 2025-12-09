@@ -1,6 +1,23 @@
 {% extends "base.html" %}
+{% from 'seo_macros.html' import seo_meta, collection_page_schema %}
 
-{% block title %}Book an Appointment{% endblock %}
+{% block title %}Book an Appointment | {{ business_config.get('business_name', 'Verso Industries') }}{% endblock %}
+
+{% block description %}Schedule an appointment with {{ business_config.get('business_name', 'Verso Industries') }}.
+Select from our available services and book online.{% endblock %}
+
+{% block og_description %}Schedule an appointment with {{ business_config.get('business_name', 'Verso Industries') }}.{%
+endblock %}
+
+{% block head %}
+{{ seo_meta('Book an Appointment | ' ~ business_config.get('business_name', 'Verso Industries'), 'Schedule an
+appointment online. Select from our available services.', url_for('static', filename='images/logo.png', _external=True))
+}}
+{% endblock %}
+
+{% block schema %}
+{{ collection_page_schema('Book an Appointment', 'Schedule an appointment online with our available services') }}
+{% endblock %}
 
 {% block content %}
 <div class="container py-5">

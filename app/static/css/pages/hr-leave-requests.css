@@ -1,0 +1,448 @@
+/* HR Leave Requests Page - Custom Styling
+ * Matches the app's dark futuristic theme with glassmorphism
+ */
+
+/* Page Container */
+.leave-requests-page {
+    padding: 2rem;
+    min-height: 100vh;
+}
+
+.leave-requests-page .page-title {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 2.2rem;
+    color: var(--text-primary);
+    text-shadow: 0 0 12px rgba(65, 105, 225, 0.3);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.leave-requests-page .page-title i {
+    color: var(--accent-blue);
+    font-size: 1.8rem;
+}
+
+/* Card Styling */
+.leave-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(65, 105, 225, 0.2);
+    border-radius: 12px;
+    box-shadow: var(--shadow-light);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.leave-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+.leave-card-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(65, 105, 225, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.leave-card-header h5 {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 1.1rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.leave-card-header.pending {
+    background: linear-gradient(90deg, rgba(255, 193, 7, 0.15) 0%, rgba(255, 193, 7, 0.05) 100%);
+    border-left: 4px solid #ffc107;
+}
+
+.leave-card-header.pending h5 {
+    color: #ffc107;
+}
+
+.leave-card-header.history {
+    background: linear-gradient(90deg, rgba(65, 105, 225, 0.15) 0%, rgba(65, 105, 225, 0.05) 100%);
+    border-left: 4px solid var(--accent-blue);
+}
+
+.leave-card-header.history h5 {
+    color: var(--accent-blue);
+}
+
+.leave-card-body {
+    padding: 1.5rem;
+}
+
+/* Table Styling */
+.leave-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.leave-table thead th {
+    background: rgba(31, 31, 31, 0.6);
+    color: var(--text-primary);
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 1rem 0.75rem;
+    text-align: left;
+    border-bottom: 2px solid rgba(65, 105, 225, 0.3);
+    white-space: nowrap;
+}
+
+.leave-table thead th:first-child {
+    border-radius: 8px 0 0 0;
+}
+
+.leave-table thead th:last-child {
+    border-radius: 0 8px 0 0;
+}
+
+.leave-table tbody tr {
+    transition: background 0.2s ease;
+}
+
+.leave-table tbody tr:hover {
+    background: rgba(65, 105, 225, 0.1);
+}
+
+.leave-table tbody td {
+    padding: 1rem 0.75rem;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: middle;
+}
+
+.leave-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Badge Styling */
+.leave-badge {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-family: 'Neon-Regular', sans-serif;
+    text-transform: capitalize;
+}
+
+.leave-badge.type {
+    background: linear-gradient(90deg, rgba(23, 162, 184, 0.3) 0%, rgba(23, 162, 184, 0.15) 100%);
+    color: #5dd3e8;
+    border: 1px solid rgba(23, 162, 184, 0.4);
+}
+
+.leave-badge.type-secondary {
+    background: rgba(108, 117, 125, 0.2);
+    color: #adb5bd;
+    border: 1px solid rgba(108, 117, 125, 0.3);
+}
+
+.leave-badge.approved {
+    background: linear-gradient(90deg, rgba(40, 167, 69, 0.3) 0%, rgba(40, 167, 69, 0.15) 100%);
+    color: #5dd879;
+    border: 1px solid rgba(40, 167, 69, 0.4);
+}
+
+.leave-badge.rejected {
+    background: linear-gradient(90deg, rgba(220, 53, 69, 0.3) 0%, rgba(220, 53, 69, 0.15) 100%);
+    color: #f07178;
+    border: 1px solid rgba(220, 53, 69, 0.4);
+}
+
+/* Action Buttons */
+.leave-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+}
+
+.leave-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.leave-btn i {
+    font-size: 0.8rem;
+}
+
+.leave-btn.approve {
+    background: linear-gradient(90deg, rgba(40, 167, 69, 0.8) 0%, rgba(34, 139, 34, 0.8) 100%);
+    color: #ffffff;
+    border: 1px solid rgba(40, 167, 69, 0.5);
+}
+
+.leave-btn.approve:hover {
+    background: linear-gradient(90deg, rgba(40, 167, 69, 1) 0%, rgba(34, 139, 34, 1) 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.leave-btn.reject {
+    background: linear-gradient(90deg, rgba(220, 53, 69, 0.8) 0%, rgba(178, 34, 34, 0.8) 100%);
+    color: #ffffff;
+    border: 1px solid rgba(220, 53, 69, 0.5);
+}
+
+.leave-btn.reject:hover {
+    background: linear-gradient(90deg, rgba(220, 53, 69, 1) 0%, rgba(178, 34, 34, 1) 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+/* Modal Styling */
+.leave-modal .modal-content {
+    background: rgba(31, 31, 31, 0.98);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(65, 105, 225, 0.3);
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.leave-modal .modal-header {
+    background: linear-gradient(90deg, rgba(65, 105, 225, 0.1) 0%, transparent 100%);
+    border-bottom: 1px solid rgba(65, 105, 225, 0.2);
+    padding: 1.25rem 1.5rem;
+}
+
+.leave-modal .modal-title {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 1.2rem;
+    color: var(--text-primary);
+}
+
+.leave-modal .btn-close {
+    filter: invert(1);
+    opacity: 0.6;
+}
+
+.leave-modal .btn-close:hover {
+    opacity: 1;
+}
+
+.leave-modal .modal-body {
+    padding: 1.5rem;
+    color: var(--text-primary);
+}
+
+.leave-modal .modal-body p {
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+}
+
+.leave-modal .modal-body strong {
+    color: var(--accent-blue);
+}
+
+.leave-modal .form-label {
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.leave-modal .form-control {
+    background: rgba(31, 31, 31, 0.8);
+    border: 1px solid rgba(65, 105, 225, 0.3);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-family: 'Neon-Regular', sans-serif;
+    padding: 0.75rem 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.leave-modal .form-control:focus {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.15);
+    background: rgba(31, 31, 31, 0.9);
+    outline: none;
+}
+
+.leave-modal .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.leave-modal .modal-footer {
+    border-top: 1px solid rgba(65, 105, 225, 0.2);
+    padding: 1rem 1.5rem;
+    gap: 0.5rem;
+}
+
+.leave-modal .btn-secondary {
+    background: rgba(108, 117, 125, 0.3);
+    border: 1px solid rgba(108, 117, 125, 0.4);
+    color: #adb5bd;
+    font-family: 'Neon-Regular', sans-serif;
+    padding: 0.5rem 1.25rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.leave-modal .btn-secondary:hover {
+    background: rgba(108, 117, 125, 0.5);
+    color: #ffffff;
+}
+
+.leave-modal .btn-success {
+    background: linear-gradient(90deg, rgba(40, 167, 69, 0.9) 0%, rgba(34, 139, 34, 0.9) 100%);
+    border: 1px solid rgba(40, 167, 69, 0.5);
+    color: #ffffff;
+    font-family: 'Neon-Regular', sans-serif;
+    padding: 0.5rem 1.25rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.leave-modal .btn-success:hover {
+    background: linear-gradient(90deg, rgba(40, 167, 69, 1) 0%, rgba(34, 139, 34, 1) 100%);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.leave-modal .btn-danger {
+    background: linear-gradient(90deg, rgba(220, 53, 69, 0.9) 0%, rgba(178, 34, 34, 0.9) 100%);
+    border: 1px solid rgba(220, 53, 69, 0.5);
+    color: #ffffff;
+    font-family: 'Neon-Regular', sans-serif;
+    padding: 0.5rem 1.25rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.leave-modal .btn-danger:hover {
+    background: linear-gradient(90deg, rgba(220, 53, 69, 1) 0%, rgba(178, 34, 34, 1) 100%);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+/* Empty State */
+.leave-empty {
+    text-align: center;
+    padding: 2rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 1rem;
+}
+
+.leave-empty i {
+    display: block;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    opacity: 0.4;
+}
+
+/* Responsive Table */
+.leave-table-container {
+    overflow-x: auto;
+    border-radius: 8px;
+}
+
+.leave-table-container::-webkit-scrollbar {
+    height: 6px;
+}
+
+.leave-table-container::-webkit-scrollbar-track {
+    background: rgba(31, 31, 31, 0.5);
+    border-radius: 3px;
+}
+
+.leave-table-container::-webkit-scrollbar-thumb {
+    background: rgba(65, 105, 225, 0.5);
+    border-radius: 3px;
+}
+
+.leave-table-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(65, 105, 225, 0.7);
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .leave-requests-page {
+        padding: 1.5rem;
+    }
+
+    .leave-requests-page .page-title {
+        font-size: 1.8rem;
+    }
+
+    .leave-table thead th,
+    .leave-table tbody td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .leave-requests-page {
+        padding: 1rem;
+    }
+
+    .leave-requests-page .page-title {
+        font-size: 1.5rem;
+    }
+
+    .leave-card-header {
+        padding: 0.75rem 1rem;
+    }
+
+    .leave-card-body {
+        padding: 1rem;
+    }
+
+    .leave-actions {
+        flex-direction: column;
+    }
+
+    .leave-btn {
+        justify-content: center;
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .leave-requests-page .page-title {
+        font-size: 1.3rem;
+    }
+
+    .leave-requests-page .page-title i {
+        font-size: 1.2rem;
+    }
+
+    .leave-table thead th {
+        font-size: 0.75rem;
+        padding: 0.6rem 0.4rem;
+    }
+
+    .leave-table tbody td {
+        font-size: 0.85rem;
+        padding: 0.6rem 0.4rem;
+    }
+
+    .leave-badge {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.5rem;
+    }
+}

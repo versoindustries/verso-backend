@@ -28,7 +28,7 @@
     {% else %}
 
     <div data-react-component="EmployeeCalendar" data-react-props='{
-             "eventsUrl": "{{ url_for(' employee.calendar_events') }}", "checkinUrlPattern"
+             "eventsUrl": "{{ url_for('employee.calendar_events') }}", "checkinUrlPattern"
         : "/employee/appointment/{id}/checkin" , "checkoutUrlPattern" : "/employee/appointment/{id}/checkout"
         , "notesUrlPattern" : "/employee/appointment/{id}/notes" , "rescheduleUrlPattern"
         : "/employee/appointment/{id}/reschedule" , "pendingReschedules" : {{ pending_reschedules_json | default('[]') |

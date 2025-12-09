@@ -234,7 +234,7 @@ class TestCSVExports:
         with app.app_context():
             response = logged_in_admin.get('/admin/users/export/csv')
             assert response.status_code == 200
-            assert response.content_type == 'text/csv'
+            assert 'text/csv' in response.content_type
             assert b'Username' in response.data or b'ID' in response.data
     
     def test_orders_csv_export(self, logged_in_admin, app):
@@ -242,7 +242,7 @@ class TestCSVExports:
         with app.app_context():
             response = logged_in_admin.get('/admin/orders/export/csv')
             assert response.status_code == 200
-            assert response.content_type == 'text/csv'
+            assert 'text/csv' in response.content_type
     
     def test_leads_csv_export(self, logged_in_admin, app):
         """Test leads CSV export."""

@@ -1,4 +1,22 @@
 {% extends "base.html" %}
+{% from 'seo_macros.html' import seo_meta, collection_page_schema %}
+
+{% block title %}Shop | {{ business_config.get('business_name', 'Verso Industries') }}{% endblock %}
+
+{% block description %}Browse our collection of products. Quality items from {{ business_config.get('business_name',
+'Verso Industries') }}.{% endblock %}
+
+{% block og_description %}Browse our collection of products from {{ business_config.get('business_name', 'Verso
+Industries') }}.{% endblock %}
+
+{% block head %}
+{{ seo_meta('Shop | ' ~ business_config.get('business_name', 'Verso Industries'), 'Browse our collection of products.
+Quality items available for purchase.', url_for('static', filename='images/logo.png', _external=True)) }}
+{% endblock %}
+
+{% block schema %}
+{{ collection_page_schema('Shop', 'Browse our collection of products') }}
+{% endblock %}
 
 {% block content %}
 <div class="container mt-5">

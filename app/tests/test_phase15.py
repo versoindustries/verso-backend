@@ -27,15 +27,19 @@ def app():
     with app.app_context():
         db.create_all()
         
-        # Create admin role and user
-        admin_role = Role(name='admin')
-        db.session.add(admin_role)
+        # Get or create admin role
+        admin_role = Role.query.filter_by(name='admin').first()
+        if not admin_role:
+            admin_role = Role(name='admin')
+            db.session.add(admin_role)
+            db.session.commit()
         
         admin = User(
             username='admin',
             email='admin@test.com',
             password='password'
         )
+        admin.confirmed = True
         admin.roles.append(admin_role)
         db.session.add(admin)
         
@@ -46,6 +50,7 @@ def app():
                 email=f'user{i}@test.com',
                 password='password'
             )
+            user.confirmed = True
             db.session.add(user)
         
         db.session.commit()

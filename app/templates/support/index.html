@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Support Center{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="text-center mb-5">
+                <h1><i class="fas fa-life-ring text-primary"></i> Support Center</h1>
+                <p class="lead text-muted">How can we help you today?</p>
+            </div>
+
+            <div class="row g-4 mb-5">
+                <div class="col-md-6">
+                    <div class="card h-100 text-center p-4">
+                        <div class="card-body">
+                            <i class="fas fa-ticket-alt fa-3x text-primary mb-3"></i>
+                            <h3 class="h5">Submit a Ticket</h3>
+                            <p class="text-muted">Create a new support request and our team will respond promptly.</p>
+                            <a href="{{ url_for('support.create_ticket') }}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>New Ticket
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100 text-center p-4">
+                        <div class="card-body">
+                            <i class="fas fa-list fa-3x text-info mb-3"></i>
+                            <h3 class="h5">My Tickets</h3>
+                            <p class="text-muted">View and manage your existing support requests.</p>
+                            {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('support.my_tickets') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-folder-open me-2"></i>View Tickets
+                            </a>
+                            {% else %}
+                            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login to View
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Support Hours</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">Our team typically responds within 24 hours during business days. For urgent issues,
+                        please mark your ticket as high priority.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

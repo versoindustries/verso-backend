@@ -111,7 +111,7 @@ def admin_user(app, db_session):
 
 
 @pytest.fixture(scope='function')
-def regular_user(app, db_session):
+def regular_user(app):
     """Create a regular user for testing."""
     from app.models import User, Role
     from app.database import db
@@ -122,6 +122,7 @@ def regular_user(app, db_session):
         if not user_role:
             user_role = Role(name='user')
             db.session.add(user_role)
+            db.session.flush()
         
         user = User(
             username='test_user',
@@ -129,6 +130,7 @@ def regular_user(app, db_session):
             password='TestPassword123!'
         )
         user.confirmed = True
+        user.tos_accepted = True
         user.roles.append(user_role)
         
         db.session.add(user)

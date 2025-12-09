@@ -16,7 +16,7 @@ from app.modules.reporting import (
     calculate_traffic_metrics, calculate_daily_revenue,
     get_date_range_presets, track_conversion
 )
-from sqlalchemy import func, desc
+from sqlalchemy import func, desc, case
 from datetime import datetime, timedelta
 
 analytics_bp = Blueprint('analytics', __name__, url_prefix='/admin/analytics')
@@ -216,7 +216,7 @@ def sessions():
     
     # Session duration distribution
     durations = db.session.query(
-        func.case(
+        case(
             (VisitorSession.duration_seconds < 30, '0-30s'),
             (VisitorSession.duration_seconds < 120, '30s-2m'),
             (VisitorSession.duration_seconds < 300, '2-5m'),
@@ -231,7 +231,7 @@ def sessions():
     
     # Pages per session distribution
     pages_dist = db.session.query(
-        func.case(
+        case(
             (VisitorSession.pages_viewed == 1, '1 page'),
             (VisitorSession.pages_viewed <= 3, '2-3 pages'),
             (VisitorSession.pages_viewed <= 5, '4-5 pages'),

@@ -53,6 +53,7 @@ def create_roles_command():
 def seed_business_config_command():
     """Seed default business configuration."""
     default_configs = [
+        {'setting_name': 'site_name', 'setting_value': 'Verso Backend'},
         {'setting_name': 'business_start_time', 'setting_value': '08:00'},
         {'setting_name': 'business_end_time', 'setting_value': '17:00'},
         {'setting_name': 'buffer_time_minutes', 'setting_value': '30'},
@@ -182,7 +183,12 @@ def create_app(config_class=Config):
     @app.context_processor
     def inject_business_config():
         config_dict = cached_business_config()
-        return dict(business_config=config_dict, erf_form=EstimateRequestForm())
+        # Feature flags (default to True for existing deployments)
+        feature_flags = {
+            'ecommerce_enabled': config_dict.get('ecommerce_enabled', 'true') == 'true',
+            'booking_enabled': config_dict.get('booking_enabled', 'true') == 'true'
+        }
+        return dict(business_config=config_dict, erf_form=EstimateRequestForm(), feature_flags=feature_flags)
 
     # Register Vite tags
     from app.utils.vite import vite_tags
@@ -296,6 +302,10 @@ def create_app(config_class=Config):
     
     app.register_blueprint(oauth_bp)
     app.register_blueprint(onboarding_bp)
+
+    # Phase 23: Support Ticketing System
+    from app.routes.support import support_bp
+    app.register_blueprint(support_bp)
 
     # Phase 24: Observability & Monitoring
     from app.routes.observability import observability_bp, init_metrics_collection
@@ -508,7 +518,11 @@ def create_app(config_class=Config):
             app._cache_warmed = True
 
     from app.routes.booking_api import booking_api_bp
+    from app.modules.security import rate_limiter
     app.register_blueprint(booking_api_bp)
+    # Exempt booking API from rate limiting for public booking flow
+    if hasattr(rate_limiter, 'limiter') and rate_limiter.limiter:
+        rate_limiter.limiter.exempt(booking_api_bp)
 
     return app
 

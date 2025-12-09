@@ -322,13 +322,13 @@ class TestAdminMetricsDashboard:
         # Should redirect to login
         assert response.status_code in [302, 401, 403]
     
-    def test_admin_metrics_accessible_to_admin(self, client, admin_user):
+    def test_admin_metrics_accessible_to_admin(self, client, admin_user, app):
         """Admin users should be able to access metrics dashboard."""
-        # Login as admin
-        client.post('/login', data={
-            'email': admin_user.email,
-            'password': 'adminpass123'
-        })
+        # admin_user fixture returns user_id directly
+        with app.app_context():
+            with client.session_transaction() as sess:
+                sess['_user_id'] = str(admin_user)
+                sess['_fresh'] = True
         
         response = client.get('/admin/metrics')
         
@@ -464,13 +464,13 @@ class TestAdvancedObservability:
 class TestObservabilityConfigEndpoint:
     """Tests for observability configuration endpoint."""
     
-    def test_config_endpoint_returns_status(self, client, admin_user):
+    def test_config_endpoint_returns_status(self, client, admin_user, app):
         """Config endpoint should return observability status."""
-        # Login as admin
-        client.post('/login', data={
-            'email': admin_user.email,
-            'password': 'adminpass123'
-        })
+        # admin_user fixture returns user_id directly
+        with app.app_context():
+            with client.session_transaction() as sess:
+                sess['_user_id'] = str(admin_user)
+                sess['_fresh'] = True
         
         response = client.get('/admin/observability-config')
         
@@ -510,10 +510,9 @@ def client(app):
 
 @pytest.fixture
 def admin_user(app):
-    """Create an admin user for testing."""
+    """Create an admin user for testing. Returns user_id to avoid DetachedInstanceError."""
     from app.database import db
     from app.models import User, Role
-    from app import bcrypt
     
     with app.app_context():
         # Create admin role if it doesn't exist
@@ -522,17 +521,20 @@ def admin_user(app):
             admin_role = Role(name='admin')
             db.session.add(admin_role)
         
-        # Create admin user
+        # Create admin user - User __init__ takes (username, email, password)
         user = User(
             username='testadmin',
             email='admin@test.com',
-            password_hash=bcrypt.generate_password_hash('adminpass123').decode('utf-8'),
-            first_name='Test',
-            last_name='Admin'
+            password='adminpass123'
         )
+        user.first_name = 'Test'
+        user.last_name = 'Admin'
+        user.confirmed = True
+        user.tos_accepted = True
         user.roles.append(admin_role)
         db.session.add(user)
         db.session.commit()
         
-        return user
+        # Return user_id to avoid DetachedInstanceError
+        return user.id
 

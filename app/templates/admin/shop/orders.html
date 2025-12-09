@@ -48,7 +48,7 @@
              "data": {{ orders_json | safe }},
              "idKey": "id",
              "bulkActions": {{ bulk_actions | safe }},
-             "bulkActionUrl": "{{ url_for(' orders_admin.bulk_update_status') }}", "csrfToken" : "{{ csrf_token() }}"
+             "bulkActionUrl": "{{ url_for('orders_admin.bulk_update_status') }}", "csrfToken" : "{{ csrf_token() }}"
         , "defaultPageSize" : 20, "emptyMessage" : "No orders found." }'>
         <!-- Loading fallback -->
         <div class="text-center py-4">

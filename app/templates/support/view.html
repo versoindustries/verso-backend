@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Ticket {{ ticket.ticket_number }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('support.index') }}">Support</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('support.my_tickets') }}">My Tickets</a></li>
+                    <li class="breadcrumb-item active">{{ ticket.ticket_number }}</li>
+                </ol>
+            </nav>
+
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="badge bg-secondary me-2">{{ ticket.ticket_number }}</span>
+                        <span
+                            class="badge bg-{{ 'danger' if ticket.priority == 'urgent' else 'warning' if ticket.priority == 'high' else 'info' if ticket.priority == 'normal' else 'secondary' }}">
+                            {{ ticket.priority }}
+                        </span>
+                        <span
+                            class="badge bg-{{ 'success' if ticket.status == 'resolved' else 'primary' if ticket.status == 'in_progress' else 'warning text-dark' if ticket.status == 'waiting' else 'info' }}">
+                            {{ ticket.status.replace('_', ' ') }}
+                        </span>
+                    </div>
+                    <small class="text-muted">{{ ticket.created_at.strftime('%B %d, %Y at %H:%M') }}</small>
+                </div>
+                <div class="card-body">
+                    <h4>{{ ticket.subject }}</h4>
+                    <hr>
+                    <div class="mb-3">
+                        {{ ticket.description | safe }}
+                    </div>
+                    <small class="text-muted">Category: {{ ticket.category or 'General' }}</small>
+                </div>
+            </div>
+
+            <!-- Replies -->
+            <h5 class="mb-3"><i class="fas fa-comments me-2"></i>Conversation</h5>
+
+            {% for reply in replies %}
+            <div class="card mb-3 {{ 'border-primary' if not reply.is_from_customer else '' }}">
+                <div
+                    class="card-header d-flex justify-content-between align-items-center {{ 'bg-primary text-white' if not reply.is_from_customer else 'bg-light' }}">
+                    <div>
+                        {% if reply.is_from_customer %}
+                        <i class="fas fa-user me-2"></i>You
+                        {% else %}
+                        <i class="fas fa-headset me-2"></i>Support Team
+                        {% endif %}
+                    </div>
+                    <small>{{ reply.created_at.strftime('%b %d, %Y %H:%M') }}</small>
+                </div>
+                <div class="card-body">
+                    {{ reply.content | safe }}
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>No replies yet. Our team will respond soon.
+            </div>
+            {% endfor %}
+
+            <!-- Reply Form (if ticket not closed) -->
+            {% if ticket.status not in ['closed', 'resolved'] %}
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-reply me-2"></i>Add Reply</h6>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('support.add_reply', ticket_number=ticket.ticket_number) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="mb-3">
+                            <textarea class="form-control" name="content" rows="4" required
+                                placeholder="Type your reply here..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-2"></i>Send Reply
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-secondary">
+                <i class="fas fa-check-circle me-2"></i>This ticket is {{ ticket.status }}. To reopen, please create a
+                new ticket.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -26,13 +26,19 @@ def theme_editor():
     configs = {c.setting_name: c.setting_value for c in BusinessConfig.query.all()}
     
     current_theme = {
+        'site_name': configs.get('site_name', configs.get('business_name', 'Verso Backend')),
         'primary_color': configs.get('primary_color', '#4169e1'),
         'secondary_color': configs.get('secondary_color', '#6c757d'),
         'accent_color': configs.get('accent_color', '#28a745'),
         'font_family': configs.get('font_family', 'Roboto, sans-serif'),
         'border_radius': configs.get('border_radius', '8'),
         'logo_media_id': configs.get('logo_media_id', ''),
-        'ga4_tracking_id': configs.get('ga4_tracking_id', '')
+        'ga4_tracking_id': configs.get('ga4_tracking_id', ''),
+        # Booking form customization
+        'booking_button_text': configs.get('booking_button_text', 'Book Now'),
+        'booking_show_phone': configs.get('booking_show_phone', 'true') == 'true',
+        'booking_show_notes': configs.get('booking_show_notes', 'true') == 'true',
+        'booking_accent_color': configs.get('booking_accent_color', configs.get('primary_color', '#4169e1'))
     }
     
     # Get logo info if exists
@@ -44,12 +50,18 @@ def theme_editor():
         try:
             # Update theme settings
             settings = {
+                'site_name': request.form.get('site_name', 'Verso Backend').strip(),
                 'primary_color': request.form.get('primary_color', '#4169e1'),
                 'secondary_color': request.form.get('secondary_color', '#6c757d'),
                 'accent_color': request.form.get('accent_color', '#28a745'),
                 'font_family': request.form.get('font_family', 'Roboto, sans-serif'),
                 'border_radius': request.form.get('border_radius', '8'),
-                'ga4_tracking_id': request.form.get('ga4_tracking_id', '').strip()
+                'ga4_tracking_id': request.form.get('ga4_tracking_id', '').strip(),
+                # Booking form customization
+                'booking_button_text': request.form.get('booking_button_text', 'Book Now').strip(),
+                'booking_show_phone': 'true' if request.form.get('booking_show_phone') else 'false',
+                'booking_show_notes': 'true' if request.form.get('booking_show_notes') else 'false',
+                'booking_accent_color': request.form.get('booking_accent_color', '#4169e1')
             }
             
             for name, value in settings.items():

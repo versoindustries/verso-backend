@@ -1,15 +1,25 @@
 {% extends "base.html" %}
+{% from 'seo_macros.html' import seo_meta, contact_page_schema %}
 
 {% block additional_css %}
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/contact.css') }}">
 {% endblock %}
 
-{% block title %}
-Contact Us | Verso Industries
-{% endblock %}
+{% block title %}Contact Us | Verso Industries{% endblock %}
+
+{% block description %}Get in touch with Verso Industries. We're here to help with your software needs and answer any
+questions about our sovereign software solutions.{% endblock %}
+
+{% block og_description %}Get in touch with Verso Industries. We're here to help with your software needs.{% endblock %}
 
 {% block head %}
-<!-- Additional head content can go here -->
+{{ seo_meta('Contact Us | Verso Industries', 'Get in touch with Verso Industries. We are here to help with your software
+needs and answer any questions about our sovereign software solutions.', url_for('static', filename='images/logo.png',
+_external=True)) }}
+{% endblock %}
+
+{% block schema %}
+{{ contact_page_schema() }}
 {% endblock %}
 
 {% block content %}

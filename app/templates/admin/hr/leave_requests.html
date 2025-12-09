@@ -1,20 +1,24 @@
-{% extends 'admin/base_admin.html' %}
+{% extends 'base.html' %}
 
 {% block title %}Leave Request Management{% endblock %}
 
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/hr-leave-requests.css') }}">
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid py-4">
-    <h1 class="mb-4"><i class="fas fa-calendar-check me-2"></i>Leave Request Management</h1>
+<div class="leave-requests-page">
+    <h1 class="page-title"><i class="fas fa-calendar-check"></i>Leave Request Management</h1>
 
     <!-- Pending Requests -->
-    <div class="card mb-4">
-        <div class="card-header bg-warning text-dark">
-            <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Pending Requests ({{ pending|length }})</h5>
+    <div class="leave-card">
+        <div class="leave-card-header pending">
+            <h5><i class="fas fa-clock"></i>Pending Requests ({{ pending|length }})</h5>
         </div>
-        <div class="card-body">
+        <div class="leave-card-body">
             {% if pending %}
-            <div class="table-responsive">
-                <table class="table table-striped">
+            <div class="leave-table-container">
+                <table class="leave-table">
                     <thead>
                         <tr>
                             <th>Employee</th>
@@ -30,7 +34,7 @@
                         {% for leave in pending %}
                         <tr>
                             <td>{{ leave.user.first_name or '' }} {{ leave.user.last_name or leave.user.username }}</td>
-                            <td><span class="badge bg-info">{{ leave.leave_type }}</span></td>
+                            <td><span class="leave-badge type">{{ leave.leave_type }}</span></td>
                             <td>{{ leave.start_date.strftime('%b %d') }} - {{ leave.end_date.strftime('%b %d, %Y') }}
                             </td>
                             <td>{{ leave.days_requested() }}</td>
@@ -38,24 +42,28 @@
                                 leave.reason|length > 50 else '' }}</td>
                             <td>{{ leave.created_at.strftime('%Y-%m-%d') }}</td>
                             <td>
-                                <button class="btn btn-sm btn-success" data-bs-toggle="modal"
-                                    data-bs-target="#approveModal{{ leave.id }}">
-                                    <i class="fas fa-check"></i> Approve
-                                </button>
-                                <button class="btn btn-sm btn-danger" data-bs-toggle="modal"
-                                    data-bs-target="#rejectModal{{ leave.id }}">
-                                    <i class="fas fa-times"></i> Reject
-                                </button>
+                                <div class="leave-actions">
+                                    <button class="leave-btn approve" data-bs-toggle="modal"
+                                        data-bs-target="#approveModal{{ leave.id }}">
+                                        <i class="fas fa-check"></i> Approve
+                                    </button>
+                                    <button class="leave-btn reject" data-bs-toggle="modal"
+                                        data-bs-target="#rejectModal{{ leave.id }}">
+                                        <i class="fas fa-times"></i> Reject
+                                    </button>
+                                </div>
 
                                 <!-- Approve Modal -->
-                                <div class="modal fade" id="approveModal{{ leave.id }}" tabindex="-1">
+                                <div class="modal fade leave-modal" id="approveModal{{ leave.id }}" tabindex="-1">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
                                             <form action="{{ url_for('admin.approve_leave', request_id=leave.id) }}"
                                                 method="post">
                                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                                 <div class="modal-header">
-                                                    <h5 class="modal-title">Approve Leave Request</h5>
+                                                    <h5 class="modal-title"><i
+                                                            class="fas fa-check-circle me-2"></i>Approve Leave Request
+                                                    </h5>
                                                     <button type="button" class="btn-close"
                                                         data-bs-dismiss="modal"></button>
                                                 </div>
@@ -68,14 +76,15 @@
                                                     <div class="mb-3">
                                                         <label for="admin_notes" class="form-label">Notes
                                                             (optional)</label>
-                                                        <textarea name="admin_notes" class="form-control"
-                                                            rows="2"></textarea>
+                                                        <textarea name="admin_notes" class="form-control" rows="2"
+                                                            placeholder="Add any notes for this approval..."></textarea>
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer">
                                                     <button type="button" class="btn btn-secondary"
                                                         data-bs-dismiss="modal">Cancel</button>
-                                                    <button type="submit" class="btn btn-success">Approve</button>
+                                                    <button type="submit" class="btn btn-success"><i
+                                                            class="fas fa-check me-1"></i>Approve</button>
                                                 </div>
                                             </form>
                                         </div>
@@ -83,14 +92,16 @@
                                 </div>
 
                                 <!-- Reject Modal -->
-                                <div class="modal fade" id="rejectModal{{ leave.id }}" tabindex="-1">
+                                <div class="modal fade leave-modal" id="rejectModal{{ leave.id }}" tabindex="-1">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
                                             <form action="{{ url_for('admin.reject_leave', request_id=leave.id) }}"
                                                 method="post">
                                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                                 <div class="modal-header">
-                                                    <h5 class="modal-title">Reject Leave Request</h5>
+                                                    <h5 class="modal-title"><i
+                                                            class="fas fa-times-circle me-2"></i>Reject Leave Request
+                                                    </h5>
                                                     <button type="button" class="btn-close"
                                                         data-bs-dismiss="modal"></button>
                                                 </div>
@@ -103,13 +114,15 @@
                                                         <label for="admin_notes" class="form-label">Reason for
                                                             rejection</label>
                                                         <textarea name="admin_notes" class="form-control" rows="2"
-                                                            required></textarea>
+                                                            required
+                                                            placeholder="Please provide a reason for rejection..."></textarea>
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer">
                                                     <button type="button" class="btn btn-secondary"
                                                         data-bs-dismiss="modal">Cancel</button>
-                                                    <button type="submit" class="btn btn-danger">Reject</button>
+                                                    <button type="submit" class="btn btn-danger"><i
+                                                            class="fas fa-times me-1"></i>Reject</button>
                                                 </div>
                                             </form>
                                         </div>
@@ -122,20 +135,23 @@
                 </table>
             </div>
             {% else %}
-            <p class="text-muted mb-0">No pending leave requests.</p>
+            <div class="leave-empty">
+                <i class="fas fa-inbox"></i>
+                No pending leave requests.
+            </div>
             {% endif %}
         </div>
     </div>
 
     <!-- Recent Decisions -->
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Decisions</h5>
+    <div class="leave-card">
+        <div class="leave-card-header history">
+            <h5><i class="fas fa-history"></i>Recent Decisions</h5>
         </div>
-        <div class="card-body">
+        <div class="leave-card-body">
             {% if recent %}
-            <div class="table-responsive">
-                <table class="table table-sm">
+            <div class="leave-table-container">
+                <table class="leave-table">
                     <thead>
                         <tr>
                             <th>Employee</th>
@@ -150,13 +166,13 @@
                         {% for leave in recent %}
                         <tr>
                             <td>{{ leave.user.first_name or '' }} {{ leave.user.last_name or leave.user.username }}</td>
-                            <td><span class="badge bg-secondary">{{ leave.leave_type }}</span></td>
+                            <td><span class="leave-badge type-secondary">{{ leave.leave_type }}</span></td>
                             <td>{{ leave.start_date.strftime('%b %d') }} - {{ leave.end_date.strftime('%b %d') }}</td>
                             <td>
                                 {% if leave.status == 'approved' %}
-                                <span class="badge bg-success">Approved</span>
+                                <span class="leave-badge approved">Approved</span>
                                 {% else %}
-                                <span class="badge bg-danger">Rejected</span>
+                                <span class="leave-badge rejected">Rejected</span>
                                 {% endif %}
                             </td>
                             <td>{{ leave.approved_by.username if leave.approved_by else 'N/A' }}</td>
@@ -167,7 +183,10 @@
                 </table>
             </div>
             {% else %}
-            <p class="text-muted mb-0">No recent decisions.</p>
+            <div class="leave-empty">
+                <i class="fas fa-folder-open"></i>
+                No recent decisions.
+            </div>
             {% endif %}
         </div>
     </div>

@@ -1,0 +1,355 @@
+/* Business Configuration Page - Custom Styling
+ * Uses theme-variables.css for theme editor integration
+ */
+
+/* Page Section */
+.business-config-section {
+    padding: 2rem;
+    min-height: 100vh;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Section Header */
+.business-config-section .section-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    position: relative;
+}
+
+.business-config-section .section-header::after {
+    content: '';
+    position: absolute;
+    bottom: -1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background: var(--btn-gradient);
+    border-radius: 2px;
+}
+
+.business-config-section .section-header h1 {
+    font-family: var(--font-heading), 'Neon-Heavy', sans-serif;
+    font-size: 2.2rem;
+    color: var(--text-primary, #ffffff);
+    text-shadow: 0 0 12px color-mix(in srgb, var(--primary-color) 30%, transparent);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.business-config-section .section-header h1 i {
+    color: var(--primary-color);
+    font-size: 1.8rem;
+}
+
+.business-config-section .section-header p {
+    font-family: var(--font-body), 'Neon-Regular', sans-serif;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    max-width: 500px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* Form Container */
+.config-form-container {
+    background: var(--glass-bg, rgba(31, 31, 31, 0.8));
+    backdrop-filter: blur(12px);
+    border: 1px solid color-mix(in srgb, var(--primary-color) 20%, transparent);
+    border-radius: var(--border-radius-lg, 12px);
+    box-shadow: var(--shadow-lg, 0 10px 15px rgba(0, 0, 0, 0.1));
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.config-form-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--btn-gradient);
+}
+
+/* Form Layout */
+.business-config-form {
+    display: grid;
+    gap: 1.5rem;
+}
+
+/* Form Groups */
+.business-config-form .form-group {
+    position: relative;
+}
+
+.business-config-form .form-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-body), 'Neon-Regular', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-primary, #ffffff);
+    margin-bottom: 0.5rem;
+}
+
+.business-config-form .form-group label i {
+    color: var(--primary-color);
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+/* Input Fields */
+.business-config-form .form-control {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    font-family: var(--font-body), 'Neon-Regular', sans-serif;
+    font-size: 1rem;
+    color: var(--text-primary, #ffffff);
+    background: rgba(31, 31, 31, 0.6);
+    border: 1px solid color-mix(in srgb, var(--primary-color) 30%, transparent);
+    border-radius: var(--border-radius, 8px);
+    transition: all 0.2s ease;
+}
+
+.business-config-form .form-control:hover {
+    border-color: color-mix(in srgb, var(--primary-color) 50%, transparent);
+}
+
+.business-config-form .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-focus, 0 0 0 3px rgba(65, 105, 225, 0.15));
+    background: rgba(31, 31, 31, 0.8);
+    outline: none;
+}
+
+.business-config-form .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* Time Input Styling */
+.business-config-form input[type="time"] {
+    color-scheme: dark;
+}
+
+.business-config-form input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.6;
+    cursor: pointer;
+}
+
+.business-config-form input[type="time"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+/* Number Input */
+.business-config-form input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+.business-config-form input[type="number"]::-webkit-outer-spin-button,
+.business-config-form input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Color Input Styling */
+.business-config-form input[type="color"] {
+    height: 50px;
+    padding: 0.25rem;
+    cursor: pointer;
+    border: 2px solid color-mix(in srgb, var(--primary-color) 30%, transparent);
+}
+
+.business-config-form input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 2px;
+}
+
+.business-config-form input[type="color"]::-webkit-color-swatch {
+    border: none;
+    border-radius: calc(var(--border-radius, 8px) - 4px);
+}
+
+.business-config-form input[type="color"]:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--primary-color) 40%, transparent);
+}
+
+/* Select Dropdown */
+.business-config-form select.form-control {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
+    cursor: pointer;
+}
+
+.business-config-form select.form-control option {
+    background: #1f1f1f;
+    color: #ffffff;
+    padding: 0.5rem;
+}
+
+/* Error Messages */
+.business-config-form .error-message {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.85rem;
+    color: #f07178;
+    font-family: var(--font-body), 'Neon-Regular', sans-serif;
+}
+
+/* Submit Button */
+.business-config-form .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 1rem 1.5rem;
+    margin-top: 1rem;
+    font-family: var(--font-heading), 'Neon-Heavy', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #ffffff;
+    background: var(--btn-gradient);
+    border: none;
+    border-radius: var(--border-radius, 8px);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.business-config-form .btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.business-config-form .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--primary-color) 40%, transparent);
+}
+
+.business-config-form .btn-primary:hover::before {
+    left: 100%;
+}
+
+.business-config-form .btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--primary-color) 30%, transparent);
+}
+
+.business-config-form .btn-primary i {
+    font-size: 1rem;
+}
+
+/* Form Section Dividers (optional enhancement) */
+.business-config-form .form-section-title {
+    font-family: var(--font-heading), 'Neon-Heavy', sans-serif;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--primary-color);
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--primary-color) 20%, transparent);
+}
+
+/* Responsive Design */
+@media (min-width: 768px) {
+    .business-config-section {
+        padding: 3rem 2rem;
+    }
+
+    .config-form-container {
+        padding: 2.5rem;
+    }
+
+    /* Two column layout for form fields */
+    .business-config-form {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    /* Full width for specific elements */
+    .business-config-form .form-group:nth-child(5),
+    .business-config-form .form-group:nth-child(6) {
+        /* Color pickers side by side */
+    }
+
+    .business-config-form .form-group:nth-child(7),
+    .business-config-form .btn-primary {
+        grid-column: span 2;
+    }
+}
+
+@media (max-width: 768px) {
+    .business-config-section {
+        padding: 1.5rem 1rem;
+    }
+
+    .business-config-section .section-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .business-config-section .section-header p {
+        font-size: 0.9rem;
+    }
+
+    .config-form-container {
+        padding: 1.5rem;
+    }
+
+    .business-config-form .form-control {
+        padding: 0.75rem 0.875rem;
+        font-size: 0.95rem;
+    }
+
+    .business-config-form .btn-primary {
+        padding: 0.875rem 1.25rem;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .business-config-section {
+        padding: 1rem 0.75rem;
+    }
+
+    .business-config-section .section-header h1 {
+        font-size: 1.5rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .config-form-container {
+        padding: 1.25rem;
+        border-radius: var(--border-radius, 8px);
+    }
+
+    .business-config-form .form-group label {
+        font-size: 0.9rem;
+    }
+
+    .business-config-form input[type="color"] {
+        height: 45px;
+    }
+}

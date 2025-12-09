@@ -290,12 +290,12 @@ def list_roles():
     roles = Role.query.all()
     form = CSRFTokenForm()
     
-    # Serialize for AdminDataTable
+    # Serialize for AdminDataTable - use HTML entities for quotes in JS to avoid JSON escaping issues
     roles_json = json.dumps([{
         'id': role.id,
         'name': role.name,
         'users': len(role.users),
-        'actions': f'<a href="{url_for("admin.edit_role", role_id=role.id)}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i> Edit</a>' + (f' <form method="post" action="{url_for("admin.delete_role", role_id=role.id)}" class="d-inline" onsubmit="return confirm(\'Delete this role?\');"><input type="hidden" name="csrf_token" value="{form.csrf_token._value()}"><button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button></form>' if not role.users else '')
+        'actions': f'<a href="{url_for("admin.edit_role", role_id=role.id)}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i> Edit</a>' + (f' <form method="post" action="{url_for("admin.delete_role", role_id=role.id)}" class="d-inline" onsubmit="return confirm(&apos;Delete this role?&apos;);"><input type="hidden" name="csrf_token" value="{form.csrf_token._value()}"><button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button></form>' if not role.users else '')
     } for role in roles])
     
     return render_template('admin/list_roles.html', roles=roles, roles_json=roles_json, form=form)
@@ -531,6 +531,52 @@ def business_config():
         form.font_family.data = config_dict.get('font_family', 'Arial, sans-serif')
 
     return render_template('admin/business_config.html', form=form, hide_estimate_form=True)
+
+@admin.route('/settings/features', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def feature_settings():
+    """Toggle e-commerce and booking features on/off."""
+    form = CSRFTokenForm()
+    
+    if request.method == 'POST' and form.validate_on_submit():
+        try:
+            # Get feature toggles from form
+            ecommerce_enabled = 'true' if request.form.get('ecommerce_enabled') else 'false'
+            booking_enabled = 'true' if request.form.get('booking_enabled') else 'false'
+            
+            settings = {
+                'ecommerce_enabled': ecommerce_enabled,
+                'booking_enabled': booking_enabled
+            }
+            
+            for name, value in settings.items():
+                config = BusinessConfig.query.filter_by(setting_name=name).first()
+                if config:
+                    config.setting_value = value
+                else:
+                    config = BusinessConfig(setting_name=name, setting_value=value)
+                    db.session.add(config)
+            
+            db.session.commit()
+            log_audit_event(current_user.id, 'update_feature_settings', 'BusinessConfig', None, settings, request.remote_addr)
+            flash('Feature settings updated successfully.', 'success')
+            return redirect(url_for('admin.feature_settings'))
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            current_app.logger.error(f'Error updating feature settings: {e}')
+            flash('Error updating settings. Please try again.', 'error')
+    
+    # Load current settings
+    configs = {c.setting_name: c.setting_value for c in BusinessConfig.query.all()}
+    
+    # Default to enabled for existing deployments
+    features = {
+        'ecommerce_enabled': configs.get('ecommerce_enabled', 'true') == 'true',
+        'booking_enabled': configs.get('booking_enabled', 'true') == 'true'
+    }
+    
+    return render_template('admin/feature_settings.html', form=form, features=features)
 
 @admin.route('/pages')
 @login_required
@@ -1634,7 +1680,7 @@ def export_users_csv():
             user.last_name or '',
             user.phone or '',
             ', '.join([r.name for r in user.roles]),
-            user.created_at.strftime('%Y-%m-%d %H:%M:%S') if user.created_at else '',
+            user.date.strftime('%Y-%m-%d %H:%M:%S') if user.date else '',
             user.last_login.strftime('%Y-%m-%d %H:%M:%S') if user.last_login else ''
         ])
     
@@ -2001,7 +2047,7 @@ def operations_dashboard():
     # Pending tasks from background worker
     from app.models import Task
     pending_tasks = Task.query.filter_by(status='pending').order_by(Task.created_at.desc()).limit(20).all()
-    failed_tasks = Task.query.filter_by(status='failed').order_by(Task.updated_at.desc()).limit(10).all()
+    failed_tasks = Task.query.filter_by(status='failed').order_by(Task.created_at.desc()).limit(10).all()
     
     # Leave requests pending approval
     from app.models import LeaveRequest
@@ -2091,7 +2137,7 @@ def sales_dashboard():
     # Follow-up reminders due today or overdue
     today = now_local.date()
     due_reminders = FollowUpReminder.query.filter(
-        FollowUpReminder.is_completed == False,
+        FollowUpReminder.status == 'pending',
         FollowUpReminder.due_date <= datetime.combine(today, datetime.max.time())
     ).order_by(FollowUpReminder.due_date.asc()).all()
     

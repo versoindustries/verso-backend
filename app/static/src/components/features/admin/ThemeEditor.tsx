@@ -13,12 +13,18 @@ import { Palette, Type, BarChart3, Image, RefreshCw, Save, Trash2 } from 'lucide
 // =============================================================================
 
 export interface ThemeConfig {
+    siteName?: string
     primaryColor: string
     secondaryColor: string
     accentColor: string
     fontFamily: string
     borderRadius: number
     ga4TrackingId?: string
+    // Booking form customization
+    bookingButtonText?: string
+    bookingShowPhone?: boolean
+    bookingShowNotes?: boolean
+    bookingAccentColor?: string
 }
 
 export interface FontChoice {
@@ -195,12 +201,19 @@ export function ThemeEditor({
     csrfToken,
 }: ThemeEditorProps) {
     // State for form values
+    const [siteName, setSiteName] = useState(currentTheme.siteName || 'Verso Backend')
     const [primaryColor, setPrimaryColor] = useState(currentTheme.primaryColor)
     const [secondaryColor, setSecondaryColor] = useState(currentTheme.secondaryColor)
     const [accentColor, setAccentColor] = useState(currentTheme.accentColor)
     const [fontFamily, setFontFamily] = useState(currentTheme.fontFamily)
     const [borderRadius, setBorderRadius] = useState(currentTheme.borderRadius)
     const [ga4TrackingId, setGa4TrackingId] = useState(currentTheme.ga4TrackingId || '')
+
+    // Booking form customization state
+    const [bookingButtonText, setBookingButtonText] = useState(currentTheme.bookingButtonText || 'Book Now')
+    const [bookingShowPhone, setBookingShowPhone] = useState(currentTheme.bookingShowPhone !== false)
+    const [bookingShowNotes, setBookingShowNotes] = useState(currentTheme.bookingShowNotes !== false)
+    const [bookingAccentColor, setBookingAccentColor] = useState(currentTheme.bookingAccentColor || currentTheme.primaryColor)
 
     // State for iframe preview
     const [showIframe, setShowIframe] = useState(false)
@@ -233,6 +246,24 @@ export function ThemeEditor({
                 <div className="editor-panel">
                     <form action={formActionUrl} method="POST">
                         <input type="hidden" name="csrf_token" value={csrfToken} />
+
+                        {/* Site Identity Section */}
+                        <div className="panel-section">
+                            <h3><Type className="inline-icon" /> Site Identity</h3>
+
+                            <div className="form-group">
+                                <label htmlFor="site_name">Site Name</label>
+                                <input
+                                    type="text"
+                                    id="site_name"
+                                    name="site_name"
+                                    value={siteName}
+                                    onChange={e => setSiteName(e.target.value)}
+                                    placeholder="Your Site Name"
+                                />
+                                <small className="form-hint">Displayed in header, SEO tags, and browser tab</small>
+                            </div>
+                        </div>
 
                         {/* Colors Section */}
                         <div className="panel-section">
@@ -309,6 +340,57 @@ export function ThemeEditor({
                                     placeholder="G-XXXXXXXXXX"
                                 />
                                 <small className="form-hint">Leave empty to disable</small>
+                            </div>
+                        </div>
+
+                        {/* Booking Form Section */}
+                        <div className="panel-section">
+                            <h3><Type className="inline-icon" /> Booking Form</h3>
+                            <small className="form-hint" style={{ display: 'block', marginBottom: '1rem' }}>
+                                Customize how the public booking form appears to customers
+                            </small>
+
+                            <div className="form-group">
+                                <label htmlFor="booking_button_text">Button Text</label>
+                                <input
+                                    type="text"
+                                    id="booking_button_text"
+                                    name="booking_button_text"
+                                    value={bookingButtonText}
+                                    onChange={e => setBookingButtonText(e.target.value)}
+                                    placeholder="Book Now"
+                                />
+                            </div>
+
+                            <ColorPickerRow
+                                id="booking_accent_color"
+                                label="Booking Accent Color"
+                                value={bookingAccentColor}
+                                onChange={setBookingAccentColor}
+                            />
+
+                            <div className="form-group">
+                                <label className="toggle-label">
+                                    <input
+                                        type="checkbox"
+                                        name="booking_show_phone"
+                                        checked={bookingShowPhone}
+                                        onChange={e => setBookingShowPhone(e.target.checked)}
+                                    />
+                                    Show Phone Number Field
+                                </label>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="toggle-label">
+                                    <input
+                                        type="checkbox"
+                                        name="booking_show_notes"
+                                        checked={bookingShowNotes}
+                                        onChange={e => setBookingShowNotes(e.target.checked)}
+                                    />
+                                    Show Notes/Comments Field
+                                </label>
                             </div>
                         </div>
 

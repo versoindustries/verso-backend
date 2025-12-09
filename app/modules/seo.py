@@ -27,9 +27,12 @@ def generate_dynamic_sitemap(base_url=None):
         ('main_routes.index', 1.0, 'weekly'),
         ('main_routes.about_us', 0.8, 'monthly'),
         ('main_routes.contact', 0.7, 'monthly'),
+        ('main_routes.services', 0.8, 'monthly'),
         ('main_routes.privacy_policy', 0.3, 'yearly'),
         ('main_routes.terms_of_service', 0.3, 'yearly'),
         ('blog.blog_home', 0.9, 'daily'),
+        ('shop.index', 0.9, 'weekly'),
+        ('booking.appointment_types', 0.7, 'weekly'),
     ]
     
     for endpoint, priority, changefreq in static_routes:
@@ -72,6 +75,43 @@ def generate_dynamic_sitemap(base_url=None):
             )
         except Exception:
             pass
+    
+    # Add active products
+    try:
+        from app.models import Product
+        products = Product.query.filter_by(is_active=True).all()
+        for product in products:
+            try:
+                url = url_for('shop.product_detail', product_id=product.id, _external=True)
+                add_url_to_sitemap(
+                    urlset,
+                    url,
+                    lastmod=getattr(product, 'updated_at', None),
+                    priority=0.8,
+                    changefreq='weekly'
+                )
+            except Exception:
+                pass
+    except Exception:
+        pass  # Skip if Product model doesn't exist
+    
+    # Add active product categories
+    try:
+        from app.models import Category
+        categories = Category.query.filter_by(is_active=True).all()
+        for category in categories:
+            try:
+                url = url_for('shop.category', slug=category.slug, _external=True)
+                add_url_to_sitemap(
+                    urlset,
+                    url,
+                    priority=0.6,
+                    changefreq='weekly'
+                )
+            except Exception:
+                pass
+    except Exception:
+        pass  # Skip if Category model doesn't exist
     
     # Generate XML string
     tree = ET.ElementTree(urlset)
@@ -200,8 +240,20 @@ def get_robots_txt_content(disallow_paths=None, sitemap_url=None):
         "Allow: /",
     ]
     
-    # Default disallow paths
-    default_disallow = ['/admin/', '/api/', '/login', '/register', '/logout']
+    # Default disallow paths - comprehensive list for security and SEO
+    default_disallow = [
+        '/admin/',
+        '/api/',
+        '/login',
+        '/register', 
+        '/logout',
+        '/user/',
+        '/employee/',
+        '/notifications/',
+        '/settings',
+        '/static/src/',
+        '/messaging/',
+    ]
     paths = disallow_paths or default_disallow
     
     for path in paths:

@@ -34,6 +34,7 @@ class User(UserMixin, db.Model):
     phone = db.Column(db.String(20), nullable=True)
     date = db.Column(db.DateTime, default=datetime.utcnow)
     tos_accepted = db.Column(db.Boolean, default=False, nullable=False)
+    is_active = db.Column(db.Boolean, default=True, nullable=False)  # For bulk user activation/deactivation
     first_name = db.Column(db.String(100), nullable=True)
     last_name = db.Column(db.String(100), nullable=True)
     bio = db.Column(db.Text, nullable=True)
@@ -4335,3 +4336,109 @@ class DataRetentionLog(db.Model):
     
     def __repr__(self):
         return f'<DataRetentionLog policy={self.policy_id} deleted={self.records_deleted}>'
+
+# ============================================================================
+# Phase 23: Support Ticketing System
+# ============================================================================
+
+class SupportTicket(db.Model):
+    """Customer support tickets for issue tracking and resolution."""
+    __tablename__ = 'support_ticket'
+    id = db.Column(db.Integer, primary_key=True)
+    ticket_number = db.Column(db.String(20), unique=True, nullable=False)  # Auto-generated TKT-XXXXXX
+    subject = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    status = db.Column(db.String(20), default='open')  # open, in_progress, waiting, resolved, closed
+    priority = db.Column(db.String(20), default='normal')  # low, normal, high, urgent
+    category = db.Column(db.String(50), nullable=True)  # billing, technical, general, feature_request
+    
+    # Customer info (either logged-in user or guest)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    email = db.Column(db.String(120), nullable=True)  # For non-logged-in users
+    name = db.Column(db.String(100), nullable=True)  # Guest name
+    
+    # Staff assignment
+    assigned_to_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    
+    # Timestamps
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    first_response_at = db.Column(db.DateTime, nullable=True)  # SLA tracking
+    resolved_at = db.Column(db.DateTime, nullable=True)
+    closed_at = db.Column(db.DateTime, nullable=True)
+    
+    # Satisfaction
+    satisfaction_rating = db.Column(db.Integer, nullable=True)  # 1-5
+    satisfaction_comment = db.Column(db.Text, nullable=True)
+    
+    # Related entities
+    related_order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=True)
+    related_appointment_id = db.Column(db.Integer, db.ForeignKey('appointment.id'), nullable=True)
+    
+    # Relationships
+    user = db.relationship('User', foreign_keys=[user_id], backref=db.backref('support_tickets', lazy='dynamic'))
+    assigned_to = db.relationship('User', foreign_keys=[assigned_to_id], backref=db.backref('assigned_tickets', lazy='dynamic'))
+    
+    __table_args__ = (
+        Index('idx_ticket_status', 'status'),
+        Index('idx_ticket_priority', 'priority'),
+        Index('idx_ticket_user', 'user_id'),
+        Index('idx_ticket_assigned', 'assigned_to_id'),
+        Index('idx_ticket_created', 'created_at'),
+    )
+
+    @staticmethod
+    def generate_ticket_number():
+        """Generate unique ticket number like TKT-000001."""
+        import random
+        import string
+        while True:
+            number = ''.join(random.choices(string.digits, k=6))
+            ticket_num = f'TKT-{number}'
+            existing = SupportTicket.query.filter_by(ticket_number=ticket_num).first()
+            if not existing:
+                return ticket_num
+    
+    def get_customer_display_name(self):
+        """Return display name for the ticket creator."""
+        if self.user:
+            return f"{self.user.first_name or ''} {self.user.last_name or ''}".strip() or self.user.username
+        return self.name or self.email or 'Anonymous'
+    
+    def get_customer_email(self):
+        """Return customer email for notifications."""
+        if self.user:
+            return self.user.email
+        return self.email
+
+    def __repr__(self):
+        return f'<SupportTicket {self.ticket_number} - {self.status}>'
+
+
+class TicketReply(db.Model):
+    """Replies/messages within a support ticket."""
+    __tablename__ = 'ticket_reply'
+    id = db.Column(db.Integer, primary_key=True)
+    ticket_id = db.Column(db.Integer, db.ForeignKey('support_ticket.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # Null for customer guest replies
+    
+    content = db.Column(db.Text, nullable=False)
+    is_internal = db.Column(db.Boolean, default=False)  # Staff-only internal notes
+    is_from_customer = db.Column(db.Boolean, default=True)  # True if customer, False if staff
+    
+    # Attachments (link to Media)
+    attachment_id = db.Column(db.Integer, db.ForeignKey('media.id'), nullable=True)
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    ticket = db.relationship('SupportTicket', backref=db.backref('replies', lazy='dynamic', order_by='TicketReply.created_at'))
+    user = db.relationship('User', backref=db.backref('ticket_replies', lazy=True))
+    attachment = db.relationship('Media')
+    
+    __table_args__ = (
+        Index('idx_reply_ticket', 'ticket_id', 'created_at'),
+    )
+
+    def __repr__(self):
+        return f'<TicketReply {self.id} on ticket {self.ticket_id}>'

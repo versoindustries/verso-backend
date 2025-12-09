@@ -514,18 +514,18 @@ def parse_user_agent(user_agent_string):
     elif 'opera' in ua or 'opr' in ua:
         browser = 'Opera'
     
-    # Detect OS
+    # Detect OS - check iOS before macOS since iPhone UA contains 'Mac OS X'
     os_name = 'other'
-    if 'windows' in ua:
+    if 'iphone' in ua or 'ipad' in ua:
+        os_name = 'iOS'
+    elif 'windows' in ua:
         os_name = 'Windows'
-    elif 'mac' in ua or 'darwin' in ua:
-        os_name = 'macOS'
-    elif 'linux' in ua and 'android' not in ua:
-        os_name = 'Linux'
     elif 'android' in ua:
         os_name = 'Android'
-    elif 'iphone' in ua or 'ipad' in ua:
-        os_name = 'iOS'
+    elif 'mac' in ua or 'darwin' in ua:
+        os_name = 'macOS'
+    elif 'linux' in ua:
+        os_name = 'Linux'
     
     return {
         'device_type': device_type,

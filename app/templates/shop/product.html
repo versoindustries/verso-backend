@@ -1,9 +1,30 @@
 {% extends "base.html" %}
+{% from 'seo_macros.html' import seo_meta, product_schema, breadcrumb_schema %}
 
-{% block title %}{{ product.name }} - {{ business_config.company_name|default('Shop') }}{% endblock %}
+{% block title %}{{ product.name }} - {{ business_config.get('business_name', 'Shop') }}{% endblock %}
+
+{% block description %}{{ (product.description or 'Shop for ' ~ product.name) | truncate(155) }}{% endblock %}
+
+{% block og_description %}{{ (product.description or 'Shop for ' ~ product.name) | truncate(155) }}{% endblock %}
 
 {% block additional_css %}
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/components/product-view.css') }}">
+{% endblock %}
+
+{% block head %}
+{% set product_image = url_for('media_bp.serve_media', media_id=product.media_id, _external=True) if product.media_id
+else url_for('static', filename='images/logo.png', _external=True) %}
+{{ seo_meta(product.name ~ ' - ' ~ business_config.get('business_name', 'Shop'), (product.description or 'Shop for ' ~
+product.name) | truncate(155), product_image) }}
+{% endblock %}
+
+{% block schema %}
+{{ product_schema(product) }}
+{{ breadcrumb_schema([
+{'name': 'Home', 'url': url_for('main_routes.index', _external=True)},
+{'name': 'Shop', 'url': url_for('shop.index', _external=True)},
+{'name': product.name, 'url': request.url}
+]) }}
 {% endblock %}
 
 {% block content %}
@@ -63,7 +84,7 @@
             "isDigital": {{ product.is_digital | tojson }},
             "category": {{ (product.category.name if product.category else "") | tojson }},
             "inWishlist": {{ in_wishlist | tojson }},
-            "addToCartUrl": "{{ url_for(' cart.add_to_cart', product_id=product.id) }}", "buyNowUrl"
+            "addToCartUrl": "{{ url_for('cart.add_to_cart', product_id=product.id) }}", "buyNowUrl"
         : "{{ url_for('shop.checkout_session', product_id=product.id) }}" , "wishlistUrl"
         : "{{ url_for('ecommerce.add_to_wishlist', product_id=product.id) if current_user.is_authenticated else '' }}"
         }'>

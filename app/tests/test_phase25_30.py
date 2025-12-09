@@ -34,7 +34,7 @@ class TestBackupService:
             backup = Backup(
                 backup_type='database',
                 status='pending',
-                initiated_by_id=None,
+                created_by_id=None,
             )
             db.session.add(backup)
             db.session.commit()
@@ -52,7 +52,7 @@ class TestBackupService:
             schedule = BackupSchedule(
                 name='Daily Database Backup',
                 backup_type='database',
-                schedule_pattern='0 2 * * *',
+                frequency='daily',
                 retention_days=30,
                 is_active=True,
             )
@@ -76,7 +76,6 @@ class TestFeatureFlags:
                 name='new_checkout_flow',
                 description='Enable new checkout experience',
                 is_enabled=False,
-                rollout_percentage=0,
             )
             db.session.add(flag)
             db.session.commit()

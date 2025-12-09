@@ -88,7 +88,7 @@ Manage user accounts, including viewing, editing, and deleting users, as well as
             "data": {{ users_data | tojson }},
             "idKey": "id",
             "bulkActions": {{ bulk_actions | tojson }},
-            "bulkActionUrl": "{{ url_for(' admin.bulk_user_action') }}", "exportCsvUrl"
+            "bulkActionUrl": "{{ url_for('admin.bulk_user_action') }}", "exportCsvUrl"
       : "{{ url_for('admin.export_users_csv') }}" , "defaultPageSize" : 25, "emptyMessage" : "No users found" }'>
       <!-- Fallback content while React loads -->
       <div class="table-responsive">

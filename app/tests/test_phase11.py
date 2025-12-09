@@ -36,34 +36,55 @@ def app():
         
         db.session.commit()
         
-        # Create admin user
-        admin = User(username='testadmin', email='admin@test.com', password='password123')
-        admin.roles.append(admin_role)
-        db.session.add(admin)
+        # Get or create admin user (use unique emails for this test module)
+        admin = User.query.filter_by(email='phase11_admin@test.com').first()
+        if not admin:
+            admin = User(username='phase11_admin', email='phase11_admin@test.com', password='password123')
+            admin.confirmed = True
+            admin.roles.append(admin_role)
+            db.session.add(admin)
         
-        # Create regular user
-        regular_user = User(username='testuser', email='user@test.com', password='password123')
-        regular_user.roles.append(user_role)
-        db.session.add(regular_user)
+        # Get or create regular user
+        regular_user = User.query.filter_by(email='phase11_user@test.com').first()
+        if not regular_user:
+            regular_user = User(username='phase11_user', email='phase11_user@test.com', password='password123')
+            regular_user.confirmed = True
+            regular_user.roles.append(user_role)
+            db.session.add(regular_user)
+        
         db.session.commit()
         
         # Create test product
-        product = Product(name='Test Product', description='A test product', price=1999)
-        db.session.add(product)
-        db.session.commit()
+        product = Product.query.filter_by(name='Test Product Phase11').first()
+        if not product:
+            product = Product(name='Test Product Phase11', description='A test product', price=1999)
+            db.session.add(product)
+            db.session.commit()
         
         # Create test order for user
-        order = Order(user_id=regular_user.id, status='paid', total_amount=1999)
-        db.session.add(order)
-        db.session.commit()
-        
-        # Create order item
-        order_item = OrderItem(order_id=order.id, product_id=product.id, quantity=1, price_at_purchase=1999)
-        db.session.add(order_item)
+        order = Order.query.filter_by(user_id=regular_user.id).first()
+        if not order:
+            order = Order(user_id=regular_user.id, status='paid', total_amount=1999)
+            db.session.add(order)
+            db.session.commit()
+            
+            # Create order item
+            order_item = OrderItem(order_id=order.id, product_id=product.id, quantity=1, price_at_purchase=1999)
+            db.session.add(order_item)
         
         # Create test contact form submission
-        lead = ContactFormSubmission(first_name='Lead', last_name='Test', email='lead@test.com', status='new')
-        db.session.add(lead)
+        lead = ContactFormSubmission.query.filter_by(email='phase11_lead@test.com').first()
+        if not lead:
+            lead = ContactFormSubmission(
+                first_name='Lead', 
+                last_name='Test', 
+                email='phase11_lead@test.com', 
+                phone='555-0011',
+                message='Test message for phase 11',
+                status='new'
+            )
+            db.session.add(lead)
+        
         db.session.commit()
         
         yield app
@@ -82,10 +103,10 @@ def client(app):
 def logged_in_user(client, app):
     """Login as regular user."""
     with app.app_context():
-        client.post('/login', data={
-            'email': 'user@test.com',
-            'password': 'password123'
-        }, follow_redirects=True)
+        user = User.query.filter_by(email='phase11_user@test.com').first()
+        with client.session_transaction() as sess:
+            sess['_user_id'] = str(user.id)
+            sess['_fresh'] = True
     return client
 
 
@@ -93,10 +114,10 @@ def logged_in_user(client, app):
 def logged_in_admin(client, app):
     """Login as admin user."""
     with app.app_context():
-        client.post('/login', data={
-            'email': 'admin@test.com',
-            'password': 'password123'
-        }, follow_redirects=True)
+        admin = User.query.filter_by(email='phase11_admin@test.com').first()
+        with client.session_transaction() as sess:
+            sess['_user_id'] = str(admin.id)
+            sess['_fresh'] = True
     return client
 
 

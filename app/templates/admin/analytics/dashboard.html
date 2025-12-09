@@ -28,7 +28,7 @@
                 "avg_session_duration": {{ metrics.avg_session_duration | default(0) }}
             },
             "days": {{ days | default(30) }},
-            "trafficUrl": "{{ url_for(' analytics.daily_traffic', days=days) }}", "sourcesUrl"
+            "trafficUrl": "{{ url_for('analytics.daily_traffic', days=days) }}", "sourcesUrl"
         : "{{ url_for('analytics.utm_breakdown', days=days) }}" , "devicesUrl"
         : "{{ url_for('analytics.device_breakdown', days=days) }}" }'>
         <!-- Fallback content while React loads -->

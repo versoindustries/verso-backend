@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}Ticket {{ ticket.ticket_number }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('admin.admin_dashboard') }}">Admin</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('support.admin_queue') }}">Support Queue</a></li>
+            <li class="breadcrumb-item active">{{ ticket.ticket_number }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Ticket Header -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-start">
+                    <div>
+                        <h4 class="mb-1">{{ ticket.subject }}</h4>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <span class="badge bg-secondary">{{ ticket.ticket_number }}</span>
+                            <span
+                                class="badge bg-{{ 'danger' if ticket.priority == 'urgent' else 'warning' if ticket.priority == 'high' else 'info' if ticket.priority == 'normal' else 'secondary' }}">
+                                {{ ticket.priority }}
+                            </span>
+                            <span
+                                class="badge bg-{{ 'success' if ticket.status == 'resolved' else 'primary' if ticket.status == 'in_progress' else 'warning text-dark' if ticket.status == 'waiting' else 'info' }}">
+                                {{ ticket.status.replace('_', ' ') }}
+                            </span>
+                            <span class="badge bg-light text-dark">{{ ticket.category or 'General' }}</span>
+                        </div>
+                    </div>
+                    <small class="text-muted">{{ ticket.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                </div>
+                <div class="card-body">
+                    <div class="p-3 bg-light rounded mb-3">
+                        {{ ticket.description | safe }}
+                    </div>
+                    <small class="text-muted">
+                        <i class="fas fa-user me-1"></i> {{ ticket.get_customer_display_name() }}
+                        ({{ ticket.get_customer_email() }})
+                    </small>
+                </div>
+            </div>
+
+            <!-- Conversation -->
+            <h5 class="mb-3"><i class="fas fa-comments me-2"></i>Conversation</h5>
+
+            {% for reply in replies %}
+            <div
+                class="card mb-3 {{ 'border-warning' if reply.is_internal else 'border-primary' if not reply.is_from_customer else '' }}">
+                <div
+                    class="card-header d-flex justify-content-between align-items-center 
+                    {{ 'bg-warning bg-opacity-25' if reply.is_internal else 'bg-primary text-white' if not reply.is_from_customer else 'bg-light' }}">
+                    <div>
+                        {% if reply.is_internal %}
+                        <i class="fas fa-lock me-2"></i><strong>Internal Note</strong> - {{ reply.user.username if
+                        reply.user else 'System' }}
+                        {% elif not reply.is_from_customer %}
+                        <i class="fas fa-headset me-2"></i>{{ reply.user.username if reply.user else 'Support' }}
+                        {% else %}
+                        <i class="fas fa-user me-2"></i>{{ ticket.get_customer_display_name() }}
+                        {% endif %}
+                    </div>
+                    <small>{{ reply.created_at.strftime('%b %d, %Y %H:%M') }}</small>
+                </div>
+                <div class="card-body">
+                    {{ reply.content | safe }}
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-light">
+                <i class="fas fa-info-circle me-2"></i>No replies yet.
+            </div>
+            {% endfor %}
+
+            <!-- Reply Forms -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="mb-0"><i class="fas fa-reply me-2"></i>Reply to Customer</h6>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" action="{{ url_for('support.admin_reply', ticket_id=ticket.id) }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <textarea class="form-control mb-2" name="content" rows="4" required
+                                    placeholder="Reply visible to customer..."></textarea>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane me-2"></i>Send Reply
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-warning bg-opacity-50">
+                            <h6 class="mb-0"><i class="fas fa-lock me-2"></i>Internal Note</h6>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST"
+                                action="{{ url_for('support.add_internal_note', ticket_id=ticket.id) }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <textarea class="form-control mb-2" name="content" rows="4" required
+                                    placeholder="Staff-only note (not visible to customer)..."></textarea>
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="fas fa-sticky-note me-2"></i>Add Note
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <!-- Status -->
+                    <form method="POST" action="{{ url_for('support.admin_update_ticket', ticket_id=ticket.id) }}"
+                        class="mb-3">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="action" value="status">
+                        <label class="form-label small text-muted">Status</label>
+                        <div class="input-group">
+                            <select name="status" class="form-select">
+                                <option value="open" {{ 'selected' if ticket.status=='open' }}>Open</option>
+                                <option value="in_progress" {{ 'selected' if ticket.status=='in_progress' }}>In Progress
+                                </option>
+                                <option value="waiting" {{ 'selected' if ticket.status=='waiting' }}>Waiting on Customer
+                                </option>
+                                <option value="resolved" {{ 'selected' if ticket.status=='resolved' }}>Resolved</option>
+                                <option value="closed" {{ 'selected' if ticket.status=='closed' }}>Closed</option>
+                            </select>
+                            <button type="submit" class="btn btn-outline-primary">Update</button>
+                        </div>
+                    </form>
+
+                    <!-- Priority -->
+                    <form method="POST" action="{{ url_for('support.admin_update_ticket', ticket_id=ticket.id) }}"
+                        class="mb-3">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="action" value="priority">
+                        <label class="form-label small text-muted">Priority</label>
+                        <div class="input-group">
+                            <select name="priority" class="form-select">
+                                <option value="low" {{ 'selected' if ticket.priority=='low' }}>Low</option>
+                                <option value="normal" {{ 'selected' if ticket.priority=='normal' }}>Normal</option>
+                                <option value="high" {{ 'selected' if ticket.priority=='high' }}>High</option>
+                                <option value="urgent" {{ 'selected' if ticket.priority=='urgent' }}>Urgent</option>
+                            </select>
+                            <button type="submit" class="btn btn-outline-primary">Update</button>
+                        </div>
+                    </form>
+
+                    <!-- Assignment -->
+                    <form method="POST" action="{{ url_for('support.admin_update_ticket', ticket_id=ticket.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="action" value="assign">
+                        <label class="form-label small text-muted">Assigned To</label>
+                        <div class="input-group">
+                            <select name="assigned_to_id" class="form-select">
+                                <option value="0">-- Unassigned --</option>
+                                {% for agent in agents %}
+                                <option value="{{ agent.id }}" {{ 'selected' if ticket.assigned_to_id==agent.id }}>
+                                    {{ agent.username }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn btn-outline-primary">Assign</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Ticket Details -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Details</h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm mb-0">
+                        <tr>
+                            <td class="text-muted">Created</td>
+                            <td>{{ ticket.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Updated</td>
+                            <td>{{ ticket.updated_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">First Response</td>
+                            <td>{{ ticket.first_response_at.strftime('%Y-%m-%d %H:%M') if ticket.first_response_at else
+                                '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Resolved</td>
+                            <td>{{ ticket.resolved_at.strftime('%Y-%m-%d %H:%M') if ticket.resolved_at else '-' }}</td>
+                        </tr>
+                        {% if ticket.satisfaction_rating %}
+                        <tr>
+                            <td class="text-muted">Rating</td>
+                            <td>
+                                {% for i in range(1, 6) %}
+                                <i
+                                    class="fas fa-star {{ 'text-warning' if i <= ticket.satisfaction_rating else 'text-muted' }}"></i>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
