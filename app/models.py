@@ -171,6 +171,8 @@ class Service(db.Model):
     description = db.Column(db.String(255))
     display_order = db.Column(db.Integer, default=0)
     duration_minutes = db.Column(db.Integer, default=60)  # Phase 2: Service duration
+    price = db.Column(db.Float, nullable=True)  # Service price for booking display
+    icon = db.Column(db.String(50), nullable=True)  # Icon class for UI display
 
 class Appointment(db.Model):
     __tablename__ = 'appointment'

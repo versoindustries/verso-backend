@@ -66,7 +66,7 @@
     color: var(--text-primary);
     border: 2px solid var(--accent-blue);
     box-shadow: 0 0 20px rgba(65, 105, 225, 0.5),
-                0 0 40px rgba(65, 105, 225, 0.2);
+        0 0 40px rgba(65, 105, 225, 0.2);
     animation: stepPulse 2s infinite ease-in-out;
 }
 
@@ -94,8 +94,15 @@
 }
 
 @keyframes stepPulse {
-    0%, 100% { box-shadow: 0 0 20px rgba(65, 105, 225, 0.5); }
-    50% { box-shadow: 0 0 30px rgba(65, 105, 225, 0.8); }
+
+    0%,
+    100% {
+        box-shadow: 0 0 20px rgba(65, 105, 225, 0.5);
+    }
+
+    50% {
+        box-shadow: 0 0 30px rgba(65, 105, 225, 0.8);
+    }
 }
 
 /* ============================================================================
@@ -396,9 +403,19 @@
 }
 
 @keyframes successPop {
-    0% { transform: scale(0); opacity: 0; }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); opacity: 1; }
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 /* ============================================================================
@@ -439,7 +456,9 @@
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* ============================================================================
@@ -492,4 +511,468 @@
     .booking-wizard__section-title {
         font-size: 1.25rem;
     }
+
+    .booking-wizard__step-label {
+        display: none;
+    }
+}
+
+/* ============================================================================
+   STEP LABELS
+   ============================================================================ */
+
+.booking-wizard__step-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.booking-wizard__step-label {
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: rgba(255, 255, 255, 0.4);
+    transition: color 0.3s ease;
+    white-space: nowrap;
+}
+
+.booking-wizard__step-label--active {
+    color: var(--text-primary);
+}
+
+/* ============================================================================
+   CALENDAR STYLING (react-day-picker overrides)
+   ============================================================================ */
+
+.booking-wizard__calendar {
+    background: rgba(31, 31, 31, 0.6);
+    border-radius: 12px;
+    padding: 1.25rem;
+    border: 1px solid rgba(65, 105, 225, 0.2);
+}
+
+.booking-wizard__calendar .rdp {
+    --rdp-cell-size: 44px;
+    --rdp-accent-color: var(--accent-blue);
+    --rdp-background-color: rgba(65, 105, 225, 0.2);
+    margin: 0;
+}
+
+.booking-wizard__calendar .rdp-month {
+    width: 100%;
+}
+
+.booking-wizard__calendar .rdp-caption {
+    color: var(--text-primary);
+    font-family: 'Neon-Heavy', sans-serif;
+    padding: 0 0 1rem 0;
+}
+
+.booking-wizard__calendar .rdp-caption_label {
+    font-size: 1.1rem;
+}
+
+.booking-wizard__calendar .rdp-nav_button {
+    color: var(--text-primary);
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.booking-wizard__calendar .rdp-nav_button:hover {
+    opacity: 1;
+    background: rgba(65, 105, 225, 0.2);
+}
+
+.booking-wizard__calendar .rdp-head_cell {
+    color: rgba(255, 255, 255, 0.5);
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 0.8rem;
+    font-weight: normal;
+    text-transform: uppercase;
+}
+
+.booking-wizard__calendar .rdp-cell {
+    padding: 2px;
+}
+
+.booking-wizard__calendar .rdp-day {
+    color: var(--text-primary);
+    font-family: 'Neon-Regular', sans-serif;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.booking-wizard__calendar .rdp-day:hover:not(.rdp-day_selected):not(.rdp-day_disabled) {
+    background: rgba(65, 105, 225, 0.2);
+}
+
+.booking-wizard__calendar .rdp-day_disabled {
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.booking-wizard__calendar .booking-wizard__day--selected,
+.booking-wizard__calendar .rdp-day_selected {
+    background: var(--btn-gradient) !important;
+    color: var(--text-primary) !important;
+    font-weight: bold;
+    box-shadow: 0 0 15px rgba(65, 105, 225, 0.4);
+}
+
+.booking-wizard__calendar .booking-wizard__day--today,
+.booking-wizard__calendar .rdp-day_today {
+    color: var(--accent-blue);
+    font-weight: bold;
+    border: 2px solid var(--accent-blue);
+}
+
+/* ============================================================================
+   TIME SLOTS STYLING
+   ============================================================================ */
+
+.booking-wizard__slots {
+    flex: 1;
+    min-width: 0;
+}
+
+.booking-wizard__slots-title {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(65, 105, 225, 0.2);
+}
+
+.booking-wizard__slots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 0.75rem;
+}
+
+.booking-wizard__slot {
+    padding: 0.75rem 1rem;
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    background: rgba(31, 31, 31, 0.6);
+    border: 2px solid rgba(65, 105, 225, 0.2);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.booking-wizard__slot:hover {
+    border-color: rgba(65, 105, 225, 0.5);
+    background: rgba(65, 105, 225, 0.1);
+    transform: translateY(-2px);
+}
+
+.booking-wizard__slot--selected {
+    background: var(--btn-gradient);
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 15px rgba(65, 105, 225, 0.4);
+    font-weight: bold;
+}
+
+/* ============================================================================
+   EMPTY STATES & PLACEHOLDERS
+   ============================================================================ */
+
+.booking-wizard__empty-state {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    background: rgba(31, 31, 31, 0.4);
+    border-radius: 12px;
+    border: 1px dashed rgba(65, 105, 225, 0.3);
+    grid-column: 1 / -1;
+}
+
+.booking-wizard__empty-state--compact {
+    padding: 1.5rem 1rem;
+}
+
+.booking-wizard__empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+    opacity: 0.8;
+}
+
+.booking-wizard__empty-state p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.booking-wizard__empty-hint {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+}
+
+.booking-wizard__placeholder {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.booking-wizard__placeholder-icon {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.booking-wizard__placeholder p {
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+/* ============================================================================
+   ENHANCED DATETIME LAYOUT
+   ============================================================================ */
+
+.booking-wizard__datetime {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+@media (max-width: 768px) {
+    .booking-wizard__datetime {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .booking-wizard__calendar {
+        justify-self: center;
+    }
+
+    .booking-wizard__slots-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .booking-wizard__slots-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ============================================================================
+   STEP TRANSITIONS & ANIMATIONS
+   ============================================================================ */
+
+.booking-wizard__card--animating {
+    opacity: 0.7;
+    transform: scale(0.98);
+    pointer-events: none;
+}
+
+.booking-wizard__card {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.booking-wizard__step-content-area {
+    animation: fadeSlideIn 0.3s ease-out;
+}
+
+@keyframes fadeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================================================
+   SKELETON LOADERS
+   ============================================================================ */
+
+.booking-wizard__skeleton {
+    background: linear-gradient(90deg, 
+        rgba(65, 105, 225, 0.1) 25%, 
+        rgba(65, 105, 225, 0.2) 50%, 
+        rgba(65, 105, 225, 0.1) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+}
+
+.booking-wizard__skeleton--title {
+    height: 1.5rem;
+    width: 70%;
+    margin-bottom: 0.75rem;
+}
+
+.booking-wizard__skeleton--text {
+    height: 1rem;
+    width: 50%;
+}
+
+.booking-wizard__skeleton--slot {
+    height: 100%;
+    width: 100%;
+    min-height: 2.5rem;
+}
+
+.booking-wizard__service-card--skeleton {
+    background: rgba(31, 31, 31, 0.6);
+    border: 2px solid rgba(65, 105, 225, 0.1);
+    padding: 1.5rem;
+    pointer-events: none;
+}
+
+.booking-wizard__slot--skeleton {
+    background: rgba(31, 31, 31, 0.4);
+    border: 2px solid rgba(65, 105, 225, 0.1);
+    min-height: 2.5rem;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ============================================================================
+   ERROR STATE
+   ============================================================================ */
+
+.booking-wizard__error {
+    text-align: center;
+    padding: 3rem 2rem;
+}
+
+.booking-wizard__error-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.booking-wizard__error p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+}
+
+/* ============================================================================
+   SERVICE CARD ENHANCEMENTS
+   ============================================================================ */
+
+.booking-wizard__service-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(65, 105, 225, 0.15);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+    color: var(--accent-blue);
+    transition: all 0.3s ease;
+}
+
+.booking-wizard__service-card:hover .booking-wizard__service-icon {
+    background: rgba(65, 105, 225, 0.25);
+    transform: scale(1.1);
+}
+
+.booking-wizard__service-card--selected .booking-wizard__service-icon {
+    background: var(--btn-gradient);
+    color: var(--text-primary);
+}
+
+.booking-wizard__service-desc {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 1rem;
+    line-height: 1.4;
+}
+
+.booking-wizard__service-duration {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.booking-wizard__service-duration i {
+    font-size: 0.8rem;
+}
+
+/* ============================================================================
+   SUMMARY ENHANCEMENTS
+   ============================================================================ */
+
+.booking-wizard__summary-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(65, 105, 225, 0.3), transparent);
+    margin: 1rem 0;
+}
+
+.booking-wizard__summary-price {
+    display: inline-block;
+    margin-left: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    background: rgba(65, 105, 225, 0.2);
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: var(--accent-blue);
+}
+
+/* ============================================================================
+   SUCCESS STATE ENHANCEMENTS
+   ============================================================================ */
+
+.booking-wizard__success-details {
+    background: rgba(31, 31, 31, 0.6);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    border: 1px solid rgba(65, 105, 225, 0.2);
+}
+
+.booking-wizard__success-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(65, 105, 225, 0.1);
+}
+
+.booking-wizard__success-item:last-child {
+    border-bottom: none;
+}
+
+.booking-wizard__success-label {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.booking-wizard__success-value {
+    font-family: 'Neon-Heavy', sans-serif;
+    color: var(--text-primary);
+}
+
+/* ============================================================================
+   ACCESSIBILITY IMPROVEMENTS
+   ============================================================================ */
+
+.booking-wizard__service-card:focus-visible {
+    outline: 2px solid var(--accent-blue);
+    outline-offset: 2px;
+}
+
+.booking-wizard__slot:focus-visible {
+    outline: 2px solid var(--accent-blue);
+    outline-offset: 2px;
+}
+
+.booking-wizard__btn:focus-visible {
+    outline: 2px solid var(--accent-blue);
+    outline-offset: 2px;
+    box-shadow: 0 0 20px rgba(65, 105, 225, 0.6);
 }

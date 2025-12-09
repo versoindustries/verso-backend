@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { DayPicker } from 'react-day-picker'
 import { format } from 'date-fns'
 import 'react-day-picker/dist/style.css'
-import { Button } from '../../ui/button'
 import { useToastApi } from '../../../hooks/useToastApi'
 
 interface DateTimePickerProps {
@@ -47,51 +46,59 @@ export default function DateTimePicker({
     }, [selectedDate, estimatorId, serviceId, api])
 
     return (
-        <div className="flex flex-col md:flex-row gap-8">
-            <div className="p-4 border rounded-lg bg-white dark:bg-gray-800">
+        <div className="booking-wizard__datetime">
+            <div className="booking-wizard__calendar">
                 <DayPicker
                     mode="single"
                     selected={selectedDate}
                     onSelect={onDateSelect}
                     disabled={{ before: new Date() }}
-                    styles={{
-                        caption: { color: 'var(--primary)' }
-                    }}
-                    classNames={{
-                        day_selected: "bg-blue-600 text-white hover:bg-blue-700",
-                        day_today: "font-bold text-blue-600"
+                    modifiersClassNames={{
+                        selected: 'booking-wizard__day--selected',
+                        today: 'booking-wizard__day--today'
                     }}
                 />
             </div>
 
-            <div className="flex-1">
-                <h3 className="text-lg font-semibold mb-4">
+            <div className="booking-wizard__slots">
+                <h4 className="booking-wizard__slots-title">
                     {selectedDate ? format(selectedDate, 'EEEE, MMMM do') : 'Select a date'}
-                </h3>
+                </h4>
 
                 {loading ? (
-                    <div className="text-gray-500">Loading slots...</div>
+                    <div className="booking-wizard__loading">
+                        <div className="booking-wizard__spinner"></div>
+                        <span>Loading available times...</span>
+                    </div>
                 ) : selectedDate ? (
                     availableSlots.length > 0 ? (
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="booking-wizard__slots-grid">
                             {availableSlots.map(time => (
-                                <Button
+                                <button
                                     key={time}
-                                    variant={selectedTime === time ? 'default' : 'outline'}
+                                    type="button"
+                                    className={`booking-wizard__slot ${selectedTime === time ? 'booking-wizard__slot--selected' : ''}`}
                                     onClick={() => onTimeSelect(time)}
-                                    className="w-full"
                                 >
                                     {time}
-                                </Button>
+                                </button>
                             ))}
                         </div>
                     ) : (
-                        <div className="text-amber-600">No available slots on this date.</div>
+                        <div className="booking-wizard__empty-state booking-wizard__empty-state--compact">
+                            <span className="booking-wizard__empty-icon">📅</span>
+                            <p>No available times on this date.</p>
+                            <span className="booking-wizard__empty-hint">Try selecting a different date.</span>
+                        </div>
                     )
                 ) : (
-                    <div className="text-gray-500">Please choose a date to see available times.</div>
+                    <div className="booking-wizard__placeholder">
+                        <span className="booking-wizard__placeholder-icon">👆</span>
+                        <p>Please choose a date to see available times.</p>
+                    </div>
                 )}
             </div>
         </div>
     )
 }
+
