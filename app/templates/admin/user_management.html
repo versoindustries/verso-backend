@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components/user-management.css') }}">
+{% endblock %}
+
+{% block title %}User Management{% endblock %}
+
+{% block description %}Manage users and roles in a unified enterprise dashboard.{% endblock %}
+
+{% block head %}
+<meta name="description" content="{{ description | e }}">
+<meta name="robots" content="noindex, nofollow">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- React UserManagement Component -->
+    <div data-react-component="UserManagement" data-react-props='{
+        "initialUsers": {{ users_json | safe }},
+        "initialRoles": {{ roles_json | safe }},
+        "csrfToken": "{{ form.csrf_token._value() }}"
+    }'>
+        <!-- Loading fallback -->
+        <div class="user-management">
+            <header class="um-header">
+                <div class="um-header-content">
+                    <h1 class="um-title">
+                        <i class="fas fa-users"></i>
+                        User Management
+                    </h1>
+                    <p class="um-subtitle">Loading...</p>
+                </div>
+            </header>
+            <div class="um-content">
+                <div class="um-empty">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Loading user management dashboard...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

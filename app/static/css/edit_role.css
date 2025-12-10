@@ -107,7 +107,7 @@ header p {
 }
 
 .form-group input.border-red-500 {
-    border-color: #dc3545;
+    border-color: var(--danger-color);
 }
 
 /* Submit Button */

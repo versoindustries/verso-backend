@@ -39,7 +39,6 @@ class User(UserMixin, db.Model):
     last_name = db.Column(db.String(100), nullable=True)
     bio = db.Column(db.Text, nullable=True)
     skills = db.Column(db.String(255), nullable=True)
-    skills = db.Column(db.String(255), nullable=True)
     emergency_contacts = db.Column(db.Text, nullable=True)  # JSON or text description
     location_id = db.Column(db.Integer, db.ForeignKey('location.id'), nullable=True)
     location = db.relationship('Location', backref='users')
@@ -88,12 +87,13 @@ class User(UserMixin, db.Model):
         s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
         try:
             data = s.loads(token, salt='password-reset-salt', max_age=expiration)
-        except:
+        except Exception as e:
+            current_app.logger.debug(f"Reset token verification failed: {type(e).__name__}")
             return None
         return User.query.get(data['id'])
 
     def has_role(self, role_name):
-        return any(role.name == role_name for role in self.roles)
+        return any(role.name.lower() == role_name.lower() for role in self.roles)
 
     def add_role(self, role):
         if not self.has_role(role.name):
@@ -117,7 +117,8 @@ class User(UserMixin, db.Model):
         s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
         try:
             data = s.loads(token, salt='email-verify-salt', max_age=expiration)
-        except:
+        except Exception as e:
+            current_app.logger.debug(f"Email token verification failed: {type(e).__name__}")
             return None
         return User.query.get(data['id'])
     
@@ -173,6 +174,7 @@ class Service(db.Model):
     duration_minutes = db.Column(db.Integer, default=60)  # Phase 2: Service duration
     price = db.Column(db.Float, nullable=True)  # Service price for booking display
     icon = db.Column(db.String(50), nullable=True)  # Icon class for UI display
+    requires_payment = db.Column(db.Boolean, default=False)  # Explicit payment toggle (price alone doesn't require payment)
 
 class Appointment(db.Model):
     __tablename__ = 'appointment'
@@ -207,6 +209,13 @@ class Appointment(db.Model):
     intake_form_data = db.Column(db.JSON, default=dict)
     checked_in_method = db.Column(db.String(20), nullable=True)  # qr, manual
     confirmation_sent_at = db.Column(db.DateTime, nullable=True)
+
+    # Stripe Payment Integration
+    stripe_checkout_session_id = db.Column(db.String(255), nullable=True)
+    stripe_payment_intent_id = db.Column(db.String(255), nullable=True)
+    payment_status = db.Column(db.String(20), default='not_required')  # not_required, pending, paid, failed, refunded
+    payment_amount = db.Column(db.Numeric(10, 2), nullable=True)  # Snapshot of price at booking time
+    payment_expires_at = db.Column(db.DateTime, nullable=True)  # When pending payment hold expires
 
     # Relationships
     estimator = db.relationship('Estimator', backref=db.backref('appointments', lazy=True))
@@ -724,26 +733,47 @@ channel_members = db.Table('channel_members',
 
 
 class Channel(db.Model):
-    """Messaging channel (public, private, or direct message)."""
+    """Messaging channel (public, private, direct, support, or customer)."""
     __tablename__ = 'channel'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    type = db.Column(db.String(20), default='public')  # public, private, direct
+    type = db.Column(db.String(20), default='public')  # public, private, direct, support, customer
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    # Phase 6: New fields
+    # Phase 6: Core fields
     is_archived = db.Column(db.Boolean, default=False)
     is_direct = db.Column(db.Boolean, default=False)  # True for 1:1 DM channels
     created_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     description = db.Column(db.String(255), nullable=True)
     
+    # Enterprise Messaging: Channel categorization
+    category = db.Column(db.String(50), default='general')  # general, support, customer, project, announcement
+    
+    # Enterprise Messaging: Customer/contact linking (for customer-facing channels)
+    contact_id = db.Column(db.Integer, db.ForeignKey('contact_form_submission.id'), nullable=True)
+    ticket_id = db.Column(db.Integer, db.ForeignKey('support_ticket.id'), nullable=True)
+    
+    # Enterprise Messaging: Access controls
+    is_public_facing = db.Column(db.Boolean, default=False)  # Customers can access
+    require_auth = db.Column(db.Boolean, default=True)       # Must be logged in
+    guest_access_token = db.Column(db.String(64), nullable=True)  # For guest links
+    
+    # Enterprise Messaging: Channel settings
+    settings = db.Column(db.JSON, default=dict)  # Customizable per-channel settings
+    retention_days = db.Column(db.Integer, default=0)  # 0 = forever
+    
     # Relationships
     created_by = db.relationship('User', foreign_keys=[created_by_id], backref='created_channels')
     members = db.relationship('User', secondary=channel_members, backref=db.backref('channels', lazy=True))
+    contact = db.relationship('ContactFormSubmission', foreign_keys=[contact_id], backref='channels')
+    ticket = db.relationship('SupportTicket', foreign_keys=[ticket_id], backref='channels')
     
     __table_args__ = (
         Index('idx_channel_type', 'type'),
         Index('idx_channel_archived', 'is_archived'),
+        Index('idx_channel_category', 'category'),
+        Index('idx_channel_contact', 'contact_id'),
+        Index('idx_channel_ticket', 'ticket_id'),
     )
 
     def __repr__(self):
@@ -756,10 +786,16 @@ class Channel(db.Model):
             if other_members:
                 return other_members[0].username
         return self.name
+    
+    def generate_guest_token(self):
+        """Generate a unique guest access token for this channel."""
+        import secrets
+        self.guest_access_token = secrets.token_urlsafe(32)
+        return self.guest_access_token
 
 
 class Message(db.Model):
-    """Message in a channel."""
+    """Message in a channel with support for slash commands and data cards."""
     __tablename__ = 'message'
     id = db.Column(db.Integer, primary_key=True)
     channel_id = db.Column(db.Integer, db.ForeignKey('channel.id'), nullable=False)
@@ -769,17 +805,28 @@ class Message(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     read_by = db.Column(db.JSON, default=list)  # List of user_ids who read this
     
-    # Phase 6: Thread support (optional)
+    # Phase 6: Thread support
     parent_id = db.Column(db.Integer, db.ForeignKey('message.id'), nullable=True)
+    
+    # Enterprise Messaging: Slash command data cards and extra data
+    extra_data = db.Column(db.JSON, default=dict)  # {'card': {...}, 'type': 'data_reference', 'command': '/order 123'}
+    message_type = db.Column(db.String(20), default='text')  # text, command, system, card
+    is_pinned = db.Column(db.Boolean, default=False)
+    pinned_at = db.Column(db.DateTime, nullable=True)
+    pinned_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    edited_at = db.Column(db.DateTime, nullable=True)
     
     # Relationships
     channel = db.relationship('Channel', backref=db.backref('messages', lazy=True, cascade="all, delete-orphan"))
-    user = db.relationship('User', backref=db.backref('messages', lazy=True))
+    user = db.relationship('User', foreign_keys=[user_id], backref=db.backref('messages', lazy=True))
     attachment = db.relationship('Media', backref='messages')
     replies = db.relationship('Message', backref=db.backref('parent', remote_side=[id]), lazy='dynamic')
+    pinned_by = db.relationship('User', foreign_keys=[pinned_by_id])
     
     __table_args__ = (
         Index('idx_message_channel_created', 'channel_id', 'created_at'),
+        Index('idx_message_pinned', 'channel_id', 'is_pinned'),
+        Index('idx_message_type', 'message_type'),
     )
 
     def __repr__(self):
@@ -790,6 +837,24 @@ class Message(db.Model):
         import re
         mentions = re.findall(r'@(\w+)', self.content or '')
         return mentions
+    
+    def get_card(self):
+        """Get the data card from extra_data if present."""
+        if self.extra_data and isinstance(self.extra_data, dict):
+            return self.extra_data.get('card')
+        return None
+    
+    def pin(self, user_id):
+        """Pin this message."""
+        self.is_pinned = True
+        self.pinned_at = datetime.utcnow()
+        self.pinned_by_id = user_id
+    
+    def unpin(self):
+        """Unpin this message."""
+        self.is_pinned = False
+        self.pinned_at = None
+        self.pinned_by_id = None
 
 
 class ChannelMember(db.Model):
@@ -836,6 +901,95 @@ class MessageReaction(db.Model):
     
     def __repr__(self):
         return f'<MessageReaction {self.emoji} on {self.message_id}>'
+
+
+class CustomerChannelAccess(db.Model):
+    """Track customer/guest access to channels for public-facing messaging."""
+    __tablename__ = 'customer_channel_access'
+    id = db.Column(db.Integer, primary_key=True)
+    channel_id = db.Column(db.Integer, db.ForeignKey('channel.id'), nullable=False)
+    
+    # Can link to registered user OR contact form submission
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    contact_id = db.Column(db.Integer, db.ForeignKey('contact_form_submission.id'), nullable=True)
+    email = db.Column(db.String(255), nullable=True)  # For non-registered guests
+    
+    access_token = db.Column(db.String(64), nullable=False)  # Unique access token per guest
+    expires_at = db.Column(db.DateTime, nullable=True)
+    is_active = db.Column(db.Boolean, default=True)
+    last_accessed_at = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    channel = db.relationship('Channel', backref=db.backref('customer_access_records', lazy=True, cascade='all, delete-orphan'))
+    user = db.relationship('User', backref=db.backref('customer_channel_access', lazy=True))
+    contact = db.relationship('ContactFormSubmission', backref=db.backref('channel_access', lazy=True))
+    
+    __table_args__ = (
+        Index('idx_cca_channel', 'channel_id'),
+        Index('idx_cca_token', 'access_token'),
+        Index('idx_cca_email', 'email'),
+    )
+    
+    def __repr__(self):
+        return f'<CustomerChannelAccess channel={self.channel_id} email={self.email}>'
+    
+    @staticmethod
+    def generate_token():
+        """Generate a unique access token."""
+        import secrets
+        return secrets.token_urlsafe(32)
+    
+    def is_expired(self):
+        """Check if access has expired."""
+        if not self.expires_at:
+            return False
+        return datetime.utcnow() > self.expires_at
+
+
+class ChannelTemplate(db.Model):
+    """Pre-built templates for common channel types."""
+    __tablename__ = 'channel_template'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False, unique=True)
+    display_name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    
+    # Template configuration
+    template_type = db.Column(db.String(50), nullable=False)  # support_ticket, customer_onboarding, project, announcement, order_discussion
+    channel_type = db.Column(db.String(20), default='private')  # public, private, customer
+    category = db.Column(db.String(50), default='general')
+    
+    # Default settings for channels created from this template
+    default_settings = db.Column(db.JSON, default=dict)
+    welcome_message = db.Column(db.Text, nullable=True)  # Auto-sent welcome message
+    
+    # Access defaults
+    is_public_facing = db.Column(db.Boolean, default=False)
+    auto_invite_roles = db.Column(db.JSON, default=list)  # Roles to auto-invite
+    
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    __table_args__ = (
+        Index('idx_ct_type', 'template_type'),
+        Index('idx_ct_active', 'is_active'),
+    )
+    
+    def __repr__(self):
+        return f'<ChannelTemplate {self.name}>'
+    
+    def create_channel(self, name, created_by_id, **kwargs):
+        """Create a new channel from this template."""
+        channel = Channel(
+            name=name,
+            type=self.channel_type,
+            category=self.category,
+            is_public_facing=self.is_public_facing,
+            settings=self.default_settings.copy() if self.default_settings else {},
+            created_by_id=created_by_id,
+            **kwargs
+        )
+        return channel
 
 
 class Notification(db.Model):
@@ -3290,6 +3444,9 @@ class FormDefinition(db.Model):
     slug = db.Column(db.String(100), unique=True, nullable=False, index=True)
     description = db.Column(db.Text, nullable=True)
     
+    # Form type for categorization
+    form_type = db.Column(db.String(30), default='general')  # general, booking_intake, contact, survey
+    
     # Fields schema: JSON array of field definitions
     # Format: [{"name": "email", "type": "email", "label": "Your Email", "required": true, "validation": {...}}, ...]
     fields_schema = db.Column(db.JSON, default=list)
@@ -3714,6 +3871,13 @@ class Resource(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
+    # Inventory tracking for rentals
+    inventory_quantity = db.Column(db.Integer, default=1)  # Total units available for booking
+    is_rental = db.Column(db.Boolean, default=False)  # True if this is a rental item with quantity
+    rental_unit = db.Column(db.String(20), nullable=True)  # e.g., 'hour', 'day', 'unit'
+    min_rental_duration = db.Column(db.Integer, nullable=True)  # Minimum rental period in minutes
+    max_rental_duration = db.Column(db.Integer, nullable=True)  # Maximum rental period in minutes
+    
     # Relationships
     location = db.relationship('Location', backref='resources')
     photo = db.relationship('Media', foreign_keys=[photo_id])
@@ -3722,6 +3886,33 @@ class Resource(db.Model):
         Index('idx_resource_type', 'resource_type'),
         Index('idx_resource_active', 'is_active'),
     )
+    
+    def get_available_quantity(self, start_time, end_time):
+        """Calculate available quantity for a time range.
+        
+        Returns the number of units available during the specified period.
+        """
+        if not self.is_rental:
+            # Non-rental resources: check if any conflicting booking exists
+            conflicting = ResourceBooking.query.filter(
+                ResourceBooking.resource_id == self.id,
+                ResourceBooking.status.in_(['confirmed', 'pending']),
+                ResourceBooking.start_time < end_time,
+                ResourceBooking.end_time > start_time
+            ).first()
+            return 0 if conflicting else 1
+        
+        # Rental resources: sum booked quantities and subtract from inventory
+        booked_quantity = db.session.query(
+            db.func.coalesce(db.func.sum(ResourceBooking.quantity_booked), 0)
+        ).filter(
+            ResourceBooking.resource_id == self.id,
+            ResourceBooking.status.in_(['confirmed', 'pending']),
+            ResourceBooking.start_time < end_time,
+            ResourceBooking.end_time > start_time
+        ).scalar()
+        
+        return max(0, self.inventory_quantity - booked_quantity)
     
     def __repr__(self):
         return f'<Resource {self.name} ({self.resource_type})>'
@@ -3739,6 +3930,9 @@ class ResourceBooking(db.Model):
     notes = db.Column(db.Text, nullable=True)
     status = db.Column(db.String(20), default='confirmed')  # confirmed, cancelled, pending
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Inventory tracking for rentals
+    quantity_booked = db.Column(db.Integer, default=1)  # Number of units booked (for rentals)
     
     # Relationships
     resource = db.relationship('Resource', backref=db.backref('bookings', lazy='dynamic'))

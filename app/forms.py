@@ -19,7 +19,7 @@ class RegistrationForm(FlaskForm):
     first_name = StringField('First Name', validators=[DataRequired(), Length(min=1, max=100)])
     last_name = StringField('Last Name', validators=[DataRequired(), Length(min=1, max=100)])
     email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=6, max=100)])
+    password = PasswordField('Password', validators=[DataRequired(), Length(min=8, max=100)])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
     role = SelectField('Role', coerce=int, validators=[DataRequired()])
     accept_tos = BooleanField('I accept the Terms and Conditions', validators=[DataRequired()])
@@ -27,8 +27,16 @@ class RegistrationForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(RegistrationForm, self).__init__(*args, **kwargs)
-        # Exclude 'admin' and 'blogger' roles from the choices
-        self.role.choices = [(role.id, role.name) for role in Role.query.filter(~Role.name.in_(['admin', 'blogger'])).all()]
+        # Only allow 'User' and 'Commercial' roles during public registration
+        # Privileged roles (Owner, Admin, Manager, Employee, Marketing, Blogger) require admin assignment
+        self.role.choices = [(role.id, role.name) for role in Role.query.filter(Role.name.in_(['User', 'Commercial'])).all()]
+
+    def validate_password(self, password):
+        """Validate password meets security requirements (SOC2/OWASP compliance)."""
+        from app.modules.security import password_validator
+        is_valid, errors = password_validator.validate(password.data)
+        if not is_valid:
+            raise ValidationError('; '.join(errors))
 
 class AcceptTOSForm(FlaskForm):
     accept_tos = BooleanField('I agree to the Terms and Conditions', validators=[DataRequired()])
@@ -39,9 +47,16 @@ class ForgotPasswordForm(FlaskForm):
     submit = SubmitField('Request Password Reset')
 
 class ResetPasswordForm(FlaskForm):
-    password = PasswordField('New Password', validators=[DataRequired(), Length(min=6, max=100)])
+    password = PasswordField('New Password', validators=[DataRequired(), Length(min=8, max=100)])
     confirm_password = PasswordField('Confirm New Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Reset Password')
+
+    def validate_password(self, password):
+        """Validate password meets security requirements (SOC2/OWASP compliance)."""
+        from app.modules.security import password_validator
+        is_valid, errors = password_validator.validate(password.data)
+        if not is_valid:
+            raise ValidationError('; '.join(errors))
 
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])

@@ -19,15 +19,15 @@
     /* Form colors */
     --input-bg: rgba(30, 30, 30, 0.9);
     --input-border: rgba(255, 255, 255, 0.15);
-    --input-focus-border: var(--primary-color, #4169e1);
-    --input-error-border: #dc3545;
+    --input-focus-border: var(--primary-color, var(--primary-color));
+    --input-error-border: var(--danger-color);
     --input-placeholder: rgba(255, 255, 255, 0.4);
 
     /* State colors */
-    --success-color: #28a745;
-    --warning-color: #ffc107;
-    --danger-color: #dc3545;
-    --info-color: #17a2b8;
+    --success-color: var(--success-color);
+    --warning-color: var(--warning-color);
+    --danger-color: var(--danger-color);
+    --info-color: var(--info-color);
 }
 
 /* =============================================================================
@@ -404,8 +404,8 @@
 }
 
 .tab-active {
-    color: var(--primary-color, #4169e1);
-    border-bottom-color: var(--primary-color, #4169e1);
+    color: var(--primary-color, var(--primary-color));
+    border-bottom-color: var(--primary-color, var(--primary-color));
 }
 
 .tab-disabled {
@@ -422,7 +422,7 @@
     padding: 0.125rem 0.5rem;
     font-size: 0.75rem;
     font-weight: 600;
-    background: var(--primary-color, #4169e1);
+    background: var(--primary-color, var(--primary-color));
     color: #fff;
     border-radius: 9999px;
 }
@@ -443,7 +443,7 @@
 }
 
 .tabs-pills .tab-active {
-    background: var(--primary-color, #4169e1);
+    background: var(--primary-color, var(--primary-color));
     color: #fff;
 }
 
@@ -708,8 +708,8 @@
 }
 
 .checkbox-input:checked+.checkbox-custom {
-    background: var(--primary-color, #4169e1);
-    border-color: var(--primary-color, #4169e1);
+    background: var(--primary-color, var(--primary-color));
+    border-color: var(--primary-color, var(--primary-color));
 }
 
 .checkbox-input:checked+.checkbox-custom .checkbox-icon {
@@ -718,7 +718,7 @@
 }
 
 .radio-input:checked+.radio-custom {
-    border-color: var(--primary-color, #4169e1);
+    border-color: var(--primary-color, var(--primary-color));
     border-width: 5px;
 }
 
@@ -803,7 +803,7 @@
 
 .badge-default {
     background: rgba(108, 117, 125, 0.2);
-    color: #adb5bd;
+    color: var(--text-secondary);
 }
 
 .badge-primary {
@@ -813,7 +813,7 @@
 
 .badge-secondary {
     background: rgba(108, 117, 125, 0.2);
-    color: #adb5bd;
+    color: var(--text-secondary);
 }
 
 .badge-success {
@@ -887,11 +887,11 @@
 }
 
 .spinner-primary {
-    color: var(--primary-color, #4169e1);
+    color: var(--primary-color, var(--primary-color));
 }
 
 .spinner-secondary {
-    color: #6c757d;
+    color: var(--text-muted);
 }
 
 .spinner-white {
@@ -1009,7 +1009,7 @@
 .table-head-sorted-asc .table-sort-icon,
 .table-head-sorted-desc .table-sort-icon {
     opacity: 1;
-    color: var(--primary-color, #4169e1);
+    color: var(--primary-color, var(--primary-color));
 }
 
 .table-row {
@@ -1148,7 +1148,7 @@
 
 .gallery-load-more-btn {
     padding: 0.75rem 2rem;
-    background: var(--primary-color, #4169e1);
+    background: var(--primary-color, var(--primary-color));
     color: #fff;
     border: none;
     border-radius: var(--component-border-radius);
@@ -1304,7 +1304,7 @@
 
 .file-upload-dropzone:hover,
 .file-upload-dragging {
-    border-color: var(--primary-color, #4169e1);
+    border-color: var(--primary-color, var(--primary-color));
     background: rgba(65, 105, 225, 0.05);
 }
 

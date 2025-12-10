@@ -1,0 +1,213 @@
+/**
+ * Data Card Styles
+ * CSS for slash command data cards in messaging
+ */
+
+.data-card {
+    background: var(--card-bg, #fff);
+    border: 1px solid var(--border-color, #e0e0e0);
+    border-radius: 8px;
+    margin-top: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    font-size: 0.9rem;
+}
+
+.data-card-header {
+    background: var(--primary-color-light, #f0f4ff);
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--border-color, #e0e0e0);
+}
+
+.data-card-header i {
+    color: var(--primary-color, #4169e1);
+    font-size: 1rem;
+}
+
+.data-card-title {
+    font-weight: 600;
+    flex: 1;
+    color: var(--text-color, #333);
+}
+
+.data-card-badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.badge-success {
+    background: var(--success-color, #28a745);
+    color: #fff;
+}
+
+.badge-warning {
+    background: var(--warning-color, #ffc107);
+    color: #333;
+}
+
+.badge-danger {
+    background: var(--danger-color, #dc3545);
+    color: #fff;
+}
+
+.badge-secondary {
+    background: var(--secondary-color, #6c757d);
+    color: #fff;
+}
+
+.badge-info {
+    background: var(--info-color, #17a2b8);
+    color: #fff;
+}
+
+.data-card-body {
+    padding: 12px;
+}
+
+.data-card-row {
+    display: flex;
+    margin-bottom: 6px;
+}
+
+.data-card-row:last-child {
+    margin-bottom: 0;
+}
+
+.data-card-label {
+    color: var(--text-muted, #6c757d);
+    width: 100px;
+    flex-shrink: 0;
+}
+
+.data-card-value {
+    color: var(--text-color, #333);
+    flex: 1;
+}
+
+.data-card-price {
+    font-weight: 600;
+    color: var(--success-color, #28a745);
+}
+
+.text-danger {
+    color: var(--danger-color, #dc3545) !important;
+}
+
+.data-card-items ul {
+    margin: 4px 0 0 0;
+    padding-left: 20px;
+    list-style: disc;
+}
+
+.data-card-items li {
+    font-size: 0.85rem;
+    color: var(--text-muted, #6c757d);
+}
+
+.data-card-message,
+.data-card-description {
+    margin-top: 8px;
+    padding: 8px;
+    background: var(--bg-muted, #f8f9fa);
+    border-radius: 4px;
+}
+
+.data-card-message p,
+.data-card-description p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-muted, #6c757d);
+}
+
+.data-card-footer {
+    background: var(--bg-muted, #f8f9fa);
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--border-color, #e0e0e0);
+}
+
+.data-card-date {
+    font-size: 0.8rem;
+    color: var(--text-muted, #6c757d);
+}
+
+.data-card-link {
+    font-size: 0.85rem;
+    color: var(--primary-color, #4169e1);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.data-card-link:hover {
+    text-decoration: underline;
+}
+
+.data-card-link i {
+    font-size: 0.75rem;
+}
+
+/* Search Results Card */
+.data-card-query {
+    font-style: italic;
+    color: var(--text-muted, #6c757d);
+    margin-bottom: 8px;
+}
+
+.data-card-results {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.data-card-results li {
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border-color, #e0e0e0);
+    font-size: 0.85rem;
+}
+
+.data-card-results li:last-child {
+    border-bottom: none;
+}
+
+.result-source {
+    color: var(--info-color, #17a2b8);
+    font-weight: 500;
+}
+
+.result-name {
+    color: var(--text-color, #333);
+    font-weight: 500;
+}
+
+.result-email {
+    color: var(--text-muted, #6c757d);
+}
+
+/* Card type variations */
+.data-card-order .data-card-header { background: #e6f7ff; }
+.data-card-order .data-card-header i { color: #1890ff; }
+
+.data-card-lead .data-card-header { background: #f0fff4; }
+.data-card-lead .data-card-header i { color: #28a745; }
+
+.data-card-appointment .data-card-header { background: #fff7e6; }
+.data-card-appointment .data-card-header i { color: #fa8c16; }
+
+.data-card-product .data-card-header { background: #f9f0ff; }
+.data-card-product .data-card-header i { color: #722ed1; }
+
+.data-card-ticket .data-card-header { background: #fff0f6; }
+.data-card-ticket .data-card-header i { color: #eb2f96; }
+
+.data-card-search .data-card-header { background: #e6fffb; }
+.data-card-search .data-card-header i { color: #13c2c2; }

@@ -12,7 +12,100 @@ Comprehensive tests for channel-based messaging functionality including:
 """
 
 import pytest
+import os
+import tempfile
 from flask import url_for
+from app.database import db
+from app.models import User, Role, BusinessConfig
+
+
+# Module-scoped fixtures for isolation from other test modules
+@pytest.fixture(scope='module')
+def app():
+    """Create application for this test module."""
+    from app import create_app
+    
+    db_fd, db_path = tempfile.mkstemp()
+    
+    app = create_app({
+        'TESTING': True,
+        'SQLALCHEMY_DATABASE_URI': f'sqlite:///{db_path}',
+        'WTF_CSRF_ENABLED': False,
+        'SECRET_KEY': 'test-secret-key-for-phase6',
+        'BCRYPT_LOG_ROUNDS': 4,
+        'SERVER_NAME': 'localhost',
+    })
+    
+    with app.app_context():
+        db.create_all()
+        
+        # Seed roles
+        for role_name in ['admin', 'user', 'staff', 'customer']:
+            if not Role.query.filter_by(name=role_name).first():
+                db.session.add(Role(name=role_name))
+        
+        # Seed business config
+        for name, value in [('site_name', 'Test Site'), ('site_email', 'test@example.com')]:
+            if not BusinessConfig.query.filter_by(setting_name=name).first():
+                db.session.add(BusinessConfig(setting_name=name, setting_value=value))
+        
+        db.session.commit()
+        
+        yield app
+        
+        db.session.remove()
+        db.drop_all()
+    
+    os.close(db_fd)
+    os.unlink(db_path)
+
+
+@pytest.fixture(scope='function')
+def client(app):
+    """Create test client for each test."""
+    return app.test_client()
+
+
+@pytest.fixture(scope='function')
+def regular_user(app):
+    """Create a regular user for testing."""
+    with app.app_context():
+        user_role = Role.query.filter_by(name='user').first()
+        
+        existing = User.query.filter_by(email='user_p6@test.com').first()
+        if existing:
+            db.session.delete(existing)
+            db.session.flush()
+        
+        user = User(
+            username='test_user_p6',
+            email='user_p6@test.com',
+            password='TestPassword123!'
+        )
+        user.confirmed = True
+        user.tos_accepted = True
+        user.roles.append(user_role)
+        
+        db.session.add(user)
+        db.session.commit()
+        
+        yield user
+        
+        try:
+            db.session.delete(user)
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+
+
+@pytest.fixture(scope='function')
+def authenticated_client(client, regular_user, app):
+    """Create an authenticated test client."""
+    with app.app_context():
+        with client.session_transaction() as sess:
+            sess['_user_id'] = regular_user.id
+            sess['_fresh'] = True
+        yield client
 
 
 class TestMessagingRoutes:
@@ -47,7 +140,7 @@ class TestDirectMessages:
 
     def test_dm_channel_creation(self, app):
         """Test creating a DM channel between two users."""
-        from app.routes.messaging import get_or_create_dm_channel
+        from app.routes.admin_routes.messaging import get_or_create_dm_channel
         from app.models import User
         from app.database import db
 
@@ -68,7 +161,7 @@ class TestDirectMessages:
 
     def test_dm_channel_is_reused(self, app):
         """Test that the same DM channel is returned for the same user pair."""
-        from app.routes.messaging import get_or_create_dm_channel
+        from app.routes.admin_routes.messaging import get_or_create_dm_channel
         from app.models import User
         from app.database import db
 
@@ -295,7 +388,7 @@ class TestMessagingHelpers:
 
     def test_user_can_access_channel(self, app):
         """Test channel access helper function."""
-        from app.routes.messaging import user_can_access_channel
+        from app.routes.admin_routes.messaging import user_can_access_channel
         from app.models import Channel, User, ChannelMember
         from app.database import db
         from flask_login import login_user

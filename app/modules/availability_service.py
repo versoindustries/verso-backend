@@ -56,22 +56,34 @@ def get_booked_slots(estimator_id: int, target_date: date) -> List[Tuple[datetim
     """
     Get all booked appointment slots for an estimator on a specific date.
     
+    Includes:
+    - Confirmed appointments
+    - Pending payment appointments (within their hold window)
+    
     Returns list of (start, end) datetime tuples.
     """
     config = get_business_config()
+    now = datetime.utcnow()
     
     # Create datetime range for the target date (in UTC)
     day_start = datetime.combine(target_date, time.min)
     day_end = datetime.combine(target_date, time.max)
     
+    # Get confirmed appointments
     appointments = Appointment.query.filter(
         Appointment.estimator_id == estimator_id,
         Appointment.preferred_date_time >= day_start,
-        Appointment.preferred_date_time <= day_end
+        Appointment.preferred_date_time <= day_end,
+        Appointment.status.notin_(['Cancelled', 'Expired'])
     ).all()
     
     booked = []
     for appt in appointments:
+        # Skip expired pending payments (their hold has expired)
+        if appt.payment_status == 'pending':
+            if appt.payment_expires_at and appt.payment_expires_at <= now:
+                continue  # Expired hold, slot is available
+        
         # Get duration from service or default to 60 minutes
         duration = 60
         if appt.service:

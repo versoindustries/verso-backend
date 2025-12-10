@@ -32,7 +32,7 @@
 .business-config-section .section-header h1 {
     font-family: var(--font-heading), 'Neon-Heavy', sans-serif;
     font-size: 2.2rem;
-    color: var(--text-primary, #ffffff);
+    color: var(--text-primary, var(--text-primary));
     text-shadow: 0 0 12px color-mix(in srgb, var(--primary-color) 30%, transparent);
     margin-bottom: 0.75rem;
     display: flex;
@@ -95,7 +95,7 @@
     font-family: var(--font-body), 'Neon-Regular', sans-serif;
     font-size: 0.95rem;
     font-weight: 500;
-    color: var(--text-primary, #ffffff);
+    color: var(--text-primary, var(--text-primary));
     margin-bottom: 0.5rem;
 }
 
@@ -111,7 +111,7 @@
     padding: 0.875rem 1rem;
     font-family: var(--font-body), 'Neon-Regular', sans-serif;
     font-size: 1rem;
-    color: var(--text-primary, #ffffff);
+    color: var(--text-primary, var(--text-primary));
     background: rgba(31, 31, 31, 0.6);
     border: 1px solid color-mix(in srgb, var(--primary-color) 30%, transparent);
     border-radius: var(--border-radius, 8px);
@@ -192,8 +192,8 @@
 }
 
 .business-config-form select.form-control option {
-    background: #1f1f1f;
-    color: #ffffff;
+    background: var(--bg-primary);
+    color: var(--text-primary);
     padding: 0.5rem;
 }
 
@@ -220,7 +220,7 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: #ffffff;
+    color: var(--text-primary);
     background: var(--btn-gradient);
     border: none;
     border-radius: var(--border-radius, 8px);

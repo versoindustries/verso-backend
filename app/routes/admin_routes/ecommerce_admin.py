@@ -908,3 +908,293 @@ def delete_attribute(id):
     db.session.commit()
     flash(f'Attribute "{name}" deleted.', 'success')
     return redirect(url_for('ecommerce_admin.list_attributes'))
+
+
+# =============================================================================
+# Product Variants Management
+# =============================================================================
+
+@ecommerce_admin_bp.route('/products/<int:product_id>/variants')
+@login_required
+@role_required('admin')
+def list_variants(product_id):
+    """List all variants for a product."""
+    product = Product.query.get_or_404(product_id)
+    variants = ProductVariant.query.filter_by(product_id=product_id).order_by(ProductVariant.name).all()
+    return render_template('admin/ecommerce/variants/index.html', product=product, variants=variants)
+
+
+@ecommerce_admin_bp.route('/products/<int:product_id>/variants/new', methods=['GET', 'POST'])
+@login_required
+@role_required('admin')
+def create_variant(product_id):
+    """Create a new product variant."""
+    product = Product.query.get_or_404(product_id)
+    
+    if request.method == 'POST':
+        name = request.form.get('name')
+        sku = request.form.get('sku')
+        price_adjustment = int(float(request.form.get('price_adjustment', 0)) * 100)  # Convert to cents
+        inventory_count = int(request.form.get('inventory_count', 0))
+        is_active = request.form.get('is_active') == 'on'
+        
+        # Parse attributes from form
+        attributes = {}
+        for key in request.form:
+            if key.startswith('attr_'):
+                attr_name = key.replace('attr_', '')
+                attributes[attr_name] = request.form.get(key)
+        
+        # Validate SKU uniqueness
+        existing = ProductVariant.query.filter_by(sku=sku).first()
+        if existing:
+            flash(f'SKU "{sku}" already exists.', 'danger')
+            return render_template('admin/ecommerce/variants/form.html', product=product, variant=None)
+        
+        variant = ProductVariant(
+            product_id=product_id,
+            name=name,
+            sku=sku,
+            price_adjustment=price_adjustment,
+            inventory_count=inventory_count,
+            is_active=is_active,
+            attributes=attributes
+        )
+        
+        db.session.add(variant)
+        db.session.commit()
+        
+        flash(f'Variant "{name}" created.', 'success')
+        return redirect(url_for('ecommerce_admin.list_variants', product_id=product_id))
+    
+    return render_template('admin/ecommerce/variants/form.html', product=product, variant=None)
+
+
+@ecommerce_admin_bp.route('/variants/<int:id>/edit', methods=['GET', 'POST'])
+@login_required
+@role_required('admin')
+def edit_variant(id):
+    """Edit a product variant."""
+    variant = ProductVariant.query.get_or_404(id)
+    product = variant.product
+    
+    if request.method == 'POST':
+        variant.name = request.form.get('name')
+        new_sku = request.form.get('sku')
+        
+        # Validate SKU uniqueness if changed
+        if new_sku != variant.sku:
+            existing = ProductVariant.query.filter_by(sku=new_sku).first()
+            if existing:
+                flash(f'SKU "{new_sku}" already exists.', 'danger')
+                return render_template('admin/ecommerce/variants/form.html', product=product, variant=variant)
+        
+        variant.sku = new_sku
+        variant.price_adjustment = int(float(request.form.get('price_adjustment', 0)) * 100)
+        variant.inventory_count = int(request.form.get('inventory_count', 0))
+        variant.is_active = request.form.get('is_active') == 'on'
+        
+        # Parse attributes
+        attributes = {}
+        for key in request.form:
+            if key.startswith('attr_'):
+                attr_name = key.replace('attr_', '')
+                attributes[attr_name] = request.form.get(key)
+        variant.attributes = attributes
+        
+        db.session.commit()
+        flash('Variant updated.', 'success')
+        return redirect(url_for('ecommerce_admin.list_variants', product_id=product.id))
+    
+    return render_template('admin/ecommerce/variants/form.html', product=product, variant=variant)
+
+
+@ecommerce_admin_bp.route('/variants/<int:id>/delete', methods=['POST'])
+@login_required
+@role_required('admin')
+def delete_variant(id):
+    """Delete a product variant."""
+    variant = ProductVariant.query.get_or_404(id)
+    product_id = variant.product_id
+    name = variant.name
+    db.session.delete(variant)
+    db.session.commit()
+    flash(f'Variant "{name}" deleted.', 'success')
+    return redirect(url_for('ecommerce_admin.list_variants', product_id=product_id))
+
+
+@ecommerce_admin_bp.route('/variants/<int:id>/json')
+@login_required
+@role_required('admin')
+def get_variant_json(id):
+    """Get variant data as JSON for AJAX."""
+    variant = ProductVariant.query.get_or_404(id)
+    return jsonify({
+        'id': variant.id,
+        'name': variant.name,
+        'sku': variant.sku,
+        'price_adjustment': variant.price_adjustment / 100,
+        'inventory_count': variant.inventory_count,
+        'is_active': variant.is_active,
+        'attributes': variant.attributes,
+        'final_price': variant.get_price() / 100
+    })
+
+
+# =============================================================================
+# Discount Rules Management
+# =============================================================================
+
+@ecommerce_admin_bp.route('/discounts/<int:discount_id>/rules')
+@login_required
+@role_required('admin')
+def list_discount_rules(discount_id):
+    """List all rules for a discount."""
+    discount = Discount.query.get_or_404(discount_id)
+    rules = DiscountRule.query.filter_by(discount_id=discount_id).all()
+    return render_template('admin/ecommerce/discounts/rules.html', discount=discount, rules=rules)
+
+
+@ecommerce_admin_bp.route('/discounts/<int:discount_id>/rules/new', methods=['GET', 'POST'])
+@login_required
+@role_required('admin')
+def create_discount_rule(discount_id):
+    """Create a new discount rule."""
+    discount = Discount.query.get_or_404(discount_id)
+    
+    if request.method == 'POST':
+        rule_type = request.form.get('rule_type')
+        condition = request.form.get('condition')
+        value = request.form.get('value')
+        
+        rule = DiscountRule(
+            discount_id=discount_id,
+            rule_type=rule_type,
+            condition=condition,
+            value=value
+        )
+        
+        db.session.add(rule)
+        db.session.commit()
+        
+        flash(f'Rule added to "{discount.code}".', 'success')
+        return redirect(url_for('ecommerce_admin.list_discount_rules', discount_id=discount_id))
+    
+    # Rule type options
+    rule_types = [
+        ('min_quantity', 'Minimum Quantity'),
+        ('min_amount', 'Minimum Order Amount'),
+        ('customer_tag', 'Customer Tag'),
+        ('first_order', 'First Order Only'),
+        ('specific_product', 'Specific Product'),
+        ('specific_collection', 'Specific Collection'),
+    ]
+    
+    conditions = [
+        ('equals', 'Equals'),
+        ('greater_than', 'Greater Than'),
+        ('less_than', 'Less Than'),
+        ('contains', 'Contains'),
+    ]
+    
+    return render_template('admin/ecommerce/discounts/rule_form.html', 
+                          discount=discount, rule=None, 
+                          rule_types=rule_types, conditions=conditions)
+
+
+@ecommerce_admin_bp.route('/rules/<int:id>/edit', methods=['GET', 'POST'])
+@login_required
+@role_required('admin')
+def edit_discount_rule(id):
+    """Edit a discount rule."""
+    rule = DiscountRule.query.get_or_404(id)
+    discount = Discount.query.get_or_404(rule.discount_id)
+    
+    if request.method == 'POST':
+        rule.rule_type = request.form.get('rule_type')
+        rule.condition = request.form.get('condition')
+        rule.value = request.form.get('value')
+        
+        db.session.commit()
+        flash('Rule updated.', 'success')
+        return redirect(url_for('ecommerce_admin.list_discount_rules', discount_id=discount.id))
+    
+    rule_types = [
+        ('min_quantity', 'Minimum Quantity'),
+        ('min_amount', 'Minimum Order Amount'),
+        ('customer_tag', 'Customer Tag'),
+        ('first_order', 'First Order Only'),
+        ('specific_product', 'Specific Product'),
+        ('specific_collection', 'Specific Collection'),
+    ]
+    
+    conditions = [
+        ('equals', 'Equals'),
+        ('greater_than', 'Greater Than'),
+        ('less_than', 'Less Than'),
+        ('contains', 'Contains'),
+    ]
+    
+    return render_template('admin/ecommerce/discounts/rule_form.html',
+                          discount=discount, rule=rule,
+                          rule_types=rule_types, conditions=conditions)
+
+
+@ecommerce_admin_bp.route('/rules/<int:id>/delete', methods=['POST'])
+@login_required
+@role_required('admin')
+def delete_discount_rule(id):
+    """Delete a discount rule."""
+    rule = DiscountRule.query.get_or_404(id)
+    discount_id = rule.discount_id
+    db.session.delete(rule)
+    db.session.commit()
+    flash('Rule deleted.', 'success')
+    return redirect(url_for('ecommerce_admin.list_discount_rules', discount_id=discount_id))
+
+
+@ecommerce_admin_bp.route('/api/discounts/<int:discount_id>/evaluate', methods=['POST'])
+@login_required
+@role_required('admin')
+def evaluate_discount_rules(discount_id):
+    """Evaluate discount rules against test data (for admin testing)."""
+    discount = Discount.query.get_or_404(discount_id)
+    rules = DiscountRule.query.filter_by(discount_id=discount_id).all()
+    
+    if not rules:
+        return jsonify({'valid': True, 'message': 'No rules to evaluate'})
+    
+    data = request.get_json() or {}
+    results = []
+    all_pass = True
+    
+    for rule in rules:
+        passed = False
+        test_value = data.get(rule.rule_type)
+        
+        if test_value is not None:
+            if rule.condition == 'equals':
+                passed = str(test_value) == rule.value
+            elif rule.condition == 'greater_than':
+                passed = float(test_value) > float(rule.value)
+            elif rule.condition == 'less_than':
+                passed = float(test_value) < float(rule.value)
+            elif rule.condition == 'contains':
+                passed = rule.value in str(test_value)
+        
+        results.append({
+            'rule_type': rule.rule_type,
+            'condition': rule.condition,
+            'value': rule.value,
+            'passed': passed
+        })
+        
+        if not passed:
+            all_pass = False
+    
+    return jsonify({
+        'valid': all_pass,
+        'rules_evaluated': len(rules),
+        'results': results
+    })
+

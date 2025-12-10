@@ -23,7 +23,7 @@
 
 .kanban-column-header {
     padding: 0.75rem 1rem;
-    border-top: 4px solid #6c757d;
+    border-top: 4px solid var(--text-muted);
     border-bottom: 1px solid var(--border-color, #dee2e6);
     display: flex;
     justify-content: space-between;
@@ -119,11 +119,11 @@
 }
 
 .lead-name:hover {
-    color: var(--primary-color, #4169e1);
+    color: var(--primary-color, var(--primary-color));
 }
 
 .lead-score {
-    background: #17a2b8;
+    background: var(--info-color);
     color: white;
     padding: 0.15rem 0.5rem;
     border-radius: 4px;
@@ -140,7 +140,7 @@
     align-items: center;
     gap: 0.5rem;
     font-size: 0.8rem;
-    color: var(--text-muted, #6c757d);
+    color: var(--text-muted, var(--text-muted));
     margin: 0.25rem 0;
 }
 
@@ -160,12 +160,12 @@
 }
 
 .lead-type-badge.contact {
-    background: #ffc107;
+    background: var(--warning-color);
     color: #212529;
 }
 
 .lead-type-badge.appointment {
-    background: #17a2b8;
+    background: var(--info-color);
     color: white;
 }
 
@@ -188,7 +188,7 @@
     position: fixed;
     bottom: 1rem;
     right: 1rem;
-    background: #dc3545;
+    background: var(--danger-color);
     color: white;
     padding: 0.75rem 1rem;
     border-radius: 8px;

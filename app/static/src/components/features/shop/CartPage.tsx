@@ -268,21 +268,41 @@ export function CartPage({
         }
     }
 
-    // Checkout handler (submits traditional form)
-    const handleCheckout = () => {
-        // Create and submit form for checkout
-        const form = document.createElement('form')
-        form.method = 'POST'
-        form.action = checkoutUrl
+    // Checkout handler - submits to backend and redirects to Stripe
+    const handleCheckout = async () => {
+        setIsLoading(true)
+        setError(null)
 
-        const csrfInput = document.createElement('input')
-        csrfInput.type = 'hidden'
-        csrfInput.name = 'csrf_token'
-        csrfInput.value = csrfToken
-        form.appendChild(csrfInput)
+        try {
+            // Create form data with CSRF token
+            const formData = new FormData()
+            formData.append('csrf_token', csrfToken)
 
-        document.body.appendChild(form)
-        form.submit()
+            // Submit checkout request - request JSON response
+            const response = await fetch(checkoutUrl, {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin',
+                headers: {
+                    'Accept': 'application/json',
+                },
+            })
+
+            const data = await response.json()
+
+            if (data.success && data.redirect_url) {
+                // Redirect to Stripe checkout
+                window.location.href = data.redirect_url
+            } else if (data.error) {
+                setError(data.error)
+                setIsLoading(false)
+            } else {
+                throw new Error('Invalid response from checkout')
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Checkout failed. Please try again.')
+            setIsLoading(false)
+        }
     }
 
     // Empty cart state

@@ -179,7 +179,7 @@
 }
 
 .edit-button {
-    background: #F4C430;
+    background: var(--accent-color);
     color: var(--text-primary);
 }
 
@@ -273,7 +273,7 @@
 }
 
 .pagination-button.current {
-    background: #F4C430;
+    background: var(--accent-color);
     pointer-events: none;
 }
 
@@ -342,7 +342,7 @@
 }
 
 .flash-message.success {
-    border-left: 4px solid #28a745;
+    border-left: 4px solid var(--success-color);
 }
 
 .flash-message.error {

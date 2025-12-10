@@ -87,6 +87,7 @@ registerComponent('Radio', () => import('./components/ui/radio'))
 registerComponent('Badge', () => import('./components/ui/badge'))
 registerComponent('Spinner', () => import('./components/ui/spinner'))
 registerComponent('Table', () => import('./components/ui/table'))
+registerComponent('InlineEdit', () => import('./components/ui/InlineEdit'))
 
 // Layout Components
 registerComponent('Header', () => import('./components/layout/Header'))
@@ -125,7 +126,12 @@ registerComponent('ImageGallery', () => import('./components/features/interactiv
 // Feature Components - Admin
 registerComponent('AdminDashboard', () => import('./components/features/admin/AdminDashboard'))
 registerComponent('AdminDataTable', () => import('./components/features/admin/AdminDataTable'))
+registerComponent('AdminSidebar', () => import('./components/features/admin/AdminSidebar'))
+registerComponent('QuickActions', () => import('./components/features/admin/QuickActions'))
+registerComponent('ActivityFeed', () => import('./components/features/admin/ActivityFeed'))
 registerComponent('ThemeEditor', () => import('./components/features/admin/ThemeEditor'))
+registerComponent('UserManagement', () => import('./components/features/admin/UserManagement'))
+registerComponent('BookingAdmin', () => import('./components/features/admin/BookingAdmin'))
 
 // Feature Components - Shop
 registerComponent('ProductView', () => import('./components/features/shop/ProductView'))
@@ -137,7 +143,13 @@ registerComponent('AnalyticsDashboard', () => import('./components/features/anal
 // Feature Components - Messaging
 registerComponent('MessagingChannel', () => import('./components/features/messaging/MessagingChannel'))
 
+// Feature Components - User Dashboard
+registerComponent('UserDashboard', () => import('./components/features/user/UserDashboard'))
+
 // Feature Components - Blog
 registerComponent('BlogPostUtils', () => import('./components/features/blog/BlogPostUtils'))
+
+// Feature Components - Content Editing (Phase D)
+registerComponent('InlineEditor', () => import('./components/features/content/InlineEditor'))
 
 export default componentRegistry

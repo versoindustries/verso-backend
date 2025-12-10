@@ -7,10 +7,18 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import api from '../../../api'
+import { DataCard } from './DataCard'
 
 // =============================================================================
 // Types
 // =============================================================================
+
+interface MessageCard {
+    type: string
+    id?: number
+    title?: string
+    [key: string]: unknown
+}
 
 interface Message {
     id: number
@@ -24,7 +32,13 @@ interface Message {
         is_image: boolean
     }
     reactions: Record<string, { count: number; user_reacted: boolean }>
+    // Enterprise messaging fields
+    message_type?: 'text' | 'command' | 'system' | 'card'
+    card?: MessageCard | null
+    is_pinned?: boolean
+    extra_data?: Record<string, unknown> | null
 }
+
 
 interface Member {
     id: number
@@ -55,8 +69,10 @@ interface MessagingChannelProps {
     canArchive: boolean
     /** Users who have seen the latest message */
     seenUsers?: Member[]
-    /** Polling URL for new messages */
+    /** Polling URL for new messages (fallback) */
     pollUrl: string
+    /** SSE stream URL for real-time messages */
+    streamUrl?: string
     /** Send message URL */
     sendUrl: string
     /** React to message URL pattern */
@@ -84,6 +100,7 @@ export function MessagingChannel({
     canManageMembers,
     seenUsers = [],
     pollUrl,
+    streamUrl,
     sendUrl,
     reactUrlPattern,
     manageMembersUrl,
@@ -94,6 +111,7 @@ export function MessagingChannel({
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
     const [isMuted, setIsMuted] = useState(initialMuted)
     const [showEmojiPicker, setShowEmojiPicker] = useState<number | null>(null)
+    const [useSSE, setUseSSE] = useState(!!streamUrl)
 
     const chatBoxRef = useRef<HTMLDivElement>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -108,23 +126,61 @@ export function MessagingChannel({
         }
     }, [])
 
-    // Poll for new messages
+    // Real-time messaging: Try SSE first, fall back to polling
     useEffect(() => {
-        const pollInterval = setInterval(async () => {
-            try {
-                const response = await api.get<Message[]>(`${pollUrl}?last_id=${lastIdRef.current}`)
-                if (response.ok && response.data && response.data.length > 0) {
-                    setMessages(prev => [...prev, ...response.data!])
-                    lastIdRef.current = response.data[response.data.length - 1].id
-                    scrollToBottom()
-                }
-            } catch (error) {
-                console.error('Polling error:', error)
-            }
-        }, 3000)
+        let eventSource: EventSource | null = null
+        let pollInterval: ReturnType<typeof setInterval> | null = null
 
-        return () => clearInterval(pollInterval)
-    }, [pollUrl, scrollToBottom])
+        const handleNewMessages = (newMessages: Message[]) => {
+            setMessages(prev => [...prev, ...newMessages])
+            if (newMessages.length > 0) {
+                lastIdRef.current = newMessages[newMessages.length - 1].id
+            }
+            scrollToBottom()
+        }
+
+        // Try SSE if available
+        if (useSSE && streamUrl) {
+            const sseUrl = `${streamUrl}?last_id=${lastIdRef.current}`
+            eventSource = new EventSource(sseUrl)
+
+            eventSource.addEventListener('messages', (event: MessageEvent) => {
+                try {
+                    const newMessages = JSON.parse(event.data) as Message[]
+                    handleNewMessages(newMessages)
+                } catch (e) {
+                    console.error('SSE parse error:', e)
+                }
+            })
+
+            eventSource.addEventListener('connected', () => {
+                console.log('SSE connected to channel')
+            })
+
+            eventSource.onerror = () => {
+                console.warn('SSE error, falling back to polling')
+                eventSource?.close()
+                setUseSSE(false)
+            }
+        } else {
+            // Polling fallback
+            pollInterval = setInterval(async () => {
+                try {
+                    const response = await api.get<Message[]>(`${pollUrl}?last_id=${lastIdRef.current}`)
+                    if (response.ok && response.data && response.data.length > 0) {
+                        handleNewMessages(response.data)
+                    }
+                } catch (error) {
+                    console.error('Polling error:', error)
+                }
+            }, 3000)
+        }
+
+        return () => {
+            eventSource?.close()
+            if (pollInterval) clearInterval(pollInterval)
+        }
+    }, [pollUrl, streamUrl, scrollToBottom, useSSE])
 
     // Initial scroll to bottom
     useEffect(() => {
@@ -239,13 +295,19 @@ export function MessagingChannel({
                 {messages.map(msg => (
                     <div
                         key={msg.id}
-                        className={`message ${msg.user_id === currentUserId ? 'me' : ''}`}
+                        className={`message ${msg.user_id === currentUserId ? 'me' : ''} ${msg.message_type || 'text'} ${msg.is_pinned ? 'pinned' : ''}`}
                         data-id={msg.id}
                     >
                         <div className="message-avatar">
                             {msg.user[0].toUpperCase()}
                         </div>
                         <div className="message-bubble">
+                            {/* Pinned Indicator */}
+                            {msg.is_pinned && (
+                                <div className="pinned-indicator">
+                                    <i className="fas fa-thumbtack"></i> Pinned
+                                </div>
+                            )}
                             <div className="message-meta">
                                 <strong>{msg.user}</strong> • {msg.created_at.split(' ')[1]?.substring(0, 5) || ''}
                             </div>
@@ -253,6 +315,11 @@ export function MessagingChannel({
                                 className="message-content"
                                 dangerouslySetInnerHTML={{ __html: msg.content }}
                             />
+
+                            {/* Data Card for slash command results */}
+                            {msg.card && (
+                                <DataCard card={msg.card as unknown as Parameters<typeof DataCard>[0]['card']} />
+                            )}
 
                             {/* Attachment */}
                             {msg.attachment && (

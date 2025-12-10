@@ -71,9 +71,9 @@
 }
 
 .booking-wizard__step-number--completed {
-    background: linear-gradient(135deg, #28a745, #20c997);
+    background: linear-gradient(135deg, var(--success-color), #20c997);
     color: var(--text-primary);
-    border: 2px solid #28a745;
+    border: 2px solid var(--success-color);
 }
 
 .booking-wizard__step-connector {
@@ -379,7 +379,7 @@
     width: 80px;
     height: 80px;
     margin: 0 auto 1.5rem;
-    background: linear-gradient(135deg, #28a745, #20c997);
+    background: linear-gradient(135deg, var(--success-color), #20c997);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -391,7 +391,7 @@
 .booking-wizard__success-title {
     font-family: 'Neon-Heavy', sans-serif;
     font-size: 2rem;
-    color: #28a745;
+    color: var(--success-color);
     margin-bottom: 1rem;
 }
 

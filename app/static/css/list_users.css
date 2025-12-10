@@ -120,7 +120,7 @@
 }
 
 .btn-danger {
-    background: #dc3545;
+    background: var(--danger-color);
     color: var(--text-primary);
     border: none;
     box-shadow: var(--shadow-light);
@@ -181,7 +181,7 @@
 }
 
 .user-link:hover {
-    color: #F4C430;
+    color: var(--accent-color);
     text-decoration: underline;
 }
 

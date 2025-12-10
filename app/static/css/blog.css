@@ -46,12 +46,12 @@
 }
 
 .header-section h1 i {
-    color: #4169e1;
+    color: var(--primary-color);
     transition: color 0.3s ease;
 }
 
 .header-section h1:hover i {
-    color: #F4C430;
+    color: var(--accent-color);
 }
 
 .header-section p {
@@ -194,7 +194,7 @@
 }
 
 .blog-card h2 a:hover {
-    color: #4169e1;
+    color: var(--primary-color);
 }
 
 .blog-card p {
@@ -214,7 +214,7 @@
 
 .blog-grid-section .text-center i {
     font-size: 2rem;
-    color: #F4C430;
+    color: var(--accent-color);
     margin-bottom: 12px;
 }
 
@@ -249,7 +249,7 @@
 }
 
 .pagination-btn:hover {
-    background: #4169e1;
+    background: var(--primary-color);
     color: var(--text-primary);
     transform: translateY(-2px);
 }
@@ -265,7 +265,7 @@
 }
 
 .pagination-btn.bg-blue-500 {
-    background: #4169e1;
+    background: var(--primary-color);
     color: var(--text-primary);
 }
 

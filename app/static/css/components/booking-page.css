@@ -44,7 +44,7 @@
     justify-content: center;
     width: 28px;
     height: 28px;
-    background: var(--primary-color, #4169e1);
+    background: var(--primary-color, var(--primary-color));
     color: white;
     border-radius: 50%;
     font-size: 0.875rem;
@@ -74,11 +74,11 @@
 /* React Day Picker Overrides */
 .booking-page .rdp {
     --rdp-cell-size: 40px;
-    --rdp-accent-color: var(--primary-color, #4169e1);
+    --rdp-accent-color: var(--primary-color, var(--primary-color));
 }
 
 .booking-page .rdp-day_selected:not([disabled]) {
-    background-color: var(--primary-color, #4169e1);
+    background-color: var(--primary-color, var(--primary-color));
     color: white;
 }
 
@@ -88,7 +88,7 @@
 
 .booking-page .rdp-day_today:not(.rdp-day_selected) {
     font-weight: bold;
-    color: var(--primary-color, #4169e1);
+    color: var(--primary-color, var(--primary-color));
 }
 
 /* Slots Grid */
@@ -126,7 +126,7 @@
     display: block;
     font-weight: 500;
     margin-bottom: 0.5rem;
-    color: var(--text-secondary, #6c757d);
+    color: var(--text-secondary, var(--text-muted));
     font-size: 0.875rem;
 }
 
@@ -141,7 +141,7 @@
 
 .booking-page .form-control:focus {
     outline: none;
-    border-color: var(--primary-color, #4169e1);
+    border-color: var(--primary-color, var(--primary-color));
     box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.15);
 }
 
@@ -159,7 +159,7 @@
 
 /* Success State */
 .booking-success .success-icon svg {
-    color: #28a745;
+    color: var(--success-color);
 }
 
 .booking-summary {
@@ -212,6 +212,6 @@
     }
 
     .booking-page .form-control:focus {
-        border-color: var(--primary-color, #4169e1);
+        border-color: var(--primary-color, var(--primary-color));
     }
 }

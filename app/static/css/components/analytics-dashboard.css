@@ -22,20 +22,20 @@
 }
 
 .analytics-kpi-primary {
-    background: linear-gradient(135deg, #4169e1, #3458c5);
+    background: linear-gradient(135deg, var(--primary-color), #3458c5);
 }
 
 .analytics-kpi-success {
-    background: linear-gradient(135deg, #28a745, #1e7e34);
+    background: linear-gradient(135deg, var(--success-color), #1e7e34);
 }
 
 .analytics-kpi-warning {
-    background: linear-gradient(135deg, #ffc107, #e0a800);
+    background: linear-gradient(135deg, var(--warning-color), #e0a800);
     color: #212529;
 }
 
 .analytics-kpi-info {
-    background: linear-gradient(135deg, #17a2b8, #138496);
+    background: linear-gradient(135deg, var(--info-color), #138496);
 }
 
 .analytics-kpi-content {

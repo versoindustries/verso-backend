@@ -49,6 +49,9 @@ def checkout_session(product_id):
         db.session.add(item)
         db.session.commit()
 
+        # Stripe expects amount in cents (integer)
+        unit_amount_cents = int(product.price * 100)
+        
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             line_items=[{
@@ -58,7 +61,7 @@ def checkout_session(product_id):
                         'name': product.name,
                         'images': [url_for('media_bp.serve_media', media_id=product.media_id, _external=True)] if product.media_id else [],
                     },
-                    'unit_amount': product.price,
+                    'unit_amount': unit_amount_cents,
                 },
                 'quantity': 1,
             }],

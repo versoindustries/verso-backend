@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, current_app
-from app.models import Order, Product, OrderItem, DownloadToken, Subscription, db
+from app.models import Order, Product, OrderItem, DownloadToken, Subscription, Appointment, db
 import stripe
 import secrets
 from datetime import datetime, timedelta
@@ -29,7 +29,11 @@ def stripe_webhook():
 
     # Handle the event
     if event_type == 'checkout.session.completed':
-        handle_checkout_session(data)
+        # Check if this is a booking payment
+        if data.get('metadata', {}).get('type') == 'booking_payment':
+            handle_booking_payment(data)
+        else:
+            handle_checkout_session(data)
     elif event_type == 'invoice.paid':
         handle_invoice_paid(data)
     elif event_type == 'invoice.payment_failed':
@@ -54,7 +58,7 @@ def handle_checkout_session(session):
             order.stripe_payment_intent_id = payment_intent_id
             
             # Release inventory locks for this order (inventory already reserved)
-            from app.routes.cart import release_inventory_locks
+            from app.routes.public_routes.cart import release_inventory_locks
             release_inventory_locks(order.id)
             
             # Process each item
@@ -154,3 +158,27 @@ def handle_subscription_deleted(stripe_sub):
         # TODO: Send cancellation confirmation email
 
 
+def handle_booking_payment(session):
+    """Handle successful booking payment from Stripe checkout."""
+    appointment_id = session.get('metadata', {}).get('appointment_id')
+    payment_intent_id = session.get('payment_intent')
+    
+    if not appointment_id:
+        current_app.logger.warning("Booking payment webhook missing appointment_id")
+        return
+    
+    appointment = Appointment.query.get(int(appointment_id))
+    if not appointment:
+        current_app.logger.warning(f"Appointment {appointment_id} not found for payment webhook")
+        return
+    
+    if appointment.payment_status == 'pending':
+        appointment.payment_status = 'paid'
+        appointment.status = 'New'  # Promote from pending_payment to confirmed
+        appointment.stripe_payment_intent_id = payment_intent_id
+        appointment.payment_expires_at = None  # Clear expiry
+        db.session.commit()
+        
+        current_app.logger.info(f"Booking payment completed for appointment {appointment_id}")
+        
+        # TODO: Send booking confirmation email via worker

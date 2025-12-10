@@ -78,7 +78,7 @@
 
 .welcome-actions a:hover {
     background: rgba(46, 204, 113, 0.2);
-    border-color: #2ecc71;
+    border-color: var(--success-color);
     transform: translateY(-3px);
     box-shadow: 0 5px 15px rgba(46, 204, 113, 0.2);
 }
@@ -330,26 +330,26 @@
 .status-pill.paid,
 .status-pill.success {
     background: rgba(46, 204, 113, 0.15);
-    color: #2ecc71;
+    color: var(--success-color);
     border: 1px solid rgba(46, 204, 113, 0.3);
     text-shadow: 0 0 5px rgba(46, 204, 113, 0.3);
 }
 
 .status-pill.pending {
     background: rgba(255, 193, 7, 0.15);
-    color: #ffc107;
+    color: var(--warning-color);
     border: 1px solid rgba(255, 193, 7, 0.3);
 }
 
 .status-pill.shipped {
     background: rgba(23, 162, 184, 0.15);
-    color: #17a2b8;
+    color: var(--info-color);
     border: 1px solid rgba(23, 162, 184, 0.3);
 }
 
 .status-pill.cancelled {
     background: rgba(231, 76, 60, 0.15);
-    color: #e74c3c;
+    color: var(--danger-color);
     border: 1px solid rgba(231, 76, 60, 0.3);
 }
 

@@ -11,8 +11,99 @@ These tests cover:
 
 import pytest
 import json
+import os
+import tempfile
 from datetime import datetime, timedelta
 from unittest.mock import patch, MagicMock
+from app.database import db
+from app.models import User, Role, BusinessConfig
+
+
+# Module-scoped fixtures for isolation from other test modules
+@pytest.fixture(scope='module')
+def app():
+    """Create application for this test module."""
+    from app import create_app
+    
+    db_fd, db_path = tempfile.mkstemp()
+    
+    app = create_app({
+        'TESTING': True,
+        'SQLALCHEMY_DATABASE_URI': f'sqlite:///{db_path}',
+        'WTF_CSRF_ENABLED': False,
+        'SECRET_KEY': 'test-secret-key-for-phase25-30',
+        'BCRYPT_LOG_ROUNDS': 4,
+        'SERVER_NAME': 'localhost',
+    })
+    
+    with app.app_context():
+        db.create_all()
+        
+        # Seed roles
+        for role_name in ['admin', 'user', 'staff', 'customer']:
+            if not Role.query.filter_by(name=role_name).first():
+                db.session.add(Role(name=role_name))
+        
+        # Seed business config
+        for name, value in [('site_name', 'Test Site'), ('site_email', 'test@example.com')]:
+            if not BusinessConfig.query.filter_by(setting_name=name).first():
+                db.session.add(BusinessConfig(setting_name=name, setting_value=value))
+        
+        db.session.commit()
+        
+        yield app
+        
+        db.session.remove()
+        db.drop_all()
+    
+    os.close(db_fd)
+    os.unlink(db_path)
+
+
+@pytest.fixture(scope='function')
+def client(app):
+    """Create test client for each test."""
+    return app.test_client()
+
+
+@pytest.fixture(scope='function')
+def db_session(app):
+    """Create a database session for each test."""
+    with app.app_context():
+        yield db.session
+
+
+@pytest.fixture(scope='function')
+def regular_user(app):
+    """Create a regular user for testing."""
+    with app.app_context():
+        user_role = Role.query.filter_by(name='user').first()
+        
+        existing = User.query.filter_by(email='user_p25_30@test.com').first()
+        if existing:
+            db.session.delete(existing)
+            db.session.flush()
+        
+        user = User(
+            username='test_user_p25_30',
+            email='user_p25_30@test.com',
+            password='TestPassword123!'
+        )
+        user.confirmed = True
+        user.tos_accepted = True
+        if user_role:
+            user.roles.append(user_role)
+        
+        db.session.add(user)
+        db.session.commit()
+        
+        yield user
+        
+        try:
+            db.session.delete(user)
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
 
 
 class TestBackupService:

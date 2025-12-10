@@ -208,14 +208,8 @@ def admin_dashboard():
 @login_required
 @admin_required
 def list_users():
-    # Use selectinload to prevent N+1 queries when accessing user.roles
-    if current_user.location_id:
-        users = User.query.options(selectinload(User.roles)).filter_by(location_id=current_user.location_id).order_by(User.username).all()
-    else:
-        users = User.query.options(selectinload(User.roles)).order_by(User.username).all()
-    roles = Role.query.all()  # For bulk action role assignment
-    form = CSRFTokenForm()  # Initialize the CSRF form
-    return render_template('admin/list_users.html', users=users, roles=roles, form=form)
+    """DEPRECATED: Redirects to unified user management dashboard."""
+    return redirect(url_for('admin.user_management'))
 
 @admin.route('/user/new', methods=['GET', 'POST'])
 @login_required
@@ -282,23 +276,165 @@ def delete_user(user_id):
     flash('User deleted successfully.', 'success')
     return redirect(url_for('admin.list_users'))
 
+# =============================================================================
+# Unified User Management Dashboard
+# =============================================================================
+
+@admin.route('/user-management')
+@login_required
+@admin_required
+def user_management():
+    """Unified user and role management dashboard."""
+    import json
+    
+    # Get users with roles eager loaded
+    if current_user.location_id:
+        users = User.query.options(selectinload(User.roles)).filter_by(location_id=current_user.location_id).order_by(User.username).all()
+    else:
+        users = User.query.options(selectinload(User.roles)).order_by(User.username).all()
+    
+    roles = Role.query.order_by(Role.name).all()
+    form = CSRFTokenForm()
+    
+    # Serialize users for React component
+    users_data = [{
+        'id': user.id,
+        'username': user.username,
+        'email': user.email,
+        'first_name': user.first_name or '',
+        'last_name': user.last_name or '',
+        'phone': user.phone or '',
+        'roles': [{'id': r.id, 'name': r.name} for r in user.roles],
+        'role_names': ', '.join([r.name for r in user.roles]) or 'No roles',
+        'last_login': user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else 'Never',
+        'is_active': getattr(user, 'is_active', True)
+    } for user in users]
+    
+    # Serialize roles for React component
+    roles_data = [{
+        'id': role.id,
+        'name': role.name,
+        'user_count': len(role.users),
+        'users': [{'id': u.id, 'username': u.username} for u in role.users[:5]]  # First 5 users
+    } for role in roles]
+    
+    return render_template('admin/user_management.html', 
+                          users_json=json.dumps(users_data),
+                          roles_json=json.dumps(roles_data),
+                          form=form)
+
+@admin.route('/api/user/<int:user_id>')
+@login_required
+@admin_required
+def api_user_detail(user_id):
+    """Get detailed user information for profile slideout."""
+    user = User.query.options(selectinload(User.roles)).get_or_404(user_id)
+    
+    return jsonify({
+        'id': user.id,
+        'username': user.username,
+        'email': user.email,
+        'first_name': user.first_name or '',
+        'last_name': user.last_name or '',
+        'phone': user.phone or '',
+        'roles': [{'id': r.id, 'name': r.name} for r in user.roles],
+        'last_login': user.last_login.isoformat() if user.last_login else None,
+        'is_active': getattr(user, 'is_active', True)
+    })
+
+@admin.route('/api/user/<int:user_id>/roles', methods=['PUT'])
+@login_required
+@admin_required
+def api_update_user_roles(user_id):
+    """Update user roles via AJAX."""
+    user = User.query.get_or_404(user_id)
+    data = request.get_json()
+    
+    if not data or 'role_ids' not in data:
+        return jsonify({'success': False, 'error': 'Missing role_ids'}), 400
+    
+    role_ids = data.get('role_ids', [])
+    
+    # Validate and assign roles
+    new_roles = []
+    for rid in role_ids:
+        role = Role.query.get(rid)
+        if role:
+            new_roles.append(role)
+    
+    user.roles = new_roles
+    
+    try:
+        db.session.commit()
+        log_audit_event(current_user.id, 'update_user_roles', 'User', user.id, 
+                       {'roles': [r.name for r in new_roles]}, request.remote_addr)
+        return jsonify({
+            'success': True, 
+            'roles': [{'id': r.id, 'name': r.name} for r in user.roles]
+        })
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        current_app.logger.error(f'Error updating user roles: {e}')
+        return jsonify({'success': False, 'error': 'Database error'}), 500
+
+@admin.route('/api/role', methods=['POST'])
+@login_required
+@admin_required
+def api_create_role():
+    """Create a new role via AJAX."""
+    data = request.get_json()
+    
+    if not data or 'name' not in data:
+        return jsonify({'success': False, 'error': 'Missing role name'}), 400
+    
+    role_name = data.get('name', '').strip()
+    if not role_name:
+        return jsonify({'success': False, 'error': 'Role name cannot be empty'}), 400
+    
+    # Check for existing role
+    if Role.query.filter_by(name=role_name).first():
+        return jsonify({'success': False, 'error': 'Role already exists'}), 400
+    
+    role = Role(name=role_name)
+    try:
+        db.session.add(role)
+        db.session.commit()
+        return jsonify({
+            'success': True,
+            'role': {'id': role.id, 'name': role.name, 'user_count': 0}
+        })
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': 'Role already exists'}), 400
+
+@admin.route('/api/role/<int:role_id>', methods=['DELETE'])
+@login_required
+@admin_required
+def api_delete_role(role_id):
+    """Delete a role via AJAX."""
+    role = Role.query.get_or_404(role_id)
+    
+    if role.users:
+        return jsonify({
+            'success': False, 
+            'error': f'Cannot delete role - {len(role.users)} user(s) assigned'
+        }), 400
+    
+    try:
+        db.session.delete(role)
+        db.session.commit()
+        return jsonify({'success': True})
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        current_app.logger.error(f'Error deleting role: {e}')
+        return jsonify({'success': False, 'error': 'Database error'}), 500
+
 @admin.route('/roles')
 @login_required
 @admin_required
 def list_roles():
-    import json
-    roles = Role.query.all()
-    form = CSRFTokenForm()
-    
-    # Serialize for AdminDataTable - use HTML entities for quotes in JS to avoid JSON escaping issues
-    roles_json = json.dumps([{
-        'id': role.id,
-        'name': role.name,
-        'users': len(role.users),
-        'actions': f'<a href="{url_for("admin.edit_role", role_id=role.id)}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i> Edit</a>' + (f' <form method="post" action="{url_for("admin.delete_role", role_id=role.id)}" class="d-inline" onsubmit="return confirm(&apos;Delete this role?&apos;);"><input type="hidden" name="csrf_token" value="{form.csrf_token._value()}"><button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button></form>' if not role.users else '')
-    } for role in roles])
-    
-    return render_template('admin/list_roles.html', roles=roles, roles_json=roles_json, form=form)
+    """DEPRECATED: Redirects to unified user management dashboard (Roles tab)."""
+    return redirect(url_for('admin.user_management'))
 
 @admin.route('/role/new', methods=['GET', 'POST'])
 @login_required
@@ -816,6 +952,30 @@ def audit_logs():
     } for log in logs.items])
     
     return render_template('admin/audit_logs.html', logs=logs, logs_json=logs_json)
+
+@admin.route('/api/recent-activity')
+@login_required
+@admin_required
+def recent_activity_api():
+    """JSON API for recent activity feed."""
+    limit = request.args.get('limit', 10, type=int)
+    limit = min(limit, 50)  # Cap at 50 for performance
+    
+    logs = AuditLog.query.options(
+        joinedload(AuditLog.user)
+    ).order_by(AuditLog.timestamp.desc()).limit(limit).all()
+    
+    activities = [{
+        'id': log.id,
+        'action': log.action,
+        'entity_type': log.target_type or '',
+        'entity_id': log.target_id,
+        'details': log.details if isinstance(log.details, dict) else {},
+        'created_at': log.timestamp.isoformat(),
+        'user_name': log.user.username if log.user else None
+    } for log in logs]
+    
+    return jsonify(activities)
 
 @admin.route('/data-management')
 @login_required
@@ -2144,7 +2304,7 @@ def sales_dashboard():
     # This month's conversions
     conversions_mtd = ContactFormSubmission.query.filter(
         ContactFormSubmission.status == 'won',
-        ContactFormSubmission.updated_at >= month_start_utc
+        ContactFormSubmission.submitted_at >= month_start_utc
     ).count()
     
     # Response time average (placeholder - would need more tracking)

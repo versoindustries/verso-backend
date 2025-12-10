@@ -69,7 +69,8 @@
                 current_user.has_role('admin')) else 'false' }}, "canArchive" : {{ 'true' if
                 current_channel.created_by_id==current_user.id or current_user.has_role('admin') else 'false'
                 }}, "seenUsers" : {{ seen_users_json | safe }}, "pollUrl"
-                : "{{ url_for('messaging.poll_messages', channel_id=current_channel.id) }}" , "sendUrl"
+                : "{{ url_for('messaging.poll_messages', channel_id=current_channel.id) }}" , "streamUrl"
+                : "{{ url_for('messaging.stream_messages', channel_id=current_channel.id) }}" , "sendUrl"
                 : "{{ url_for('messaging.send_message', channel_id=current_channel.id) }}" , "reactUrlPattern"
                 : "/messaging/message/{id}/react" , "manageMembersUrl"
                 : "{{ url_for('messaging.manage_members', channel_id=current_channel.id) if current_channel.type == 'private' else '' }}"

@@ -46,7 +46,8 @@ def welcome():
     return render_template(
         'onboarding/welcome.html',
         step=step,
-        progress=progress
+        progress=progress,
+        hide_estimate_form=True
     )
 
 
@@ -117,7 +118,8 @@ def profile():
     return render_template(
         'onboarding/profile.html',
         form=form,
-        progress=progress
+        progress=progress,
+        hide_estimate_form=True
     )
 
 
@@ -166,7 +168,8 @@ def preferences():
     return render_template(
         'onboarding/preferences.html',
         form=form,
-        progress=progress
+        progress=progress,
+        hide_estimate_form=True
     )
 
 

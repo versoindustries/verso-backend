@@ -79,7 +79,7 @@ def db_session(app):
 
 
 @pytest.fixture(scope='function')
-def admin_user(app, db_session):
+def admin_user(app):
     """Create an admin user for testing."""
     from app.models import User, Role
     from app.database import db
@@ -90,6 +90,13 @@ def admin_user(app, db_session):
         if not admin_role:
             admin_role = Role(name='admin')
             db.session.add(admin_role)
+            db.session.flush()
+        
+        # Check for existing admin user
+        existing = User.query.filter_by(email='admin@test.com').first()
+        if existing:
+            db.session.delete(existing)
+            db.session.flush()
         
         # Create admin user
         user = User(
@@ -106,8 +113,11 @@ def admin_user(app, db_session):
         yield user
         
         # Cleanup
-        db.session.delete(user)
-        db.session.commit()
+        try:
+            db.session.delete(user)
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
 
 
 @pytest.fixture(scope='function')

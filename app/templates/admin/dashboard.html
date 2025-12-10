@@ -1,8 +1,6 @@
-{% extends "base.html" %}
+{% extends "admin_base.html" %}
 
-{% block additional_css %}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/admindash.css') }}">
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/components/admin-dashboard.css') }}">
+{% block admin_css %}
 <style>
     /* Quick Actions - page-specific styles */
     .quick-actions {
@@ -135,11 +133,11 @@
 </style>
 {% endblock %}
 
-{% block scripts %}
+{% block admin_scripts %}
 <!-- Chart.js loaded by React component -->
 {% endblock %}
 
-{% block content %}
+{% block admin_content %}
 <div class="admin-dashboard">
     <h1>Admin Dashboard</h1>
 
@@ -280,25 +278,10 @@
         {% endif %}
     </div>
 
-    <!-- Admin Links -->
-    <div class="admin-links" style="margin-top: 2rem;">
-        <h2>Admin Pages</h2>
-        <ul class="admin-pages-list"
-            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; text-align: left; max-width: 800px; margin: 1rem auto;">
-            <li><a href="{{ url_for('admin.business_config') }}"><i class="fas fa-cog"></i> Business Settings</a></li>
-            <li><a href="{{ url_for('crm.board') }}"><i class="fas fa-funnel-dollar"></i> CRM / Lead Board</a></li>
-            <li><a href="{{ url_for('calendar.view_calendar') }}"><i class="fas fa-calendar"></i> Calendar</a></li>
-            <li><a href="{{ url_for('admin.admin_estimator') }}"><i class="fas fa-user-tie"></i> Estimators</a></li>
-            <li><a href="{{ url_for('admin.services') }}"><i class="fas fa-clipboard-list"></i> Services</a></li>
-            <li><a href="{{ url_for('admin.list_users') }}"><i class="fas fa-users"></i> Manage Users</a></li>
-            <li><a href="{{ url_for('admin.list_roles') }}"><i class="fas fa-user-shield"></i> Manage Roles</a></li>
-            <li><a href="{{ url_for('admin.list_locations') }}"><i class="fas fa-map-marker-alt"></i> Locations</a></li>
-            <li><a href="{{ url_for('admin.audit_logs') }}"><i class="fas fa-history"></i> Audit Logs</a></li>
-            <li><a href="{{ url_for('admin.data_management') }}"><i class="fas fa-database"></i> Data Management</a>
-            </li>
-            <li><a href="{{ url_for('admin.list_api_keys') }}"><i class="fas fa-key"></i> API Keys</a></li>
-            <li><a href="{{ url_for('theme.theme_editor') }}"><i class="fas fa-palette"></i> Theme Editor</a></li>
-        </ul>
+    <!-- Activity Feed -->
+    <div class="recent-section">
+        <div data-react-component="ActivityFeed" data-react-props='{"limit": 10, "refreshInterval": 60}'></div>
     </div>
+
 </div>
 {% endblock %}

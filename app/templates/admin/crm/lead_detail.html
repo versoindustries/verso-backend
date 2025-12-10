@@ -1,212 +1,749 @@
-{% extends "base.html" %}
+{% extends "admin_base.html" %}
 
 {% block title %}Lead Detail - {{ item.first_name }} {{ item.last_name }}{% endblock %}
 
-{% block content %}
-<div class="container-fluid mt-4">
-    <!-- Header with quick actions -->
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ url_for('crm.board') }}">CRM Board</a></li>
-                    <li class="breadcrumb-item active">{{ item.first_name }} {{ item.last_name }}</li>
-                </ol>
-            </nav>
-            <h2>
-                <span class="badge"
-                    style="background-color: {{ stages|selectattr('name', 'equalto', item.status)|first|attr('color') if stages|selectattr('name', 'equalto', item.status)|first else '#6c757d' }}">
+{% block admin_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admindash.css') }}">
+<style>
+    /* Lead Detail Page Styling */
+    .lead-detail-container {
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        max-width: 1600px;
+        margin: 0 auto;
+    }
+
+    @media (max-width: 992px) {
+        .lead-detail-container {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Header */
+    .lead-header {
+        grid-column: 1 / -1;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 1rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(65, 105, 225, 0.2);
+        margin-bottom: 0.5rem;
+    }
+
+    .lead-header-info h1 {
+        font-family: 'Neon-Regular', sans-serif;
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--text-primary, #fff);
+        margin: 0 0 0.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .lead-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.6);
+        margin-bottom: 0.5rem;
+    }
+
+    .lead-breadcrumb a {
+        color: var(--accent-blue, #4169e1);
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .lead-breadcrumb a:hover {
+        color: var(--accent-pink, #e91e8c);
+    }
+
+    .lead-status-badge {
+        display: inline-block;
+        padding: 0.375rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .lead-score {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.25rem 0.75rem;
+        background: rgba(65, 105, 225, 0.2);
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        color: var(--accent-blue, #4169e1);
+        margin-left: 0.5rem;
+    }
+
+    .lead-header-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    /* Glass Card Styling (same as admin dashboard) */
+    .glass-card {
+        background: rgba(42, 42, 42, 0.9);
+        border: 1px solid rgba(65, 105, 225, 0.2);
+        border-radius: 10px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .glass-card:hover {
+        border-color: rgba(65, 105, 225, 0.4);
+        box-shadow: 0 4px 20px rgba(65, 105, 225, 0.1);
+    }
+
+    .glass-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid rgba(65, 105, 225, 0.2);
+        background: rgba(0, 0, 0, 0.2);
+    }
+
+    .glass-card-header h3 {
+        font-family: 'Neon-Regular', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-primary, #fff);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .glass-card-body {
+        padding: 1.25rem;
+    }
+
+    /* Contact Info */
+    .contact-info-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .contact-info-item:last-child {
+        border-bottom: none;
+    }
+
+    .contact-info-icon {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(65, 105, 225, 0.15);
+        border-radius: 6px;
+        color: var(--accent-blue, #4169e1);
+    }
+
+    .contact-info-content {
+        flex: 1;
+    }
+
+    .contact-info-label {
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.5);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .contact-info-value {
+        font-size: 0.95rem;
+        color: var(--text-primary, #fff);
+    }
+
+    .contact-info-value a {
+        color: var(--accent-blue, #4169e1);
+        text-decoration: none;
+    }
+
+    .contact-info-value a:hover {
+        color: var(--accent-pink, #e91e8c);
+    }
+
+    /* Form Styling */
+    .glass-form .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .glass-form label {
+        display: block;
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 0.375rem;
+    }
+
+    .glass-form .form-control {
+        width: 100%;
+        padding: 0.625rem 0.875rem;
+        background: rgba(42, 42, 42, 0.9);
+        border: 1px solid rgba(65, 105, 225, 0.3);
+        border-radius: 6px;
+        color: var(--text-primary, #fff);
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+    }
+
+    .glass-form .form-control:focus {
+        outline: none;
+        border-color: var(--accent-blue, #4169e1);
+        box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.1);
+    }
+
+    .glass-form textarea.form-control {
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    .glass-form select.form-control {
+        cursor: pointer;
+    }
+
+    /* Buttons */
+    .btn-glass {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.625rem 1.25rem;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+    }
+
+    .btn-glass-primary {
+        background: linear-gradient(135deg, var(--accent-blue, #4169e1), var(--accent-pink, #e91e8c));
+        color: #fff;
+    }
+
+    .btn-glass-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(65, 105, 225, 0.3);
+    }
+
+    .btn-glass-outline {
+        background: transparent;
+        border: 1px solid rgba(65, 105, 225, 0.4);
+        color: var(--text-primary, #fff);
+    }
+
+    .btn-glass-outline:hover {
+        background: rgba(65, 105, 225, 0.1);
+        border-color: var(--accent-blue, #4169e1);
+    }
+
+    .btn-glass-warning {
+        background: rgba(243, 156, 18, 0.2);
+        color: #f39c12;
+        border: 1px solid rgba(243, 156, 18, 0.3);
+    }
+
+    .btn-glass-warning:hover {
+        background: rgba(243, 156, 18, 0.3);
+    }
+
+    /* Dropdown */
+    .glass-dropdown {
+        position: relative;
+    }
+
+    .glass-dropdown-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        margin-top: 0.5rem;
+        background: rgba(42, 42, 42, 0.98);
+        border: 1px solid rgba(65, 105, 225, 0.3);
+        border-radius: 8px;
+        padding: 0.5rem 0;
+        min-width: 180px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+        z-index: 100;
+        display: none;
+    }
+
+    .glass-dropdown.open .glass-dropdown-menu {
+        display: block;
+    }
+
+    .glass-dropdown-item {
+        display: block;
+        width: 100%;
+        padding: 0.5rem 1rem;
+        border: none;
+        background: none;
+        color: rgba(255, 255, 255, 0.8);
+        text-align: left;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        border-left: 3px solid transparent;
+    }
+
+    .glass-dropdown-item:hover {
+        background: rgba(65, 105, 225, 0.15);
+        color: #fff;
+    }
+
+    .glass-dropdown-item.active {
+        background: rgba(65, 105, 225, 0.1);
+    }
+
+    /* Tabs */
+    .glass-tabs {
+        display: flex;
+        gap: 0;
+        border-bottom: 1px solid rgba(65, 105, 225, 0.2);
+    }
+
+    .glass-tab {
+        padding: 0.75rem 1.25rem;
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.875rem;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        transition: all 0.2s ease;
+    }
+
+    .glass-tab:hover {
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .glass-tab.active {
+        color: var(--accent-blue, #4169e1);
+        border-bottom-color: var(--accent-blue, #4169e1);
+    }
+
+    .glass-tab-content {
+        padding: 1rem 0;
+    }
+
+    .glass-tab-pane {
+        display: none;
+    }
+
+    .glass-tab-pane.active {
+        display: block;
+    }
+
+    /* Notes Timeline */
+    .note-item {
+        padding: 1rem;
+        border-left: 3px solid var(--accent-blue, #4169e1);
+        margin-bottom: 1rem;
+        background: rgba(65, 105, 225, 0.05);
+        border-radius: 0 8px 8px 0;
+    }
+
+    .note-item.pinned {
+        border-left-color: #f39c12;
+        background: rgba(243, 156, 18, 0.05);
+    }
+
+    .note-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.5);
+        margin-bottom: 0.5rem;
+    }
+
+    .note-badge {
+        padding: 0.125rem 0.5rem;
+        border-radius: 9999px;
+        font-size: 0.7rem;
+        background: rgba(243, 156, 18, 0.2);
+        color: #f39c12;
+    }
+
+    .note-content {
+        color: var(--text-primary, #fff);
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    /* Activity Timeline */
+    .activity-item {
+        display: flex;
+        gap: 0.75rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .activity-icon {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .activity-icon.success {
+        background: rgba(46, 204, 113, 0.2);
+        color: #2ecc71;
+    }
+
+    .activity-icon.danger {
+        background: rgba(231, 76, 60, 0.2);
+        color: #e74c3c;
+    }
+
+    .activity-icon.info {
+        background: rgba(65, 105, 225, 0.2);
+        color: var(--accent-blue, #4169e1);
+    }
+
+    .activity-content {
+        flex: 1;
+    }
+
+    .activity-title {
+        font-size: 0.9rem;
+        color: var(--text-primary, #fff);
+    }
+
+    .activity-time {
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Reminder Card */
+    .reminder-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background: rgba(243, 156, 18, 0.1);
+        border-radius: 6px;
+        margin-bottom: 0.5rem;
+        border-left: 3px solid #f39c12;
+    }
+
+    .reminder-icon {
+        color: #f39c12;
+    }
+
+    .reminder-content {
+        flex: 1;
+    }
+
+    .reminder-date {
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .reminder-note {
+        font-size: 0.9rem;
+        color: var(--text-primary, #fff);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Form check */
+    .glass-form-check {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .glass-form-check input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--accent-blue, #4169e1);
+    }
+
+    .glass-form-check label {
+        margin: 0;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="lead-detail-container">
+    <!-- Header -->
+    <div class="lead-header">
+        <div class="lead-header-info">
+            <div class="lead-breadcrumb">
+                <a href="{{ url_for('crm.board') }}">CRM Board</a>
+                <span>→</span>
+                <span>Lead Detail</span>
+            </div>
+            <h1>
+                <span class="lead-status-badge"
+                    style="background-color: {{ stages|selectattr('name', 'equalto', item.status)|first|attr('color') if stages|selectattr('name', 'equalto', item.status)|first else '#6c757d' }};">
                     {{ item.status or 'New' }}
                 </span>
                 {{ item.first_name }} {{ item.last_name }}
-            </h2>
-            {% if lead_score %}
-            <span class="badge badge-info">Score: {{ lead_score.score }}</span>
-            {% endif %}
+                {% if lead_score %}
+                <span class="lead-score">⭐ Score: {{ lead_score.score }}</span>
+                {% endif %}
+            </h1>
         </div>
-        <div class="col-md-4 text-right">
-            <div class="dropdown d-inline-block">
-                <button class="btn btn-outline-primary dropdown-toggle" data-toggle="dropdown">
-                    Change Status
+        <div class="lead-header-actions">
+            <div class="glass-dropdown" id="statusDropdown">
+                <button class="btn-glass btn-glass-outline" onclick="toggleDropdown('statusDropdown')">
+                    Change Status ▾
                 </button>
-                <div class="dropdown-menu dropdown-menu-right">
+                <div class="glass-dropdown-menu">
                     {% for stage in stages %}
-                    <a class="dropdown-item {% if item.status == stage.name %}active{% endif %}" href="#"
-                        onclick="updateStatus('{{ lead_type }}', {{ item.id }}, '{{ stage.name }}'); return false;"
-                        style="border-left: 4px solid {{ stage.color }};">
+                    <button class="glass-dropdown-item {% if item.status == stage.name %}active{% endif %}"
+                        style="border-left-color: {{ stage.color }};"
+                        onclick="updateStatus('{{ lead_type }}', {{ item.id }}, '{{ stage.name }}')">
                         {{ stage.name }}
-                    </a>
+                    </button>
                     {% endfor %}
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row">
-        <!-- Left Column: Lead Info & Forms -->
-        <div class="col-md-4">
-            <!-- Contact Info Card -->
-            <div class="card mb-4">
-                <div class="card-header">Contact Information</div>
-                <div class="card-body">
-                    <p><i class="fas fa-envelope"></i> <a href="mailto:{{ item.email }}">{{ item.email }}</a></p>
-                    <p><i class="fas fa-phone"></i> <a href="tel:{{ item.phone }}">{{ item.phone }}</a></p>
-                    <p><i class="fas fa-calendar"></i> {{ (item.submitted_at if lead_type == 'contact' else
-                        item.created_at).strftime('%Y-%m-%d %H:%M') }}</p>
-                    {% if lead_type == 'contact' and item.source %}
-                    <p><i class="fas fa-link"></i> Source: <span class="badge badge-secondary">{{ item.source }}</span>
-                    </p>
-                    {% endif %}
-                    {% if lead_type == 'contact' and item.assigned_to %}
-                    <p><i class="fas fa-user"></i> Assigned to: {{ item.assigned_to.first_name }} {{
-                        item.assigned_to.last_name }}</p>
-                    {% endif %}
-                </div>
+    <!-- Left Column -->
+    <div class="lead-sidebar">
+        <!-- Contact Info -->
+        <div class="glass-card" style="margin-bottom: 1rem;">
+            <div class="glass-card-header">
+                <h3>📧 Contact Information</h3>
             </div>
-
-            <!-- Message/Notes Card -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    {% if lead_type == 'contact' %}Message{% else %}Details{% endif %}
+            <div class="glass-card-body" style="padding: 0.5rem 1.25rem;">
+                <div class="contact-info-item">
+                    <div class="contact-info-icon">✉️</div>
+                    <div class="contact-info-content">
+                        <div class="contact-info-label">Email</div>
+                        <div class="contact-info-value"><a href="mailto:{{ item.email }}">{{ item.email }}</a></div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    {% if lead_type == 'contact' %}
-                    <p>{{ item.message }}</p>
-                    {% else %}
-                    <p><strong>Service:</strong> {{ item.service.name if item.service else 'N/A' }}</p>
-                    <p><strong>Estimator:</strong> {{ item.estimator.name if item.estimator else 'N/A' }}</p>
-                    <p><strong>Preferred Time:</strong> {{ item.preferred_date_time.strftime('%Y-%m-%d %H:%M') if
-                        item.preferred_date_time else 'N/A' }}</p>
-                    {% endif %}
+                <div class="contact-info-item">
+                    <div class="contact-info-icon">📞</div>
+                    <div class="contact-info-content">
+                        <div class="contact-info-label">Phone</div>
+                        <div class="contact-info-value"><a href="tel:{{ item.phone }}">{{ item.phone }}</a></div>
+                    </div>
                 </div>
-            </div>
-
-            <!-- Assign Lead (Contact only) -->
-            {% if lead_type == 'contact' %}
-            <div class="card mb-4">
-                <div class="card-header">Assign Lead</div>
-                <div class="card-body">
-                    <form method="POST" action="{{ url_for('crm.assign_lead', lead_type=lead_type, lead_id=item.id) }}">
-                        {{ assign_form.hidden_tag() }}
-                        <div class="form-group">
-                            {{ assign_form.assigned_to_id(class="form-control") }}
-                        </div>
-                        {{ assign_form.submit(class="btn btn-primary btn-block") }}
-                    </form>
+                <div class="contact-info-item">
+                    <div class="contact-info-icon">📅</div>
+                    <div class="contact-info-content">
+                        <div class="contact-info-label">Created</div>
+                        <div class="contact-info-value">{{ (item.submitted_at if lead_type == 'contact' else
+                            item.created_at).strftime('%b %d, %Y at %H:%M') }}</div>
+                    </div>
                 </div>
-            </div>
-            {% endif %}
-
-            <!-- Add Reminder -->
-            <div class="card mb-4">
-                <div class="card-header">Schedule Follow-Up</div>
-                <div class="card-body">
-                    <form method="POST"
-                        action="{{ url_for('crm.create_reminder', lead_type=lead_type, lead_id=item.id) }}">
-                        {{ reminder_form.hidden_tag() }}
-                        <div class="form-group">
-                            <label>Due Date</label>
-                            {{ reminder_form.due_date(class="form-control", type="datetime-local") }}
-                        </div>
-                        <div class="form-group">
-                            {{ reminder_form.note(class="form-control", placeholder="Reminder note...") }}
-                        </div>
-                        {{ reminder_form.submit(class="btn btn-warning btn-block") }}
-                    </form>
+                {% if lead_type == 'contact' and item.source %}
+                <div class="contact-info-item">
+                    <div class="contact-info-icon">🔗</div>
+                    <div class="contact-info-content">
+                        <div class="contact-info-label">Source</div>
+                        <div class="contact-info-value">{{ item.source }}</div>
+                    </div>
                 </div>
+                {% endif %}
+                {% if lead_type == 'contact' and item.assigned_to %}
+                <div class="contact-info-item">
+                    <div class="contact-info-icon">👤</div>
+                    <div class="contact-info-content">
+                        <div class="contact-info-label">Assigned To</div>
+                        <div class="contact-info-value">{{ item.assigned_to.first_name }} {{ item.assigned_to.last_name
+                            }}</div>
+                    </div>
+                </div>
+                {% endif %}
             </div>
-
-            <!-- Pending Reminders -->
-            {% if reminders %}
-            <div class="card mb-4 border-warning">
-                <div class="card-header bg-warning text-dark">Pending Reminders</div>
-                <ul class="list-group list-group-flush">
-                    {% for r in reminders %}
-                    <li class="list-group-item">
-                        <small class="text-muted">{{ r.due_date.strftime('%Y-%m-%d %H:%M') }}</small>
-                        <p class="mb-0">{{ r.note or 'Follow up' }}</p>
-                    </li>
-                    {% endfor %}
-                </ul>
-            </div>
-            {% endif %}
         </div>
 
-        <!-- Right Column: Timeline -->
-        <div class="col-md-8">
-            <!-- Add Note Form -->
-            <div class="card mb-4">
-                <div class="card-header">Add Note</div>
-                <div class="card-body">
-                    <form method="POST" action="{{ url_for('crm.add_note', lead_type=lead_type, lead_id=item.id) }}">
-                        {{ note_form.hidden_tag() }}
-                        <div class="form-group">
-                            {{ note_form.content(class="form-control", rows=3, placeholder="Add a note about this
-                            lead...") }}
-                        </div>
-                        <div class="form-check mb-3">
-                            {{ note_form.is_pinned(class="form-check-input") }}
-                            <label class="form-check-label">Pin this note</label>
-                        </div>
-                        {{ note_form.submit(class="btn btn-primary") }}
-                    </form>
-                </div>
+        <!-- Message/Details -->
+        <div class="glass-card" style="margin-bottom: 1rem;">
+            <div class="glass-card-header">
+                <h3>{% if lead_type == 'contact' %}💬 Message{% else %}📋 Details{% endif %}</h3>
             </div>
-
-            <!-- Notes & Activities Timeline -->
-            <div class="card">
-                <div class="card-header">
-                    <ul class="nav nav-tabs card-header-tabs">
-                        <li class="nav-item">
-                            <a class="nav-link active" data-toggle="tab" href="#notes-tab">Notes ({{ notes|length
-                                }})</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#activities-tab">Activity Log ({{
-                                activities|length }})</a>
-                        </li>
-                    </ul>
+            <div class="glass-card-body">
+                {% if lead_type == 'contact' %}
+                <p style="color: var(--text-primary, #fff); line-height: 1.6; margin: 0;">{{ item.message or 'No message
+                    provided.' }}</p>
+                {% else %}
+                <div class="contact-info-item" style="padding-top: 0;">
+                    <div class="contact-info-content">
+                        <div class="contact-info-label">Service</div>
+                        <div class="contact-info-value">{{ item.service.name if item.service else 'N/A' }}</div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div class="tab-content">
-                        <!-- Notes Tab -->
-                        <div class="tab-pane fade show active" id="notes-tab">
-                            {% for note in notes %}
-                            <div
-                                class="border-left border-primary pl-3 mb-3 {% if note.is_pinned %}bg-light p-2{% endif %}">
-                                {% if note.is_pinned %}<span class="badge badge-info">Pinned</span>{% endif %}
-                                <small class="text-muted d-block">
-                                    {{ note.user.username if note.user else 'System' }} &middot;
-                                    {{ note.created_at.strftime('%Y-%m-%d %H:%M') }}
-                                </small>
-                                <p class="mb-0">{{ note.content }}</p>
-                            </div>
-                            {% else %}
-                            <p class="text-muted">No notes yet.</p>
-                            {% endfor %}
-                        </div>
+                <div class="contact-info-item">
+                    <div class="contact-info-content">
+                        <div class="contact-info-label">Estimator</div>
+                        <div class="contact-info-value">{{ item.estimator.name if item.estimator else 'N/A' }}</div>
+                    </div>
+                </div>
+                <div class="contact-info-item" style="border-bottom: none;">
+                    <div class="contact-info-content">
+                        <div class="contact-info-label">Preferred Time</div>
+                        <div class="contact-info-value">{{ item.preferred_date_time.strftime('%b %d, %Y at %H:%M') if
+                            item.preferred_date_time else 'N/A' }}</div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
 
-                        <!-- Activities Tab -->
-                        <div class="tab-pane fade" id="activities-tab">
-                            <ul class="list-unstyled">
-                                {% for activity in activities %}
-                                <li class="mb-3">
-                                    <div class="d-flex align-items-center">
-                                        <span
-                                            class="badge badge-{{ 'success' if activity.activity_type == 'lead_won' else 'danger' if activity.activity_type == 'lead_lost' else 'secondary' }} mr-2">
-                                            {{ activity.activity_type.replace('_', ' ').title() }}
-                                        </span>
-                                        <small class="text-muted">{{ activity.created_at.strftime('%Y-%m-%d %H:%M')
-                                            }}</small>
-                                    </div>
-                                    <p class="mb-0 ml-2">{{ activity.description }}</p>
-                                </li>
-                                {% else %}
-                                <li class="text-muted">No activities recorded yet.</li>
-                                {% endfor %}
-                            </ul>
+        <!-- Assign Lead (Contact only) -->
+        {% if lead_type == 'contact' %}
+        <div class="glass-card" style="margin-bottom: 1rem;">
+            <div class="glass-card-header">
+                <h3>👥 Assign Lead</h3>
+            </div>
+            <div class="glass-card-body">
+                <form method="POST" action="{{ url_for('crm.assign_lead', lead_type=lead_type, lead_id=item.id) }}"
+                    class="glass-form">
+                    {{ assign_form.hidden_tag() }}
+                    <div class="form-group">
+                        {{ assign_form.assigned_to_id(class="form-control") }}
+                    </div>
+                    <button type="submit" class="btn-glass btn-glass-primary" style="width: 100%;">Assign</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Schedule Follow-Up -->
+        <div class="glass-card" style="margin-bottom: 1rem;">
+            <div class="glass-card-header">
+                <h3>⏰ Schedule Follow-Up</h3>
+            </div>
+            <div class="glass-card-body">
+                <form method="POST" action="{{ url_for('crm.create_reminder', lead_type=lead_type, lead_id=item.id) }}"
+                    class="glass-form">
+                    {{ reminder_form.hidden_tag() }}
+                    <div class="form-group">
+                        <label>Due Date</label>
+                        {{ reminder_form.due_date(class="form-control", type="datetime-local") }}
+                    </div>
+                    <div class="form-group">
+                        {{ reminder_form.note(class="form-control", placeholder="Reminder note...") }}
+                    </div>
+                    <button type="submit" class="btn-glass btn-glass-warning" style="width: 100%;">Set Reminder</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Pending Reminders -->
+        {% if reminders %}
+        <div class="glass-card">
+            <div class="glass-card-header" style="background: rgba(243, 156, 18, 0.1);">
+                <h3 style="color: #f39c12;">🔔 Pending Reminders</h3>
+            </div>
+            <div class="glass-card-body" style="padding: 0.75rem;">
+                {% for r in reminders %}
+                <div class="reminder-item">
+                    <div class="reminder-icon">⏳</div>
+                    <div class="reminder-content">
+                        <div class="reminder-date">{{ r.due_date.strftime('%b %d, %Y at %H:%M') }}</div>
+                        <div class="reminder-note">{{ r.note or 'Follow up' }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Right Column: Timeline -->
+    <div class="lead-main">
+        <!-- Add Note Form -->
+        <div class="glass-card" style="margin-bottom: 1rem;">
+            <div class="glass-card-header">
+                <h3>✏️ Add Note</h3>
+            </div>
+            <div class="glass-card-body">
+                <form method="POST" action="{{ url_for('crm.add_note', lead_type=lead_type, lead_id=item.id) }}"
+                    class="glass-form">
+                    {{ note_form.hidden_tag() }}
+                    <div class="form-group">
+                        {{ note_form.content(class="form-control", rows=3, placeholder="Add a note about this lead...")
+                        }}
+                    </div>
+                    <div class="glass-form-check">
+                        {{ note_form.is_pinned(id="pinNote") }}
+                        <label for="pinNote">Pin this note</label>
+                    </div>
+                    <button type="submit" class="btn-glass btn-glass-primary">Add Note</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Notes & Activities Tabs -->
+        <div class="glass-card">
+            <div class="glass-tabs">
+                <button class="glass-tab active" data-tab="notes">📝 Notes ({{ notes|length }})</button>
+                <button class="glass-tab" data-tab="activities">📊 Activity Log ({{ activities|length }})</button>
+            </div>
+            <div class="glass-card-body glass-tab-content">
+                <!-- Notes Tab -->
+                <div class="glass-tab-pane active" id="notes-pane">
+                    {% for note in notes %}
+                    <div class="note-item {% if note.is_pinned %}pinned{% endif %}">
+                        <div class="note-meta">
+                            {% if note.is_pinned %}<span class="note-badge">📌 Pinned</span>{% endif %}
+                            <span>{{ note.user.username if note.user else 'System' }}</span>
+                            <span>•</span>
+                            <span>{{ note.created_at.strftime('%b %d, %Y at %H:%M') }}</span>
+                        </div>
+                        <div class="note-content">{{ note.content }}</div>
+                    </div>
+                    {% else %}
+                    <div class="empty-state">No notes yet. Add one above!</div>
+                    {% endfor %}
+                </div>
+
+                <!-- Activities Tab -->
+                <div class="glass-tab-pane" id="activities-pane">
+                    {% for activity in activities %}
+                    <div class="activity-item">
+                        <div
+                            class="activity-icon {{ 'success' if activity.activity_type == 'lead_won' else 'danger' if activity.activity_type == 'lead_lost' else 'info' }}">
+                            {{ '✓' if activity.activity_type == 'lead_won' else '✕' if activity.activity_type ==
+                            'lead_lost' else '→' }}
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">{{ activity.activity_type.replace('_', ' ').title() }}</div>
+                            <div class="activity-time">{{ activity.created_at.strftime('%b %d, %Y at %H:%M') }}</div>
+                            {% if activity.description %}
+                            <p style="margin: 0.25rem 0 0 0; color: rgba(255,255,255,0.7); font-size: 0.85rem;">{{
+                                activity.description }}</p>
+                            {% endif %}
                         </div>
                     </div>
+                    {% else %}
+                    <div class="empty-state">No activities recorded yet.</div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
@@ -214,6 +751,32 @@
 </div>
 
 <script>
+    function toggleDropdown(id) {
+        document.getElementById(id).classList.toggle('open');
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('.glass-dropdown')) {
+            document.querySelectorAll('.glass-dropdown.open').forEach(d => d.classList.remove('open'));
+        }
+    });
+
+    // Tab switching
+    document.querySelectorAll('.glass-tab').forEach(tab => {
+        tab.addEventListener('click', function () {
+            const tabId = this.dataset.tab;
+
+            // Update active tab
+            document.querySelectorAll('.glass-tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+
+            // Update active pane
+            document.querySelectorAll('.glass-tab-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(tabId + '-pane').classList.add('active');
+        });
+    });
+
     function updateStatus(leadType, leadId, newStatus) {
         fetch("{{ url_for('crm.update_status') }}", {
             method: 'POST',

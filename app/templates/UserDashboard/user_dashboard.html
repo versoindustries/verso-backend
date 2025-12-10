@@ -3,190 +3,30 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block additional_css %}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/user_dashboard.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/components/user-dashboard.css') }}">
 {% endblock %}
 
 
 {% block content %}
 <div class="section-spacer"></div>
 
-<div class="dashboard-container">
-    <!-- Welcome Banner -->
-    <div class="welcome-banner">
-        <div class="welcome-text">
-            <h1>Welcome back, {{ current_user.first_name or current_user.username }}!</h1>
-            <p>Here's an overview of your account activity.</p>
-        </div>
-        <div class="welcome-actions">
-            <a href="{{ url_for('user.my_account') }}"><i class="fas fa-user-circle"></i> My Account</a>
-            <a href="{{ url_for('user.settings') }}"><i class="fas fa-cog"></i> Settings</a>
-        </div>
-    </div>
-
-    <!-- Stats Row -->
-    <div class="stats-row">
-        <div class="stat-card">
-            <i class="fas fa-shopping-bag"></i>
-            <div class="value">{{ stats.total_orders }}</div>
-            <div class="label">Total Orders</div>
-        </div>
-        <div class="stat-card">
-            <i class="fas fa-download"></i>
-            <div class="value">{{ stats.total_downloads }}</div>
-            <div class="label">Downloads</div>
-        </div>
-        <div class="stat-card">
-            <i class="fas fa-calendar-check"></i>
-            <div class="value">{{ stats.upcoming_appointments }}</div>
-            <div class="label">Upcoming Appts</div>
-        </div>
-        <div class="stat-card">
-            <i class="fas fa-sync-alt"></i>
-            <div class="value">{{ stats.active_subscriptions }}</div>
-            <div class="label">Active Subscriptions</div>
-        </div>
-    </div>
-
-    <!-- Quick Links -->
-    <div class="quick-links">
-        <a href="{{ url_for('user.my_account', tab='orders') }}" class="quick-link">
-            <i class="fas fa-receipt"></i>
-            <span>View Order History</span>
-        </a>
-        <a href="{{ url_for('cart.my_downloads') }}" class="quick-link">
-            <i class="fas fa-cloud-download-alt"></i>
-            <span>My Downloads</span>
-        </a>
-        <a href="{{ url_for('shop.index') }}" class="quick-link">
-            <i class="fas fa-store"></i>
-            <span>Browse Shop</span>
-        </a>
-        <a href="{{ url_for('subscriptions.my_subscriptions') }}" class="quick-link">
-            <i class="fas fa-credit-card"></i>
-            <span>Manage Subscriptions</span>
-        </a>
-    </div>
-
-    <!-- Content Grid -->
-    <div class="content-grid">
-        <!-- Recent Orders -->
-        <div class="dash-card">
-            <div class="dash-card-header">
-                <h3><i class="fas fa-shopping-bag"></i> Recent Orders</h3>
-                <a href="{{ url_for('user.my_account', tab='orders') }}">View All →</a>
-            </div>
-            <div class="dash-card-body">
-                {% if recent_orders %}
-                <ul class="dash-list">
-                    {% for order in recent_orders %}
-                    <li class="dash-list-item">
-                        <div class="info">
-                            <div class="title">Order #{{ order.id }}</div>
-                            <div class="meta">${{ '%.2f' % (order.total_amount / 100) }} • {{
-                                order.created_at.strftime('%b %d') if order.created_at else 'N/A' }}</div>
-                        </div>
-                        <span class="status-pill {{ order.status }}">{{ order.status|capitalize }}</span>
-                    </li>
-                    {% endfor %}
-                </ul>
-                {% else %}
-                <div class="empty-state">
-                    <i class="fas fa-shopping-bag"></i>
-                    <p>No orders yet</p>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- Upcoming Appointments -->
-        <div class="dash-card">
-            <div class="dash-card-header">
-                <h3><i class="fas fa-calendar-alt"></i> Upcoming Appointments</h3>
-                <a href="{{ url_for('user.my_account', tab='appointments') }}">View All →</a>
-            </div>
-            <div class="dash-card-body">
-                {% if upcoming_appointments %}
-                <ul class="dash-list">
-                    {% for appt in upcoming_appointments %}
-                    <li class="dash-list-item">
-                        <div class="info">
-                            <div class="title">{{ appt.service.name if appt.service else 'Appointment' }}</div>
-                            <div class="meta">{{ appt.preferred_date_time.strftime('%b %d at %I:%M %p') if
-                                appt.preferred_date_time else 'TBD' }}</div>
-                        </div>
-                        <span class="status-pill pending">Scheduled</span>
-                    </li>
-                    {% endfor %}
-                </ul>
-                {% else %}
-                <div class="empty-state">
-                    <i class="fas fa-calendar-alt"></i>
-                    <p>No upcoming appointments</p>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- Digital Downloads -->
-        <div class="dash-card">
-            <div class="dash-card-header">
-                <h3><i class="fas fa-download"></i> Recent Downloads</h3>
-                <a href="{{ url_for('cart.my_downloads') }}">View All →</a>
-            </div>
-            <div class="dash-card-body">
-                {% if download_tokens %}
-                <ul class="dash-list">
-                    {% for token in download_tokens %}
-                    <li class="dash-list-item">
-                        <div class="info">
-                            <div class="title">{{ token.order_item.product.name if token.order_item and
-                                token.order_item.product else 'Digital Product' }}</div>
-                            <div class="meta">{{ token.download_count }}/{{ token.max_downloads }} downloads</div>
-                        </div>
-                        {% if token.is_valid() %}
-                        <a href="{{ url_for('cart.download_file', token=token.token) }}"
-                            class="status-pill success">Download</a>
-                        {% else %}
-                        <span class="status-pill">Expired</span>
-                        {% endif %}
-                    </li>
-                    {% endfor %}
-                </ul>
-                {% else %}
-                <div class="empty-state">
-                    <i class="fas fa-download"></i>
-                    <p>No downloads yet</p>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- Notifications -->
-        <div class="dash-card">
-            <div class="dash-card-header">
-                <h3><i class="fas fa-bell"></i> Notifications</h3>
-                <a href="{{ url_for('notifications.index') }}">View All →</a>
-            </div>
-            <div class="dash-card-body">
-                {% if unread_notifications %}
-                <ul class="dash-list">
-                    {% for notif in unread_notifications[:5] %}
-                    <li class="dash-list-item">
-                        <div class="info">
-                            <div class="title">{{ notif.title }}</div>
-                            <div class="meta">{{ notif.created_at.strftime('%b %d at %I:%M %p') if notif.created_at else
-                                '' }}</div>
-                        </div>
-                    </li>
-                    {% endfor %}
-                </ul>
-                {% else %}
-                <div class="empty-state">
-                    <i class="fas fa-bell-slash"></i>
-                    <p>No new notifications</p>
-                </div>
-                {% endif %}
-            </div>
+<div class="user-dashboard-wrapper">
+    <!-- React UserDashboard Component -->
+    <div data-react-component="UserDashboard" data-react-props='{
+        "userName": "{{ current_user.first_name or current_user.username | e }}",
+        "stats": {{ stats | tojson }},
+        "recentOrders": {{ recent_orders | tojson }},
+        "upcomingAppointments": {{ upcoming_appointments | tojson }},
+        "downloadTokens": {{ download_tokens | tojson }},
+        "notifications": {{ unread_notifications | tojson }},
+        "ecommerceEnabled": {{ ecommerce_enabled | tojson }},
+        "accountUrl": "{{ url_for('user.my_account') }}",
+        "settingsUrl": "{{ url_for('user.settings') }}"
+    }'>
+        <!-- Fallback content while React loads -->
+        <div class="user-dashboard-loading">
+            <div class="spinner"></div>
+            <span>Loading your dashboard...</span>
         </div>
     </div>
 </div>
@@ -195,5 +35,5 @@
 {% endblock %}
 
 {% block scripts %}
-<!-- Include any JavaScript files here -->
+<!-- React Islands architecture handles component mounting -->
 {% endblock scripts %}

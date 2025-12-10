@@ -59,7 +59,7 @@
 
 .blog-manage-empty i {
     font-size: 4rem;
-    color: var(--text-muted, #6c757d);
+    color: var(--text-muted, var(--text-muted));
     margin-bottom: 1rem;
 }
 
@@ -69,7 +69,7 @@
 }
 
 .blog-manage-empty p {
-    color: var(--text-muted, #6c757d);
+    color: var(--text-muted, var(--text-muted));
     margin-bottom: 1.5rem;
 }
 
@@ -89,7 +89,7 @@
 
 /* Delete confirmation dialog */
 .delete-form button:hover {
-    background-color: var(--danger-color, #dc3545);
-    border-color: var(--danger-color, #dc3545);
+    background-color: var(--danger-color, var(--danger-color));
+    border-color: var(--danger-color, var(--danger-color));
     color: white;
 }

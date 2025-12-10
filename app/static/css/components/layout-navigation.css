@@ -29,13 +29,13 @@
     left: 50%;
     width: 0;
     height: 2px;
-    background: linear-gradient(90deg, #4169e1, #6c63ff);
+    background: linear-gradient(90deg, var(--primary-color), #6c63ff);
     transition: all 0.3s ease;
     transform: translateX(-50%);
 }
 
 .verso-navlink:hover {
-    color: #ffffff;
+    color: var(--text-primary);
     background: rgba(255, 255, 255, 0.05);
 }
 
@@ -44,7 +44,7 @@
 }
 
 .verso-navlink--active {
-    color: #ffffff;
+    color: var(--text-primary);
 }
 
 .verso-navlink--active::after {
@@ -66,7 +66,7 @@
 }
 
 .verso-mobile-navlink:hover {
-    color: #ffffff;
+    color: var(--text-primary);
     background: rgba(99, 102, 241, 0.15);
 }
 
@@ -100,7 +100,7 @@
     border-radius: 9px;
     font-size: 0.6875rem;
     font-weight: 700;
-    color: #ffffff;
+    color: var(--text-primary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -128,7 +128,7 @@
 .verso-icon-btn:hover {
     background: rgba(255, 255, 255, 0.1);
     border-color: rgba(255, 255, 255, 0.2);
-    color: #ffffff;
+    color: var(--text-primary);
     transform: translateY(-1px);
 }
 
@@ -148,7 +148,7 @@
     border-radius: 9px;
     font-size: 0.6875rem;
     font-weight: 700;
-    color: #ffffff;
+    color: var(--text-primary);
     display: flex;
     align-items: center;
     justify-content: center;

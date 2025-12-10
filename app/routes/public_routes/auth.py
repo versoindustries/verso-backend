@@ -5,6 +5,7 @@ from flask import current_app as app
 from app import db, mail, bcrypt
 from app.models import User, Role, UserPreference, UserActivity
 from app.forms import RegistrationForm, LoginForm, EstimateRequestForm, ResendVerificationForm
+from app.modules.security import rate_limiter, login_tracker, ip_check_required
 from datetime import datetime
 
 auth = Blueprint('auth', __name__)
@@ -20,6 +21,8 @@ def combined_context_processor():
 # ============================================================================
 
 @auth.route("/register", methods=['GET', 'POST'])
+@rate_limiter.limit("3 per minute")
+@ip_check_required
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('main_routes.index'))
@@ -181,6 +184,7 @@ def resend_verification():
 
 # Phase 22: AJAX Duplicate Detection Endpoints
 @auth.route('/check-email', methods=['POST'])
+@rate_limiter.limit("10 per minute")
 def check_email():
     """AJAX endpoint for real-time email duplicate check."""
     email = request.json.get('email', '').lower().strip()
@@ -195,6 +199,7 @@ def check_email():
 
 
 @auth.route('/check-username', methods=['POST'])
+@rate_limiter.limit("10 per minute")
 def check_username():
     """AJAX endpoint for real-time username duplicate check."""
     username = request.json.get('username', '').strip()
@@ -210,6 +215,8 @@ def check_username():
 
 # Standard Login/Logout Routes
 @auth.route("/login", methods=['GET', 'POST'])
+@rate_limiter.limit("5 per minute")
+@ip_check_required
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('main_routes.index'))
@@ -217,9 +224,21 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         email = form.email.data.lower()
+        
+        # Check for account lockout before attempting login
+        is_locked, lockout_expires = login_tracker.is_locked_out(email)
+        if is_locked:
+            remaining_minutes = int((lockout_expires - datetime.utcnow()).total_seconds() / 60) + 1
+            flash(f'Account temporarily locked due to failed login attempts. Try again in {remaining_minutes} minutes.', 'danger')
+            app.logger.warning(f'Login attempt on locked account: {email}')
+            return render_template('login.html', title='Login', form=form)
+        
         user = User.query.filter_by(email=email).first()
 
         if user and bcrypt.check_password_hash(user.password_hash, form.password.data):
+            # Log successful login attempt
+            login_tracker.log_attempt(email, success=True, user_id=user.id)
+            
             login_user(user)
             user.last_activity_at = datetime.utcnow()
             user.last_login = datetime.utcnow()
@@ -245,6 +264,12 @@ def login():
             next_page = request.args.get('next')
             return redirect(next_page) if next_page else redirect(url_for('user.dashboard'))
         else:
+            # Log failed login attempt
+            failure_reason = 'incorrect_password' if user else 'user_not_found'
+            login_tracker.log_attempt(email, success=False, 
+                                      user_id=user.id if user else None,
+                                      failure_reason=failure_reason)
+            
             if user:
                 app.logger.warning(f'Failed login attempt for {email}: Incorrect password')
             else:
@@ -274,6 +299,8 @@ def logout():
 
 # Password Reset Routes
 @auth.route('/forgot_password', methods=['POST'])
+@rate_limiter.limit("3 per minute")
+@ip_check_required
 def forgot_password():
     email = request.form.get('email', '').lower()
     user = User.query.filter_by(email=email).first()
@@ -322,17 +349,30 @@ def reset_password_form(token):
 
 
 @auth.route('/reset_password', methods=['POST'])
+@rate_limiter.limit("3 per minute")
+@ip_check_required
 def reset_password():
     """Legacy password reset POST handler."""
+    from app.modules.security import password_validator
+    
     token = request.form.get('token')
     password = request.form.get('password')
+    
+    # Validate password before processing
+    is_valid, errors = password_validator.validate(password or '')
+    if not is_valid:
+        flash(f'Password requirements not met: {"; ".join(errors)}', 'danger')
+        return redirect(url_for('auth.login'))
+    
     user = User.confirm_reset_token(token)
     if user:
         user.set_password(password)
         db.session.commit()
+        app.logger.info(f'Password reset completed for user: {user.email}')
         flash('Your password has been updated!', 'success')
         return redirect(url_for('auth.login'))
     else:
+        app.logger.warning(f'Invalid password reset token attempt')
         flash('That is an invalid or expired token', 'warning')
         return redirect(url_for('auth.login'))
 

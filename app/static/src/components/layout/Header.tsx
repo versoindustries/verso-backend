@@ -93,10 +93,10 @@ const Header: React.FC = () => {
                                             <MessageSquare className="verso-user-menu__item-icon" />
                                             Messages
                                         </a>
-                                        {user.roles?.includes('admin') && (
+                                        {(user.roles?.includes('Admin') || user.roles?.includes('Owner') || user.roles?.includes('Manager')) && (
                                             <a href={urls.adminDashboard} className="verso-user-menu__item">
                                                 <LayoutDashboard className="verso-user-menu__item-icon" />
-                                                Admin Dashboard
+                                                Admin Portal
                                             </a>
                                         )}
                                     </div>
@@ -154,8 +154,8 @@ const Header: React.FC = () => {
                     <nav className="verso-mobile-menu__nav">
                         <MobileNavLink href={urls.employeeDashboard}>Employee Portal</MobileNavLink>
                         <MobileNavLink href={urls.messaging}>Messages</MobileNavLink>
-                        {user.roles?.includes('admin') && (
-                            <MobileNavLink href={urls.adminDashboard}>Admin Dashboard</MobileNavLink>
+                        {(user.roles?.includes('Admin') || user.roles?.includes('Owner') || user.roles?.includes('Manager')) && (
+                            <MobileNavLink href={urls.adminDashboard}>Admin Portal</MobileNavLink>
                         )}
                         <MobileNavLink href={urls.logout}>Sign out</MobileNavLink>
                     </nav>

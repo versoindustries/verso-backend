@@ -31,7 +31,7 @@
 /* Sheet title */
 .fixed.inset-0.z-50.flex h2 {
     font-family: 'Neon-Heavy', sans-serif;
-    color: #ffffff;
+    color: var(--text-primary);
     text-shadow: 0 0 10px rgba(65, 105, 225, 0.3);
 }
 
@@ -44,7 +44,7 @@
 
 .fixed.inset-0.z-50.flex button.rounded-full:hover {
     background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
+    color: var(--text-primary);
 }
 
 /* Cart item cards */
@@ -61,11 +61,11 @@
 
 /* Cart item text */
 .fixed.inset-0.z-50.flex .font-medium {
-    color: #ffffff;
+    color: var(--text-primary);
 }
 
 .fixed.inset-0.z-50.flex .font-semibold {
-    color: var(--primary-color, #4169e1);
+    color: var(--primary-color, var(--primary-color));
 }
 
 /* Cart quantity buttons */
@@ -77,7 +77,7 @@
 
 .fixed.inset-0.z-50.flex .rounded:not(.rounded-lg):not(.rounded-full):hover {
     background: rgba(65, 105, 225, 0.3);
-    color: #ffffff;
+    color: var(--text-primary);
 }
 
 /* Cart remove button */
@@ -100,7 +100,7 @@
 
 /* Cart subtotal text */
 .fixed.inset-0.z-50.flex .font-bold.text-lg {
-    color: var(--primary-color, #4169e1);
+    color: var(--primary-color, var(--primary-color));
     font-family: 'Neon-Heavy', sans-serif;
 }
 
@@ -127,13 +127,13 @@
 
 [data-react-component="NotificationBell"] button.relative:hover,
 .notification-bell-btn:hover {
-    color: #ffffff;
+    color: var(--text-primary);
 }
 
 /* Notification badge */
 [data-react-component="NotificationBell"] .bg-red-600,
 .notification-badge {
-    background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
+    background: linear-gradient(135deg, var(--danger-color), var(--danger-dark)) !important;
     box-shadow: 0 2px 8px rgba(231, 76, 60, 0.4);
 }
 
@@ -159,14 +159,14 @@
 [data-react-component="NotificationBell"] .font-semibold,
 .notification-dropdown-title {
     font-family: 'Neon-Heavy', sans-serif;
-    color: #ffffff;
+    color: var(--text-primary);
     text-shadow: 0 0 8px rgba(65, 105, 225, 0.3);
 }
 
 /* "See All" link */
 [data-react-component="NotificationBell"] .text-blue-500,
 .notification-see-all {
-    color: var(--primary-color, #4169e1) !important;
+    color: var(--primary-color, var(--primary-color)) !important;
     transition: color 0.2s ease;
 }
 
@@ -220,13 +220,13 @@
 [data-react-component="NotificationBell"] [class*="bg-blue-900"],
 .notification-unread {
     background: rgba(65, 105, 225, 0.1) !important;
-    border-left: 3px solid var(--primary-color, #4169e1);
+    border-left: 3px solid var(--primary-color, var(--primary-color));
 }
 
 /* Notification text */
 [data-react-component="NotificationBell"] p.text-sm.font-medium,
 .notification-title {
-    color: #ffffff;
+    color: var(--text-primary);
     font-family: 'Neon-Regular', sans-serif;
 }
 
@@ -261,9 +261,9 @@
 
 [data-react-component="NotificationBell"] button.w-full:hover,
 .notification-mark-read-btn:hover {
-    color: #ffffff;
+    color: var(--text-primary);
     background: rgba(65, 105, 225, 0.2);
-    border-color: var(--primary-color, #4169e1);
+    border-color: var(--primary-color, var(--primary-color));
 }
 
 /* ======================================
@@ -278,13 +278,13 @@
 
 [data-react-component="ShoppingCartWidget"] button.relative:hover,
 .cart-widget-btn:hover {
-    color: #ffffff;
+    color: var(--text-primary);
 }
 
 /* Cart badge */
 [data-react-component="ShoppingCartWidget"] .bg-blue-600,
 .cart-badge {
-    background: linear-gradient(135deg, var(--primary-color, #4169e1), var(--primary-dark, #3558c0)) !important;
+    background: linear-gradient(135deg, var(--primary-color, var(--primary-color)), var(--primary-dark, #3558c0)) !important;
     box-shadow: 0 2px 8px rgba(65, 105, 225, 0.4);
 }
 
@@ -302,8 +302,8 @@
 /* View Full Cart / Start Shopping buttons */
 .fixed.inset-0.z-50.flex .w-full[class*="Button"],
 .fixed.inset-0.z-50.flex button.w-full {
-    background: linear-gradient(135deg, var(--primary-color, #4169e1), var(--primary-dark, #3558c0));
-    color: #ffffff;
+    background: linear-gradient(135deg, var(--primary-color, var(--primary-color)), var(--primary-dark, #3558c0));
+    color: var(--text-primary);
     font-family: 'Neon-Regular', sans-serif;
     border: none;
     border-radius: 8px;
@@ -327,7 +327,7 @@
 .fixed.inset-0.z-50.flex button.w-full.mt-2:hover {
     background: rgba(255, 255, 255, 0.1) !important;
     border-color: rgba(255, 255, 255, 0.4);
-    color: #ffffff;
+    color: var(--text-primary);
 }
 
 /* ======================================

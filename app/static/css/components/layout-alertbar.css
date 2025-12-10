@@ -117,7 +117,7 @@
 .verso-alert-bar__icon {
     width: 16px;
     height: 16px;
-    color: var(--primary-color, #4169e1);
+    color: var(--primary-color, var(--primary-color));
     animation: iconGlow 2s ease-in-out infinite;
 }
 
@@ -151,8 +151,8 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: #ffffff;
-    background: var(--btn-gradient, linear-gradient(135deg, #4169e1, #6366f1));
+    color: var(--text-primary);
+    background: var(--btn-gradient, linear-gradient(135deg, var(--primary-color), #6366f1));
     border: none;
     border-radius: 8px;
     text-decoration: none;
@@ -169,7 +169,7 @@
     box-shadow: 
         0 6px 25px rgba(var(--primary-rgb, 65, 105, 225), 0.6),
         inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    color: #ffffff;
+    color: var(--text-primary);
 }
 
 .verso-alert-bar__cta:active {

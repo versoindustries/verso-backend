@@ -69,3 +69,35 @@ def blogger_required(f):
             return redirect(url_for('auth.login'))
         return f(*args, **kwargs)
     return decorated_function
+
+
+def role_required(*required_roles):
+    """Decorator to restrict access to routes for users with any of the specified roles.
+    
+    Usage:
+        @role_required('admin', 'manager')
+        def some_route():
+            ...
+
+    Args:
+        *required_roles: Variable number of role names (strings).
+
+    Returns:
+        function: The decorated function.
+    """
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not current_user.is_authenticated:
+                flash('Please log in to access this page.', 'warning')
+                return redirect(url_for('auth.login'))
+            if not any(current_user.has_role(role) for role in required_roles):
+                current_app.logger.warning(
+                    f"Unauthorized access attempt by user {current_user.username}: "
+                    f"required roles {required_roles}, has roles {[r.name for r in current_user.roles]}"
+                )
+                flash('You do not have permission to view this page.', 'warning')
+                return redirect(url_for('auth.login'))
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator

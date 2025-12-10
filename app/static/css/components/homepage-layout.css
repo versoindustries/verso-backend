@@ -122,7 +122,7 @@
 .verso-hero__title {
     font-family: 'Neon-Heavy', sans-serif;
     font-size: clamp(2.5rem, 8vw, 5rem);
-    color: #ffffff;
+    color: var(--text-primary);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     line-height: 1.1;
@@ -162,7 +162,7 @@
 
 .verso-hero__btn--primary {
     background: linear-gradient(135deg, #3b82f6, #6366f1);
-    color: #ffffff;
+    color: var(--text-primary);
     box-shadow: 0 8px 30px rgba(99, 102, 241, 0.4);
 }
 
@@ -173,7 +173,7 @@
 
 .verso-hero__btn--secondary {
     background: transparent;
-    color: #ffffff;
+    color: var(--text-primary);
     border: 2px solid rgba(255, 255, 255, 0.25);
 }
 
@@ -246,7 +246,7 @@
 .verso-feature-section__title {
     font-family: 'Neon-Heavy', sans-serif;
     font-size: clamp(1.75rem, 4vw, 2.5rem);
-    color: #ffffff;
+    color: var(--text-primary);
     margin-bottom: 1.5rem;
 }
 
@@ -389,7 +389,7 @@
 .verso-section-title {
     font-family: 'Neon-Heavy', sans-serif;
     font-size: clamp(1.75rem, 4vw, 2.5rem);
-    color: #ffffff;
+    color: var(--text-primary);
     text-align: center;
     margin-bottom: 3rem;
 }
@@ -451,7 +451,7 @@
 .verso-module-card__title {
     font-family: 'Neon-Heavy', sans-serif;
     font-size: 1.25rem;
-    color: #ffffff;
+    color: var(--text-primary);
     margin-bottom: 0.75rem;
 }
 
@@ -492,7 +492,7 @@
 .verso-cta-section__title {
     font-family: 'Neon-Heavy', sans-serif;
     font-size: clamp(1.75rem, 4vw, 2.5rem);
-    color: #ffffff;
+    color: var(--text-primary);
     margin-bottom: 1.25rem;
 }
 
@@ -517,7 +517,7 @@
     letter-spacing: 0.08em;
     text-decoration: none;
     color: #000000;
-    background: #ffffff;
+    background: var(--text-primary);
     border-radius: 8px;
     transition: all 0.3s ease;
 }

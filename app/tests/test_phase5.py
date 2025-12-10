@@ -83,7 +83,7 @@ class TestPhase5(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Buy Now', response.data)
 
-    @patch('app.routes.shop.stripe.checkout.Session.create')
+    @patch('app.routes.public_routes.shop.stripe.checkout.Session.create')
     def test_checkout_session(self, mock_checkout):
         # Mock stripe response
         mock_checkout.return_value = MagicMock(url='http://stripe.com/checkout')
@@ -101,7 +101,7 @@ class TestPhase5(unittest.TestCase):
             self.assertIsNotNone(order)
             self.assertEqual(order.status, 'pending')
 
-    @patch('app.routes.webhooks.stripe.Webhook.construct_event')
+    @patch('app.routes.api_routes.webhooks.stripe.Webhook.construct_event')
     def test_stripe_webhook(self, mock_construct_event):
         # Create an order to pay
         order = Order(total_amount=1000, status='pending')

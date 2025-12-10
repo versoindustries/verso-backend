@@ -7,81 +7,112 @@
  */
 
 :root {
-    /* ========================================
+   /* ========================================
        Primary Theme Colors (Set by base.html)
        ======================================== */
-    /* Fallbacks in case base.html injection fails */
-    --primary-color: #4169e1;
-    --secondary-color: #6c757d;
-    --accent-color: #28a745;
-    --font-family: 'Neon-Regular', sans-serif;
+   /* Fallbacks in case base.html injection fails */
+   --primary-color: #4169e1;
+   --secondary-color: #6c757d;
+   --accent-color: #28a745;
+   --font-family: 'Neon-Regular', sans-serif;
 
-    /* ========================================
+   /* ========================================
        Derived Colors
        ======================================== */
-    /* Darker variants using color-mix */
-    --primary-dark: color-mix(in srgb, var(--primary-color) 80%, black);
-    --primary-light: color-mix(in srgb, var(--primary-color) 80%, white);
-    --secondary-dark: color-mix(in srgb, var(--secondary-color) 80%, black);
-    --secondary-light: color-mix(in srgb, var(--secondary-color) 80%, white);
-    --accent-dark: color-mix(in srgb, var(--accent-color) 80%, black);
-    --accent-light: color-mix(in srgb, var(--accent-color) 80%, white);
+   /* Darker variants using color-mix */
+   --primary-dark: color-mix(in srgb, var(--primary-color) 80%, black);
+   --primary-light: color-mix(in srgb, var(--primary-color) 80%, white);
+   --secondary-dark: color-mix(in srgb, var(--secondary-color) 80%, black);
+   --secondary-light: color-mix(in srgb, var(--secondary-color) 80%, white);
+   --accent-dark: color-mix(in srgb, var(--accent-color) 80%, black);
+   --accent-light: color-mix(in srgb, var(--accent-color) 80%, white);
 
-    /* ========================================
+   /* ========================================
        Component Aliases
        ======================================== */
-    /* Links and interactive elements */
-    --link-color: var(--primary-color);
-    --link-hover-color: var(--primary-dark);
+   /* Links and interactive elements */
+   --link-color: var(--primary-color);
+   --link-hover-color: var(--primary-dark);
 
-    /* Buttons */
-    --btn-primary-bg: var(--primary-color);
-    --btn-primary-hover-bg: var(--primary-dark);
-    --btn-secondary-bg: var(--secondary-color);
-    --btn-secondary-hover-bg: var(--secondary-dark);
-    --btn-gradient: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+   /* Buttons */
+   --btn-primary-bg: var(--primary-color);
+   --btn-primary-hover-bg: var(--primary-dark);
+   --btn-secondary-bg: var(--secondary-color);
+   --btn-secondary-hover-bg: var(--secondary-dark);
+   --btn-gradient: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
 
-    /* Legacy aliases for compatibility */
-    --accent-blue: var(--primary-color);
-    --accent-blue-dark: var(--primary-dark);
+   /* Legacy aliases for compatibility */
+   --accent-blue: var(--primary-color);
+   --accent-blue-dark: var(--primary-dark);
 
-    /* Form elements */
-    --input-focus-border: var(--primary-color);
-    --input-focus-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 25%, transparent);
+   /* ========================================
+       Semantic Colors (Status/Feedback)
+       ======================================== */
+   --success-color: #28a745;
+   --danger-color: #dc3545;
+   --warning-color: #ffc107;
+   --info-color: #17a2b8;
 
-    /* UI Elements */
-    --badge-primary-bg: var(--primary-color);
-    --badge-success-bg: var(--accent-color);
-    --badge-secondary-bg: var(--secondary-color);
+   /* Darker/lighter variants */
+   --success-dark: color-mix(in srgb, var(--success-color) 80%, black);
+   --success-light: color-mix(in srgb, var(--success-color) 80%, white);
+   --danger-dark: color-mix(in srgb, var(--danger-color) 80%, black);
+   --danger-light: color-mix(in srgb, var(--danger-color) 80%, white);
+   --warning-dark: color-mix(in srgb, var(--warning-color) 80%, black);
+   --warning-light: color-mix(in srgb, var(--warning-color) 80%, white);
+   --info-dark: color-mix(in srgb, var(--info-color) 80%, black);
+   --info-light: color-mix(in srgb, var(--info-color) 80%, white);
 
-    /* ========================================
+   /* ========================================
+       Background Colors (Dark Theme Defaults)
+       ======================================== */
+   --bg-primary: #1f1f1f;
+   --bg-secondary: #2a2a2a;
+   --bg-tertiary: #333333;
+   --text-primary: #ffffff;
+   --text-secondary: #adb5bd;
+   --text-muted: #6c757d;
+
+   /* Background Gradients */
+   --bg-gradient-primary: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+
+   /* Form elements */
+   --input-focus-border: var(--primary-color);
+   --input-focus-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 25%, transparent);
+
+   /* UI Elements */
+   --badge-primary-bg: var(--primary-color);
+   --badge-success-bg: var(--accent-color);
+   --badge-secondary-bg: var(--secondary-color);
+
+   /* ========================================
        Typography
        ======================================== */
-    --font-heading: var(--font-family);
-    --font-body: var(--font-family);
+   --font-heading: var(--font-family);
+   --font-body: var(--font-family);
 
-    /* ========================================
+   /* ========================================
        Spacing & Layout
        ======================================== */
-    --border-radius: 8px;
-    --border-radius-sm: 4px;
-    --border-radius-lg: 12px;
-    --border-radius-xl: 16px;
+   --border-radius: 8px;
+   --border-radius-sm: 4px;
+   --border-radius-lg: 12px;
+   --border-radius-xl: 16px;
 
-    /* ========================================
+   /* ========================================
        Shadows
        ======================================== */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-    --shadow-focus: 0 0 0 3px color-mix(in srgb, var(--primary-color) 35%, transparent);
+   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+   --shadow-focus: 0 0 0 3px color-mix(in srgb, var(--primary-color) 35%, transparent);
 }
 
 /* Dark mode overrides (if implemented) */
 @media (prefers-color-scheme: dark) {
-    :root {
-        /* Dark mode specific adjustments can go here */
-        --primary-dark: color-mix(in srgb, var(--primary-color) 70%, white);
-        --primary-light: color-mix(in srgb, var(--primary-color) 85%, black);
-    }
+   :root {
+      /* Dark mode specific adjustments can go here */
+      --primary-dark: color-mix(in srgb, var(--primary-color) 70%, white);
+      --primary-light: color-mix(in srgb, var(--primary-color) 85%, black);
+   }
 }

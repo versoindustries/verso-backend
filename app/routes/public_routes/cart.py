@@ -7,6 +7,7 @@ For logged-in users, cart is persisted to UserCart model.
 from flask import Blueprint, render_template, request, session, jsonify, flash, redirect, url_for, current_app, send_file
 from flask_login import current_user
 from app.models import Product, Order, OrderItem, DownloadToken, UserCart, InventoryLock, DownloadLog, db
+from app.modules.security import rate_limiter
 import stripe
 import secrets
 import hashlib
@@ -191,22 +192,26 @@ def view_cart():
     )
     
     # Serialize items for React component
+    # NOTE: React CartPage expects prices in CENTS (it divides by 100 for display)
     import json
     items_json = json.dumps([{
         'productId': item['product'].id,
         'name': item['product'].name,
-        'price': item['product'].price,
+        'price': int(item['product'].price * 100),  # Convert dollars to cents
         'quantity': item['quantity'],
         'maxQuantity': item['product'].inventory_count if not item['product'].is_digital else 99,
         'imageUrl': url_for('media_bp.serve_media', media_id=item['product'].media_id) if item['product'].media_id else None,
         'productUrl': url_for('shop.product_detail', product_id=item['product'].id),
         'isDigital': item['product'].is_digital,
-        'itemTotal': item['item_total']
+        'itemTotal': int(item['item_total'] * 100)  # Convert dollars to cents
     } for item in items])
+    
+    # Convert subtotal to cents for React component
+    subtotal_cents = int(subtotal * 100)
     
     return render_template('shop/cart.html', 
                           items=items, 
-                          subtotal=subtotal,
+                          subtotal=subtotal_cents,
                           items_json=items_json,
                           totals=totals)
 
@@ -360,6 +365,7 @@ def update_cart_quantity(product_id):
 
 
 @cart_bp.route('/cart/data')
+@rate_limiter.exempt
 def cart_data():
     """Return cart data as JSON. Useful for HTMX/JS updates."""
     cart = get_cart()
@@ -462,14 +468,18 @@ def checkout():
                 except:
                     pass
             
+            # Stripe expects amount in cents (integer)
+            unit_amount_cents = int(item['product'].price * 100)
+            
             line_items.append({
                 'price_data': {
                     'currency': 'usd',
                     'product_data': product_data,
-                    'unit_amount': item['product'].price,
+                    'unit_amount': unit_amount_cents,
                 },
                 'quantity': item['quantity'],
             })
+
         
         db.session.commit()
         
@@ -484,10 +494,20 @@ def checkout():
             metadata={'order_id': order.id}
         )
         
+        # For AJAX/fetch requests, return JSON with redirect URL
+        # This is needed because fetch() redirect:follow doesn't work for cross-origin redirects
+        if request.headers.get('Accept') == 'application/json' or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({
+                'success': True,
+                'redirect_url': checkout_session.url
+            })
+        
         return redirect(checkout_session.url, code=303)
         
     except Exception as e:
         current_app.logger.error(f"Stripe checkout error: {e}")
+        if request.headers.get('Accept') == 'application/json' or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'success': False, 'error': 'An error occurred during checkout. Please try again.'}), 500
         flash('An error occurred during checkout. Please try again.', 'danger')
         return redirect(url_for('cart.view_cart'))
 

@@ -21,7 +21,7 @@
 }
 
 .template-card.previewing {
-    border-color: var(--primary-color, #4169e1);
+    border-color: var(--primary-color, var(--primary-color));
 }
 
 .template-card-header {
@@ -49,11 +49,11 @@
 }
 
 .template-status.active {
-    color: #28a745;
+    color: var(--success-color);
 }
 
 .template-status.inactive {
-    color: #6c757d;
+    color: var(--text-muted);
 }
 
 .template-name {
@@ -65,7 +65,7 @@
 
 .template-subject {
     font-size: 0.875rem;
-    color: var(--text-muted, #6c757d);
+    color: var(--text-muted, var(--text-muted));
     margin: 0 0 1rem;
     overflow: hidden;
     text-overflow: ellipsis;

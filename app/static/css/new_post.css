@@ -1,10 +1,10 @@
 /* CSS Variables for Reusability (Unchanged) */
 :root {
   --glass-bg: rgba(31, 31, 31, 0.7);
-  --text-primary: #ffffff;
-  --accent-blue: #4169e1;
+  --text-primary: var(--text-primary);
+  --accent-blue: var(--primary-color);
   --accent-blue-dark: #2f4ca6;
-  --accent-highlight: #F4C430;
+  --accent-highlight: var(--accent-color);
   --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.3);
   --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.5);
   --pulse-effect: radial-gradient(circle, rgba(82, 80, 194, 0.2) 0%, transparent 70%);
@@ -87,19 +87,19 @@
 }
 
 .feedback-message.success {
-  border-left: 4px solid #28a745;
+  border-left: 4px solid var(--success-color);
 }
 
 .feedback-message.success .feedback-icon {
-  color: #28a745;
+  color: var(--success-color);
 }
 
 .feedback-message.danger {
-  border-left: 4px solid #dc3545;
+  border-left: 4px solid var(--danger-color);
 }
 
 .feedback-message.danger .feedback-icon {
-  color: #dc3545;
+  color: var(--danger-color);
 }
 
 .feedback-message:hover {
@@ -358,7 +358,7 @@
 .form-error {
   font-family: 'Neon-Regular', sans-serif;
   font-size: 0.9rem;
-  color: #dc3545;
+  color: var(--danger-color);
   margin-top: 4px;
 }
 

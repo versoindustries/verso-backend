@@ -55,12 +55,12 @@
 
 .confirmation-heading i {
     font-size: 2rem;
-    color: #4169e1;
+    color: var(--primary-color);
     transition: color 0.3s ease;
 }
 
 .confirmation-heading:hover i {
-    color: #F4C430;
+    color: var(--accent-color);
 }
 
 .confirmation-text {
@@ -76,7 +76,7 @@
     width: 100px;
     border: 0;
     height: 2px;
-    background: #F4C430;
+    background: var(--accent-color);
     margin: 20px auto;
 }
 
@@ -134,7 +134,7 @@
     gap: 15px;
     box-shadow: var(--shadow-light);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border-left: 4px solid #F4C430;
+    border-left: 4px solid var(--accent-color);
 }
 
 .appointment-detail-item:hover {
@@ -151,12 +151,12 @@
 
 .detail-label i {
     font-size: 1.3rem;
-    color: #4169e1;
+    color: var(--primary-color);
     transition: color 0.3s ease;
 }
 
 .appointment-detail-item:hover .detail-label i {
-    color: #F4C430;
+    color: var(--accent-color);
 }
 
 .detail-value {
@@ -246,12 +246,12 @@
 
 .calendar-button i {
     font-size: 1.2rem;
-    color: #4169e1;
+    color: var(--primary-color);
     transition: color 0.3s ease;
 }
 
 .calendar-button:hover i {
-    color: #F4C430;
+    color: var(--accent-color);
 }
 
 /* Redirect Section */
@@ -314,7 +314,7 @@
 .timer-progress {
     width: 100%;
     height: 100%;
-    background: #F4C430;
+    background: var(--accent-color);
     transition: width 1s linear;
 }
 
@@ -341,12 +341,12 @@
 
 .return-home-button i {
     font-size: 1.2rem;
-    color: #4169e1;
+    color: var(--primary-color);
     transition: color 0.3s ease;
 }
 
 .return-home-button:hover i {
-    color: #F4C430;
+    color: var(--accent-color);
 }
 
 /* Medium screens (768px and up) */

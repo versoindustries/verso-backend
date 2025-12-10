@@ -107,6 +107,13 @@ def format_lead_item(item, lead_type):
 # Kanban Board
 # =============================================================================
 
+@crm_bp.route('/')
+@login_required
+@role_required('admin')
+def index():
+    """Redirect to kanban board."""
+    return redirect(url_for('crm.board'))
+
 @crm_bp.route('/board')
 @login_required
 @role_required('admin')

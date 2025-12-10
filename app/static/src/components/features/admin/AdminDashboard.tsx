@@ -443,7 +443,7 @@ export function AdminDashboard({
                 <div className="chart-card">
                     <div className="chart-header">
                         <span className="chart-title">
-                            <Zap size={16} style={{ color: '#10b981' }} />
+                            <Zap size={16} className="chart-icon chart-icon--success" />
                             Revenue Over Time
                         </span>
                         <div className="chart-controls">
@@ -470,7 +470,7 @@ export function AdminDashboard({
                 <div className="chart-card">
                     <div className="chart-header">
                         <span className="chart-title">
-                            <Activity size={16} style={{ color: '#6366f1' }} />
+                            <Activity size={16} className="chart-icon chart-icon--primary" />
                             Lead Pipeline
                         </span>
                     </div>
@@ -482,7 +482,7 @@ export function AdminDashboard({
                 <div className="chart-card" style={{ gridColumn: 'span 2' }}>
                     <div className="chart-header">
                         <span className="chart-title">
-                            <UserPlus size={16} style={{ color: '#8b5cf6' }} />
+                            <UserPlus size={16} className="chart-icon chart-icon--accent" />
                             Leads Over Time
                         </span>
                     </div>

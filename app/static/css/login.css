@@ -91,7 +91,7 @@
 
 .form-control:focus {
     outline: none;
-    border-color: #4169e1;
+    border-color: var(--primary-color);
     box-shadow: 0 0 8px rgba(65, 105, 225, 0.5);
 }
 
@@ -99,8 +99,8 @@
 .btn-primary {
     font-family: 'Neon-Heavy', sans-serif;
     font-size: 1.1rem;
-    color: #ffffff;
-    background: #4169e1;
+    color: var(--text-primary);
+    background: var(--primary-color);
     border: none;
     padding: 12px 30px;
     border-radius: 8px;
@@ -111,7 +111,7 @@
 }
 
 .btn-primary:hover {
-    background: #F4C430;
+    background: var(--accent-color);
     transform: translateY(-3px);
     box-shadow: 0 4px 12px rgba(244, 196, 48, 0.5);
 }
@@ -132,20 +132,20 @@
 
 .alert-success {
     background: rgba(40, 167, 69, 0.2);
-    color: #28a745;
-    border: 1px solid #28a745;
+    color: var(--success-color);
+    border: 1px solid var(--success-color);
 }
 
 .alert-danger {
     background: rgba(220, 53, 69, 0.2);
-    color: #dc3545;
-    border: 1px solid #dc3545;
+    color: var(--danger-color);
+    border: 1px solid var(--danger-color);
 }
 
 .alert-info {
     background: rgba(23, 162, 184, 0.2);
-    color: #17a2b8;
-    border: 1px solid #17a2b8;
+    color: var(--info-color);
+    border: 1px solid var(--info-color);
 }
 
 .alert-dismissible .close {
@@ -159,7 +159,7 @@
 }
 
 .alert-dismissible .close:hover {
-    color: #F4C430;
+    color: var(--accent-color);
 }
 
 /* Registration Link */

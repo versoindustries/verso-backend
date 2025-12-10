@@ -7,22 +7,76 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-calendar-alt me-2"></i>Appointment Calendar</h2>
+<div class="calendar-page">
+    <!-- Calendar Header -->
+    <div class="calendar-header">
+        <h1 class="calendar-title">
+            <i class="fas fa-calendar-alt"></i>
+            Appointment Calendar
+        </h1>
+        <div class="calendar-actions">
+            <a href="/admin/scheduling" class="calendar-btn primary">
+                <i class="fas fa-plus"></i>
+                New Appointment
+            </a>
+        </div>
     </div>
 
+    <!-- Stats Panel -->
+    <div class="calendar-stats">
+        <div class="calendar-stat-card">
+            <div class="calendar-stat-label">Today's Appointments</div>
+            <div class="calendar-stat-value" id="stat-today">--</div>
+        </div>
+        <div class="calendar-stat-card">
+            <div class="calendar-stat-label">This Week</div>
+            <div class="calendar-stat-value" id="stat-week">--</div>
+        </div>
+        <div class="calendar-stat-card">
+            <div class="calendar-stat-label">This Month</div>
+            <div class="calendar-stat-value" id="stat-month">--</div>
+        </div>
+        <div class="calendar-stat-card">
+            <div class="calendar-stat-label">Pending</div>
+            <div class="calendar-stat-value" id="stat-pending">--</div>
+        </div>
+    </div>
+
+    <!-- Calendar Component -->
     <div data-react-component="AdminCalendar" data-react-props='{
             "eventsUrl": "{{ url_for('calendar.get_events') }}", "updateUrlPattern"
         : "{{ url_for('calendar.update_event', event_id=0) | replace('0', '{id}') }}" , "initialView" : "dayGridMonth"
-        , "height" : 700 }'>
+        , "height" : 650 }'>
         <!-- Fallback while React loads -->
-        <div class="text-center py-5">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading calendar...</span>
+        <div class="admin-calendar">
+            <div class="calendar-wrapper calendar-skeleton">
+                <div class="calendar-skeleton-header"></div>
+                <div class="calendar-skeleton-grid">
+                    {% for i in range(35) %}
+                    <div class="calendar-skeleton-cell"></div>
+                    {% endfor %}
+                </div>
             </div>
-            <p class="mt-2 text-muted">Loading calendar...</p>
         </div>
     </div>
 </div>
+
+<script>
+    // Fetch stats on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        fetch('{{ url_for('calendar.get_events') }}?start=' + new Date().toISOString().slice(0, 10) + '&end=' + new Date().toISOString().slice(0, 10))
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('stat-today').textContent = data.length;
+            })
+            .catch(() => {
+                document.getElementById('stat-today').textContent = '0';
+            });
+
+        // Set placeholders for other stats (would need additional API endpoints)
+        document.getElementById('stat-week').textContent = '--';
+        document.getElementById('stat-month').textContent = '--';
+        document.getElementById('stat-pending').textContent = '--';
+    });
+</script>
 {% endblock %}

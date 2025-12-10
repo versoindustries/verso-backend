@@ -1,12 +1,218 @@
 /**
- * Admin Calendar Component Styles
+ * Admin Calendar Component Styles - Enterprise Glassmorphism Design
  * 
- * Styles specific to the admin appointment calendar page.
+ * Premium calendar interface using base.css color scheme with
+ * glassmorphism effects, gradient accents, and animated interactions.
+ * All colors use CSS variables for theme editor compatibility.
  */
 
+/* =============================================================================
+   Calendar Page Container - Glassmorphism Wrapper
+   ============================================================================= */
+.calendar-page {
+    background: var(--glass-bg, rgba(31, 31, 31, 0.8));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 12px;
+    border: 1px solid rgba(65, 105, 225, 0.2);
+    box-shadow: var(--shadow-light, 0 4px 12px rgba(0, 0, 0, 0.5));
+    margin: 1.5rem;
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+    animation: calendarFadeIn 0.6s ease-out;
+}
+
+@keyframes calendarFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Animated pulse background */
+.calendar-page::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: var(--pulse-effect, radial-gradient(circle, rgba(82, 80, 194, 0.2) 0%, transparent 70%));
+    opacity: 0.3;
+    z-index: 0;
+    animation: calendarPulse 15s infinite ease-in-out;
+    pointer-events: none;
+}
+
+@keyframes calendarPulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.3;
+    }
+
+    50% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+
+    100% {
+        transform: scale(0.8);
+        opacity: 0.3;
+    }
+}
+
+.calendar-page>* {
+    position: relative;
+    z-index: 1;
+}
+
+/* =============================================================================
+   Calendar Header - Title & Actions
+   ============================================================================= */
+.calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid rgba(65, 105, 225, 0.2);
+    background: rgba(31, 31, 31, 0.5);
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.calendar-title {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 1.75rem;
+    color: var(--text-primary, #fff);
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0;
+}
+
+.calendar-title::before {
+    content: '';
+    width: 5px;
+    height: 28px;
+    background: var(--btn-gradient, linear-gradient(90deg, #4169e1 0%, #1348e7 100%));
+    border-radius: 3px;
+    box-shadow: 0 0 15px rgba(65, 105, 225, 0.4);
+}
+
+.calendar-title i,
+.calendar-title svg {
+    color: var(--accent-blue, #4169e1);
+    margin-right: 0.5rem;
+}
+
+.calendar-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.calendar-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    background: rgba(65, 105, 225, 0.1);
+    color: var(--text-primary, #fff);
+    border: 1px solid rgba(65, 105, 225, 0.3);
+    border-radius: 8px;
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.calendar-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.calendar-btn:hover::before {
+    left: 100%;
+}
+
+.calendar-btn:hover {
+    background: var(--btn-gradient, linear-gradient(90deg, #4169e1 0%, #1348e7 100%));
+    border-color: var(--accent-blue, #4169e1);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover, 0 12px 32px rgba(0, 0, 0, 0.6));
+}
+
+.calendar-btn.primary {
+    background: var(--btn-gradient, linear-gradient(90deg, #4169e1 0%, #1348e7 100%));
+    border-color: var(--accent-blue, #4169e1);
+    box-shadow: var(--shadow-light, 0 4px 12px rgba(0, 0, 0, 0.5));
+}
+
+.calendar-btn.primary:hover {
+    background: linear-gradient(90deg, var(--accent-blue-dark, #1348e7), var(--accent-blue, #4169e1));
+    box-shadow: var(--shadow-hover, 0 12px 32px rgba(0, 0, 0, 0.6)), 0 0 20px rgba(65, 105, 225, 0.3);
+}
+
+/* =============================================================================
+   Quick Filter Tabs
+   ============================================================================= */
+.calendar-filters {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(65, 105, 225, 0.1);
+}
+
+.filter-tab {
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.5);
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-tab:hover {
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(65, 105, 225, 0.1);
+}
+
+.filter-tab.active {
+    background: var(--btn-gradient, linear-gradient(90deg, #4169e1 0%, #1348e7 100%));
+    color: #fff;
+    box-shadow: 0 4px 15px -3px rgba(65, 105, 225, 0.4);
+}
+
+/* =============================================================================
+   Admin Calendar Component - Core Styles
+   ============================================================================= */
 .admin-calendar {
     position: relative;
     min-height: 500px;
+    padding: 1.5rem 2rem 2rem;
 }
 
 .admin-calendar.updating {
@@ -20,93 +226,658 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(31, 31, 31, 0.9);
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 1rem;
     z-index: 100;
-    backdrop-filter: blur(2px);
+    backdrop-filter: blur(4px);
+    border-radius: 12px;
 }
 
-/* Calendar wrapper styling */
+.admin-calendar-overlay .spinner-border {
+    width: 40px;
+    height: 40px;
+    border-width: 3px;
+    border-color: rgba(65, 105, 225, 0.2);
+    border-top-color: var(--accent-blue, #4169e1);
+}
+
+/* =============================================================================
+   Calendar Wrapper - Glass Panel
+   ============================================================================= */
 .admin-calendar .calendar-wrapper {
-    background: var(--card-bg, #fff);
-    border-radius: var(--border-radius, 8px);
-    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.1));
-    padding: 1rem;
+    background: rgba(42, 42, 42, 0.9);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 10px;
+    border: 1px solid rgba(65, 105, 225, 0.2);
+    box-shadow: var(--shadow-light, 0 4px 12px rgba(0, 0, 0, 0.5));
+    padding: 1.5rem;
+    transition: all 0.3s ease;
 }
 
-/* FullCalendar theme overrides for admin */
+.admin-calendar .calendar-wrapper:hover {
+    border-color: rgba(65, 105, 225, 0.3);
+}
+
+/* =============================================================================
+   FullCalendar Theme Override - Enterprise Dark Theme
+   ============================================================================= */
 .admin-calendar .fc {
-    font-family: inherit;
+    font-family: 'Neon-Regular', sans-serif;
+}
+
+/* Toolbar Header */
+.admin-calendar .fc-toolbar {
+    margin-bottom: 1.5rem !important;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
 .admin-calendar .fc-toolbar-title {
-    font-size: 1.25rem;
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 1.5rem;
     font-weight: 600;
-    color: var(--text-primary, #1a1a2e);
+    color: var(--text-primary, #fff);
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Navigation Buttons */
+.admin-calendar .fc-button-group {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.25rem;
+    border-radius: 8px;
 }
 
 .admin-calendar .fc-button-primary {
-    background-color: var(--primary-color, #3b82f6);
-    border-color: var(--primary-color, #3b82f6);
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-family: 'Neon-Regular', sans-serif;
     font-weight: 500;
-    font-size: 0.875rem;
-    padding: 0.375rem 0.75rem;
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: all 0.3s ease;
 }
 
 .admin-calendar .fc-button-primary:hover {
-    background-color: var(--primary-hover, #2563eb);
-    border-color: var(--primary-hover, #2563eb);
+    background: rgba(65, 105, 225, 0.2);
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .admin-calendar .fc-button-primary:not(:disabled).fc-button-active,
 .admin-calendar .fc-button-primary:not(:disabled):active {
-    background-color: var(--primary-dark, #1e40af);
-    border-color: var(--primary-dark, #1e40af);
+    background: var(--btn-gradient, linear-gradient(90deg, #4169e1 0%, #1348e7 100%)) !important;
+    color: #fff !important;
+    box-shadow: 0 4px 15px -3px rgba(65, 105, 225, 0.4);
 }
 
+.admin-calendar .fc-button-primary:focus {
+    box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.3);
+}
+
+.admin-calendar .fc-button-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Today Button */
+.admin-calendar .fc-today-button {
+    background: rgba(65, 105, 225, 0.1) !important;
+    border: 1px solid rgba(65, 105, 225, 0.3) !important;
+    color: var(--accent-blue, #4169e1) !important;
+    margin-right: 0.5rem;
+}
+
+.admin-calendar .fc-today-button:hover:not(:disabled) {
+    background: var(--btn-gradient, linear-gradient(90deg, #4169e1 0%, #1348e7 100%)) !important;
+    border-color: var(--accent-blue, #4169e1) !important;
+    color: #fff !important;
+}
+
+/* Prev/Next Buttons */
+.admin-calendar .fc-prev-button,
+.admin-calendar .fc-next-button {
+    background: rgba(65, 105, 225, 0.1) !important;
+    border: 1px solid rgba(65, 105, 225, 0.2) !important;
+}
+
+.admin-calendar .fc-prev-button:hover,
+.admin-calendar .fc-next-button:hover {
+    background: rgba(65, 105, 225, 0.2) !important;
+    border-color: rgba(65, 105, 225, 0.4) !important;
+}
+
+/* =============================================================================
+   Calendar Grid - Day Cells
+   ============================================================================= */
+.admin-calendar .fc-scrollgrid {
+    border-color: rgba(65, 105, 225, 0.15) !important;
+}
+
+.admin-calendar .fc-scrollgrid td,
+.admin-calendar .fc-scrollgrid th {
+    border-color: rgba(65, 105, 225, 0.1) !important;
+}
+
+/* Column Headers */
+.admin-calendar .fc-col-header {
+    background: rgba(31, 31, 31, 0.5);
+}
+
+.admin-calendar .fc-col-header-cell {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(65, 105, 225, 0.2) !important;
+}
+
+.admin-calendar .fc-col-header-cell-cushion {
+    color: rgba(255, 255, 255, 0.5);
+    font-family: 'Neon-Heavy', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 1.5px;
+    text-decoration: none;
+}
+
+/* Day Grid Cells */
+.admin-calendar .fc-daygrid-day {
+    background: transparent;
+    transition: all 0.2s ease;
+}
+
+.admin-calendar .fc-daygrid-day:hover {
+    background: rgba(65, 105, 225, 0.05);
+}
+
+.admin-calendar .fc-daygrid-day-frame {
+    min-height: 100px;
+}
+
+.admin-calendar .fc-daygrid-day-number {
+    color: rgba(255, 255, 255, 0.6);
+    font-family: 'Neon-Regular', sans-serif;
+    font-weight: 500;
+    font-size: 0.9rem;
+    padding: 0.5rem;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.admin-calendar .fc-daygrid-day:hover .fc-daygrid-day-number {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Today Highlight */
+.admin-calendar .fc-day-today {
+    background: rgba(65, 105, 225, 0.1) !important;
+    position: relative;
+}
+
+.admin-calendar .fc-day-today::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--btn-gradient, linear-gradient(90deg, #4169e1 0%, #1348e7 100%));
+}
+
+.admin-calendar .fc-day-today .fc-daygrid-day-number {
+    color: var(--accent-blue, #4169e1);
+    font-weight: 700;
+}
+
+/* Other Month Days */
+.admin-calendar .fc-day-other {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.admin-calendar .fc-day-other .fc-daygrid-day-number {
+    color: rgba(255, 255, 255, 0.25);
+}
+
+/* =============================================================================
+   Events - Glassmorphic Event Cards
+   ============================================================================= */
 .admin-calendar .fc-event {
+    background: var(--btn-gradient, linear-gradient(90deg, #4169e1 0%, #1348e7 100%));
+    border: none;
+    border-radius: 6px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 500;
     cursor: pointer;
-    border-radius: 4px;
-    font-size: 0.8125rem;
-    padding: 2px 4px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(65, 105, 225, 0.3);
+    overflow: hidden;
+}
+
+.admin-calendar .fc-event::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.admin-calendar .fc-event:hover::before {
+    left: 100%;
 }
 
 .admin-calendar .fc-event:hover {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 4px 12px rgba(65, 105, 225, 0.5);
+}
+
+.admin-calendar .fc-event-title {
+    font-family: 'Neon-Regular', sans-serif;
+    font-weight: 500;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.admin-calendar .fc-event-time {
+    font-weight: 400;
     opacity: 0.9;
 }
 
+/* Day Grid Events */
 .admin-calendar .fc-daygrid-event {
+    margin: 1px 2px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-.admin-calendar .fc-timegrid-event {
-    border-radius: 4px;
+.admin-calendar .fc-daygrid-event-dot {
+    display: none;
 }
 
-/* Day cell styling */
-.admin-calendar .fc-daygrid-day-number {
-    color: var(--text-secondary, #64748b);
-    font-weight: 500;
-}
-
-.admin-calendar .fc-day-today {
-    background-color: rgba(59, 130, 246, 0.05) !important;
-}
-
-.admin-calendar .fc-day-today .fc-daygrid-day-number {
-    color: var(--primary-color, #3b82f6);
-    font-weight: 700;
-}
-
-/* Header styling */
-.admin-calendar .fc-col-header-cell-cushion {
-    color: var(--text-secondary, #64748b);
+/* More Events Link */
+.admin-calendar .fc-daygrid-more-link {
+    color: var(--accent-blue, #4169e1);
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 0.8rem;
     font-weight: 600;
-    text-transform: uppercase;
+    transition: color 0.2s ease;
+}
+
+.admin-calendar .fc-daygrid-more-link:hover {
+    color: #fff;
+}
+
+/* Time Grid Events */
+.admin-calendar .fc-timegrid-event {
+    border-radius: 6px;
+    border-left: 3px solid rgba(255, 255, 255, 0.5);
+}
+
+.admin-calendar .fc-timegrid-event .fc-event-main {
+    padding: 0.25rem 0.5rem;
+}
+
+/* =============================================================================
+   Time Grid - Enterprise Styling
+   ============================================================================= */
+.admin-calendar .fc-timegrid-slot {
+    height: 48px;
+}
+
+.admin-calendar .fc-timegrid-slot-label-cushion {
+    color: rgba(255, 255, 255, 0.4);
+    font-family: 'Neon-Regular', sans-serif;
     font-size: 0.75rem;
-    letter-spacing: 0.05em;
+}
+
+.admin-calendar .fc-timegrid-now-indicator-line {
+    border-color: var(--accent-blue, #4169e1);
+    border-width: 2px;
+}
+
+.admin-calendar .fc-timegrid-now-indicator-arrow {
+    border-color: var(--accent-blue, #4169e1);
+    border-top-color: transparent;
+    border-bottom-color: transparent;
+}
+
+/* =============================================================================
+   List View - Enterprise Styling
+   ============================================================================= */
+.admin-calendar .fc-list {
+    border-color: rgba(65, 105, 225, 0.2);
+}
+
+.admin-calendar .fc-list-day-cushion {
+    background: rgba(31, 31, 31, 0.8) !important;
+    padding: 1rem 1.5rem;
+}
+
+.admin-calendar .fc-list-day-text,
+.admin-calendar .fc-list-day-side-text {
+    color: var(--text-primary, #fff);
+    font-family: 'Neon-Heavy', sans-serif;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.admin-calendar .fc-list-event {
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.admin-calendar .fc-list-event:hover td {
+    background: rgba(65, 105, 225, 0.1) !important;
+}
+
+.admin-calendar .fc-list-event-title a {
+    color: var(--text-primary, #fff);
+    text-decoration: none;
+    font-family: 'Neon-Regular', sans-serif;
+}
+
+.admin-calendar .fc-list-event-time {
+    color: rgba(255, 255, 255, 0.6);
+    font-family: 'Neon-Regular', sans-serif;
+}
+
+.admin-calendar .fc-list-event-graphic {
+    padding-right: 1rem;
+}
+
+.admin-calendar .fc-list-event-dot {
+    border-color: var(--accent-blue, #4169e1);
+}
+
+.admin-calendar .fc-list-empty {
+    background: transparent;
+}
+
+.admin-calendar .fc-list-empty-cushion {
+    color: rgba(255, 255, 255, 0.4);
+    font-family: 'Neon-Regular', sans-serif;
+}
+
+/* =============================================================================
+   Popover - Event Details
+   ============================================================================= */
+.admin-calendar .fc-popover {
+    background: var(--glass-bg, rgba(31, 31, 31, 0.95));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(65, 105, 225, 0.3);
+    border-radius: 10px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.admin-calendar .fc-popover-header {
+    background: rgba(31, 31, 31, 0.5);
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(65, 105, 225, 0.2);
+}
+
+.admin-calendar .fc-popover-title {
+    color: var(--text-primary, #fff);
+    font-family: 'Neon-Heavy', sans-serif;
+    font-weight: 600;
+}
+
+.admin-calendar .fc-popover-close {
+    color: rgba(255, 255, 255, 0.6);
+    transition: color 0.2s ease;
+}
+
+.admin-calendar .fc-popover-close:hover {
+    color: #fff;
+}
+
+.admin-calendar .fc-popover-body {
+    padding: 0.5rem;
+}
+
+/* =============================================================================
+   Custom Scrollbar
+   ============================================================================= */
+.admin-calendar .fc-scroller::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.admin-calendar .fc-scroller::-webkit-scrollbar-track {
+    background: rgba(31, 31, 31, 0.5);
+}
+
+.admin-calendar .fc-scroller::-webkit-scrollbar-thumb {
+    background: rgba(65, 105, 225, 0.4);
+    border-radius: 3px;
+}
+
+.admin-calendar .fc-scroller::-webkit-scrollbar-thumb:hover {
+    background: rgba(65, 105, 225, 0.6);
+}
+
+/* =============================================================================
+   Stats Sidebar Panel
+   ============================================================================= */
+.calendar-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    padding: 1rem 2rem;
+    background: rgba(0, 0, 0, 0.15);
+    border-bottom: 1px solid rgba(65, 105, 225, 0.1);
+}
+
+.calendar-stat-card {
+    background: rgba(42, 42, 42, 0.9);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(65, 105, 225, 0.2);
+    border-radius: 10px;
+    padding: 1.25rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.calendar-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--btn-gradient, linear-gradient(90deg, #4169e1 0%, #1348e7 100%));
+}
+
+.calendar-stat-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent-blue, #4169e1);
+    box-shadow: var(--shadow-light, 0 4px 12px rgba(0, 0, 0, 0.5));
+}
+
+.calendar-stat-label {
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+}
+
+.calendar-stat-value {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 1.75rem;
+    color: var(--text-primary, #fff);
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+.calendar-stat-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.8rem;
+    margin-left: 0.5rem;
+}
+
+.calendar-stat-trend.up {
+    color: var(--success-color, #28a745);
+}
+
+.calendar-stat-trend.down {
+    color: var(--danger-color, #e74c3c);
+}
+
+/* =============================================================================
+   Loading Skeleton
+   ============================================================================= */
+.calendar-skeleton {
+    animation: skeletonPulse 1.5s infinite ease-in-out;
+}
+
+@keyframes skeletonPulse {
+
+    0%,
+    100% {
+        opacity: 0.4;
+    }
+
+    50% {
+        opacity: 0.8;
+    }
+}
+
+.calendar-skeleton-header {
+    height: 60px;
+    background: rgba(65, 105, 225, 0.1);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.calendar-skeleton-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.5rem;
+}
+
+.calendar-skeleton-cell {
+    height: 80px;
+    background: rgba(65, 105, 225, 0.05);
+    border-radius: 6px;
+}
+
+/* =============================================================================
+   Responsive Design
+   ============================================================================= */
+@media (max-width: 1200px) {
+    .calendar-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .calendar-page {
+        margin: 1rem;
+        border-radius: 10px;
+    }
+
+    .calendar-header {
+        padding: 1rem 1.5rem;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .calendar-title {
+        font-size: 1.3rem;
+    }
+
+    .calendar-actions {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .calendar-filters {
+        padding: 0.75rem 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .admin-calendar {
+        padding: 1rem 1.5rem 1.5rem;
+    }
+
+    .admin-calendar .calendar-wrapper {
+        padding: 1rem;
+    }
+
+    .admin-calendar .fc-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .admin-calendar .fc-toolbar-chunk {
+        text-align: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .admin-calendar .fc-toolbar-title {
+        font-size: 1.2rem;
+    }
+
+    .calendar-stats {
+        grid-template-columns: 1fr;
+        padding: 1rem 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .calendar-page {
+        margin: 0.5rem;
+    }
+
+    .calendar-header {
+        padding: 1rem;
+    }
+
+    .calendar-title {
+        font-size: 1.1rem;
+    }
+
+    .calendar-title::before {
+        width: 4px;
+        height: 22px;
+    }
+
+    .admin-calendar {
+        padding: 0.75rem 1rem 1rem;
+    }
+
+    .admin-calendar .calendar-wrapper {
+        padding: 0.75rem;
+        border-radius: 8px;
+    }
+
+    .admin-calendar .fc-toolbar-title {
+        font-size: 1rem;
+    }
+
+    .admin-calendar .fc-button-primary {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8rem;
+    }
+
+    .admin-calendar .fc-daygrid-day-frame {
+        min-height: 70px;
+    }
+
+    .calendar-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
 }

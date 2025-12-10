@@ -1,0 +1,399 @@
+/**
+ * InlineEditor Component Styles
+ * 
+ * Styles for in-page content editing with theme variable compliance.
+ */
+
+/* =============================================================================
+   Edit Mode Controls - Floating Button Bar
+   ============================================================================= */
+
+.inline-editor-controls {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    gap: 0.5rem;
+    background: var(--bg-secondary, #2a2a2a);
+    padding: 0.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.inline-editor-controls.editing {
+    background: var(--bg-primary, #1f1f1f);
+    border-color: var(--primary-color);
+}
+
+.edit-mode-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    border: none;
+    border-radius: 6px;
+    font-family: var(--font-family, sans-serif);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: var(--primary-color);
+    color: var(--text-primary, #fff);
+}
+
+.edit-mode-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+.edit-mode-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.edit-mode-btn.seo {
+    background: var(--info-color);
+}
+
+.edit-mode-btn.seo:hover {
+    background: var(--info-dark);
+}
+
+.edit-mode-btn.cancel {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-secondary, #adb5bd);
+}
+
+.edit-mode-btn.cancel:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.edit-mode-btn.save {
+    background: var(--success-color);
+}
+
+.edit-mode-btn.save:hover {
+    background: var(--success-dark);
+}
+
+/* =============================================================================
+   Editable Content Styling
+   ============================================================================= */
+
+.inline-editable {
+    outline: 2px dashed var(--primary-color) !important;
+    outline-offset: 4px;
+    min-height: 1em;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: outline-color 0.2s ease, background 0.2s ease;
+}
+
+.inline-editable:focus {
+    outline-color: var(--success-color) !important;
+    outline-style: solid;
+    background: rgba(var(--primary-color-rgb, 65, 105, 225), 0.05);
+}
+
+.inline-editable:hover {
+    background: rgba(65, 105, 225, 0.05);
+}
+
+/* =============================================================================
+   Floating Toolbar
+   ============================================================================= */
+
+.inline-editor-toolbar {
+    position: fixed;
+    z-index: 1001;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem;
+    background: var(--bg-primary, #1f1f1f);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.inline-editor-toolbar button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text-primary, #fff);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.inline-editor-toolbar button:hover {
+    background: var(--primary-color);
+}
+
+.toolbar-divider {
+    width: 1px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    margin: 0 0.25rem;
+}
+
+/* =============================================================================
+   SEO Sidebar
+   ============================================================================= */
+
+.seo-sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 380px;
+    height: 100vh;
+    background: var(--bg-primary, #1f1f1f);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 1002;
+    display: flex;
+    flex-direction: column;
+    animation: slideInRight 0.3s ease-out;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+.seo-sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--bg-secondary, #2a2a2a);
+}
+
+.seo-sidebar-header h3 {
+    font-family: var(--font-family, sans-serif);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary, #fff);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.seo-sidebar-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-secondary, #adb5bd);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.seo-sidebar-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary, #fff);
+}
+
+.seo-sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+}
+
+.seo-sidebar-content h4 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary, #fff);
+    margin: 0 0 1rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.seo-field {
+    margin-bottom: 1.25rem;
+}
+
+.seo-field label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-secondary, #adb5bd);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.seo-field input,
+.seo-field textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--bg-secondary, #2a2a2a);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: var(--text-primary, #fff);
+    font-family: var(--font-family, sans-serif);
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.seo-field input:focus,
+.seo-field textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.15);
+}
+
+.seo-field textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.char-count {
+    font-size: 0.75rem;
+    font-weight: 400;
+}
+
+.char-count.good {
+    color: var(--success-color);
+}
+
+.char-count.short,
+.char-count.empty {
+    color: var(--warning-color);
+}
+
+.char-count.long {
+    color: var(--danger-color);
+}
+
+.field-hint {
+    display: block;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.field-hint.info {
+    color: var(--info-color);
+}
+
+.field-hint.warning {
+    color: var(--warning-color);
+}
+
+.seo-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 1.5rem 0;
+}
+
+/* =============================================================================
+   Social Preview Card
+   ============================================================================= */
+
+.seo-preview {
+    margin-top: 1rem;
+}
+
+.seo-preview-card {
+    background: var(--bg-secondary, #2a2a2a);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.seo-preview-image {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.seo-preview-content {
+    padding: 0.75rem;
+}
+
+.seo-preview-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary, #fff);
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.seo-preview-desc {
+    font-size: 0.8rem;
+    color: var(--text-secondary, #adb5bd);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* =============================================================================
+   Responsive
+   ============================================================================= */
+
+@media (max-width: 768px) {
+    .inline-editor-controls {
+        top: auto;
+        bottom: 20px;
+        right: 10px;
+        left: 10px;
+        justify-content: center;
+    }
+
+    .seo-sidebar {
+        width: 100%;
+    }
+}

@@ -96,7 +96,7 @@
 }
 
 .messaging-channel .message.me .message-avatar {
-    background: linear-gradient(90deg, #28a745, #20c997);
+    background: linear-gradient(90deg, var(--success-color), #20c997);
 }
 
 .messaging-channel .message-bubble {
@@ -309,7 +309,7 @@
 
 .messaging-channel .btn-remove-file:hover {
     opacity: 1;
-    color: #dc3545;
+    color: var(--danger-color);
 }
 
 /* Responsive */
@@ -321,4 +321,35 @@
     .messaging-channel .message {
         max-width: 95%;
     }
+}
+
+/* Pinned Messages */
+.messaging-channel .message.pinned .message-bubble {
+    border-left: 3px solid var(--warning-color, #ffc107);
+}
+
+.messaging-channel .pinned-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: var(--warning-color, #ffc107);
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.messaging-channel .pinned-indicator i {
+    font-size: 0.7rem;
+}
+
+/* System Messages */
+.messaging-channel .message.system .message-bubble {
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+/* Command Messages */
+.messaging-channel .message.command .message-bubble {
+    background: rgba(23, 162, 184, 0.1);
+    border: 1px solid rgba(23, 162, 184, 0.3);
 }

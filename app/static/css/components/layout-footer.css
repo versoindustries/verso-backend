@@ -60,7 +60,7 @@
 .verso-footer__logo {
     font-family: 'Neon-Heavy', sans-serif;
     font-size: 1.75rem;
-    color: #ffffff;
+    color: var(--text-primary);
     text-transform: uppercase;
     letter-spacing: 0.2em;
     text-shadow: 0 0 30px rgba(65, 105, 225, 0.4);
@@ -114,13 +114,13 @@
     top: 50%;
     width: 0;
     height: 2px;
-    background: linear-gradient(90deg, #4169e1, #6c63ff);
+    background: linear-gradient(90deg, var(--primary-color), #6c63ff);
     transition: width 0.3s ease;
     transform: translateY(-50%);
 }
 
 .verso-footer__link:hover {
-    color: #ffffff;
+    color: var(--text-primary);
     padding-left: 16px;
 }
 
@@ -146,7 +146,7 @@
 }
 
 .verso-footer__lang-link:hover {
-    color: #ffffff;
+    color: var(--text-primary);
 }
 
 .verso-footer__lang-divider {
@@ -209,7 +209,7 @@
 .verso-footer__social-link:hover {
     background: rgba(99, 102, 241, 0.2);
     border-color: rgba(99, 102, 241, 0.4);
-    color: #ffffff;
+    color: var(--text-primary);
     transform: translateY(-2px);
     box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
 }

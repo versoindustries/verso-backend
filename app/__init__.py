@@ -112,16 +112,21 @@ def create_app(config_class=Config):
     def set_admin(email):
         """Set a user as admin by email."""
         user = User.query.filter_by(email=email).first()
-        if user:
-            admin_role = Role.query.filter_by(name='admin').first()
-            if admin_role not in user.roles:
-                user.roles.append(admin_role)
-                db.session.commit()
-                print(f"User {email} set as admin.")
-            else:
-                print("User already has admin role.")
+        if not user:
+            print(f"User not found: {email}")
+            return
+        
+        admin_role = Role.query.filter_by(name='Admin').first()
+        if not admin_role:
+            print("Admin role not found. Please run 'flask create-roles' first.")
+            return
+        
+        if admin_role in user.roles:
+            print(f"User {email} already has admin role.")
         else:
-            print("User not found.")
+            user.roles.append(admin_role)
+            db.session.commit()
+            print(f"User {email} set as admin.")
 
     # Initialize extensions
     db.init_app(app)
@@ -197,34 +202,41 @@ def create_app(config_class=Config):
         return dict(vite_tags=vite_tags)
 
     # Register blueprints
-    from app.routes.auth import auth
-    from app.routes.main_routes import main
-    from app.routes.user import user
-    from app.routes.admin import admin as admin_blueprint
-    from app.routes.blog import blog_blueprint, news_update, updates_blueprint
-    from app.routes.api import api
-    from app.routes.crm import crm_bp
-    from app.routes.messaging import messaging_bp
-    from app.routes.employee import employee_bp
-    from app.routes.webhooks import webhooks_bp
-    from app.routes.newsletter import newsletter_bp
-    from app.routes.theme import theme_bp
-    from app.routes.calendar import calendar_bp
-    from app.routes.analytics import analytics_bp
-    from app.routes.orders_admin import orders_admin_bp
-    from app.routes.subscriptions import subscriptions_bp
-    from app.routes.shop import shop_bp
-    from app.routes.shop_admin import shop_admin_bp
-    from app.routes.api_docs import api_docs
-    from app.routes.tasks_admin import tasks_admin_bp
-    from app.routes.availability import availability_bp
-    from app.routes.category_admin import category_admin_bp
-    from app.routes.automation import automation_bp
-    from app.routes.media import media_bp
-    from app.routes.pages import pages_bp
-    from app.routes.cart import cart_bp
-    from app.routes.notifications import notifications_bp
-    from app.routes.setup import setup_bp
+    # Public routes (customer-facing)
+    from app.routes.public_routes.auth import auth
+    from app.routes.public_routes.main_routes import main
+    from app.routes.public_routes.blog import blog_blueprint, news_update, updates_blueprint
+    from app.routes.public_routes.newsletter import newsletter_bp
+    from app.routes.public_routes.shop import shop_bp
+    from app.routes.public_routes.pages import pages_bp
+    from app.routes.public_routes.cart import cart_bp
+    from app.routes.public_routes.media import media_bp
+    
+    # API routes
+    from app.routes.api_routes.api import api
+    from app.routes.api_routes.api_docs import api_docs
+    from app.routes.api_routes.webhooks import webhooks_bp
+    
+    # Employee routes
+    from app.routes.employee_routes.user import user
+    from app.routes.employee_routes.employee import employee_bp
+    
+    # Admin routes
+    from app.routes.admin_routes.admin import admin as admin_blueprint
+    from app.routes.admin_routes.crm import crm_bp
+    from app.routes.admin_routes.messaging import messaging_bp
+    from app.routes.admin_routes.theme import theme_bp
+    from app.routes.admin_routes.calendar import calendar_bp
+    from app.routes.admin_routes.analytics import analytics_bp
+    from app.routes.admin_routes.orders_admin import orders_admin_bp
+    from app.routes.admin_routes.subscriptions import subscriptions_bp
+    from app.routes.admin_routes.shop_admin import shop_admin_bp
+    from app.routes.admin_routes.tasks_admin import tasks_admin_bp
+    from app.routes.admin_routes.availability import availability_bp
+    from app.routes.admin_routes.category_admin import category_admin_bp
+    from app.routes.admin_routes.automation import automation_bp
+    from app.routes.admin_routes.notifications import notifications_bp
+    from app.routes.admin_routes.setup import setup_bp
 
     # Register main blueprints
     app.register_blueprint(main)
@@ -258,23 +270,31 @@ def create_app(config_class=Config):
     app.register_blueprint(setup_bp)
 
     # Phase 17: Calendar & Scheduling Powerhouse
-    from app.routes.scheduling import scheduling_bp
+    from app.routes.admin_routes.scheduling import scheduling_bp
     app.register_blueprint(scheduling_bp)
 
     # Phase 13: E-Commerce Routes
-    from app.routes.ecommerce_admin import ecommerce_admin_bp
-    from app.routes.ecommerce import ecommerce_bp
+    from app.routes.admin_routes.ecommerce_admin import ecommerce_admin_bp
+    from app.routes.public_routes.ecommerce import ecommerce_bp
     app.register_blueprint(ecommerce_admin_bp)
     app.register_blueprint(ecommerce_bp)
 
+    # Phase E: Feature Completion - Media, SMS, Reports
+    from app.routes.admin_routes.media_admin import media_admin_bp
+    from app.routes.admin_routes.sms_admin import sms_admin_bp
+    from app.routes.admin_routes.reports_admin import reports_admin_bp
+    app.register_blueprint(media_admin_bp)
+    app.register_blueprint(sms_admin_bp)
+    app.register_blueprint(reports_admin_bp)
+
     # Phase 14: Reports Blueprint
-    from app.routes.reports import reports_bp
+    from app.routes.admin_routes.reports import reports_bp
     app.register_blueprint(reports_bp)
 
     # Phase 15: Communication Hub Expansion
-    from app.routes.email_admin import email_admin_bp
-    from app.routes.email_tracking import email_tracking_bp
-    from app.routes.push import push_bp
+    from app.routes.admin_routes.email_admin import email_admin_bp
+    from app.routes.admin_routes.email_tracking import email_tracking_bp
+    from app.routes.admin_routes.push import push_bp
     app.register_blueprint(email_admin_bp)
     csrf.exempt(email_tracking_bp)  # Tracking endpoints don't need CSRF
     app.register_blueprint(email_tracking_bp)
@@ -282,14 +302,14 @@ def create_app(config_class=Config):
     app.register_blueprint(push_bp)
 
     # Phase 16: Forms & Data Collection Platform
-    from app.routes.forms_admin import forms_admin_bp
-    from app.routes.forms import forms_bp
+    from app.routes.admin_routes.forms_admin import forms_admin_bp
+    from app.routes.public_routes.forms import forms_bp
     app.register_blueprint(forms_admin_bp)
     app.register_blueprint(forms_bp)
 
     # Phase 22: Registration & User Experience Hardening
-    from app.routes.oauth import oauth_bp, init_oauth
-    from app.routes.onboarding import onboarding_bp
+    from app.routes.public_routes.oauth import oauth_bp, init_oauth
+    from app.routes.employee_routes.onboarding import onboarding_bp
     
     # Configure OAuth settings from environment
     app.config['GOOGLE_CLIENT_ID'] = os.getenv('GOOGLE_CLIENT_ID')
@@ -304,11 +324,11 @@ def create_app(config_class=Config):
     app.register_blueprint(onboarding_bp)
 
     # Phase 23: Support Ticketing System
-    from app.routes.support import support_bp
+    from app.routes.admin_routes.support import support_bp
     app.register_blueprint(support_bp)
 
     # Phase 24: Observability & Monitoring
-    from app.routes.observability import observability_bp, init_metrics_collection
+    from app.routes.admin_routes.observability import observability_bp, init_metrics_collection
     csrf.exempt(observability_bp)  # Health/metrics endpoints don't need CSRF
     app.register_blueprint(observability_bp)
     init_metrics_collection(app)
@@ -321,7 +341,7 @@ def create_app(config_class=Config):
         app.logger.debug(f'Advanced observability not fully configured: {e}')
 
     # Phase 25: Advanced Infrastructure (Backup, Session, Deployment)
-    from app.routes.backup import backup_bp
+    from app.routes.admin_routes.backup import backup_bp
     app.register_blueprint(backup_bp)
     
     # Initialize backup service and session manager
@@ -344,7 +364,7 @@ def create_app(config_class=Config):
         app.logger.debug(f'Phase 25 infrastructure partially configured: {e}')
 
     # Phase 27: AI & Business Intelligence
-    from app.routes.ai import ai_bp
+    from app.routes.admin_routes.ai import ai_bp
     app.register_blueprint(ai_bp)
     
     try:
@@ -369,7 +389,7 @@ def create_app(config_class=Config):
         app.logger.debug(f'Phase 28 security partially configured: {e}')
 
     # Phase 29: Privacy & Compliance
-    from app.routes.privacy import privacy_bp, compliance_bp
+    from app.routes.public_routes.privacy import privacy_bp, compliance_bp
     app.register_blueprint(privacy_bp)
     app.register_blueprint(compliance_bp)
     
@@ -517,9 +537,11 @@ def create_app(config_class=Config):
             cache_warmup()
             app._cache_warmed = True
 
-    from app.routes.booking_api import booking_api_bp
+    from app.routes.api_routes.booking_api import booking_api_bp
+    from app.routes.admin_routes.booking_admin import booking_admin_bp
     from app.modules.security import rate_limiter
     app.register_blueprint(booking_api_bp)
+    app.register_blueprint(booking_admin_bp)
     # Exempt booking API from rate limiting for public booking flow
     if hasattr(rate_limiter, 'limiter') and rate_limiter.limiter:
         rate_limiter.limiter.exempt(booking_api_bp)

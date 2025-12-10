@@ -121,20 +121,20 @@
 }
 
 .table a:hover {
-    color: #F4C430;
+    color: var(--accent-color);
     text-decoration: underline;
     transform: translateY(-2px);
 }
 
 .table button {
-    color: #dc3545;
+    color: var(--danger-color);
     background: none;
     border: none;
     cursor: pointer;
 }
 
 .table button:hover {
-    color: #c82333;
+    color: var(--danger-dark);
     text-decoration: underline;
     transform: translateY(-2px);
 }

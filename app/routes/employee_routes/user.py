@@ -66,11 +66,19 @@ def settings():
 @login_required
 def dashboard():
     """Enhanced user dashboard with comprehensive account overview."""
+    from app.models import BusinessConfig
+    
     now = datetime.utcnow()
     
-    # Get recent orders (last 5)
-    recent_orders = Order.query.filter_by(user_id=current_user.id)\
-        .order_by(Order.created_at.desc()).limit(5).all()
+    # Get ecommerce_enabled from BusinessConfig
+    ecommerce_config = BusinessConfig.query.filter_by(setting_name='ecommerce_enabled').first()
+    ecommerce_enabled = ecommerce_config.setting_value.lower() == 'true' if ecommerce_config else True
+    
+    # Get recent orders (last 5) - only if ecommerce enabled
+    recent_orders = []
+    if ecommerce_enabled:
+        recent_orders = Order.query.filter_by(user_id=current_user.id)\
+            .order_by(Order.created_at.desc()).limit(5).all()
     
     # Get upcoming appointments
     upcoming_appointments = Appointment.query.filter(
@@ -82,7 +90,7 @@ def dashboard():
     active_subscriptions = Subscription.query.filter(
         Subscription.user_id == current_user.id,
         Subscription.status.in_(['active', 'trialing'])
-    ).all()
+    ).all() if ecommerce_enabled else []
     
     # Get digital downloads
     download_tokens = DownloadToken.query.filter_by(user_id=current_user.id)\
@@ -96,7 +104,7 @@ def dashboard():
     
     # Summary stats
     stats = {
-        'total_orders': Order.query.filter_by(user_id=current_user.id).count(),
+        'total_orders': Order.query.filter_by(user_id=current_user.id).count() if ecommerce_enabled else 0,
         'total_downloads': DownloadToken.query.filter_by(user_id=current_user.id).count(),
         'upcoming_appointments': Appointment.query.filter(
             Appointment.email == current_user.email,
@@ -105,14 +113,46 @@ def dashboard():
         'active_subscriptions': len(active_subscriptions)
     }
     
+    # Serialize data for React component
+    orders_json = [{
+        'id': o.id,
+        'total_amount': o.total_amount or 0,
+        'status': o.status or 'pending',
+        'created_at': o.created_at.isoformat() if o.created_at else None
+    } for o in recent_orders]
+    
+    appointments_json = [{
+        'id': a.id,
+        'service_name': a.service.name if a.service else 'Appointment',
+        'preferred_date_time': a.preferred_date_time.isoformat() if a.preferred_date_time else None,
+        'status': 'scheduled'
+    } for a in upcoming_appointments]
+    
+    downloads_json = [{
+        'id': t.id,
+        'product_name': t.order_item.product.name if t.order_item and t.order_item.product else 'Digital Product',
+        'download_count': t.download_count or 0,
+        'max_downloads': t.max_downloads or 5,
+        'is_valid': t.is_valid() if hasattr(t, 'is_valid') else True,
+        'download_url': f'/download/{t.token}' if t.token else '#'
+    } for t in download_tokens]
+    
+    notifications_json = [{
+        'id': n.id,
+        'title': n.title or 'Notification',
+        'created_at': n.created_at.isoformat() if n.created_at else None,
+        'is_read': n.is_read
+    } for n in unread_notifications]
+    
     return render_template(
         'UserDashboard/user_dashboard.html',
-        recent_orders=recent_orders,
-        upcoming_appointments=upcoming_appointments,
+        recent_orders=orders_json,
+        upcoming_appointments=appointments_json,
         active_subscriptions=active_subscriptions,
-        download_tokens=download_tokens,
-        unread_notifications=unread_notifications,
-        stats=stats
+        download_tokens=downloads_json,
+        unread_notifications=notifications_json,
+        stats=stats,
+        ecommerce_enabled=ecommerce_enabled
     )
 
 

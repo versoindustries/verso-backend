@@ -3,7 +3,7 @@
   position: relative;
   width: 100%;
   overflow: hidden;
-  background: linear-gradient(135deg, #1f1f1f 0%, #2a2a2a 100%);
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
   border-radius: 15px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -62,7 +62,7 @@
   width: 90%;
   max-width: 1000px;
   text-align: center;
-  color: #ffffff;
+  color: var(--text-primary);
   z-index: 2;
   padding: 20px;
 }
@@ -91,8 +91,8 @@
   padding: 15px 40px;
   font-family: 'Neon-Heavy', sans-serif;
   font-size: 1.4rem;
-  background: linear-gradient(90deg, #4169e1 0%, #1348e7 100%);
-  color: #ffffff;
+  background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  color: var(--text-primary);
   text-decoration: none;
   border: none;
   border-radius: 8px;
@@ -103,7 +103,7 @@
 }
 
 .hero-content .btn-primary:hover {
-  background: linear-gradient(90deg, #1348e7 0%, #4169e1 100%);
+  background: linear-gradient(90deg, var(--primary-dark) 0%, var(--primary-color) 100%);
   transform: translateY(-3px);
   box-shadow: 0 6px 18px rgba(65, 105, 225, 0.6);
 }
@@ -210,8 +210,8 @@
 /* Our Vision Section */
 #our-vision {
   padding: 60px 20px;
-  background: linear-gradient(135deg, #1f1f1f 0%, #2a2a2a 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  color: var(--text-primary);
   border-radius: 15px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   position: relative;
@@ -254,7 +254,7 @@
 #our-vision h2 {
   font-family: 'Neon-Heavy', sans-serif;
   font-size: 2.8rem;
-  color: #ffffff;
+  color: var(--text-primary);
   margin-bottom: 20px;
   text-transform: uppercase;
   letter-spacing: 1.5px;
@@ -265,7 +265,7 @@
   font-family: 'Neon-Regular', sans-serif;
   font-size: 1.4rem;
   line-height: 1.6;
-  color: #ffffff;
+  color: var(--text-primary);
   margin-bottom: 25px;
   text-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
 }
@@ -369,8 +369,8 @@
 /* Meet Our Team Section */
 #team {
   padding: 60px 20px;
-  background: linear-gradient(135deg, #1f1f1f 0%, #2a2a2a 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  color: var(--text-primary);
   text-align: center;
   border-radius: 15px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
@@ -407,7 +407,7 @@
 #team h2 {
   font-family: 'Neon-Heavy', sans-serif;
   font-size: 2.8rem;
-  color: #ffffff;
+  color: var(--text-primary);
   margin-bottom: 20px;
   text-transform: uppercase;
   letter-spacing: 1.5px;
@@ -418,7 +418,7 @@
   font-family: 'Neon-Regular', sans-serif;
   font-size: 1.4rem;
   line-height: 1.6;
-  color: #ffffff;
+  color: var(--text-primary);
   max-width: 1200px;
   margin: 0 auto 40px;
   text-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
@@ -467,7 +467,7 @@
 #team .team-card h3 {
   font-family: 'Neon-Heavy', sans-serif;
   font-size: 1.8rem;
-  color: #ffffff;
+  color: var(--text-primary);
   margin-bottom: 10px;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -477,7 +477,7 @@
 #team .team-card h4 {
   font-family: 'Neon-Regular', sans-serif;
   font-size: 1.2rem;
-  color: #4169e1;
+  color: var(--primary-color);
   margin-bottom: 15px;
   text-shadow: 0 0 6px rgba(65, 105, 225, 0.4);
 }
@@ -486,7 +486,7 @@
   font-family: 'Neon-Regular', sans-serif;
   font-size: 1.2rem;
   line-height: 1.6;
-  color: #ffffff;
+  color: var(--text-primary);
   margin-bottom: 0;
   text-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
 }
@@ -612,8 +612,8 @@
 #mission {
   position: relative;
   padding: 60px 20px;
-  background: linear-gradient(135deg, #1f1f1f 0%, #2a2a2a 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  color: var(--text-primary);
   border-radius: 15px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   overflow: hidden;
@@ -682,7 +682,7 @@
 .mission-content h2 {
   font-family: 'Neon-Heavy', sans-serif;
   font-size: 2.8rem;
-  color: #ffffff;
+  color: var(--text-primary);
   margin-bottom: 20px;
   text-transform: uppercase;
   letter-spacing: 1.5px;
@@ -694,7 +694,7 @@
   font-family: 'Neon-Regular', sans-serif;
   font-size: 1.4rem;
   line-height: 1.6;
-  color: #ffffff;
+  color: var(--text-primary);
   margin-bottom: 0;
   text-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
   animation: fadeIn 1.5s ease-in-out;
@@ -784,8 +784,8 @@
 /* Commitment to Quality and Innovation Section */
 #commitment {
   padding: 60px 20px;
-  background: linear-gradient(135deg, #1f1f1f 0%, #2a2a2a 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  color: var(--text-primary);
   text-align: center;
   border-radius: 15px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
@@ -822,7 +822,7 @@
 #commitment h2 {
   font-family: 'Neon-Heavy', sans-serif;
   font-size: 2.8rem;
-  color: #ffffff;
+  color: var(--text-primary);
   margin-bottom: 20px;
   text-transform: uppercase;
   letter-spacing: 1.5px;
@@ -834,7 +834,7 @@
   font-family: 'Neon-Regular', sans-serif;
   font-size: 1.4rem;
   line-height: 1.6;
-  color: #ffffff;
+  color: var(--text-primary);
   max-width: 800px;
   margin: 0 auto 40px;
   text-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
@@ -880,7 +880,7 @@
 #commitment .commitment-item h3 {
   font-family: 'Neon-Heavy', sans-serif;
   font-size: 1.8rem;
-  color: #ffffff;
+  color: var(--text-primary);
   margin-bottom: 10px;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -891,7 +891,7 @@
   font-family: 'Neon-Regular', sans-serif;
   font-size: 1.2rem;
   line-height: 1.6;
-  color: #ffffff;
+  color: var(--text-primary);
   margin-bottom: 0;
   text-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
 }
@@ -1009,8 +1009,8 @@
 /* Vision for the Future Section */
 #future-vision {
   padding: 60px 20px;
-  background: linear-gradient(135deg, #1f1f1f 0%, #2a2a2a 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  color: var(--text-primary);
   text-align: center;
   border-radius: 15px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
@@ -1072,7 +1072,7 @@
 .future-vision-content h2 {
   font-family: 'Neon-Heavy', sans-serif;
   font-size: 2.8rem;
-  color: #ffffff;
+  color: var(--text-primary);
   margin-bottom: 20px;
   text-transform: uppercase;
   letter-spacing: 1.5px;
@@ -1084,7 +1084,7 @@
   font-family: 'Neon-Regular', sans-serif;
   font-size: 1.4rem;
   line-height: 1.6;
-  color: #ffffff;
+  color: var(--text-primary);
   margin-bottom: 20px;
   text-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
   animation: fadeIn 1.5s ease-in-out;

@@ -8,63 +8,46 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
     /* ========================================
-       Enterprise Onboarding - Premium Design
+       Enterprise Onboarding - Redesigned
+       Works within normal document flow
        ======================================== */
 
-    /* CSS Custom Properties - Uses base.css theme colors */
-    :root {
-        /* Primary colors from base.css theme */
-        --onboard-primary: var(--accent-blue, #4169e1);
-        --onboard-primary-dark: var(--accent-blue-dark, #1348e7);
-        --onboard-secondary: var(--accent-blue, #4169e1);
-        --onboard-accent: var(--accent-blue, #4169e1);
-        --onboard-success: #2ecc71;
-        /* Background gradients matching base.css dark theme */
-        --onboard-bg-gradient-1: #1f1f1f;
-        --onboard-bg-gradient-2: #2a2a2a;
-        --onboard-bg-gradient-3: #1f1f1f;
-        /* Glass effect from base.css */
-        --onboard-glass-bg: var(--glass-bg, rgba(31, 31, 31, 0.8));
-        --onboard-glass-border: rgba(65, 105, 225, 0.3);
-        /* Typography from base.css */
-        --onboard-text-primary: var(--text-primary, #ffffff);
-        --onboard-text-secondary: rgba(255, 255, 255, 0.7);
-        --onboard-text-muted: rgba(255, 255, 255, 0.5);
-        --onboard-shadow-glow: 0 0 60px rgba(65, 105, 225, 0.3);
-        --onboard-card-radius: 24px;
-        --onboard-font: 'Neon-Regular', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    /* Hide main container padding for full-width design */
+    main.container {
+        max-width: 100%;
+        padding: 0;
+        margin: 0;
     }
 
-    /* Animated Background */
-    .onboarding-wrapper {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg, var(--onboard-bg-gradient-1) 0%, var(--onboard-bg-gradient-2) 50%, var(--onboard-bg-gradient-3) 100%);
-        overflow-y: auto;
+    /* Onboarding Section */
+    .onboarding-section {
+        min-height: calc(100vh - 200px);
         display: flex;
         align-items: center;
         justify-content: center;
-        min-height: 100vh;
-        padding: 2rem;
+        padding: 4rem 2rem;
+        position: relative;
+        background: linear-gradient(135deg,
+                var(--bg-primary, #1a1a2e) 0%,
+                var(--bg-secondary, #16213e) 50%,
+                var(--bg-primary, #1a1a2e) 100%);
+        overflow: hidden;
     }
 
-    .onboarding-wrapper::before {
+    /* Animated background gradient overlay */
+    .onboarding-section::before {
         content: '';
-        position: fixed;
+        position: absolute;
         top: -50%;
         left: -50%;
         width: 200%;
         height: 200%;
         background:
-            radial-gradient(ellipse at 20% 80%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
-            radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
-            radial-gradient(ellipse at 50% 50%, rgba(6, 182, 212, 0.08) 0%, transparent 60%);
-        animation: backgroundPulse 15s ease-in-out infinite;
+            radial-gradient(ellipse at 20% 80%, rgba(65, 105, 225, 0.12) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 20%, rgba(99, 102, 241, 0.12) 0%, transparent 50%),
+            radial-gradient(ellipse at 50% 50%, rgba(6, 182, 212, 0.06) 0%, transparent 60%);
+        animation: backgroundPulse 20s ease-in-out infinite;
         pointer-events: none;
-        z-index: 0;
     }
 
     @keyframes backgroundPulse {
@@ -75,53 +58,37 @@
             opacity: 1;
         }
 
-        33% {
+        50% {
             transform: translate(2%, -2%) rotate(1deg);
-            opacity: 0.9;
-        }
-
-        66% {
-            transform: translate(-2%, 2%) rotate(-1deg);
-            opacity: 1;
+            opacity: 0.85;
         }
     }
 
-    /* Floating Orbs */
-    .floating-orb {
-        position: fixed;
+    /* Floating orbs - subtle background elements */
+    .onboarding-orb {
+        position: absolute;
         border-radius: 50%;
-        filter: blur(60px);
-        opacity: 0.4;
-        animation: floatOrb 20s ease-in-out infinite;
+        filter: blur(80px);
+        opacity: 0.3;
         pointer-events: none;
-        z-index: 0;
+        animation: floatOrb 25s ease-in-out infinite;
     }
 
-    .floating-orb-1 {
+    .onboarding-orb-1 {
         width: 400px;
         height: 400px;
-        background: var(--onboard-primary);
-        top: -100px;
-        right: -100px;
-        animation-delay: 0s;
+        background: var(--accent-blue, #4169e1);
+        top: -150px;
+        right: -150px;
     }
 
-    .floating-orb-2 {
+    .onboarding-orb-2 {
         width: 300px;
         height: 300px;
-        background: var(--onboard-secondary);
-        bottom: -50px;
-        left: -50px;
-        animation-delay: -7s;
-    }
-
-    .floating-orb-3 {
-        width: 200px;
-        height: 200px;
-        background: var(--onboard-accent);
-        top: 50%;
-        left: 50%;
-        animation-delay: -14s;
+        background: var(--accent-color, #6366f1);
+        bottom: -100px;
+        left: -100px;
+        animation-delay: -10s;
     }
 
     @keyframes floatOrb {
@@ -131,33 +98,24 @@
             transform: translate(0, 0) scale(1);
         }
 
-        25% {
-            transform: translate(30px, -30px) scale(1.05);
-        }
-
         50% {
-            transform: translate(-20px, 20px) scale(0.95);
-        }
-
-        75% {
-            transform: translate(20px, 10px) scale(1.02);
+            transform: translate(20px, -20px) scale(1.05);
         }
     }
 
-    /* Container */
+    /* Main container */
     .onboarding-container {
         position: relative;
         z-index: 1;
         max-width: 520px;
         width: 100%;
-        margin: 0 auto;
-        animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     @keyframes fadeInUp {
         from {
             opacity: 0;
-            transform: translateY(30px);
+            transform: translateY(24px);
         }
 
         to {
@@ -168,17 +126,17 @@
 
     /* Glassmorphic Card */
     .onboarding-card {
-        background: var(--onboard-glass-bg);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid var(--onboard-glass-border);
-        border-radius: var(--onboard-card-radius);
+        background: var(--glass-bg, rgba(31, 31, 31, 0.85));
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
         padding: 3rem;
         text-align: center;
         box-shadow:
-            var(--onboard-shadow-glow),
-            0 25px 50px -12px rgba(0, 0, 0, 0.5),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            0 0 60px rgba(65, 105, 225, 0.15),
+            0 25px 50px -12px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
         position: relative;
         overflow: hidden;
     }
@@ -190,7 +148,7 @@
         left: 0;
         right: 0;
         height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
     }
 
     /* Progress Bar */
@@ -199,20 +157,20 @@
     }
 
     .progress-bar {
-        height: 6px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 3px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 2px;
         overflow: hidden;
         position: relative;
     }
 
     .progress-fill {
         height: 100%;
-        background: linear-gradient(90deg, var(--onboard-primary), var(--onboard-secondary), var(--onboard-accent));
+        background: linear-gradient(90deg, var(--accent-blue, #4169e1), #6366f1, #06b6d4);
         background-size: 200% 100%;
-        border-radius: 3px;
-        animation: shimmer 2s ease-in-out infinite;
-        box-shadow: 0 0 20px var(--onboard-primary);
+        border-radius: 2px;
+        animation: shimmer 3s ease-in-out infinite;
+        box-shadow: 0 0 12px var(--accent-blue, #4169e1);
     }
 
     @keyframes shimmer {
@@ -226,13 +184,12 @@
     }
 
     .progress-text {
-        font-family: var(--onboard-font);
-        font-size: 0.75rem;
-        font-weight: 500;
-        color: var(--onboard-text-muted);
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.4);
         margin-top: 0.75rem;
         text-transform: uppercase;
-        letter-spacing: 0.1em;
+        letter-spacing: 0.15em;
     }
 
     /* Step Dots */
@@ -240,263 +197,229 @@
         display: flex;
         justify-content: center;
         gap: 0.75rem;
-        margin-bottom: 2.5rem;
+        margin-bottom: 2rem;
     }
 
     .step-dot {
-        width: 10px;
-        height: 10px;
+        width: 8px;
+        height: 8px;
         border-radius: 50%;
-        background: rgba(255, 255, 255, 0.15);
+        background: rgba(255, 255, 255, 0.12);
         transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        position: relative;
     }
 
     .step-dot.active {
-        background: var(--onboard-primary);
-        box-shadow: 0 0 20px var(--onboard-primary), 0 0 40px rgba(99, 102, 241, 0.4);
-        transform: scale(1.2);
-    }
-
-    .step-dot.active::after {
-        content: '';
-        position: absolute;
-        inset: -4px;
-        border-radius: 50%;
-        border: 2px solid var(--onboard-primary);
-        opacity: 0;
-        animation: pingDot 1.5s ease-out infinite;
-    }
-
-    @keyframes pingDot {
-        0% {
-            transform: scale(1);
-            opacity: 0.8;
-        }
-
-        100% {
-            transform: scale(2);
-            opacity: 0;
-        }
+        background: var(--accent-blue, #4169e1);
+        box-shadow: 0 0 16px var(--accent-blue, #4169e1);
+        transform: scale(1.3);
     }
 
     .step-dot.completed {
-        background: var(--onboard-success);
-        box-shadow: 0 0 15px var(--onboard-success);
+        background: #10b981;
+        box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
     }
 
     /* Icon */
     .onboarding-icon {
-        font-size: 4rem;
-        margin-bottom: 1.5rem;
-        background: linear-gradient(135deg, var(--onboard-primary), var(--onboard-secondary));
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 20px;
+        background: linear-gradient(135deg,
+                rgba(65, 105, 225, 0.15) 0%,
+                rgba(99, 102, 241, 0.1) 100%);
+        border: 1px solid rgba(65, 105, 225, 0.2);
+        animation: iconPulse 3s ease-in-out infinite;
+    }
+
+    .onboarding-icon i {
+        font-size: 2rem;
+        background: linear-gradient(135deg, var(--accent-blue, #4169e1), #6366f1);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        animation: iconFloat 3s ease-in-out infinite;
-        display: inline-block;
     }
 
-    @keyframes iconFloat {
+    @keyframes iconPulse {
 
         0%,
         100% {
             transform: translateY(0);
+            box-shadow: 0 10px 40px rgba(65, 105, 225, 0.2);
         }
 
         50% {
-            transform: translateY(-8px);
+            transform: translateY(-4px);
+            box-shadow: 0 15px 50px rgba(65, 105, 225, 0.3);
         }
     }
 
     /* Typography */
     .onboarding-title {
-        font-family: var(--onboard-font);
-        font-size: 2rem;
+        font-size: 1.75rem;
         font-weight: 700;
-        color: var(--onboard-text-primary);
-        margin-bottom: 0.75rem;
+        color: var(--text-primary, #ffffff);
+        margin: 0 0 0.5rem;
         letter-spacing: -0.02em;
-        line-height: 1.2;
+        line-height: 1.3;
     }
 
     .onboarding-title span {
-        background: linear-gradient(135deg, var(--onboard-primary), var(--onboard-accent));
+        background: linear-gradient(135deg, var(--accent-blue, #4169e1), #6366f1);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
     }
 
     .onboarding-subtitle {
-        font-family: var(--onboard-font);
-        font-size: 1rem;
+        font-size: 0.95rem;
         font-weight: 400;
-        color: var(--onboard-text-secondary);
-        margin-bottom: 2rem;
+        color: rgba(255, 255, 255, 0.6);
+        margin: 0 0 2rem;
         line-height: 1.6;
     }
 
     /* Feature List */
     .feature-list {
         text-align: left;
-        margin: 2rem 0;
+        margin: 0 0 2rem;
     }
 
     .feature-item {
         display: flex;
         align-items: flex-start;
         gap: 1rem;
-        margin-bottom: 0.75rem;
         padding: 1rem 1.25rem;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.06);
-        border-radius: 12px;
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+        margin-bottom: 0.5rem;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 14px;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         text-decoration: none;
-        cursor: pointer;
         color: inherit;
+        cursor: pointer;
     }
 
-    .feature-item:nth-child(1) {
-        animation-delay: 0.1s;
-    }
-
-    .feature-item:nth-child(2) {
-        animation-delay: 0.2s;
-    }
-
-    .feature-item:nth-child(3) {
-        animation-delay: 0.3s;
+    .feature-item:last-child {
+        margin-bottom: 0;
     }
 
     .feature-item:hover {
-        background: rgba(65, 105, 225, 0.15);
-        border-color: rgba(65, 105, 225, 0.5);
+        background: rgba(65, 105, 225, 0.1);
+        border-color: rgba(65, 105, 225, 0.3);
         transform: translateX(4px);
-        box-shadow: 0 4px 20px rgba(65, 105, 225, 0.25);
+        box-shadow: 0 4px 20px rgba(65, 105, 225, 0.15);
     }
 
     .feature-icon {
-        font-size: 1.25rem;
-        color: var(--onboard-success);
         flex-shrink: 0;
-        margin-top: 0.1rem;
-        filter: drop-shadow(0 0 8px var(--onboard-success));
-    }
-
-    .feature-text {
-        font-family: var(--onboard-font);
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #10b981;
+        font-size: 1rem;
     }
 
     .feature-text strong {
         display: block;
         font-weight: 600;
-        color: var(--onboard-text-primary);
-        margin-bottom: 0.25rem;
-        font-size: 0.95rem;
-        user-select: text;
-        -webkit-user-select: text;
-        -moz-user-select: text;
-        cursor: text;
+        color: var(--text-primary, #ffffff);
+        margin-bottom: 0.15rem;
+        font-size: 0.9rem;
     }
 
     .feature-text span {
-        font-size: 0.85rem;
-        color: var(--onboard-text-muted);
-        line-height: 1.5;
-        user-select: text;
-        -webkit-user-select: text;
-        -moz-user-select: text;
-        cursor: text;
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.5);
+        line-height: 1.4;
     }
 
     /* Primary Button */
-    .btn-primary-lg {
-        font-family: var(--onboard-font);
+    .btn-onboard-primary {
         display: inline-flex;
         align-items: center;
         justify-content: center;
         gap: 0.75rem;
-        padding: 1rem 2.5rem;
-        font-size: 1rem;
+        width: 100%;
+        padding: 1rem 2rem;
+        font-size: 0.95rem;
         font-weight: 600;
         border-radius: 12px;
-        background: linear-gradient(135deg, var(--onboard-primary), var(--onboard-secondary));
+        background: linear-gradient(135deg, var(--accent-blue, #4169e1), #6366f1);
         color: white;
         border: none;
         cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         position: relative;
         overflow: hidden;
-        box-shadow:
-            0 4px 15px rgba(99, 102, 241, 0.4),
-            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 20px rgba(65, 105, 225, 0.35);
     }
 
-    .btn-primary-lg::before {
+    .btn-onboard-primary::before {
         content: '';
         position: absolute;
         top: 0;
         left: -100%;
         width: 100%;
         height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-        transition: left 0.5s ease;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+        transition: left 0.4s ease;
     }
 
-    .btn-primary-lg:hover {
-        transform: translateY(-3px);
+    .btn-onboard-primary:hover {
+        transform: translateY(-2px);
         box-shadow:
-            0 8px 25px rgba(99, 102, 241, 0.5),
-            0 0 40px rgba(99, 102, 241, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            0 8px 30px rgba(65, 105, 225, 0.45),
+            0 0 40px rgba(65, 105, 225, 0.2);
     }
 
-    .btn-primary-lg:hover::before {
+    .btn-onboard-primary:hover::before {
         left: 100%;
     }
 
-    .btn-primary-lg:active {
-        transform: translateY(-1px);
+    .btn-onboard-primary:active {
+        transform: translateY(0);
     }
 
-    .btn-primary-lg i {
-        font-size: 0.9rem;
-        transition: transform 0.3s ease;
+    .btn-onboard-primary i {
+        font-size: 0.85rem;
+        transition: transform 0.25s ease;
     }
 
-    .btn-primary-lg:hover i {
-        transform: translateX(4px);
+    .btn-onboard-primary:hover i {
+        transform: translateX(3px);
     }
 
     /* Skip Link */
     .skip-onboarding {
         display: inline-block;
-        margin-top: 1.5rem;
-        font-family: var(--onboard-font);
-        font-size: 0.85rem;
+        margin-top: 1.25rem;
+        font-size: 0.8rem;
         font-weight: 400;
-        color: var(--onboard-text-muted);
+        color: rgba(255, 255, 255, 0.4);
         background: none;
         border: none;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.25s ease;
         padding: 0.5rem 1rem;
         border-radius: 8px;
     }
 
     .skip-onboarding:hover {
-        color: var(--onboard-text-secondary);
+        color: rgba(255, 255, 255, 0.7);
         background: rgba(255, 255, 255, 0.05);
     }
 
     /* Responsive */
     @media (max-width: 640px) {
-        .onboarding-wrapper {
-            padding: 1rem;
-            align-items: flex-start;
-            padding-top: 2rem;
+        .onboarding-section {
+            padding: 2rem 1rem;
+            min-height: calc(100vh - 160px);
         }
 
         .onboarding-card {
@@ -505,36 +428,34 @@
         }
 
         .onboarding-title {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
         }
 
         .onboarding-icon {
-            font-size: 3rem;
+            width: 64px;
+            height: 64px;
         }
 
-        .btn-primary-lg {
-            width: 100%;
-            padding: 1rem 1.5rem;
+        .onboarding-icon i {
+            font-size: 1.5rem;
         }
 
-        .floating-orb {
-            opacity: 0.2;
+        .feature-item {
+            padding: 0.875rem 1rem;
         }
     }
 
     /* Reduced Motion */
     @media (prefers-reduced-motion: reduce) {
 
-        .onboarding-wrapper::before,
-        .floating-orb,
+        .onboarding-section::before,
+        .onboarding-orb,
         .onboarding-icon,
-        .progress-fill,
-        .step-dot.active::after {
+        .progress-fill {
             animation: none;
         }
 
-        .onboarding-container,
-        .feature-item {
+        .onboarding-container {
             animation: none;
         }
     }
@@ -542,13 +463,12 @@
 {% endblock %}
 
 {% block content %}
-<div class="onboarding-wrapper">
-    <!-- Floating Orbs -->
-    <div class="floating-orb floating-orb-1"></div>
-    <div class="floating-orb floating-orb-2"></div>
-    <div class="floating-orb floating-orb-3"></div>
+<section class="onboarding-section">
+    <!-- Background orbs -->
+    <div class="onboarding-orb onboarding-orb-1"></div>
+    <div class="onboarding-orb onboarding-orb-2"></div>
 
-    <main class="onboarding-container">
+    <div class="onboarding-container">
         <div class="onboarding-card">
             <!-- Progress -->
             <div class="progress-container">
@@ -566,20 +486,20 @@
                 <div class="step-dot"></div>
             </div>
 
-            <!-- Welcome content -->
+            <!-- Welcome icon -->
             <div class="onboarding-icon">
                 <i class="fas fa-hand-sparkles"></i>
             </div>
 
+            <!-- Welcome content -->
             <h1 class="onboarding-title">Welcome, <span>{{ current_user.first_name or current_user.username }}</span>!
             </h1>
 
             <p class="onboarding-subtitle">
-                Thanks for joining us! Let's get your account set up so you can make the most of
-                your experience.
+                Let's get your account set up so you can make the most of your experience.
             </p>
 
-            <!-- Features preview - Clickable links to onboarding steps -->
+            <!-- Features preview - Clickable links -->
             <div class="feature-list">
                 <a href="{{ url_for('onboarding.profile') }}" class="feature-item">
                     <i class="fas fa-check-circle feature-icon"></i>
@@ -607,7 +527,7 @@
             <!-- Actions -->
             <form method="POST" action="{{ url_for('onboarding.complete_welcome') }}">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="btn-primary-lg">
+                <button type="submit" class="btn-onboard-primary">
                     Let's Get Started <i class="fas fa-arrow-right"></i>
                 </button>
             </form>
@@ -619,6 +539,6 @@
                 </button>
             </form>
         </div>
-    </main>
-</div>
+    </div>
+</section>
 {% endblock %}

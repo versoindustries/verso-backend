@@ -26,5 +26,5 @@
 }
 
 .balance-empty {
-    color: var(--bs-secondary, #6c757d);
+    color: var(--bs-secondary, var(--text-muted));
 }

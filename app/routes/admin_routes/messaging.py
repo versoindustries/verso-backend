@@ -95,7 +95,7 @@ def process_mentions(message):
             mentioned_user_ids.append(user.id)
             
             # Create notification
-            from app.routes.notifications import create_notification
+            from app.routes.admin_routes.notifications import create_notification
             create_notification(
                 user_id=user.id,
                 notification_type='mention',
@@ -113,7 +113,7 @@ def notify_channel_members(message, exclude_user_id=None):
     """
     Notify all channel members about a new message.
     """
-    from app.routes.notifications import create_notification
+    from app.routes.admin_routes.notifications import create_notification
     
     channel = message.channel
     
@@ -386,7 +386,7 @@ def channel(channel_id):
 @messaging_bp.route('/channel/<int:channel_id>/send', methods=['POST'])
 @login_required
 def send_message(channel_id):
-    """Send a message to a channel."""
+    """Send a message to a channel with slash command support."""
     channel = Channel.query.get_or_404(channel_id)
     
     # Check access
@@ -420,11 +420,36 @@ def send_message(channel_id):
         db.session.flush()
         attachment_id = media.id
     
+    # Process slash commands
+    message_type = 'text'
+    extra_data = {}
+    display_content = content
+    
+    if content.startswith('/'):
+        from app.modules.slash_commands import process_slash_command, is_slash_command
+        if is_slash_command(content):
+            result = process_slash_command(content, current_user, channel_id)
+            if result.get('success'):
+                display_content = result.get('display_text', content)
+                message_type = 'command'
+                extra_data = {
+                    'command': content,
+                    'card': result.get('card'),
+                    'type': 'data_reference' if result.get('card') else 'command_result'
+                }
+            elif result.get('error'):
+                # Show error as system message
+                display_content = f"⚠️ {result.get('error')}"
+                message_type = 'system'
+                extra_data = {'command': content, 'error': result.get('error')}
+    
     message = Message(
         channel_id=channel_id, 
         user_id=current_user.id, 
-        content=content,
-        attachment_id=attachment_id
+        content=display_content,
+        attachment_id=attachment_id,
+        message_type=message_type,
+        extra_data=extra_data if extra_data else None
     )
     db.session.add(message)
     db.session.commit()
@@ -437,7 +462,12 @@ def send_message(channel_id):
     
     # Handle AJAX request
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return jsonify({'success': True, 'message_id': message.id})
+        return jsonify({
+            'success': True, 
+            'message_id': message.id,
+            'message_type': message_type,
+            'card': extra_data.get('card') if extra_data else None
+        })
     
     return redirect(url_for('messaging.channel', channel_id=channel_id))
 
@@ -490,7 +520,12 @@ def poll_messages(channel_id):
             'created_at': msg.created_at.strftime('%Y-%m-%d %H:%M:%S'),
             'is_me': msg.user_id == current_user.id,
             'attachment': attachment_info,
-            'reactions': reactions
+            'reactions': reactions,
+            # Enterprise messaging fields
+            'message_type': getattr(msg, 'message_type', 'text') or 'text',
+            'card': msg.get_card() if hasattr(msg, 'get_card') else None,
+            'is_pinned': getattr(msg, 'is_pinned', False),
+            'extra_data': msg.extra_data if hasattr(msg, 'extra_data') else None
         })
     
     return jsonify(results)
@@ -680,3 +715,324 @@ def get_reactions(message_id):
             reactions[reaction.emoji]['user_reacted'] = True
     
     return jsonify(reactions)
+
+
+# ============================================================================
+# Message Pinning Routes
+# ============================================================================
+
+@messaging_bp.route('/message/<int:message_id>/pin', methods=['POST'])
+@login_required
+def pin_message(message_id):
+    """Pin a message in a channel."""
+    message = Message.query.get_or_404(message_id)
+    channel = message.channel
+    
+    if not user_can_access_channel(channel):
+        return jsonify({'error': 'Access denied'}), 403
+    
+    # Only channel creator or admin can pin
+    if channel.created_by_id != current_user.id and not current_user.has_role('admin'):
+        return jsonify({'error': 'Permission denied'}), 403
+    
+    message.pin(current_user.id)
+    db.session.commit()
+    
+    return jsonify({'success': True, 'action': 'pinned'})
+
+
+@messaging_bp.route('/message/<int:message_id>/unpin', methods=['POST'])
+@login_required
+def unpin_message(message_id):
+    """Unpin a message."""
+    message = Message.query.get_or_404(message_id)
+    channel = message.channel
+    
+    if not user_can_access_channel(channel):
+        return jsonify({'error': 'Access denied'}), 403
+    
+    if channel.created_by_id != current_user.id and not current_user.has_role('admin'):
+        return jsonify({'error': 'Permission denied'}), 403
+    
+    message.unpin()
+    db.session.commit()
+    
+    return jsonify({'success': True, 'action': 'unpinned'})
+
+
+@messaging_bp.route('/channel/<int:channel_id>/pinned')
+@login_required
+def get_pinned_messages(channel_id):
+    """Get all pinned messages in a channel."""
+    channel = Channel.query.get_or_404(channel_id)
+    if not user_can_access_channel(channel):
+        return jsonify({'error': 'Access denied'}), 403
+    
+    pinned = Message.query.filter_by(
+        channel_id=channel_id, 
+        is_pinned=True
+    ).order_by(Message.pinned_at.desc()).all()
+    
+    results = []
+    for msg in pinned:
+        results.append({
+            'id': msg.id,
+            'content': msg.content[:200] + ('...' if len(msg.content or '') > 200 else ''),
+            'user': msg.user.username,
+            'created_at': msg.created_at.strftime('%Y-%m-%d %H:%M'),
+            'pinned_at': msg.pinned_at.strftime('%Y-%m-%d %H:%M') if msg.pinned_at else None,
+            'pinned_by': msg.pinned_by.username if msg.pinned_by else None
+        })
+    
+    return jsonify(results)
+
+
+# ============================================================================
+# Customer/Guest Channel Access Routes
+# ============================================================================
+
+@messaging_bp.route('/guest/<token>')
+def guest_channel_access(token):
+    """Access a channel via guest token."""
+    from app.models import CustomerChannelAccess
+    
+    access = CustomerChannelAccess.query.filter_by(
+        access_token=token, 
+        is_active=True
+    ).first_or_404()
+    
+    if access.is_expired():
+        flash('This access link has expired.', 'error')
+        return redirect(url_for('main_routes.index'))
+    
+    # Update last accessed
+    access.last_accessed_at = datetime.utcnow()
+    db.session.commit()
+    
+    channel = access.channel
+    messages = Message.query.filter_by(channel_id=channel.id)\
+        .order_by(Message.created_at.asc()).all()
+    
+    return render_template('messaging/guest_channel.html',
+                         channel=channel,
+                         messages=messages,
+                         access=access)
+
+
+@messaging_bp.route('/guest/<token>/send', methods=['POST'])
+def guest_send_message(token):
+    """Send a message as a guest."""
+    from app.models import CustomerChannelAccess
+    
+    access = CustomerChannelAccess.query.filter_by(
+        access_token=token, 
+        is_active=True
+    ).first_or_404()
+    
+    if access.is_expired():
+        return jsonify({'error': 'Access expired'}), 403
+    
+    channel = access.channel
+    if channel.is_archived:
+        return jsonify({'error': 'Channel is archived'}), 403
+    
+    content = request.form.get('content', '').strip()
+    if not content:
+        return jsonify({'error': 'Message cannot be empty'}), 400
+    
+    # For guest messages, we use user_id=None or a system user
+    # For now, require a linked user or contact
+    user_id = access.user_id or 1  # Fallback to first user if no linked user
+    
+    message = Message(
+        channel_id=channel.id,
+        user_id=user_id,
+        content=content,
+        message_type='text'
+    )
+    db.session.add(message)
+    access.last_accessed_at = datetime.utcnow()
+    db.session.commit()
+    
+    return jsonify({'success': True, 'message_id': message.id})
+
+
+# ============================================================================
+# Message Search
+# ============================================================================
+
+@messaging_bp.route('/search')
+@login_required
+def search_messages():
+    """Search messages across accessible channels."""
+    query = request.args.get('q', '').strip()
+    channel_id = request.args.get('channel_id', type=int)
+    
+    if not query or len(query) < 2:
+        return jsonify({'error': 'Query too short', 'results': []})
+    
+    # Build base query
+    msg_query = Message.query.filter(Message.content.ilike(f'%{query}%'))
+    
+    # Filter by channel if specified
+    if channel_id:
+        channel = Channel.query.get(channel_id)
+        if channel and user_can_access_channel(channel):
+            msg_query = msg_query.filter(Message.channel_id == channel_id)
+        else:
+            return jsonify({'error': 'Access denied', 'results': []})
+    else:
+        # Get all accessible channels
+        accessible_channels = []
+        for ch in Channel.query.all():
+            if user_can_access_channel(ch):
+                accessible_channels.append(ch.id)
+        msg_query = msg_query.filter(Message.channel_id.in_(accessible_channels))
+    
+    messages = msg_query.order_by(Message.created_at.desc()).limit(50).all()
+    
+    results = []
+    for msg in messages:
+        results.append({
+            'id': msg.id,
+            'channel_id': msg.channel_id,
+            'channel_name': msg.channel.name,
+            'user': msg.user.username,
+            'content': msg.content[:200] + ('...' if len(msg.content or '') > 200 else ''),
+            'created_at': msg.created_at.strftime('%Y-%m-%d %H:%M')
+        })
+    
+    return jsonify({'results': results, 'count': len(results)})
+
+
+# ============================================================================
+# Slash Command Help Route
+# ============================================================================
+
+@messaging_bp.route('/commands')
+@login_required
+def list_commands():
+    """List available slash commands."""
+    from app.modules.slash_commands import get_available_commands
+    commands = get_available_commands()
+    
+    if request.headers.get('Accept') == 'application/json':
+        return jsonify(commands)
+    
+    return render_template('messaging/commands.html', commands=commands)
+
+
+# ============================================================================
+# Server-Sent Events (SSE) for Real-Time Updates
+# ============================================================================
+
+@messaging_bp.route('/channel/<int:channel_id>/stream')
+@login_required
+def stream_messages(channel_id):
+    """
+    SSE endpoint for real-time message streaming.
+    
+    Clients connect to this endpoint to receive new messages as they arrive.
+    Uses simple polling on the server side (no Redis) per roadmap requirements.
+    
+    Usage:
+        const eventSource = new EventSource('/messaging/channel/1/stream?last_id=100');
+        eventSource.onmessage = (event) => {
+            const messages = JSON.parse(event.data);
+            // Process new messages
+        };
+    """
+    from flask import Response, stream_with_context
+    import time
+    import json
+    
+    channel = Channel.query.get_or_404(channel_id)
+    if not user_can_access_channel(channel):
+        return jsonify({'error': 'Access denied'}), 403
+    
+    last_id = request.args.get('last_id', 0, type=int)
+    
+    def generate():
+        """Generator function for SSE stream."""
+        nonlocal last_id
+        heartbeat_interval = 30  # Send heartbeat every 30 seconds
+        poll_interval = 2  # Check for new messages every 2 seconds
+        last_heartbeat = time.time()
+        
+        # Initial connection event
+        yield f"event: connected\ndata: {json.dumps({'channel_id': channel_id, 'status': 'connected'})}\n\n"
+        
+        while True:
+            try:
+                # Check for new messages
+                new_messages = Message.query.filter(
+                    Message.channel_id == channel_id,
+                    Message.id > last_id
+                ).order_by(Message.created_at.asc()).all()
+                
+                if new_messages:
+                    messages_data = []
+                    for msg in new_messages:
+                        attachment_info = None
+                        if msg.attachment_id and msg.attachment:
+                            attachment_info = {
+                                'url': url_for('media.serve_media', media_id=msg.attachment_id),
+                                'name': msg.attachment.filename,
+                                'is_image': msg.attachment.mimetype.startswith('image/') if msg.attachment.mimetype else False
+                            }
+                        
+                        # Get reactions
+                        reactions = {}
+                        for reaction in msg.reactions:
+                            if reaction.emoji not in reactions:
+                                reactions[reaction.emoji] = {'count': 0, 'user_reacted': False}
+                            reactions[reaction.emoji]['count'] += 1
+                            if reaction.user_id == current_user.id:
+                                reactions[reaction.emoji]['user_reacted'] = True
+                        
+                        messages_data.append({
+                            'id': msg.id,
+                            'user': msg.user.username,
+                            'user_id': msg.user_id,
+                            'content': str(render_message_content(msg)),
+                            'raw_content': msg.content,
+                            'created_at': msg.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                            'is_me': msg.user_id == current_user.id,
+                            'attachment': attachment_info,
+                            'reactions': reactions,
+                            'message_type': getattr(msg, 'message_type', 'text') or 'text',
+                            'card': msg.get_card() if hasattr(msg, 'get_card') else None,
+                            'is_pinned': getattr(msg, 'is_pinned', False),
+                            'extra_data': msg.extra_data if hasattr(msg, 'extra_data') else None
+                        })
+                    
+                    last_id = new_messages[-1].id
+                    yield f"event: messages\ndata: {json.dumps(messages_data)}\n\n"
+                
+                # Send heartbeat
+                current_time = time.time()
+                if current_time - last_heartbeat >= heartbeat_interval:
+                    yield f"event: heartbeat\ndata: {json.dumps({'timestamp': int(current_time)})}\n\n"
+                    last_heartbeat = current_time
+                
+                # Wait before next poll
+                time.sleep(poll_interval)
+                
+            except GeneratorExit:
+                # Client disconnected
+                break
+            except Exception as e:
+                # Log error but keep stream alive
+                yield f"event: error\ndata: {json.dumps({'error': str(e)})}\n\n"
+                time.sleep(poll_interval)
+    
+    response = Response(
+        stream_with_context(generate()),
+        mimetype='text/event-stream',
+        headers={
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+            'X-Accel-Buffering': 'no'  # Disable nginx buffering
+        }
+    )
+    return response
