@@ -1,25 +1,58 @@
-{% extends "admin/dashboard.html" %}
+{% extends "base.html" %}
 
-{% block admin_content %}
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Locations</h1>
-    <div class="btn-toolbar mb-2 mb-md-0">
-        <a href="{{ url_for('admin.new_location') }}" class="btn btn-sm btn-outline-primary">
-            <i class="fas fa-plus"></i> New Location
-        </a>
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components/locations-management.css') }}">
+{% endblock %}
+
+{% block title %}Location Management{% endblock %}
+
+{% block description %}Manage your business locations and user assignments.{% endblock %}
+
+{% block head %}
+<meta name="description" content="{{ description | e }}">
+<meta name="robots" content="noindex, nofollow">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- React LocationManagement Component -->
+    <div data-react-component="LocationManagement" data-react-props='{
+        "initialLocations": {{ locations_json | safe }},
+        "csrfToken": "{{ form.csrf_token._value() }}"
+    }'>
+        <!-- Loading fallback with glassmorphism styling -->
+        <div class="location-management">
+            <header class="lm-header">
+                <div class="lm-header-content">
+                    <h1 class="lm-title">
+                        <i class="fas fa-map-marker-alt"></i>
+                        Location Management
+                    </h1>
+                    <p class="lm-subtitle">Loading...</p>
+                </div>
+            </header>
+            <div class="lm-stats">
+                <div class="lm-stat-card">
+                    <div class="lm-stat-icon"><i class="fas fa-building"></i></div>
+                    <div class="lm-stat-value">-</div>
+                    <div class="lm-stat-label">Total Locations</div>
+                </div>
+                <div class="lm-stat-card">
+                    <div class="lm-stat-icon"><i class="fas fa-users"></i></div>
+                    <div class="lm-stat-value">-</div>
+                    <div class="lm-stat-label">Total Users</div>
+                </div>
+                <div class="lm-stat-card">
+                    <div class="lm-stat-icon"><i class="fas fa-star"></i></div>
+                    <div class="lm-stat-value">-</div>
+                    <div class="lm-stat-label">Most Active</div>
+                </div>
+            </div>
+            <div class="lm-loading">
+                <div class="spinner"></div>
+                <span>Loading location management dashboard...</span>
+            </div>
+        </div>
     </div>
 </div>
-
-<div data-react-component="AdminDataTable" data-react-props='{
-    "columns": [
-        {"accessorKey": "id", "header": "ID", "sortable": true},
-        {"accessorKey": "name", "header": "Name", "sortable": true},
-        {"accessorKey": "address", "header": "Address"},
-        {"accessorKey": "users", "header": "Users", "sortable": true},
-        {"accessorKey": "actions", "header": "Actions", "html": true}
-    ],
-    "data": {{ locations_json | safe }},
-    "idKey": "id",
-    "emptyMessage": "No locations found."
-}'></div>
 {% endblock %}

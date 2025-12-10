@@ -111,8 +111,183 @@ def format_lead_item(item, lead_type):
 @login_required
 @role_required('admin')
 def index():
-    """Redirect to kanban board."""
-    return redirect(url_for('crm.board'))
+    """Redirect to unified CRM dashboard."""
+    return redirect(url_for('crm.dashboard'))
+
+
+@crm_bp.route('/dashboard')
+@login_required
+@role_required('admin')
+def dashboard():
+    """Unified CRM dashboard with Kanban, Analytics, Settings, and Templates."""
+    import json
+    from flask_wtf.csrf import generate_csrf
+    
+    pipeline_name = request.args.get('pipeline', 'default')
+    stages = get_pipeline_stages(pipeline_name)
+    
+    # Fetch all leads for Kanban
+    contacts = ContactFormSubmission.query.all()
+    appointments = Appointment.query.all()
+    
+    # Create columns dict from stages
+    columns = {stage.name: {'stage': stage, 'leads': []} for stage in stages}
+    
+    # Place leads in columns
+    for c in contacts:
+        status = c.status or 'New'
+        if status in columns:
+            columns[status]['leads'].append(format_lead_item(c, 'contact'))
+        else:
+            first_stage = stages[0].name if stages else 'New'
+            if first_stage in columns:
+                columns[first_stage]['leads'].append(format_lead_item(c, 'contact'))
+    
+    for a in appointments:
+        status = a.status or 'New'
+        if status in columns:
+            columns[status]['leads'].append(format_lead_item(a, 'appointment'))
+        else:
+            first_stage = stages[0].name if stages else 'New'
+            if first_stage in columns:
+                columns[first_stage]['leads'].append(format_lead_item(a, 'appointment'))
+    
+    # Sort items by date desc
+    for col in columns.values():
+        col['leads'].sort(key=lambda x: x['date'] or datetime.min, reverse=True)
+    
+    # Serialize Kanban columns for React
+    columns_json = {
+        stage_name: {
+            'stage': {
+                'name': col['stage'].name,
+                'color': col['stage'].color
+            },
+            'leads': [
+                {
+                    'id': lead['id'],
+                    'type': lead['type'],
+                    'name': lead['name'],
+                    'email': lead['email'],
+                    'phone': lead['phone'],
+                    'date': lead['date'].isoformat() if lead['date'] else None,
+                    'source': lead['source'],
+                    'score': lead['score']
+                }
+                for lead in col['leads']
+            ]
+        }
+        for stage_name, col in columns.items()
+    }
+    
+    # Analytics data: Funnel
+    funnel_data = []
+    for stage in stages:
+        contact_count = ContactFormSubmission.query.filter_by(status=stage.name).count()
+        appt_count = Appointment.query.filter_by(status=stage.name).count()
+        funnel_data.append({
+            'stage': stage.name,
+            'color': stage.color,
+            'count': contact_count + appt_count,
+            'probability': stage.probability
+        })
+    
+    # Analytics data: Sources
+    source_query = db.session.query(
+        ContactFormSubmission.source,
+        func.count(ContactFormSubmission.id)
+    ).group_by(ContactFormSubmission.source).all()
+    
+    total_sources = sum(c for _, c in source_query)
+    source_data = [
+        {
+            'source': s or 'Unknown',
+            'count': c,
+            'percentage': (c / total_sources * 100) if total_sources > 0 else 0
+        }
+        for s, c in source_query
+    ]
+    
+    # KPI data
+    today = datetime.utcnow().date()
+    week_ago = today - timedelta(days=7)
+    month_ago = today - timedelta(days=30)
+    
+    total_leads = ContactFormSubmission.query.count() + Appointment.query.count()
+    new_this_week = ContactFormSubmission.query.filter(
+        ContactFormSubmission.submitted_at >= week_ago
+    ).count() + Appointment.query.filter(
+        Appointment.created_at >= week_ago
+    ).count()
+    won_this_month = ContactFormSubmission.query.filter(
+        ContactFormSubmission.status == 'Won',
+        ContactFormSubmission.submitted_at >= month_ago
+    ).count() + Appointment.query.filter(
+        Appointment.status == 'Won',
+        Appointment.created_at >= month_ago
+    ).count()
+    
+    won_total = ContactFormSubmission.query.filter_by(status='Won').count() + \
+                Appointment.query.filter_by(status='Won').count()
+    conversion_rate = round((won_total / total_leads) * 100, 1) if total_leads > 0 else 0
+    
+    kpi_data = {
+        'totalLeads': total_leads,
+        'newThisWeek': new_this_week,
+        'wonThisMonth': won_this_month,
+        'conversionRate': conversion_rate,
+        'trends': {
+            'totalLeads': 0,  # TODO: Calculate actual trend
+            'newThisWeek': 0,
+            'wonThisMonth': 0,
+            'conversionRate': 0
+        }
+    }
+    
+    # Pipeline stages for settings
+    stages_data = [
+        {
+            'id': s.id,
+            'name': s.name,
+            'color': s.color,
+            'order': s.order,
+            'probability': s.probability,
+            'isWonStage': s.is_won_stage,
+            'isLostStage': s.is_lost_stage,
+            'pipelineName': s.pipeline_name
+        }
+        for s in stages
+    ]
+    
+    # Email templates
+    templates = EmailTemplate.query.order_by(EmailTemplate.template_type, EmailTemplate.name).all()
+    templates_data = [
+        {
+            'id': t.id,
+            'name': t.name,
+            'type': t.template_type,
+            'subject': t.subject,
+            'body': t.body or '',
+            'isActive': t.is_active
+        }
+        for t in templates
+    ]
+    
+    # Combine all props for React component
+    dashboard_props = json.dumps({
+        'columns': columns_json,
+        'updateStatusUrl': url_for('crm.update_status'),
+        'leadDetailUrl': url_for('crm.lead_detail', lead_type='__TYPE__', lead_id=0).replace('/0', '/__ID__'),
+        'stages': stages_data,
+        'pipelineName': pipeline_name,
+        'kpiData': kpi_data,
+        'funnelData': funnel_data,
+        'sourceData': source_data,
+        'templates': templates_data,
+        'csrfToken': generate_csrf()
+    })
+    
+    return render_template('admin/crm/dashboard.html', dashboard_props=dashboard_props)
 
 @crm_bp.route('/board')
 @login_required
@@ -296,7 +471,7 @@ def lead_detail(lead_type, lead_id):
     item = get_lead(lead_type, lead_id)
     if not item:
         flash('Lead not found', 'error')
-        return redirect(url_for('crm.board'))
+        return redirect(url_for('crm.dashboard'))
     
     # Get notes
     notes = LeadNote.query.filter_by(
@@ -395,7 +570,7 @@ def assign_lead(lead_type, lead_id):
     item = ContactFormSubmission.query.get(lead_id)
     if not item:
         flash('Lead not found', 'error')
-        return redirect(url_for('crm.board'))
+        return redirect(url_for('crm.dashboard'))
     
     form = LeadAssignForm()
     if form.validate_on_submit():
@@ -431,7 +606,7 @@ def create_reminder(lead_type, lead_id):
     item = get_lead(lead_type, lead_id)
     if not item:
         flash('Lead not found', 'error')
-        return redirect(url_for('crm.board'))
+        return redirect(url_for('crm.dashboard'))
     
     form = FollowUpReminderForm()
     if form.validate_on_submit():

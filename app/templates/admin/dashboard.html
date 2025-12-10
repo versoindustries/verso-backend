@@ -179,8 +179,8 @@
         <a href="{{ url_for('admin.hr_leave_requests') }}" class="quick-action-btn">
             <i class="fas fa-user-clock"></i> Leave Requests
         </a>
-        <a href="{{ url_for('crm.board') }}" class="quick-action-btn">
-            <i class="fas fa-kanban"></i> CRM Board
+        <a href="{{ url_for('crm.dashboard') }}" class="quick-action-btn">
+            <i class="fas fa-kanban"></i> CRM Dashboard
         </a>
         <a href="{{ url_for('orders_admin.orders_list') }}" class="quick-action-btn">
             <i class="fas fa-shopping-cart"></i> View Orders
@@ -239,7 +239,7 @@
     <div class="recent-section">
         <div class="section-header">
             <span class="section-title">Recent Leads</span>
-            <a href="{{ url_for('crm.board') }}" class="view-all-link">View All →</a>
+            <a href="{{ url_for('crm.dashboard') }}" class="view-all-link">View All →</a>
         </div>
         {% if contact_form_submissions %}
         <table class="data-table">

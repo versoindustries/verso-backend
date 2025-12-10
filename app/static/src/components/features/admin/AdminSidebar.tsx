@@ -54,7 +54,7 @@ function getNavCategories(_urls: Record<string, string>): NavCategory[] {
         {
             label: 'CRM',
             items: [
-                { label: 'Lead Board', href: '/admin/crm/board', icon: <Kanban size={18} /> },
+                { label: 'CRM Dashboard', href: '/admin/crm/dashboard', icon: <Kanban size={18} /> },
                 { label: 'Duplicates', href: '/admin/crm/duplicates', icon: <Users size={18} /> },
             ]
         },
@@ -83,7 +83,6 @@ function getNavCategories(_urls: Record<string, string>): NavCategory[] {
             label: 'Analytics',
             items: [
                 { label: 'Analytics', href: '/admin/analytics', icon: <BarChart3 size={18} /> },
-                { label: 'CRM Analytics', href: '/admin/crm/analytics', icon: <BarChart3 size={18} /> },
             ]
         },
         {

@@ -44,7 +44,7 @@ const defaultActions: QuickAction[] = [
     { id: 'calendar', label: 'Calendar', description: 'View appointment calendar', icon: <Calendar size={18} />, href: '/calendar/view', category: 'Navigation' },
     { id: 'users', label: 'Manage Users', description: 'View and edit users', icon: <Users size={18} />, href: '/admin/users', category: 'Navigation' },
     { id: 'orders', label: 'View Orders', description: 'E-commerce orders list', icon: <ShoppingCart size={18} />, href: '/admin/shop/orders', category: 'Navigation' },
-    { id: 'crm', label: 'CRM Board', description: 'Lead pipeline kanban', icon: <Users size={18} />, href: '/admin/crm/board', category: 'Navigation' },
+    { id: 'crm', label: 'CRM Dashboard', description: 'Unified lead management', icon: <Users size={18} />, href: '/admin/crm/dashboard', category: 'Navigation' },
 
     // Create Actions
     { id: 'new-post', label: 'New Blog Post', description: 'Write a new blog post', icon: <FileText size={18} />, href: '/blog/new', category: 'Create' },

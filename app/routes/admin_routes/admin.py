@@ -1052,16 +1052,135 @@ def list_locations():
     locations = Location.query.all()
     form = CSRFTokenForm()
     
-    # Serialize for AdminDataTable
+    # Serialize for LocationManagement React component
     locations_json = json.dumps([{
         'id': loc.id,
         'name': loc.name,
-        'address': loc.address or 'N/A',
-        'users': str(len(loc.users)),
-        'actions': f'<a href="{url_for("admin.edit_location", location_id=loc.id)}" class="btn btn-sm btn-outline-secondary">Edit</a>'
+        'address': loc.address or None,
+        'userCount': len(loc.users) if hasattr(loc, 'users') else 0,
+        'createdAt': loc.created_at.isoformat() if loc.created_at else None
     } for loc in locations])
     
-    return render_template('admin/list_locations.html', locations=locations, locations_json=locations_json)
+    return render_template('admin/list_locations.html', locations=locations, locations_json=locations_json, form=form)
+
+
+@admin.route('/api/locations', methods=['GET'])
+@login_required
+@admin_required
+def api_list_locations():
+    """JSON API for listing locations."""
+    locations = Location.query.all()
+    return jsonify({
+        'locations': [{
+            'id': loc.id,
+            'name': loc.name,
+            'address': loc.address or None,
+            'userCount': len(loc.users) if hasattr(loc, 'users') else 0,
+            'createdAt': loc.created_at.isoformat() if loc.created_at else None
+        } for loc in locations]
+    })
+
+
+@admin.route('/api/locations', methods=['POST'])
+@login_required
+@admin_required
+def api_create_location():
+    """JSON API for creating a location."""
+    data = request.get_json()
+    
+    if not data or not data.get('name'):
+        return jsonify({'error': 'Location name is required'}), 400
+    
+    # Check for duplicate name
+    existing = Location.query.filter_by(name=data['name']).first()
+    if existing:
+        return jsonify({'error': 'Location name already exists'}), 400
+    
+    location = Location(
+        name=data['name'],
+        address=data.get('address')
+    )
+    
+    try:
+        db.session.add(location)
+        db.session.commit()
+        log_audit_event(current_user.id, 'create_location', 'Location', location.id, {'name': location.name}, request.remote_addr)
+        
+        return jsonify({
+            'location': {
+                'id': location.id,
+                'name': location.name,
+                'address': location.address,
+                'userCount': 0,
+                'createdAt': location.created_at.isoformat() if location.created_at else None
+            },
+            'message': 'Location created successfully'
+        }), 201
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({'error': 'Location name already exists'}), 400
+
+
+@admin.route('/api/locations/<int:location_id>', methods=['PUT'])
+@login_required
+@admin_required
+def api_update_location(location_id):
+    """JSON API for updating a location."""
+    location = Location.query.get_or_404(location_id)
+    data = request.get_json()
+    
+    if not data or not data.get('name'):
+        return jsonify({'error': 'Location name is required'}), 400
+    
+    # Check for duplicate name (excluding current location)
+    existing = Location.query.filter(Location.name == data['name'], Location.id != location_id).first()
+    if existing:
+        return jsonify({'error': 'Location name already exists'}), 400
+    
+    location.name = data['name']
+    location.address = data.get('address')
+    
+    try:
+        db.session.commit()
+        log_audit_event(current_user.id, 'update_location', 'Location', location.id, {'name': location.name}, request.remote_addr)
+        
+        return jsonify({
+            'location': {
+                'id': location.id,
+                'name': location.name,
+                'address': location.address,
+                'userCount': len(location.users) if hasattr(location, 'users') else 0,
+                'createdAt': location.created_at.isoformat() if location.created_at else None
+            },
+            'message': 'Location updated successfully'
+        })
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({'error': 'Location name already exists'}), 400
+
+
+@admin.route('/api/locations/<int:location_id>', methods=['DELETE'])
+@login_required
+@admin_required
+def api_delete_location(location_id):
+    """JSON API for deleting a location."""
+    location = Location.query.get_or_404(location_id)
+    
+    # Check if location has users assigned
+    if hasattr(location, 'users') and len(location.users) > 0:
+        return jsonify({'error': 'Cannot delete location with assigned users. Please reassign users first.'}), 400
+    
+    name = location.name
+    try:
+        db.session.delete(location)
+        db.session.commit()
+        log_audit_event(current_user.id, 'delete_location', 'Location', location_id, {'name': name}, request.remote_addr)
+        
+        return jsonify({'message': 'Location deleted successfully'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
 
 @admin.route('/location/new', methods=['GET', 'POST'])
 @login_required

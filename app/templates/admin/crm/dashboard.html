@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}CRM Dashboard{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components/crm-dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components/kanban-board.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div data-react-component="CRMDashboard" data-react-props='{{ dashboard_props | safe }}'></div>
+</div>
+{% endblock %}

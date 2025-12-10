@@ -103,6 +103,7 @@ registerComponent('ShoppingCartWidget', () => import('./components/features/cart
 registerComponent('BookingWizard', () => import('./components/features/booking/BookingWizard'))
 registerComponent('BookingPage', () => import('./components/features/booking/BookingPage'))
 registerComponent('KanbanBoard', () => import('./components/features/crm/KanbanBoard'))
+registerComponent('CRMDashboard', () => import('./components/features/crm/CRMDashboard'))
 registerComponent('EmailTemplateCards', () => import('./components/features/crm/EmailTemplateCards'))
 registerComponent('DataTable', () => import('./components/features/admin/DataTable'))
 
@@ -132,6 +133,7 @@ registerComponent('ActivityFeed', () => import('./components/features/admin/Acti
 registerComponent('ThemeEditor', () => import('./components/features/admin/ThemeEditor'))
 registerComponent('UserManagement', () => import('./components/features/admin/UserManagement'))
 registerComponent('BookingAdmin', () => import('./components/features/admin/BookingAdmin'))
+registerComponent('LocationManagement', () => import('./components/features/admin/LocationManagement'))
 
 // Feature Components - Shop
 registerComponent('ProductView', () => import('./components/features/shop/ProductView'))
