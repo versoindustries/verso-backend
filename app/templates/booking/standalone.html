@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Book an Appointment - {{ business_config.get('site_name', 'DemoSite') }}{% endblock %}
+
+{% block additional_css %}
+<style>
+    .booking-standalone-page {
+        min-height: calc(100vh - 200px);
+        padding: 2rem 1rem;
+        background: linear-gradient(135deg, var(--bg-gradient-start, #1a1a2e) 0%, var(--bg-gradient-end, #16213e) 100%);
+    }
+
+    .booking-standalone-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .booking-standalone-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .booking-standalone-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 0.5rem;
+    }
+
+    .booking-standalone-header p {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 1.1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="booking-standalone-page">
+    <div class="booking-standalone-container">
+        <div class="booking-standalone-header">
+            <h1>Book an Appointment</h1>
+            <p>Select a service, choose a time that works for you, and we'll take care of the rest.</p>
+        </div>
+
+        <div data-react-component="BookingWizard"></div>
+    </div>
+</div>
+{% endblock %}

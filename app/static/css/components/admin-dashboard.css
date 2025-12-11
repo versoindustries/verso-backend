@@ -58,6 +58,54 @@
 }
 
 /* =============================================================================
+   Tab Navigation
+   ============================================================================= */
+
+.dashboard-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    width: fit-content;
+}
+
+.dashboard-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.dashboard-tab:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.dashboard-tab.active {
+    background: var(--dash-gradient-primary);
+    color: #fff;
+    box-shadow: 0 4px 15px -3px var(--dash-primary-glow);
+}
+
+.dashboard-tab svg {
+    opacity: 0.8;
+}
+
+.dashboard-tab.active svg {
+    opacity: 1;
+}
+
+/* =============================================================================
    KPI Grid & Cards - Premium Glassmorphic Design
    ============================================================================= */
 .kpi-grid {

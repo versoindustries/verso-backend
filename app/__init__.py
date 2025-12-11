@@ -537,11 +537,13 @@ def create_app(config_class=Config):
             cache_warmup()
             app._cache_warmed = True
 
-    from app.routes.api_routes.booking_api import booking_api_bp
-    from app.routes.admin_routes.booking_admin import booking_admin_bp
+    from app.routes.api_routes.booking_api import booking_api_bp, booking_pages_public_bp
+    from app.routes.admin_routes.booking_admin import booking_admin_bp, booking_pages_bp
     from app.modules.security import rate_limiter
     app.register_blueprint(booking_api_bp)
+    app.register_blueprint(booking_pages_public_bp)
     app.register_blueprint(booking_admin_bp)
+    app.register_blueprint(booking_pages_bp)
     # Exempt booking API from rate limiting for public booking flow
     if hasattr(rate_limiter, 'limiter') and rate_limiter.limiter:
         rate_limiter.limiter.exempt(booking_api_bp)

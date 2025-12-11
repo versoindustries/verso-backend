@@ -9,7 +9,7 @@ import { useState, useEffect } from 'react'
 import {
     LayoutDashboard, Users, ShoppingCart, FileText, Mail,
     Calendar, BarChart3, Palette, Database, MapPin,
-    History, Building, Briefcase, MessageSquare, FileEdit, ChevronLeft,
+    History, Building, MessageSquare, FileEdit, ChevronLeft,
     ChevronRight, Kanban, ClipboardList, Zap
 } from 'lucide-react'
 
@@ -99,8 +99,7 @@ function getNavCategories(_urls: Record<string, string>): NavCategory[] {
         {
             label: 'Scheduling',
             items: [
-                { label: 'Estimators', href: '/admin/estimator', icon: <Briefcase size={18} /> },
-                { label: 'Services', href: '/admin/service', icon: <ClipboardList size={18} /> },
+                { label: 'Booking', href: '/admin/booking', icon: <Calendar size={18} /> },
                 { label: 'Automation', href: '/admin/automation', icon: <Zap size={18} /> },
             ]
         }

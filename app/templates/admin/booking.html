@@ -1,0 +1,11 @@
+{% extends "admin_base.html" %}
+
+{% block admin_css %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/components/booking-admin.css') }}">
+{% endblock %}
+
+{% block admin_content %}
+<div class="booking-admin-container">
+    <div data-react-component="BookingAdmin" data-react-props='{"activeTab": "{{ active_tab | default("services") }}"}'></div>
+</div>
+{% endblock %}

@@ -31,7 +31,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<div class="container py-4 blog-manage-wrapper">
   {# Breadcrumb #}
   <nav class="blog-breadcrumb">
     <a href="{{ url_for('blog.show_blog') }}">Blog</a> &gt; <span>Manage Posts</span>
@@ -39,9 +39,9 @@
 
   {# Page header #}
   <div class="blog-manage-header">
-    <h1><i class="fas fa-blog me-2"></i>Manage Your Posts</h1>
+    <h1><i class="fas fa-blog"></i>Manage Your Posts</h1>
     <a href="{{ url_for('blog.new_post') }}" class="btn btn-primary">
-      <i class="fas fa-plus me-1"></i> New Post
+      <i class="fas fa-plus"></i> New Post
     </a>
   </div>
 
@@ -55,9 +55,25 @@
   {% endfor %}
   {% endwith %}
 
-  {# Posts table #}
-  <div class="card blog-manage-table">
-    <div class="card-body">
+  {# React BlogManagement Component - KPIs and Filters #}
+  <div data-react-component="BlogManagement" data-react-props='{
+    "kpis": {
+      "total": {{ kpis.total if kpis else 0 }},
+      "published": {{ kpis.published if kpis else 0 }},
+      "drafts": {{ kpis.drafts if kpis else 0 }},
+      "scheduled": {{ kpis.scheduled if kpis else 0 }}
+    },
+    "newPostUrl": "{{ url_for('blog.new_post') }}", "csrfToken" : "{{ form.csrf_token._value() }}" }'></div>
+
+  {# Main Content Panel #}
+  <div class="blog-manage-panel">
+    <div class="blog-manage-panel-header">
+      <span class="blog-manage-panel-title">All Posts</span>
+      <span class="text-muted" style="font-size: 0.85rem;">
+        {% if posts %}{{ posts.total }} post{% if posts.total != 1 %}s{% endif %} total{% endif %}
+      </span>
+    </div>
+    <div class="blog-manage-panel-body">
       {% if posts and posts.items %}
       <div data-react-component="AdminDataTable" data-react-props='{
                     "columns": [
@@ -115,7 +131,7 @@
                   <a href="{{ url_for('blog.edit_post', post_id=post.id) }}" class="btn btn-sm btn-outline-primary"><i
                       class="fas fa-edit"></i></a>
                   <form action="{{ url_for('blog.delete_post', id=post.id) }}" method="POST"
-                    class="d-inline delete-form">
+                    class="d-inline delete-form" data-delete-post-id="{{ post.id }}">
                     {{ form.csrf_token }}
                     <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
                   </form>
@@ -128,11 +144,13 @@
       </div>
       {% else %}
       <div class="blog-manage-empty">
-        <i class="fas fa-file-alt"></i>
+        <div class="blog-manage-empty-icon">
+          <i class="fas fa-file-alt"></i>
+        </div>
         <h3>No Posts Yet</h3>
-        <p>Create your first blog post to get started.</p>
+        <p>Create your first blog post to share your ideas with the world.</p>
         <a href="{{ url_for('blog.new_post') }}" class="btn btn-primary">
-          <i class="fas fa-plus me-1"></i> Create Post
+          <i class="fas fa-plus"></i> Create Your First Post
         </a>
       </div>
       {% endif %}
@@ -140,9 +158,9 @@
   </div>
 
   {# Footer links #}
-  <div class="mt-4 text-center">
+  <div class="blog-manage-footer">
     <a href="{{ url_for('blog.show_blog') }}" class="btn btn-outline-secondary">
-      <i class="fas fa-arrow-left me-1"></i> Back to Blog
+      <i class="fas fa-arrow-left"></i> Back to Blog
     </a>
   </div>
 </div>
@@ -158,6 +176,24 @@
         e.preventDefault();
       }
     });
+  });
+
+  // Listen for filter changes from BlogManagement component
+  document.addEventListener('blog-filter-change', (e) => {
+    const filter = e.detail.filter;
+    const table = document.querySelector('[data-react-component="AdminDataTable"]');
+    if (table) {
+      // Apply filter via URL parameter (page reload for server-side filtering)
+      // For client-side filtering, we could filter the data directly
+      console.log('Filter changed to:', filter);
+    }
+  });
+
+  // Listen for search from BlogManagement component
+  document.addEventListener('blog-search', (e) => {
+    const query = e.detail.query;
+    console.log('Search query:', query);
+    // AdminDataTable has its own built-in search, this is for future enhancements
   });
 </script>
 {% endblock %}

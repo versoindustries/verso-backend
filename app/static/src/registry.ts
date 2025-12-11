@@ -134,6 +134,7 @@ registerComponent('ThemeEditor', () => import('./components/features/admin/Theme
 registerComponent('UserManagement', () => import('./components/features/admin/UserManagement'))
 registerComponent('BookingAdmin', () => import('./components/features/admin/BookingAdmin'))
 registerComponent('LocationManagement', () => import('./components/features/admin/LocationManagement'))
+registerComponent('UnifiedAppointmentsDashboard', () => import('./components/features/admin/UnifiedAppointmentsDashboard'))
 
 // Feature Components - Shop
 registerComponent('ProductView', () => import('./components/features/shop/ProductView'))
@@ -150,6 +151,8 @@ registerComponent('UserDashboard', () => import('./components/features/user/User
 
 // Feature Components - Blog
 registerComponent('BlogPostUtils', () => import('./components/features/blog/BlogPostUtils'))
+registerComponent('BlogManagement', () => import('./components/features/blog/BlogManagement'))
+registerComponent('BlogPostEditor', () => import('./components/features/blog/BlogPostEditor'))
 
 // Feature Components - Content Editing (Phase D)
 registerComponent('InlineEditor', () => import('./components/features/content/InlineEditor'))

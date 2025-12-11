@@ -483,88 +483,9 @@ def delete_role(role_id):
     flash('Role deleted successfully.', 'success')
     return redirect(url_for('admin.list_roles'))
 
-@admin.route('/estimator', methods=['GET', 'POST'])
-@login_required
-@admin_required
-def admin_estimator():
-    form = EstimatorForm()
-    if form.validate_on_submit():
-        estimator = Estimator(name=form.name.data)
-        db.session.add(estimator)
-        db.session.commit()
-        return redirect(url_for('admin.admin_dashboard'))
-    estimators = Estimator.query.all()
-    return render_template('admin/estimator_form.html', hide_estimate_form=True, form=form, estimators=estimators)
-
-@admin.route('/estimator/delete/<int:estimator_id>', methods=['POST'])
-@login_required
-@admin_required
-def delete_estimator(estimator_id):
-    current_app.logger.debug(f'Attempting to delete estimator with ID: {estimator_id}')
-    estimator = Estimator.query.get_or_404(estimator_id)
-    try:
-        if estimator.appointments:
-            flash('Cannot delete estimator because they are assigned to appointments.', 'error')
-            return redirect(url_for('admin.admin_estimator'))
-        db.session.delete(estimator)
-        db.session.commit()
-        current_app.logger.info(f'Estimator ID {estimator_id} deleted successfully.')
-        flash('Estimator deleted successfully.', 'success')
-    except SQLAlchemyError as e:
-        db.session.rollback()
-        current_app.logger.error(f'Error deleting estimator ID {estimator_id}: {e}')
-        flash('Error deleting estimator. Please try again.', 'error')
-    return redirect(url_for('admin.admin_estimator'))
-
-@admin.route('/service', methods=['GET', 'POST'])
-@login_required
-@admin_required
-def services():
-    form = ServiceOptionForm()
-    if form.validate_on_submit():
-        current_app.logger.debug('Form validated successfully.')
-        service = Service(
-            name=form.name.data, 
-            description=form.description.data, 
-            display_order=form.display_order.data
-        )
-        current_app.logger.debug(f'Creating new Service: {service.name}')
-        db.session.add(service)
-        try:
-            db.session.commit()
-            current_app.logger.debug('New Service added to the database successfully.')
-            flash('Service added successfully.', 'success')
-        except Exception as e:
-            db.session.rollback()
-            current_app.logger.error(f'Error adding Service to the database: {e}')
-            flash('Error adding Service. Please try again.', 'error')
-        return redirect(url_for('admin.services'))
-    else:
-        if form.errors:
-            current_app.logger.debug(f'Form validation errors: {form.errors}')
-    services = Service.query.order_by(Service.display_order).all()
-    current_app.logger.debug(f'Loaded {len(services)} Services for display.')
-    return render_template('admin/service.html', hide_estimate_form=True, form=form, services=services)
-
-@admin.route('/service/delete/<int:service_id>', methods=['POST'])
-@login_required
-@admin_required
-def delete_service(service_id):
-    current_app.logger.debug(f'Attempting to delete service with ID: {service_id}')
-    service = Service.query.get_or_404(service_id)
-    try:
-        if service.appointments:
-            flash('Cannot delete service because it is associated with appointments.', 'error')
-            return redirect(url_for('admin.services'))
-        db.session.delete(service)
-        db.session.commit()
-        current_app.logger.info(f'Service ID {service_id} deleted successfully.')
-        flash('Service deleted successfully.', 'success')
-    except SQLAlchemyError as e:
-        db.session.rollback()
-        current_app.logger.error(f'Error deleting service ID {service_id}: {e}')
-        flash('Error deleting service. Please try again.', 'error')
-    return redirect(url_for('admin.services'))
+# NOTE: Old /admin/estimator and /admin/service routes have been removed.
+# Use the unified booking dashboard at /admin/booking instead.
+# Staff and services are now managed through the React-based BookingAdmin component.
 
 @admin.route('/generate-sitemap', methods=['GET'])
 @login_required

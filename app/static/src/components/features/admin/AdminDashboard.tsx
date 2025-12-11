@@ -5,10 +5,13 @@
  * animated charts, gradient effects, and enterprise-level design.
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react'
-import { DollarSign, UserPlus, CalendarCheck, Users, TrendingUp, TrendingDown, Activity, Zap } from 'lucide-react'
+import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react'
+import { DollarSign, UserPlus, CalendarCheck, Users, TrendingUp, TrendingDown, Activity, Zap, LayoutDashboard, Calendar } from 'lucide-react'
 import api from '../../../api'
 import { Spinner } from '../../ui/spinner'
+
+// Lazy load the appointments dashboard
+const UnifiedAppointmentsDashboard = lazy(() => import('./UnifiedAppointmentsDashboard'))
 
 // =============================================================================
 // Types
@@ -46,6 +49,8 @@ export interface AdminDashboardProps {
     metricsUrl?: string
     /** Additional class */
     className?: string
+    /** Active tab: 'overview' or 'appointments' */
+    activeTab?: 'overview' | 'appointments'
 }
 
 // =============================================================================
@@ -196,11 +201,13 @@ export function AdminDashboard({
     kpis: initialKpis,
     metricsUrl = '/admin/dashboard_metrics',
     className = '',
+    activeTab: initialTab = 'overview',
 }: AdminDashboardProps) {
     const [kpis] = useState<KPIData | null>(initialKpis || null)
     const [chartData, setChartData] = useState<ChartData | null>(null)
     const [selectedDays, setSelectedDays] = useState(30)
     const [loading, setLoading] = useState(false)
+    const [activeTab, setActiveTab] = useState<'overview' | 'appointments'>(initialTab)
     const chartRef = useRef<any>(null)
     const leadsChartRef = useRef<any>(null)
 
@@ -402,99 +409,126 @@ export function AdminDashboard({
 
     return (
         <div className={`admin-dashboard-react ${className}`}>
-            {/* KPI Grid */}
-            {kpis && (
-                <div className="kpi-grid">
-                    <KPICard
-                        title="Revenue This Month"
-                        value={`$${(animatedRevenue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
-                        subtitle={`Today: $${(kpis.revenue_today / 100).toFixed(2)}`}
-                        icon={<DollarSign size={24} />}
-                        iconColor="#10b981"
-                        trend={kpis.revenue_trend}
-                    />
-                    <KPICard
-                        title="Leads This Month"
-                        value={animatedLeads}
-                        subtitle={`Today: ${kpis.leads_today} new leads`}
-                        icon={<UserPlus size={24} />}
-                        iconColor="#22d3ee"
-                        trend={kpis.leads_trend}
-                    />
-                    <KPICard
-                        title="Appointments Today"
-                        value={animatedAppointments}
-                        subtitle="Scheduled for today"
-                        icon={<CalendarCheck size={24} />}
-                        iconColor="#f59e0b"
-                    />
-                    <KPICard
-                        title="Active Users"
-                        value={animatedUsers}
-                        subtitle={`of ${kpis.total_users} total (last 24h)`}
-                        icon={<Users size={24} />}
-                        iconColor="#a855f7"
-                    />
-                </div>
-            )}
+            {/* Tab Navigation */}
+            <div className="dashboard-tabs">
+                <button
+                    className={`dashboard-tab ${activeTab === 'overview' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('overview')}
+                >
+                    <LayoutDashboard size={18} />
+                    Overview
+                </button>
+                <button
+                    className={`dashboard-tab ${activeTab === 'appointments' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('appointments')}
+                >
+                    <Calendar size={18} />
+                    Appointments
+                </button>
+            </div>
 
-            {/* Charts Grid */}
-            <div className="charts-grid">
-                <div className="chart-card">
-                    <div className="chart-header">
-                        <span className="chart-title">
-                            <Zap size={16} className="chart-icon chart-icon--success" />
-                            Revenue Over Time
-                        </span>
-                        <div className="chart-controls">
-                            {[7, 30, 90].map(days => (
-                                <button
-                                    key={days}
-                                    className={selectedDays === days ? 'active' : ''}
-                                    onClick={() => handleDaysChange(days)}
-                                >
-                                    {days}D
-                                </button>
-                            ))}
+            {/* Tab Content */}
+            {activeTab === 'appointments' ? (
+                <Suspense fallback={<div className="dashboard-loading"><Spinner size="lg" /><span>Loading appointments...</span></div>}>
+                    <UnifiedAppointmentsDashboard />
+                </Suspense>
+            ) : (
+                <>
+                    {/* KPI Grid */}
+                    {kpis && (
+                        <div className="kpi-grid">
+                            <KPICard
+                                title="Revenue This Month"
+                                value={`$${(animatedRevenue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
+                                subtitle={`Today: $${(kpis.revenue_today / 100).toFixed(2)}`}
+                                icon={<DollarSign size={24} />}
+                                iconColor="#10b981"
+                                trend={kpis.revenue_trend}
+                            />
+                            <KPICard
+                                title="Leads This Month"
+                                value={animatedLeads}
+                                subtitle={`Today: ${kpis.leads_today} new leads`}
+                                icon={<UserPlus size={24} />}
+                                iconColor="#22d3ee"
+                                trend={kpis.leads_trend}
+                            />
+                            <KPICard
+                                title="Appointments Today"
+                                value={animatedAppointments}
+                                subtitle="Scheduled for today"
+                                icon={<CalendarCheck size={24} />}
+                                iconColor="#f59e0b"
+                            />
+                            <KPICard
+                                title="Active Users"
+                                value={animatedUsers}
+                                subtitle={`of ${kpis.total_users} total (last 24h)`}
+                                icon={<Users size={24} />}
+                                iconColor="#a855f7"
+                            />
+                        </div>
+                    )}
+
+                    {/* Charts Grid */}
+                    <div className="charts-grid">
+                        <div className="chart-card">
+                            <div className="chart-header">
+                                <span className="chart-title">
+                                    <Zap size={16} className="chart-icon chart-icon--success" />
+                                    Revenue Over Time
+                                </span>
+                                <div className="chart-controls">
+                                    {[7, 30, 90].map(days => (
+                                        <button
+                                            key={days}
+                                            className={selectedDays === days ? 'active' : ''}
+                                            onClick={() => handleDaysChange(days)}
+                                        >
+                                            {days}D
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="chart-container">
+                                {loading ? (
+                                    <div className="chart-loading"><Spinner /></div>
+                                ) : (
+                                    <canvas id="revenueChart" />
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="chart-card">
+                            <div className="chart-header">
+                                <span className="chart-title">
+                                    <Activity size={16} className="chart-icon chart-icon--primary" />
+                                    Lead Pipeline
+                                </span>
+                            </div>
+                            {chartData?.funnel && <FunnelChart stages={chartData.funnel} />}
                         </div>
                     </div>
-                    <div className="chart-container">
-                        {loading ? (
-                            <div className="chart-loading"><Spinner /></div>
-                        ) : (
-                            <canvas id="revenueChart" />
-                        )}
-                    </div>
-                </div>
 
-                <div className="chart-card">
-                    <div className="chart-header">
-                        <span className="chart-title">
-                            <Activity size={16} className="chart-icon chart-icon--primary" />
-                            Lead Pipeline
-                        </span>
+                    <div className="charts-grid">
+                        <div className="chart-card" style={{ gridColumn: 'span 2' }}>
+                            <div className="chart-header">
+                                <span className="chart-title">
+                                    <UserPlus size={16} className="chart-icon chart-icon--accent" />
+                                    Leads Over Time
+                                </span>
+                            </div>
+                            <div className="chart-container">
+                                {loading ? (
+                                    <div className="chart-loading"><Spinner /></div>
+                                ) : (
+                                    <canvas id="leadsChart" />
+                                )}
+                            </div>
+                        </div>
                     </div>
-                    {chartData?.funnel && <FunnelChart stages={chartData.funnel} />}
-                </div>
-            </div>
-
-            <div className="charts-grid">
-                <div className="chart-card" style={{ gridColumn: 'span 2' }}>
-                    <div className="chart-header">
-                        <span className="chart-title">
-                            <UserPlus size={16} className="chart-icon chart-icon--accent" />
-                            Leads Over Time
-                        </span>
-                    </div>
-                    <div className="chart-container">
-                        {loading ? (
-                            <div className="chart-loading"><Spinner /></div>
-                        ) : (
-                            <canvas id="leadsChart" />
-                        )}
-                    </div>
-                </div>
-            </div>
+                </>
+            )}
         </div>
     )
 }

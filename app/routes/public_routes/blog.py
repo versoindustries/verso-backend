@@ -99,11 +99,28 @@ def manage_posts():
     try:
         page = request.args.get('page', 1, type=int)
         per_page = 50  # Increased for client-side table
-        # Show all posts for the current user or admins
+        
+        # Build base query based on user role
         if current_user.has_role('admin'):
-            posts = Post.query.order_by(Post.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
+            base_query = Post.query
         else:
-            posts = Post.query.filter_by(author_id=current_user.id).order_by(Post.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
+            base_query = Post.query.filter_by(author_id=current_user.id)
+        
+        # Calculate KPIs
+        total_posts = base_query.count()
+        published_posts = base_query.filter_by(is_published=True).count()
+        scheduled_posts = base_query.filter(Post.publish_at.isnot(None), Post.is_published == False).count()
+        draft_posts = total_posts - published_posts - scheduled_posts
+        
+        kpis = {
+            'total': total_posts,
+            'published': published_posts,
+            'drafts': draft_posts,
+            'scheduled': scheduled_posts
+        }
+        
+        # Get paginated posts
+        posts = base_query.order_by(Post.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
         form = CSRFTokenForm()
         
         # Serialize posts for AdminDataTable
@@ -134,7 +151,7 @@ def manage_posts():
             actions = f'''
                 <a href="{view_url}" class="btn btn-sm btn-outline-secondary" title="View"><i class="fas fa-eye"></i></a>
                 <a href="{edit_url}" class="btn btn-sm btn-outline-primary" title="Edit"><i class="fas fa-edit"></i></a>
-                <form action="{delete_url}" method="POST" class="d-inline delete-form">
+                <form action="{delete_url}" method="POST" class="d-inline delete-form" data-delete-post-id="{post.id}">
                     <input type="hidden" name="csrf_token" value="{form.csrf_token._value()}">
                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash"></i></button>
                 </form>
@@ -152,12 +169,15 @@ def manage_posts():
         logger.debug(f"Retrieved {posts.total} posts for management by user {current_user.username}")
         return render_template('blog/manage_posts.html', posts=posts, form=form, 
                              posts_json=json.dumps(posts_json),
-                             is_admin=current_user.has_role('admin'))
+                             is_admin=current_user.has_role('admin'),
+                             kpis=kpis)
     except Exception as e:
         logger.error(f"Error fetching posts for management: {e}")
         flash('An error occurred while loading your posts.', 'danger')
         return render_template('blog/manage_posts.html', posts=None, form=CSRFTokenForm(), 
-                             posts_json='[]', is_admin=False)
+                             posts_json='[]', is_admin=False,
+                             kpis={'total': 0, 'published': 0, 'drafts': 0, 'scheduled': 0})
+
 
 # Create new post (blogger role required)
 @blog_blueprint.route('/blog/new', methods=['GET', 'POST'])
@@ -251,7 +271,158 @@ def new_post():
             flash('An error occurred while creating the post.', 'danger')
     if form.errors:
         logger.debug(f"Form validation errors: {form.errors}")
-    return render_template('blog/new_post.html', form=form)
+    
+    # Fetch categories and series for React component
+    import json
+    categories = BlogCategory.query.order_by(BlogCategory.name).all()
+    series = PostSeries.query.order_by(PostSeries.title).all()
+    categories_json = json.dumps([{'id': c.id, 'name': c.name} for c in categories])
+    series_json = json.dumps([{'id': s.id, 'title': s.title} for s in series])
+    
+    return render_template('blog/new_post.html', form=form, 
+                          categories_json=categories_json,
+                          series_json=series_json)
+
+
+# API endpoint for React blog post editor
+@blog_blueprint.route('/api/blog/posts', methods=['POST'])
+@login_required
+@blogger_required
+def api_create_post():
+    """Create a new blog post via JSON API (for React component)."""
+    import json
+    try:
+        # Get form data
+        title = request.form.get('title', '').strip()
+        content = request.form.get('content', '')
+        category = request.form.get('category', '')
+        blog_category_id = request.form.get('blog_category_id', 0, type=int)
+        tags_input = request.form.get('tags_input', '')
+        is_featured = request.form.get('is_featured', 'false').lower() == 'true'
+        publish_at_str = request.form.get('publish_at', '')
+        meta_description = request.form.get('meta_description', '')
+        series_id = request.form.get('series_id', 0, type=int)
+        series_order = request.form.get('series_order', 0, type=int)
+        is_published = request.form.get('is_published', 'false').lower() == 'true'
+        
+        # Validation
+        errors = {}
+        if not title:
+            errors['title'] = 'Title is required.'
+        elif len(title) > 200:
+            errors['title'] = 'Title must be 200 characters or less.'
+        
+        if not content:
+            errors['content'] = 'Content is required.'
+        
+        if errors:
+            return jsonify({'success': False, 'errors': errors, 'message': 'Validation failed.'}), 400
+        
+        # Handle image
+        image_data = None
+        image_mime_type = None
+        if 'image' in request.files:
+            file = request.files['image']
+            if file and file.filename:
+                # Validate file type
+                allowed_extensions = {'png', 'jpg', 'jpeg'}
+                ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else ''
+                if ext not in allowed_extensions:
+                    return jsonify({'success': False, 'errors': {'image': 'Only PNG, JPG, JPEG allowed.'}, 'message': 'Invalid image format.'}), 400
+                
+                file.seek(0)
+                image_data = file.read()
+                image_mime_type = file.mimetype
+                
+                if len(image_data) > 5 * 1024 * 1024:
+                    return jsonify({'success': False, 'errors': {'image': 'Image must be less than 5MB.'}, 'message': 'Image too large.'}), 400
+        
+        # Sanitize content
+        sanitized_content = bleach.clean(
+            content,
+            tags=ALLOWED_TAGS,
+            attributes=ALLOWED_ATTRIBUTES,
+            strip=True
+        )
+        
+        # Generate slug
+        slug = title.lower().replace(' ', '-')
+        
+        # Handle scheduled publishing
+        publish_at = None
+        if publish_at_str:
+            try:
+                publish_at = datetime.fromisoformat(publish_at_str.replace('Z', '+00:00'))
+                if publish_at > datetime.utcnow():
+                    is_published = False
+            except ValueError:
+                pass
+        
+        # Create post
+        post = Post(
+            title=title,
+            content=sanitized_content,
+            category=category,
+            is_published=is_published,
+            author_id=current_user.id,
+            slug=slug,
+            image=image_data,
+            image_mime_type=image_mime_type,
+            blog_category_id=blog_category_id if blog_category_id else None,
+            is_featured=is_featured,
+            series_id=series_id if series_id else None,
+            series_order=series_order or 0,
+            publish_at=publish_at,
+            meta_description=meta_description
+        )
+        
+        # Calculate read time
+        post.read_time_minutes = post.calculate_read_time()
+        
+        db.session.add(post)
+        db.session.flush()
+        
+        # Handle tags
+        if tags_input:
+            tag_names = [t.strip() for t in tags_input.split(',') if t.strip()]
+            for tag_name in tag_names:
+                tag_slug = tag_name.lower().replace(' ', '-')
+                tag = Tag.query.filter_by(slug=tag_slug).first()
+                if not tag:
+                    tag = Tag(name=tag_name, slug=tag_slug)
+                    db.session.add(tag)
+                post.tags.append(tag)
+        
+        # Create initial revision
+        revision = PostRevision(
+            post_id=post.id,
+            title=post.title,
+            content=post.content,
+            user_id=current_user.id,
+            revision_note='Initial version'
+        )
+        db.session.add(revision)
+        
+        db.session.commit()
+        logger.info(f"New post created via API by {current_user.username}: {post.title}")
+        
+        return jsonify({
+            'success': True,
+            'post_id': post.id,
+            'slug': post.slug,
+            'message': 'Post created successfully!'
+        })
+        
+    except IntegrityError:
+        db.session.rollback()
+        logger.error(f"Duplicate slug detected for post: {request.form.get('title')}")
+        return jsonify({'success': False, 'message': 'A post with this title already exists.'}), 400
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"API error creating post: {e}")
+        return jsonify({'success': False, 'message': 'An error occurred while creating the post.'}), 500
+
+
 
 @blog_blueprint.route('/blog/edit/<int:post_id>', methods=['GET', 'POST'])
 @login_required
@@ -701,6 +872,96 @@ def delete_category(id):
             flash('An error occurred.', 'danger')
     return redirect(url_for('blog.manage_categories'))
 
+
+# API endpoint for inline category creation (from editor)
+@blog_blueprint.route('/api/blog/categories', methods=['POST'])
+@login_required
+@blogger_required
+def api_create_category():
+    """Create a new blog category via JSON API."""
+    try:
+        data = request.get_json() or {}
+        name = data.get('name', '').strip()
+        
+        if not name:
+            return jsonify({'success': False, 'message': 'Category name is required.'}), 400
+        
+        if len(name) > 100:
+            return jsonify({'success': False, 'message': 'Category name must be 100 characters or less.'}), 400
+        
+        # Generate slug from name
+        slug = name.lower().replace(' ', '-')
+        
+        # Check for existing category with same slug
+        existing = BlogCategory.query.filter_by(slug=slug).first()
+        if existing:
+            return jsonify({'success': False, 'message': 'A category with this name already exists.'}), 400
+        
+        category = BlogCategory(
+            name=name,
+            slug=slug,
+            description=data.get('description', ''),
+            display_order=0
+        )
+        db.session.add(category)
+        db.session.commit()
+        
+        logger.info(f"Category '{name}' created via API by {current_user.username}")
+        
+        return jsonify({
+            'success': True,
+            'category': {'id': category.id, 'name': category.name},
+            'message': 'Category created successfully!'
+        })
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        logger.error(f"Error creating category via API: {e}")
+        return jsonify({'success': False, 'message': 'An error occurred while creating the category.'}), 500
+
+
+# API endpoint for inline series creation (from editor)
+@blog_blueprint.route('/api/blog/series', methods=['POST'])
+@login_required
+@blogger_required
+def api_create_series():
+    """Create a new post series via JSON API."""
+    try:
+        data = request.get_json() or {}
+        title = data.get('title', '').strip()
+        
+        if not title:
+            return jsonify({'success': False, 'message': 'Series title is required.'}), 400
+        
+        if len(title) > 200:
+            return jsonify({'success': False, 'message': 'Series title must be 200 characters or less.'}), 400
+        
+        # Generate slug from title
+        slug = title.lower().replace(' ', '-')
+        
+        # Check for existing series with same slug
+        existing = PostSeries.query.filter_by(slug=slug).first()
+        if existing:
+            return jsonify({'success': False, 'message': 'A series with this title already exists.'}), 400
+        
+        series = PostSeries(
+            title=title,
+            slug=slug,
+            description=data.get('description', '')
+        )
+        db.session.add(series)
+        db.session.commit()
+        
+        logger.info(f"Series '{title}' created via API by {current_user.username}")
+        
+        return jsonify({
+            'success': True,
+            'series': {'id': series.id, 'title': series.title},
+            'message': 'Series created successfully!'
+        })
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        logger.error(f"Error creating series via API: {e}")
+        return jsonify({'success': False, 'message': 'An error occurred while creating the series.'}), 500
 
 # Tag Management
 @blog_blueprint.route('/blog/admin/tags')

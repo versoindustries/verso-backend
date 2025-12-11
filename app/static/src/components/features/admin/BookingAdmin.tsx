@@ -334,12 +334,24 @@ function ServicesPanel() {
 // Staff Panel (Estimators from Employees)
 // =============================================================================
 
+interface Availability {
+    id?: number
+    day_of_week: number
+    day_name: string
+    start_time: string | null
+    end_time: string | null
+}
+
 function StaffPanel() {
     const [staff, setStaff] = useState<Staff[]>([])
     const [employees, setEmployees] = useState<Employee[]>([])
     const [loading, setLoading] = useState(true)
     const { isOpen, openModal, closeModal } = useModal()
     const [selectedEmployee, setSelectedEmployee] = useState<number | null>(null)
+    const [selectedStaffId, setSelectedStaffId] = useState<number | null>(null)
+    const [availability, setAvailability] = useState<Availability[]>([])
+    const [availabilityModalOpen, setAvailabilityModalOpen] = useState(false)
+    const [savingAvailability, setSavingAvailability] = useState(false)
     const toast = useToast()
 
     const fetchData = useCallback(async () => {
@@ -363,7 +375,7 @@ function StaffPanel() {
         if (!selectedEmployee) return
         try {
             await api.post('/api/admin/booking/staff', { user_id: selectedEmployee })
-            toast.success('Staff member added')
+            toast.success('Staff member added with default Mon-Fri availability')
             closeModal()
             setSelectedEmployee(null)
             fetchData()
@@ -393,6 +405,65 @@ function StaffPanel() {
         }
     }
 
+    const openAvailabilityModal = async (staffId: number) => {
+        setSelectedStaffId(staffId)
+        try {
+            const res = await api.get(`/api/admin/booking/availability/${staffId}`)
+            // Initialize all 7 days, filling in from response
+            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+            const fullAvailability = days.map((day, idx) => {
+                const existing = res.data.availability.find((a: Availability) => a.day_of_week === idx)
+                return existing || { day_of_week: idx, day_name: day, start_time: null, end_time: null }
+            })
+            setAvailability(fullAvailability)
+            setAvailabilityModalOpen(true)
+        } catch {
+            toast.error('Failed to load availability')
+        }
+    }
+
+    const handleSaveAvailability = async () => {
+        if (!selectedStaffId) return
+        setSavingAvailability(true)
+        try {
+            // Only send days that have both start and end times
+            const validAvailability = availability.filter(a => a.start_time && a.end_time)
+            await api.post(`/api/admin/booking/availability/${selectedStaffId}`, {
+                availability: validAvailability
+            })
+            toast.success('Availability updated')
+            setAvailabilityModalOpen(false)
+        } catch {
+            toast.error('Failed to save availability')
+        } finally {
+            setSavingAvailability(false)
+        }
+    }
+
+    const handleSeedAvailability = async (staffId: number) => {
+        try {
+            await api.post(`/api/admin/booking/availability/${staffId}/seed`)
+            toast.success('Default availability seeded (Mon-Fri 9am-5pm)')
+        } catch (err: unknown) {
+            const error = err as { response?: { data?: { error?: string } } }
+            toast.error(error.response?.data?.error || 'Failed to seed availability')
+        }
+    }
+
+    const updateDayAvailability = (dayIndex: number, field: 'start_time' | 'end_time', value: string) => {
+        setAvailability(prev => prev.map(a =>
+            a.day_of_week === dayIndex ? { ...a, [field]: value || null } : a
+        ))
+    }
+
+    const toggleDayAvailability = (dayIndex: number, enabled: boolean) => {
+        setAvailability(prev => prev.map(a =>
+            a.day_of_week === dayIndex
+                ? { ...a, start_time: enabled ? '09:00' : null, end_time: enabled ? '17:00' : null }
+                : a
+        ))
+    }
+
     // Filter employees not already added as staff
     const availableEmployees = employees.filter(
         emp => !staff.some(s => s.user_id === emp.id)
@@ -411,6 +482,7 @@ function StaffPanel() {
 
             <p className="booking-admin__info">
                 Staff members are pulled from your employee database. Add employees here to make them available for booking assignments.
+                Click "Availability" to manage their weekly schedule.
             </p>
 
             <table className="booking-admin__table">
@@ -419,6 +491,7 @@ function StaffPanel() {
                         <th>Name</th>
                         <th>Email</th>
                         <th>Status</th>
+                        <th>Availability</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -439,6 +512,15 @@ function StaffPanel() {
                             <td>
                                 <Button
                                     size="sm"
+                                    variant="secondary"
+                                    onClick={() => openAvailabilityModal(member.id)}
+                                >
+                                    <Clock size={14} /> Manage Hours
+                                </Button>
+                            </td>
+                            <td>
+                                <Button
+                                    size="sm"
                                     variant="ghost"
                                     onClick={() => handleToggleActive(member.id, member.is_active)}
                                 >
@@ -452,7 +534,7 @@ function StaffPanel() {
                     ))}
                     {staff.length === 0 && (
                         <tr>
-                            <td colSpan={4} className="text-center text-muted">
+                            <td colSpan={5} className="text-center text-muted">
                                 No staff members configured. Add employees to enable booking assignments.
                             </td>
                         </tr>
@@ -460,6 +542,7 @@ function StaffPanel() {
                 </tbody>
             </table>
 
+            {/* Add Staff Modal */}
             <Modal open={isOpen} onClose={closeModal} title="Add Staff Member">
                 <div className="booking-admin__form">
                     <div className="booking-admin__form-group">
@@ -482,10 +565,75 @@ function StaffPanel() {
                             All employees are already added as staff members.
                         </p>
                     )}
+                    <p className="booking-admin__info" style={{ marginTop: '0.5rem' }}>
+                        New staff members will be auto-assigned Mon-Fri 9am-5pm availability.
+                    </p>
                     <div className="booking-admin__form-actions">
                         <Button variant="ghost" onClick={closeModal}>Cancel</Button>
                         <Button variant="primary" onClick={handleAddStaff} disabled={!selectedEmployee}>
                             <Plus size={14} /> Add Staff Member
+                        </Button>
+                    </div>
+                </div>
+            </Modal>
+
+            {/* Availability Modal */}
+            <Modal
+                open={availabilityModalOpen}
+                onClose={() => setAvailabilityModalOpen(false)}
+                title="Manage Weekly Availability"
+            >
+                <div className="booking-admin__form">
+                    <p className="booking-admin__info">
+                        Set the working hours for each day of the week. Leave a day unchecked to mark it as unavailable.
+                    </p>
+
+                    <div className="booking-admin__availability-grid">
+                        {availability.map(day => (
+                            <div key={day.day_of_week} className="booking-admin__availability-row">
+                                <label className="booking-admin__checkbox">
+                                    <input
+                                        type="checkbox"
+                                        checked={!!(day.start_time && day.end_time)}
+                                        onChange={e => toggleDayAvailability(day.day_of_week, e.target.checked)}
+                                    />
+                                    <span className="booking-admin__day-label">{day.day_name}</span>
+                                </label>
+                                {day.start_time && day.end_time ? (
+                                    <div className="booking-admin__time-inputs">
+                                        <Input
+                                            type="time"
+                                            value={day.start_time}
+                                            onChange={e => updateDayAvailability(day.day_of_week, 'start_time', e.target.value)}
+                                        />
+                                        <span>to</span>
+                                        <Input
+                                            type="time"
+                                            value={day.end_time}
+                                            onChange={e => updateDayAvailability(day.day_of_week, 'end_time', e.target.value)}
+                                        />
+                                    </div>
+                                ) : (
+                                    <span className="text-muted">Not available</span>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="booking-admin__form-row" style={{ marginTop: '1rem' }}>
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => selectedStaffId && handleSeedAvailability(selectedStaffId)}
+                        >
+                            Reset to Default (Mon-Fri 9-5)
+                        </Button>
+                    </div>
+
+                    <div className="booking-admin__form-actions">
+                        <Button variant="ghost" onClick={() => setAvailabilityModalOpen(false)}>Cancel</Button>
+                        <Button variant="primary" onClick={handleSaveAvailability} disabled={savingAvailability}>
+                            <Save size={14} /> {savingAvailability ? 'Saving...' : 'Save Availability'}
                         </Button>
                     </div>
                 </div>

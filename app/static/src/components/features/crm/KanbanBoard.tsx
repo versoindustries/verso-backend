@@ -2,12 +2,14 @@ import { useState, useCallback } from 'react'
 import {
     DndContext,
     DragEndEvent,
+    DragOverEvent,
     DragOverlay,
     DragStartEvent,
-    closestCorners,
+    closestCenter,
     PointerSensor,
     useSensor,
     useSensors,
+    useDroppable,
 } from '@dnd-kit/core'
 import {
     SortableContext,
@@ -56,7 +58,7 @@ function LeadCard({ lead, leadDetailUrl }: { lead: Lead; leadDetailUrl: string }
         isDragging,
     } = useSortable({
         id: `${lead.type}-${lead.id}`,
-        data: { lead }
+        data: { lead, type: 'lead' }
     })
 
     const style = {
@@ -73,11 +75,11 @@ function LeadCard({ lead, leadDetailUrl }: { lead: Lead; leadDetailUrl: string }
         <div
             ref={setNodeRef}
             style={style}
-            className="kanban-card"
+            className={`kanban-card ${isDragging ? 'is-dragging' : ''}`}
         >
             <div className="kanban-card-header">
                 <div {...attributes} {...listeners} className="drag-handle">
-                    <GripVertical className="w-4 h-4 text-gray-400" />
+                    <GripVertical className="w-4 h-4" />
                 </div>
                 <a href={detailUrl} className="lead-name">
                     {lead.name}
@@ -114,23 +116,30 @@ function LeadCard({ lead, leadDetailUrl }: { lead: Lead; leadDetailUrl: string }
     )
 }
 
-// Droppable Column Component
+// Droppable Column Component - now with useDroppable for empty column drops
 function KanbanColumn({
     stageName,
     column,
     leadDetailUrl,
+    isOver,
 }: {
     stageName: string
     column: Column
     leadDetailUrl: string
+    isOver: boolean
 }) {
+    const { setNodeRef } = useDroppable({
+        id: stageName,
+        data: { type: 'column', stageName }
+    })
+
     const leadIds = column.leads.map(l => `${l.type}-${l.id}`)
 
     return (
-        <div className="kanban-column">
+        <div className={`kanban-column ${isOver ? 'drop-target' : ''}`}>
             <div
                 className="kanban-column-header"
-                style={{ borderTopColor: column.stage.color }}
+                style={{ '--column-color': column.stage.color } as React.CSSProperties}
             >
                 <span className="stage-name">{stageName}</span>
                 <span
@@ -142,7 +151,11 @@ function KanbanColumn({
             </div>
 
             <SortableContext items={leadIds} strategy={verticalListSortingStrategy}>
-                <div className="kanban-column-body" data-status={stageName}>
+                <div
+                    ref={setNodeRef}
+                    className={`kanban-column-body ${isOver ? 'is-over' : ''}`}
+                    data-status={stageName}
+                >
                     {column.leads.map((lead) => (
                         <LeadCard
                             key={`${lead.type}-${lead.id}`}
@@ -151,8 +164,9 @@ function KanbanColumn({
                         />
                     ))}
                     {column.leads.length === 0 && (
-                        <div className="empty-column">
-                            Drop leads here
+                        <div className={`empty-column ${isOver ? 'active' : ''}`}>
+                            <span className="empty-icon">📥</span>
+                            <span>Drop leads here</span>
                         </div>
                     )}
                 </div>
@@ -169,6 +183,7 @@ export default function KanbanBoard({
     const [columns, setColumns] = useState(initialColumns)
     const [activeId, setActiveId] = useState<string | null>(null)
     const [activeLead, setActiveLead] = useState<Lead | null>(null)
+    const [overColumn, setOverColumn] = useState<string | null>(null)
     const api = useToastApi()
 
     const sensors = useSensors(
@@ -185,47 +200,81 @@ export default function KanbanBoard({
         setActiveLead(active.data.current?.lead || null)
     }, [])
 
+    const handleDragOver = useCallback((event: DragOverEvent) => {
+        const { over } = event
+        if (!over) {
+            setOverColumn(null)
+            return
+        }
+
+        // Check if hovering over a column directly
+        if (over.data.current?.type === 'column') {
+            setOverColumn(over.data.current.stageName)
+            return
+        }
+
+        // Check if hovering over a lead in a column
+        if (over.data.current?.sortable) {
+            // Find which column contains this lead
+            const overId = over.id as string
+            for (const [stageName, col] of Object.entries(columns)) {
+                const leadIds = col.leads.map(l => `${l.type}-${l.id}`)
+                if (leadIds.includes(overId)) {
+                    setOverColumn(stageName)
+                    return
+                }
+            }
+        }
+
+        // Check if over.id is a stage name (column)
+        if (typeof over.id === 'string' && columns[over.id]) {
+            setOverColumn(over.id)
+            return
+        }
+
+        setOverColumn(null)
+    }, [columns])
+
     const handleDragEnd = useCallback(async (event: DragEndEvent) => {
         const { active, over } = event
         setActiveId(null)
         setActiveLead(null)
+        setOverColumn(null)
 
         if (!over) return
 
-        // Find which column the item was dropped into
-        const overId = over.id as string
+        // Determine target column
         let targetStatus: string | null = null
 
-        // Check if dropped on a column
-        for (const [stageName, col] of Object.entries(columns)) {
-            const leadIds = col.leads.map(l => `${l.type}-${l.id}`)
-            if (leadIds.includes(overId) || over.data.current?.sortable?.containerId === stageName) {
-                targetStatus = stageName
-                break
+        // Priority 1: Dropped on a column directly (from useDroppable)
+        if (over.data.current?.type === 'column') {
+            targetStatus = over.data.current.stageName
+        }
+
+        // Priority 2: Dropped on a lead card - get its column
+        if (!targetStatus && over.data.current?.lead) {
+            const overId = over.id as string
+            for (const [stageName, col] of Object.entries(columns)) {
+                const leadIds = col.leads.map(l => `${l.type}-${l.id}`)
+                if (leadIds.includes(overId)) {
+                    targetStatus = stageName
+                    break
+                }
             }
         }
 
-        // If dropped directly on a column body
-        if (!targetStatus && typeof over.id === 'string') {
-            // Check if overId matches a stage name
-            if (columns[over.id]) {
-                targetStatus = over.id
-            }
-        }
-
-        if (!targetStatus) {
-            // Try to find from the droppable element's data-status
-            const el = document.querySelector(`[data-status="${overId}"]`)
-            if (el) {
-                targetStatus = el.getAttribute('data-status')
-            }
+        // Priority 3: over.id is a stage name directly
+        if (!targetStatus && typeof over.id === 'string' && columns[over.id]) {
+            targetStatus = over.id
         }
 
         if (!targetStatus) return
 
         // Extract lead info from activeId
-        const [type, idStr] = (active.id as string).split('-')
-        const id = parseInt(idStr, 10)
+        const activeIdStr = active.id as string
+        const dashIndex = activeIdStr.indexOf('-')
+        const type = activeIdStr.substring(0, dashIndex)
+        const id = parseInt(activeIdStr.substring(dashIndex + 1), 10)
 
         // Find current column and lead
         let currentColumn: string | null = null
@@ -269,13 +318,21 @@ export default function KanbanBoard({
         }
     }, [columns, initialColumns, updateStatusUrl, api])
 
+    const handleDragCancel = useCallback(() => {
+        setActiveId(null)
+        setActiveLead(null)
+        setOverColumn(null)
+    }, [])
+
     return (
         <div className="kanban-board">
             <DndContext
                 sensors={sensors}
-                collisionDetection={closestCorners}
+                collisionDetection={closestCenter}
                 onDragStart={handleDragStart}
+                onDragOver={handleDragOver}
                 onDragEnd={handleDragEnd}
+                onDragCancel={handleDragCancel}
             >
                 <div className="kanban-columns">
                     {Object.entries(columns).map(([stageName, column]) => (
@@ -284,15 +341,27 @@ export default function KanbanBoard({
                             stageName={stageName}
                             column={column}
                             leadDetailUrl={leadDetailUrl}
+                            isOver={overColumn === stageName}
                         />
                     ))}
                 </div>
 
-                <DragOverlay>
+                <DragOverlay dropAnimation={null}>
                     {activeId && activeLead ? (
-                        <div className="kanban-card dragging">
+                        <div className="kanban-card drag-overlay">
                             <div className="kanban-card-header">
+                                <div className="drag-handle">
+                                    <GripVertical className="w-4 h-4" />
+                                </div>
                                 <span className="lead-name">{activeLead.name}</span>
+                                {activeLead.score > 0 && (
+                                    <span className="lead-score">{activeLead.score}</span>
+                                )}
+                            </div>
+                            <div className="kanban-card-body">
+                                <p className="lead-contact">
+                                    <Mail className="w-3 h-3" /> {activeLead.email}
+                                </p>
                             </div>
                         </div>
                     ) : null}

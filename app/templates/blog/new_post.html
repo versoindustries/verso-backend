@@ -2,10 +2,10 @@
 
 {% block title %}Create a New Blog Post{% endblock %}
 
-{% block description %}Share your insights with the community. Fill out the form below to publish your post.{% endblock %}
+{% block description %}Share your insights with the community. Create and publish your blog post.{% endblock %}
 
 {% block additional_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/new_post.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components/blog-post-editor.css') }}">
 {% endblock %}
 
 {% block head %}
@@ -18,7 +18,7 @@
 <meta name="twitter:description" content="{{ description | e }}">
 <meta name="twitter:image" content="{{ url_for('static', filename='images/logo.png') }}">
 <link rel="canonical" href="{{ request.url }}">
-<meta name="robots" content="index, follow">
+<meta name="robots" content="noindex, nofollow">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -30,143 +30,56 @@
 {% endblock %}
 
 {% block content %}
-<section class="header-section">
-  <div class="header-container">
-    <h1 class="header-title">Create a New Blog Post</h1>
-    <p class="header-subtitle">Share your insights with the community. Fill out the form below to publish your post.</p>
-    <hr class="header-divider">
+<div class="container py-4">
+  {# Flash messages #}
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="flash-messages mb-4">
+    {% for category, message in messages %}
+    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show">
+      {{ message | e }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
   </div>
-</section>
+  {% endif %}
+  {% endwith %}
 
-<section class="feedback-section">
-  <div class="feedback-container">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="feedback-message feedback-{{ category }}">
-            <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }} feedback-icon"></i>
-            <span>{{ message }}</span>
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
-  </div>
-</section>
-
-<section class="form-section">
-  <div class="form-container">
-    <form method="POST" action="{{ url_for('blog.new_post') }}" class="post-form" enctype="multipart/form-data">
-      {{ form.hidden_tag() }}
-      {{ ckeditor.load() }} <!-- Load CKEditor JavaScript -->
-      {{ ckeditor.config(name='content') }} <!-- Initialize CKEditor for the content field -->
-
-      <div class="form-group">
-        <label for="{{ form.title.id }}" class="form-label">Title</label>
-        {{ form.title(class="form-input", placeholder="Enter your post title") }}
-        {% if form.title.errors %}
-          <span class="form-error" aria-describedby="{{ form.title.id }}-error">{{ form.title.errors[0] }}</span>
-        {% endif %}
-      </div>
-
-      <div class="form-group">
-        <label for="{{ form.content.id }}" class="form-label">Content</label>
-        {{ form.content(class="form-textarea") }}
-        {% if form.content.errors %}
-          <span class="form-error" aria-describedby="{{ form.content.id }}-error">{{ form.content.errors[0] }}</span>
-        {% endif %}
-      </div>
-
-      <div class="form-group">
-        <label for="{{ form.category.id }}" class="form-label">Category</label>
-        <div class="select-wrapper">
-          {{ form.category(class="form-select") }}
-          <i class="fas fa-chevron-down select-icon"></i>
+  {# React BlogPostEditor Component #}
+  <div data-react-component="BlogPostEditor" data-react-props='{
+    "categories": {{ categories_json | safe if categories_json else "[]" }},
+    "series": {{ series_json | safe if series_json else "[]" }},
+    "csrfToken": "{{ form.csrf_token._value() }}",
+    "apiEndpoint": "{{ url_for('blog.api_create_post') }}", "redirectUrl" : "{{ url_for('blog.manage_posts') }}" }'>
+    {# Fallback for non-JS users #}
+    <noscript>
+      <section class="header-section">
+        <div class="header-container">
+          <h1 class="header-title">Create a New Blog Post</h1>
+          <p class="header-subtitle">JavaScript is required for the blog post editor.</p>
+          <a href="{{ url_for('blog.manage_posts') }}" class="btn btn-primary">Back to Manage Posts</a>
         </div>
-        {% if form.category.errors %}
-          <span class="form-error" aria-describedby="{{ form.category.id }}-error">{{ form.category.errors[0] }}</span>
-        {% endif %}
-      </div>
+      </section>
+    </noscript>
 
-      <div class="form-group">
-        <label for="{{ form.image.id }}" class="form-label">Post Image</label>
-        {{ form.image(class="form-file-input", accept="image/*") }}
-        {% if form.image.errors %}
-          <span class="form-error" aria-describedby="{{ form.image.id }}-error">{{ form.image.errors[0] }}</span>
-        {% endif %}
-      </div>
-
-      <div class="form-group form-checkbox">
-        <label for="{{ form.is_published.id }}" class="form-label-checkbox">
-          {{ form.is_published(class="form-checkbox-input") }}
-          <span class="checkbox-label">Publish Immediately</span>
-        </label>
-        {% if form.is_published.errors %}
-          <span class="form-error" aria-describedby="{{ form.is_published.id }}-error">{{ form.is_published.errors[0] }}</span>
-        {% endif %}
-      </div>
-
-      <div class="form-group form-submit">
-        {{ form.submit(class="form-submit-button") }}
-      </div>
-    </form>
+    {# Loading state while React mounts #}
+    <div class="editor-loading" id="editor-loading">
+      <div class="editor-spinner"></div>
+      <span>Loading editor...</span>
+    </div>
   </div>
-</section>
+</div>
 
-<section class="footer-section">
-  <div class="footer-container">
-    <a href="{{ url_for('blog.manage_posts') }}" class="footer-back-button">
-      <i class="fas fa-arrow-left footer-icon"></i>
-      Back to Manage Posts
-    </a>
-    <p class="footer-note">Need help? Contact support.</p>
-  </div>
-</section>
-{% endblock %}
-
-{% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  try {
-    const inputs = document.querySelectorAll('.form-input, .form-select, .form-file-input');
-    inputs.forEach(input => {
-      input.addEventListener('focus', () => {
-        input.parentElement.classList.add('focused');
-      });
-      input.addEventListener('blur', () => {
-        input.parentElement.classList.remove('focused');
-      });
-    });
-
-    const checkbox = document.querySelector('.form-checkbox-input');
-    if (checkbox) {
-      checkbox.addEventListener('change', () => {
-        checkbox.parentElement.classList.toggle('checked', checkbox.checked);
-      });
-    }
-
-    const imageInput = document.querySelector('.form-file-input');
-    if (imageInput) {
-      imageInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            const preview = document.createElement('img');
-            preview.src = event.target.result;
-            preview.className = 'image-preview';
-            preview.style.maxWidth = '200px';
-            preview.style.marginTop = '10px';
-            const existingPreview = document.querySelector('.image-preview');
-            if (existingPreview) existingPreview.remove();
-            imageInput.parentElement.appendChild(preview);
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-    }
-  } catch (error) {
-    console.error('Error in form script:', error);
-  }
-});
+  // Hide loading spinner once React mounts
+  document.addEventListener('DOMContentLoaded', function () {
+    // Give React time to mount
+    setTimeout(function () {
+      var loading = document.getElementById('editor-loading');
+      if (loading) {
+        loading.style.display = 'none';
+      }
+    }, 500);
+  });
 </script>
 {% endblock %}

@@ -1,0 +1,260 @@
+/**
+ * Booking Admin Dashboard Styles
+ * 
+ * Enterprise glassmorphism styling for unified booking administration.
+ * Matches the design system used in admin-dashboard.css
+ */
+
+/* Container */
+.booking-admin-container {
+    min-height: calc(100vh - 80px);
+    padding: 0;
+}
+
+/* Main booking admin component */
+.booking-admin {
+    padding: 2rem;
+}
+
+.booking-admin__header {
+    margin-bottom: 2rem;
+}
+
+.booking-admin__title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 0.5rem 0;
+}
+
+.booking-admin__subtitle {
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0;
+}
+
+.booking-admin__tabs {
+    margin-bottom: 1.5rem;
+}
+
+/* Panel styling */
+.booking-admin__panel {
+    background: rgba(42, 42, 42, 0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.booking-admin__panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.booking-admin__panel-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 0;
+}
+
+.booking-admin__info {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.booking-admin__warning {
+    color: var(--warning-color, #f59e0b);
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
+}
+
+/* Table styling */
+.booking-admin__table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #fff;
+}
+
+.booking-admin__table th,
+.booking-admin__table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.booking-admin__table th {
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.booking-admin__table tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.booking-admin__table .text-muted {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.booking-admin__table .text-center {
+    text-align: center;
+}
+
+/* Form styling */
+.booking-admin__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.booking-admin__form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.booking-admin__form-group label {
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+}
+
+.booking-admin__form-row {
+    display: flex;
+    gap: 1rem;
+}
+
+.booking-admin__form-row .booking-admin__form-group {
+    flex: 1;
+}
+
+.booking-admin__form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.booking-admin__checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.booking-admin__checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary-color, #3b82f6);
+}
+
+.booking-admin__select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: rgba(30, 30, 30, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.95rem;
+}
+
+.booking-admin__select:focus {
+    outline: none;
+    border-color: var(--primary-color, #3b82f6);
+}
+
+/* Availability Grid */
+.booking-admin__availability-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.booking-admin__availability-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: rgba(30, 30, 30, 0.5);
+    border-radius: 8px;
+}
+
+.booking-admin__day-label {
+    min-width: 100px;
+    font-weight: 500;
+}
+
+.booking-admin__time-inputs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.booking-admin__time-inputs input {
+    padding: 0.5rem;
+    background: rgba(30, 30, 30, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    color: #fff;
+    font-size: 0.9rem;
+}
+
+.booking-admin__time-inputs span {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Settings grid */
+.booking-admin__settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.booking-admin__settings-card {
+    padding: 1.25rem;
+    background: rgba(30, 30, 30, 0.5);
+    border-radius: 8px;
+}
+
+.booking-admin__settings-card h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 0.5rem 0;
+}
+
+.booking-admin__settings-card p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    margin: 0 0 1rem 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .booking-admin {
+        padding: 1rem;
+    }
+
+    .booking-admin__form-row {
+        flex-direction: column;
+    }
+
+    .booking-admin__availability-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .booking-admin__settings-grid {
+        grid-template-columns: 1fr;
+    }
+}

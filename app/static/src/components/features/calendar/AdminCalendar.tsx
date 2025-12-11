@@ -5,9 +5,14 @@
  * with CSRF protection and confirmation dialogs.
  */
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { Calendar, CalendarEvent } from './Calendar'
 import api from '../../../api'
+
+interface Location {
+    id: number
+    name: string
+}
 
 export interface AdminCalendarProps {
     /** URL to fetch events from */
@@ -20,6 +25,8 @@ export interface AdminCalendarProps {
     height?: number | string
     /** Additional CSS class */
     className?: string
+    /** Show location filter dropdown */
+    showLocationFilter?: boolean
 }
 
 export function AdminCalendar({
@@ -28,8 +35,33 @@ export function AdminCalendar({
     initialView = 'dayGridMonth',
     height = 600,
     className = '',
+    showLocationFilter = true,
 }: AdminCalendarProps) {
     const [isUpdating, setIsUpdating] = useState(false)
+    const [locations, setLocations] = useState<Location[]>([])
+    const [selectedLocation, setSelectedLocation] = useState<number | null>(null)
+
+    // Fetch locations for filter dropdown
+    useEffect(() => {
+        if (!showLocationFilter) return
+
+        const fetchLocations = async () => {
+            try {
+                const response = await api.get<Location[]>('/admin/api/locations')
+                if (response.data) {
+                    setLocations(response.data)
+                }
+            } catch {
+                // Silently fail - location filter just won't be available
+            }
+        }
+        fetchLocations()
+    }, [showLocationFilter])
+
+    // Build events URL with location filter
+    const filteredEventsUrl = selectedLocation
+        ? `${eventsUrl}${eventsUrl.includes('?') ? '&' : '?'}location_id=${selectedLocation}`
+        : eventsUrl
 
     const handleEventClick = useCallback((event: CalendarEvent) => {
         const props = event.extendedProps || {}
@@ -37,9 +69,12 @@ export function AdminCalendar({
             ? event.start.toLocaleString()
             : new Date(event.start).toLocaleString()
 
+        const locationInfo = props.location_name ? `\nLocation: ${props.location_name}` : ''
+
         alert(
             `Event: ${event.title}\n` +
-            `Start: ${startStr}\n` +
+            `Start: ${startStr}` +
+            locationInfo + '\n' +
             (props.description || '')
         )
     }, [])
@@ -79,6 +114,20 @@ export function AdminCalendar({
 
     return (
         <div className={`admin-calendar ${className} ${isUpdating ? 'updating' : ''}`}>
+            {showLocationFilter && locations.length > 0 && (
+                <div className="admin-calendar__filters">
+                    <select
+                        className="admin-calendar__location-filter"
+                        value={selectedLocation || ''}
+                        onChange={(e) => setSelectedLocation(e.target.value ? parseInt(e.target.value) : null)}
+                    >
+                        <option value="">All Locations</option>
+                        {locations.map(loc => (
+                            <option key={loc.id} value={loc.id}>{loc.name}</option>
+                        ))}
+                    </select>
+                </div>
+            )}
             {isUpdating && (
                 <div className="admin-calendar-overlay">
                     <div className="spinner-border text-primary" role="status">
@@ -87,7 +136,7 @@ export function AdminCalendar({
                 </div>
             )}
             <Calendar
-                eventsUrl={eventsUrl}
+                eventsUrl={filteredEventsUrl}
                 initialView={initialView}
                 editable={true}
                 selectable={false}
@@ -100,3 +149,4 @@ export function AdminCalendar({
 }
 
 export default AdminCalendar
+

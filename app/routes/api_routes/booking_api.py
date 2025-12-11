@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, current_app, url_for
+from flask import Blueprint, jsonify, request, current_app, url_for, render_template
 from app.models import Estimator, Service, Availability, Appointment, db
 from app.modules.availability_service import get_available_slots, check_slot_available
 from app.modules.security import rate_limiter
@@ -6,7 +6,18 @@ from datetime import datetime, date, time, timedelta
 from decimal import Decimal
 import stripe
 
+# API routes for booking
 booking_api_bp = Blueprint('booking_api', __name__, url_prefix='/api/booking')
+
+# Public booking page route
+booking_pages_public_bp = Blueprint('booking_pages_public', __name__)
+
+
+@booking_pages_public_bp.route('/booking')
+@rate_limiter.exempt
+def booking_page():
+    """Public standalone booking page with the booking wizard."""
+    return render_template('booking/standalone.html')
 
 # Payment hold duration (minutes) - how long a pending payment reservation lasts
 PAYMENT_HOLD_MINUTES = 15

@@ -13,6 +13,7 @@
 
     <div class="card">
         <div class="card-body p-0">
+            {% set empty_link = url_for('automation.new_workflow') %}
             <div data-react-component="AdminDataTable" data-react-props='{
                 "columns": [
                     {"accessorKey": "name", "header": "Name", "html": true, "sortable": true},
@@ -24,7 +25,7 @@
                 "data": {{ workflows_json | safe }},
                 "idKey": "id",
                 "emptyStateMessage": "No workflows defined.",
-                "emptyStateLink": "{{ url_for(\"automation.new_workflow\") }}",
+                "emptyStateLink": "{{ empty_link }}",
                 "emptyStateLinkText": "Create one now"
             }'></div>
         </div>

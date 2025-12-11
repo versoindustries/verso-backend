@@ -22,12 +22,19 @@ def view_calendar():
 def get_events():
     start_str = request.args.get('start')
     end_str = request.args.get('end')
+    location_id = request.args.get('location_id', type=int)
     
     query = Appointment.query
     if start_str and end_str:
         start_date = datetime.fromisoformat(start_str.replace('Z', '+00:00'))
         end_date = datetime.fromisoformat(end_str.replace('Z', '+00:00'))
         query = query.filter(Appointment.preferred_date_time >= start_date, Appointment.preferred_date_time <= end_date)
+    
+    # Location filter - either from query param or user's default location
+    if location_id:
+        query = query.filter(Appointment.location_id == location_id)
+    elif current_user.location_id:
+        query = query.filter(Appointment.location_id == current_user.location_id)
         
     appointments = query.all()
     events = []
@@ -46,6 +53,9 @@ def get_events():
         end = end_dt.isoformat()
         if not end.endswith('Z'):
             end += 'Z'
+        
+        # Include location info in event
+        location_name = appt.location.name if appt.location else 'No Location'
             
         events.append({
             'id': appt.id,
@@ -53,7 +63,9 @@ def get_events():
             'start': start,
             'end': end,
             'extendedProps': {
-                'description': f"Email: {appt.email}, Phone: {appt.phone}, Estimator: {appt.estimator.name if appt.estimator else 'None'}"
+                'description': f"Email: {appt.email}, Phone: {appt.phone}, Estimator: {appt.estimator.name if appt.estimator else 'None'}",
+                'location_id': appt.location_id,
+                'location_name': location_name
             }
         })
         
