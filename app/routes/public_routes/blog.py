@@ -1098,3 +1098,89 @@ def editorial_calendar():
         logger.error(f"Error loading editorial calendar: {e}")
         flash('An error occurred.', 'danger')
         return redirect(url_for('blog.manage_posts'))
+
+
+# ============================================================================
+# Inline Content Editing API
+# ============================================================================
+
+@blog_blueprint.route('/api/post/<int:id>/content', methods=['PATCH'])
+@login_required
+def update_post_content(id):
+    """
+    Update blog post content via inline editor.
+    Accessible to Admin, Manager, Marketing, Owner, or the post author.
+    """
+    from app.modules.auth_manager import role_required
+    
+    post = Post.query.get_or_404(id)
+    
+    # Check permissions: privileged roles OR post author
+    privileged_roles = ['Admin', 'Manager', 'Marketing', 'Owner']
+    is_privileged = any(current_user.has_role(role) for role in privileged_roles)
+    is_author = post.author_id == current_user.id
+    
+    if not is_privileged and not is_author:
+        return jsonify({'error': 'You do not have permission to edit this post'}), 403
+    
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    
+    # Update title if provided
+    if 'title' in data and data['title']:
+        post.title = bleach.clean(data['title'], tags=[], strip=True)
+        post.slug = post.title.lower().replace(' ', '-')
+    
+    # Update content if provided (sanitize HTML)
+    if 'content' in data and data['content']:
+        post.content = bleach.clean(
+            data['content'], 
+            tags=ALLOWED_TAGS, 
+            attributes=ALLOWED_ATTRIBUTES,
+            strip=True
+        )
+        post.read_time_minutes = post.calculate_read_time()
+    
+    # Update SEO fields
+    if 'metaTitle' in data:
+        # Note: Post model uses meta_description, may need to add meta_title if not present
+        pass  # Post model doesn't have meta_title field currently
+    
+    if 'metaDescription' in data:
+        post.meta_description = bleach.clean(data['metaDescription'], tags=[], strip=True)[:200]
+    
+    # Update Open Graph fields if post model supports them
+    if hasattr(post, 'og_title') and 'ogTitle' in data:
+        post.og_title = bleach.clean(data['ogTitle'], tags=[], strip=True)
+    
+    if hasattr(post, 'og_description') and 'ogDescription' in data:
+        post.og_description = bleach.clean(data['ogDescription'], tags=[], strip=True)
+    
+    if hasattr(post, 'og_image') and 'ogImage' in data:
+        post.og_image = bleach.clean(data['ogImage'], tags=[], strip=True)
+    
+    # Create revision for tracking
+    revision = PostRevision(
+        post_id=post.id,
+        title=post.title,
+        content=post.content,
+        user_id=current_user.id,
+        revision_note=f'Inline edit by {current_user.username}'
+    )
+    db.session.add(revision)
+    
+    db.session.commit()
+    logger.info(f"Post '{post.title}' updated via inline editor by {current_user.username}")
+    
+    return jsonify({
+        'success': True,
+        'message': 'Post updated successfully',
+        'post': {
+            'id': post.id,
+            'title': post.title,
+            'slug': post.slug,
+            'meta_description': post.meta_description
+        }
+    })

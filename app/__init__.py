@@ -158,6 +158,24 @@ def create_app(config_class=Config):
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
+    
+    # Handle unauthorized requests - return JSON for AJAX, redirect for browser
+    @login_manager.unauthorized_handler
+    def unauthorized():
+        from flask import jsonify
+        # Check if this is an AJAX request
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or \
+           request.headers.get('Accept', '').startswith('application/json'):
+            return jsonify({
+                'success': False,
+                'error': 'Authentication required',
+                'redirect': url_for('auth.login', next=request.url)
+            }), 401
+        # For regular requests, use the default behavior (redirect to login)
+        from flask import redirect, flash
+        flash('Please log in to access this page.', 'warning')
+        return redirect(url_for('auth.login', next=request.url))
+
 
     # Load version from file
     def get_version():
@@ -247,6 +265,7 @@ def create_app(config_class=Config):
     app.register_blueprint(api)
     app.register_blueprint(blog_blueprint)
     app.register_blueprint(crm_bp)
+    csrf.exempt(messaging_bp)  # Messaging uses AJAX with X-CSRFToken header
     app.register_blueprint(messaging_bp)
     app.register_blueprint(employee_bp)
     app.register_blueprint(webhooks_bp)
@@ -539,11 +558,13 @@ def create_app(config_class=Config):
 
     from app.routes.api_routes.booking_api import booking_api_bp, booking_pages_public_bp
     from app.routes.admin_routes.booking_admin import booking_admin_bp, booking_pages_bp
+    from app.routes.admin_routes.stripe_settings import stripe_settings_bp
     from app.modules.security import rate_limiter
     app.register_blueprint(booking_api_bp)
     app.register_blueprint(booking_pages_public_bp)
     app.register_blueprint(booking_admin_bp)
     app.register_blueprint(booking_pages_bp)
+    app.register_blueprint(stripe_settings_bp)
     # Exempt booking API from rate limiting for public booking flow
     if hasattr(rate_limiter, 'limiter') and rate_limiter.limiter:
         rate_limiter.limiter.exempt(booking_api_bp)

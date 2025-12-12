@@ -1,47 +1,311 @@
 /**
- * AnalyticsDashboard Component Styles
+ * Analytics Dashboard - Enterprise Glassmorphism Design
  * 
- * Styles for the React AnalyticsDashboard component.
- * Import this in templates that use the AnalyticsDashboard component.
+ * Premium analytics UI matching base.css color scheme with
+ * unified navigation tabs, glassmorphism cards, and dark theme charts.
  */
 
 /* =============================================================================
-   Analytics KPI Grid
+   CSS Variables - Inheriting from base.css
+   ============================================================================= */
+:root {
+    /* Primary colors from base.css */
+    --analytics-primary: var(--accent-blue, #4169e1);
+    --analytics-primary-dark: var(--accent-blue-dark, #1348e7);
+    --analytics-primary-glow: rgba(65, 105, 225, 0.5);
+
+    /* Supporting colors */
+    --analytics-success: var(--success-color, #28a745);
+    --analytics-success-glow: rgba(40, 167, 69, 0.5);
+    --analytics-warning: var(--warning-color, #ffc107);
+    --analytics-warning-glow: rgba(255, 193, 7, 0.5);
+    --analytics-danger: var(--danger-color, #dc3545);
+    --analytics-info: var(--info-color, #17a2b8);
+    --analytics-info-glow: rgba(23, 162, 184, 0.5);
+
+    /* Glass effects from base.css */
+    --analytics-glass-bg: var(--glass-bg, rgba(31, 31, 31, 0.8));
+    --analytics-glass-border: rgba(65, 105, 225, 0.2);
+    --analytics-glass-highlight: rgba(255, 255, 255, 0.05);
+
+    /* Gradients */
+    --analytics-gradient-primary: var(--btn-gradient, linear-gradient(90deg, #4169e1 0%, #1348e7 100%));
+    --analytics-gradient-success: linear-gradient(90deg, #28a745 0%, #1e7e34 100%);
+    --analytics-gradient-warning: linear-gradient(90deg, #ffc107 0%, #e0a800 100%);
+    --analytics-gradient-info: linear-gradient(90deg, #17a2b8 0%, #138496 100%);
+    --analytics-gradient-purple: linear-gradient(90deg, #8b5cf6 0%, #6d28d9 100%);
+}
+
+/* =============================================================================
+   Analytics Page Container
+   ============================================================================= */
+.analytics-page {
+    animation: analyticsPageFadeIn 0.6s ease-out;
+}
+
+@keyframes analyticsPageFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =============================================================================
+   Page Header
+   ============================================================================= */
+.analytics-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.analytics-page-title {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.analytics-page-title h2 {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 1.75rem;
+    color: var(--text-primary, #fff);
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+}
+
+.analytics-page-title h2 i {
+    color: var(--analytics-primary);
+}
+
+.analytics-page-description {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin: 0;
+}
+
+/* =============================================================================
+   Navigation Tabs
+   ============================================================================= */
+.analytics-nav-tabs {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    width: fit-content;
+}
+
+.analytics-nav-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.analytics-nav-tab:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+}
+
+.analytics-nav-tab.active {
+    background: var(--analytics-gradient-primary);
+    color: #fff;
+    box-shadow: 0 4px 15px -3px var(--analytics-primary-glow);
+}
+
+.analytics-nav-tab i {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+.analytics-nav-tab.active i {
+    opacity: 1;
+}
+
+/* =============================================================================
+   Date Range Controls
+   ============================================================================= */
+.analytics-date-controls {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.35rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+}
+
+.analytics-date-btn {
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.analytics-date-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+}
+
+.analytics-date-btn.active {
+    background: var(--analytics-gradient-primary);
+    color: #fff;
+    box-shadow: 0 4px 10px -3px var(--analytics-primary-glow);
+}
+
+/* =============================================================================
+   KPI Cards Grid - Premium Glassmorphism
    ============================================================================= */
 .analytics-kpi-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 1.5rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
 }
 
 .analytics-kpi-card {
-    padding: 1.25rem;
-    border-radius: var(--component-border-radius, 0.375rem);
-    color: #fff;
+    position: relative;
+    background: var(--analytics-glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--analytics-glass-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: kpiCardSlideIn 0.5s ease-out;
+    animation-fill-mode: both;
 }
 
-.analytics-kpi-primary {
-    background: linear-gradient(135deg, var(--primary-color), #3458c5);
+.analytics-kpi-card:nth-child(1) {
+    animation-delay: 0.1s;
 }
 
-.analytics-kpi-success {
-    background: linear-gradient(135deg, var(--success-color), #1e7e34);
+.analytics-kpi-card:nth-child(2) {
+    animation-delay: 0.2s;
 }
 
-.analytics-kpi-warning {
-    background: linear-gradient(135deg, var(--warning-color), #e0a800);
-    color: #212529;
+.analytics-kpi-card:nth-child(3) {
+    animation-delay: 0.3s;
 }
 
-.analytics-kpi-info {
-    background: linear-gradient(135deg, var(--info-color), #138496);
+.analytics-kpi-card:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+@keyframes kpiCardSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Accent bar at top */
+.analytics-kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--analytics-gradient-primary);
+    opacity: 0.9;
+    transition: height 0.3s ease;
+}
+
+.analytics-kpi-card.kpi-success::before {
+    background: var(--analytics-gradient-success);
+}
+
+.analytics-kpi-card.kpi-warning::before {
+    background: var(--analytics-gradient-warning);
+}
+
+.analytics-kpi-card.kpi-info::before {
+    background: var(--analytics-gradient-info);
+}
+
+.analytics-kpi-card.kpi-purple::before {
+    background: var(--analytics-gradient-purple);
+}
+
+/* Glow effect on hover */
+.analytics-kpi-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: var(--pulse-effect, radial-gradient(circle, rgba(82, 80, 194, 0.2) 0%, transparent 70%));
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.analytics-kpi-card:hover::after {
+    opacity: 0.3;
+}
+
+.analytics-kpi-card:hover {
+    transform: translateY(-6px) scale(1.01);
+    border-color: var(--analytics-primary);
+    box-shadow:
+        var(--shadow-hover, 0 12px 32px rgba(0, 0, 0, 0.6)),
+        0 0 30px -10px var(--analytics-primary-glow);
+}
+
+.analytics-kpi-card.kpi-success:hover {
+    box-shadow: var(--shadow-hover, 0 12px 32px rgba(0, 0, 0, 0.6)), 0 0 30px -10px var(--analytics-success-glow);
+}
+
+.analytics-kpi-card.kpi-warning:hover {
+    box-shadow: var(--shadow-hover, 0 12px 32px rgba(0, 0, 0, 0.6)), 0 0 30px -10px var(--analytics-warning-glow);
+}
+
+.analytics-kpi-card.kpi-info:hover {
+    box-shadow: var(--shadow-hover, 0 12px 32px rgba(0, 0, 0, 0.6)), 0 0 30px -10px var(--analytics-info-glow);
 }
 
 .analytics-kpi-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: relative;
+    z-index: 1;
 }
 
 .analytics-kpi-text {
@@ -50,125 +314,612 @@
 }
 
 .analytics-kpi-title {
-    font-size: 0.8rem;
-    opacity: 0.85;
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.5);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 0.25rem;
+    letter-spacing: 1.5px;
+    margin-bottom: 0.5rem;
 }
 
 .analytics-kpi-value {
-    font-size: 1.75rem;
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 2rem;
     font-weight: 700;
+    color: var(--text-primary, #fff);
+    line-height: 1.2;
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+.analytics-kpi-subtitle {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.4);
+    margin-top: 0.5rem;
 }
 
 .analytics-kpi-icon {
-    opacity: 0.5;
-}
-
-/* =============================================================================
-   Analytics Charts
-   ============================================================================= */
-.analytics-charts-row {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
-}
-
-.analytics-chart-card {
-    background: var(--component-bg, rgba(42, 42, 42, 0.95));
-    border: 1px solid var(--component-border-color, rgba(255, 255, 255, 0.1));
-    border-radius: var(--component-border-radius, 0.375rem);
-    overflow: hidden;
-}
-
-.analytics-chart-header {
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--component-border-color, rgba(255, 255, 255, 0.1));
-    background: rgba(0, 0, 0, 0.2);
-}
-
-.analytics-chart-title {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #fff;
-    display: flex;
-    align-items: center;
-}
-
-.analytics-chart-body {
-    padding: 1.25rem;
-    min-height: 300px;
-    position: relative;
-}
-
-.analytics-chart-large .analytics-chart-body {
-    min-height: 320px;
-}
-
-.analytics-chart-small .analytics-chart-body {
-    min-height: 270px;
-}
-
-.analytics-chart-loading {
-    position: absolute;
-    inset: 0;
+    width: 48px;
+    height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 0.9rem;
+    border-radius: 10px;
+    background: rgba(65, 105, 225, 0.1);
+    backdrop-filter: blur(10px);
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.6);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.analytics-kpi-card:hover .analytics-kpi-icon {
+    transform: scale(1.1) rotate(5deg);
 }
 
 /* =============================================================================
-   Devices Section
+   Glassmorphism Cards
    ============================================================================= */
-.analytics-devices-section {
+.analytics-card {
+    background: var(--analytics-glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--analytics-glass-border);
+    border-radius: 12px;
+    overflow: hidden;
     margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+    animation: cardFadeIn 0.5s ease-out;
 }
 
-.analytics-chart-devices {
-    max-width: 300px;
+@keyframes cardFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.analytics-chart-devices .analytics-chart-body {
-    min-height: 220px;
+.analytics-card:hover {
+    border-color: var(--analytics-primary);
+    box-shadow: var(--shadow-light, 0 4px 12px rgba(0, 0, 0, 0.5));
 }
 
-/* =============================================================================
-   Canvas Charts
-   ============================================================================= */
-.analytics-chart-body canvas {
+.analytics-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--analytics-glass-border);
+    background: rgba(31, 31, 31, 0.5);
+}
+
+.analytics-card-title {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary, #fff);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+.analytics-card-title::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: var(--analytics-primary);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--analytics-primary-glow);
+    animation: blink 2s infinite;
+}
+
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.analytics-card-title i {
+    color: var(--analytics-primary);
+    margin-right: 0.25rem;
+}
+
+.analytics-card-body {
+    padding: 1.25rem;
+}
+
+.analytics-card-body.no-padding {
+    padding: 0;
+}
+
+/* Chart container */
+.analytics-chart-container {
+    padding: 1.5rem;
+    min-height: 280px;
+    position: relative;
+}
+
+.analytics-chart-container canvas {
     width: 100% !important;
     height: 100% !important;
 }
 
+.analytics-chart-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 280px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
 /* =============================================================================
-   Responsive
+   Data Tables
+   ============================================================================= */
+.analytics-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.analytics-table thead th {
+    padding: 1rem 1.25rem;
+    text-align: left;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background: rgba(31, 31, 31, 0.5);
+    border-bottom: 1px solid var(--analytics-glass-border);
+}
+
+.analytics-table thead th.text-end {
+    text-align: right;
+}
+
+.analytics-table thead th.text-center {
+    text-align: center;
+}
+
+.analytics-table tbody tr {
+    transition: background 0.2s ease;
+}
+
+.analytics-table tbody tr:hover {
+    background: rgba(65, 105, 225, 0.1);
+}
+
+.analytics-table tbody td {
+    padding: 1rem 1.25rem;
+    color: var(--text-primary, #fff);
+    font-size: 0.9rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.analytics-table tbody td.text-end {
+    text-align: right;
+}
+
+.analytics-table tbody td.text-center {
+    text-align: center;
+}
+
+.analytics-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.analytics-table .text-muted {
+    color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.analytics-table .text-truncate {
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.analytics-table code {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: var(--analytics-info);
+}
+
+/* =============================================================================
+   Badges - Enhanced
+   ============================================================================= */
+.analytics-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.analytics-badge.badge-primary {
+    background: linear-gradient(90deg, rgba(65, 105, 225, 0.2) 0%, rgba(65, 105, 225, 0.1) 100%);
+    color: var(--analytics-primary);
+    border: 1px solid rgba(65, 105, 225, 0.3);
+}
+
+.analytics-badge.badge-success {
+    background: linear-gradient(90deg, rgba(40, 167, 69, 0.2) 0%, rgba(40, 167, 69, 0.1) 100%);
+    color: var(--analytics-success);
+    border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.analytics-badge.badge-warning {
+    background: linear-gradient(90deg, rgba(255, 193, 7, 0.2) 0%, rgba(255, 193, 7, 0.1) 100%);
+    color: var(--analytics-warning);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.analytics-badge.badge-danger {
+    background: linear-gradient(90deg, rgba(220, 53, 69, 0.2) 0%, rgba(220, 53, 69, 0.1) 100%);
+    color: var(--analytics-danger);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+.analytics-badge.badge-info {
+    background: linear-gradient(90deg, rgba(23, 162, 184, 0.2) 0%, rgba(23, 162, 184, 0.1) 100%);
+    color: var(--analytics-info);
+    border: 1px solid rgba(23, 162, 184, 0.3);
+}
+
+.analytics-badge.badge-secondary {
+    background: rgba(108, 117, 125, 0.15);
+    color: #94a3b8;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+/* =============================================================================
+   Funnel Cards
+   ============================================================================= */
+.analytics-funnel-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.analytics-funnel-card {
+    background: var(--analytics-glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--analytics-glass-border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.analytics-funnel-card:hover {
+    transform: translateY(-6px);
+    border-color: var(--analytics-primary);
+    box-shadow: var(--shadow-hover, 0 12px 32px rgba(0, 0, 0, 0.6)),
+        0 0 30px -10px var(--analytics-primary-glow);
+}
+
+.analytics-funnel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--analytics-glass-border);
+    background: rgba(31, 31, 31, 0.5);
+}
+
+.analytics-funnel-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-primary, #fff);
+    font-weight: 600;
+}
+
+.analytics-funnel-status {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.analytics-funnel-status.active {
+    background: var(--analytics-success);
+    box-shadow: 0 0 10px var(--analytics-success-glow);
+}
+
+.analytics-funnel-status.inactive {
+    background: rgba(108, 117, 125, 0.5);
+}
+
+.analytics-funnel-body {
+    padding: 1.25rem;
+}
+
+.analytics-funnel-description {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.analytics-funnel-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+}
+
+.analytics-funnel-stat-label {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+}
+
+.analytics-funnel-footer {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--analytics-glass-border);
+    background: transparent;
+}
+
+.analytics-funnel-footer .btn {
+    width: 100%;
+}
+
+/* Conversion rate badge */
+.analytics-conversion-rate {
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+}
+
+.analytics-conversion-rate.rate-high {
+    background: var(--analytics-gradient-success);
+    color: #fff;
+}
+
+.analytics-conversion-rate.rate-medium {
+    background: var(--analytics-gradient-warning);
+    color: #212529;
+}
+
+.analytics-conversion-rate.rate-low {
+    background: linear-gradient(90deg, #dc3545 0%, #c82333 100%);
+    color: #fff;
+}
+
+/* =============================================================================
+   Progress Bars
+   ============================================================================= */
+.analytics-progress-container {
+    height: 28px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+}
+
+.analytics-progress-bar {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+}
+
+.analytics-progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        left: -100%;
+    }
+
+    100% {
+        left: 100%;
+    }
+}
+
+.analytics-progress-bar.progress-primary {
+    background: var(--analytics-gradient-primary);
+}
+
+.analytics-progress-bar.progress-success {
+    background: var(--analytics-gradient-success);
+}
+
+.analytics-progress-bar.progress-warning {
+    background: var(--analytics-gradient-warning);
+}
+
+.analytics-progress-bar.progress-info {
+    background: var(--analytics-gradient-info);
+}
+
+/* =============================================================================
+   Empty State
+   ============================================================================= */
+.analytics-empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.analytics-empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.analytics-empty-state p {
+    margin-bottom: 1.5rem;
+}
+
+/* =============================================================================
+   Back Button
+   ============================================================================= */
+.analytics-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: 1px solid rgba(65, 105, 225, 0.3);
+    border-radius: 8px;
+    color: var(--analytics-primary);
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.analytics-back-btn:hover {
+    background: var(--analytics-gradient-primary);
+    border-color: transparent;
+    color: #fff;
+    text-decoration: none;
+}
+
+/* =============================================================================
+   Grid Layouts
+   ============================================================================= */
+.analytics-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.analytics-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.analytics-grid-2-1 {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+}
+
+.analytics-grid-1-2 {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 1.5rem;
+}
+
+/* =============================================================================
+   Responsive Design
    ============================================================================= */
 @media (max-width: 1200px) {
     .analytics-kpi-grid {
         grid-template-columns: repeat(2, 1fr);
     }
+
+    .analytics-funnel-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .analytics-grid-2-1,
+    .analytics-grid-1-2 {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 992px) {
-    .analytics-charts-row {
+
+    .analytics-grid-2,
+    .analytics-grid-3 {
         grid-template-columns: 1fr;
     }
 
-    .analytics-chart-devices {
-        max-width: none;
+    .analytics-nav-tabs {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .analytics-page-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+@media (max-width: 768px) {
+    .analytics-kpi-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .analytics-kpi-card {
+        padding: 1.25rem;
+    }
+
+    .analytics-kpi-value {
+        font-size: 1.75rem;
+    }
+
+    .analytics-funnel-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .analytics-nav-tab {
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    .analytics-table thead th,
+    .analytics-table tbody td {
+        padding: 0.75rem;
+        font-size: 0.85rem;
     }
 }
 
 @media (max-width: 576px) {
-    .analytics-kpi-grid {
-        grid-template-columns: 1fr;
+    .analytics-kpi-card {
+        padding: 1rem;
+        border-radius: 10px;
     }
 
     .analytics-kpi-value {
         font-size: 1.5rem;
+    }
+
+    .analytics-kpi-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.25rem;
+    }
+
+    .analytics-date-controls {
+        flex-wrap: wrap;
+    }
+
+    .analytics-date-btn {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8rem;
     }
 }

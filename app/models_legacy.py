@@ -41,7 +41,7 @@ class User(UserMixin, db.Model):
     skills = db.Column(db.String(255), nullable=True)
     emergency_contacts = db.Column(db.Text, nullable=True)  # JSON or text description
     location_id = db.Column(db.Integer, db.ForeignKey('location.id'), nullable=True)
-    location = db.relationship('Location', backref='users')
+    location = db.relationship('Location', foreign_keys=[location_id], backref='users')
     
     # Phase 5: Employee Portal enhancements
     reports_to_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
@@ -175,6 +175,13 @@ class Service(db.Model):
     price = db.Column(db.Float, nullable=True)  # Service price for booking display
     icon = db.Column(db.String(50), nullable=True)  # Icon class for UI display
     requires_payment = db.Column(db.Boolean, default=False)  # Explicit payment toggle (price alone doesn't require payment)
+    
+    # Cancellation Policy Fields
+    # Policy types: 'full_refund', 'partial_refund', 'no_refund', 'deposit_only', 'manual'
+    cancellation_policy = db.Column(db.String(20), default='manual')
+    cancellation_window_hours = db.Column(db.Integer, default=24)  # Hours before appointment to allow free cancellation
+    refund_percentage = db.Column(db.Integer, default=100)  # For partial_refund: what percentage to refund
+    deposit_percentage = db.Column(db.Integer, default=0)  # For deposit_only: non-refundable deposit percentage
 
 class Appointment(db.Model):
     __tablename__ = 'appointment'
@@ -213,9 +220,16 @@ class Appointment(db.Model):
     # Stripe Payment Integration
     stripe_checkout_session_id = db.Column(db.String(255), nullable=True)
     stripe_payment_intent_id = db.Column(db.String(255), nullable=True)
-    payment_status = db.Column(db.String(20), default='not_required')  # not_required, pending, paid, failed, refunded
+    payment_status = db.Column(db.String(20), default='not_required')  # not_required, pending, paid, failed, refunded, partial_refund
     payment_amount = db.Column(db.Numeric(10, 2), nullable=True)  # Snapshot of price at booking time
     payment_expires_at = db.Column(db.DateTime, nullable=True)  # When pending payment hold expires
+    
+    # Refund tracking
+    stripe_refund_id = db.Column(db.String(255), nullable=True)
+    refund_amount = db.Column(db.Numeric(10, 2), nullable=True)  # Amount refunded (may be partial)
+    refund_reason = db.Column(db.String(255), nullable=True)  # Why refund was issued
+    refunded_at = db.Column(db.DateTime, nullable=True)
+    cancellation_policy_applied = db.Column(db.String(50), nullable=True)  # What policy was applied at cancellation
 
     # Relationships
     estimator = db.relationship('Estimator', backref=db.backref('appointments', lazy=True))
@@ -762,6 +776,10 @@ class Channel(db.Model):
     settings = db.Column(db.JSON, default=dict)  # Customizable per-channel settings
     retention_days = db.Column(db.Integer, default=0)  # 0 = forever
     
+    # Enterprise Messaging: Role-based access control
+    allowed_roles = db.Column(db.JSON, default=list)  # List of role names that can access this channel
+    is_restricted = db.Column(db.Boolean, default=False)  # True if role restriction is active
+    
     # Relationships
     created_by = db.relationship('User', foreign_keys=[created_by_id], backref='created_channels')
     members = db.relationship('User', secondary=channel_members, backref=db.backref('channels', lazy=True))
@@ -792,6 +810,46 @@ class Channel(db.Model):
         import secrets
         self.guest_access_token = secrets.token_urlsafe(32)
         return self.guest_access_token
+    
+    def can_user_access(self, user):
+        """
+        Check if a user has access to this channel.
+        
+        Access rules:
+        - Direct messages: Only members
+        - Private channels: Only members
+        - Public channels with restriction: User must have an allowed role
+        - Public channels without restriction: All authenticated users
+        """
+        if not user or not user.is_authenticated:
+            return False
+        
+        # DMs and private channels: member-list based
+        if self.type in ('private', 'direct') or self.is_direct:
+            return user in self.members
+        
+        # Public channels with role restriction
+        if self.type == 'public' and self.is_restricted and self.allowed_roles:
+            user_role_names = [role.name.lower() for role in user.roles]
+            allowed_lower = [r.lower() for r in self.allowed_roles]
+            # Admin always has access
+            if 'admin' in user_role_names:
+                return True
+            return any(role in allowed_lower for role in user_role_names)
+        
+        # Public channels without restriction: all authenticated users
+        return True
+    
+    @staticmethod
+    def can_user_create_channels(user):
+        """
+        Check if a user can create new channels.
+        Only Admin and Manager roles can create channels.
+        """
+        if not user or not user.is_authenticated:
+            return False
+        user_role_names = [role.name.lower() for role in user.roles]
+        return 'admin' in user_role_names or 'manager' in user_role_names
 
 
 class Message(db.Model):
@@ -1626,13 +1684,50 @@ class AuditLog(db.Model):
         return f'<AuditLog {self.action} by {self.user_id}>'
 
 class Location(db.Model):
+    """Business location for multi-location support.
+    
+    Locations can have users assigned to them, and users will only see
+    data (orders, appointments, etc.) related to their assigned location.
+    """
+    __tablename__ = 'location'
+    
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False, unique=True)
     address = db.Column(db.String(255))
+    city = db.Column(db.String(100), nullable=True)
+    state = db.Column(db.String(50), nullable=True)
+    zip_code = db.Column(db.String(20), nullable=True)
+    phone = db.Column(db.String(20), nullable=True)
+    email = db.Column(db.String(120), nullable=True)
+    timezone = db.Column(db.String(50), nullable=True)
+    is_active = db.Column(db.Boolean, default=True)
+    is_primary = db.Column(db.Boolean, default=False)  # Primary/HQ location
+    manager_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    manager = db.relationship('User', foreign_keys=[manager_id], backref='managed_locations')
+    
     def __repr__(self):
         return f'<Location {self.name}>'
+    
+    @property
+    def full_address(self):
+        """Return formatted full address."""
+        parts = [self.address]
+        if self.city:
+            parts.append(self.city)
+        if self.state:
+            parts.append(self.state)
+        if self.zip_code:
+            parts.append(self.zip_code)
+        return ', '.join(filter(None, parts)) or 'No address'
+    
+    @property
+    def user_count(self):
+        """Return count of users assigned to this location."""
+        return len(self.users) if self.users else 0
 
 import hashlib
 

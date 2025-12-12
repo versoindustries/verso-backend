@@ -8,6 +8,7 @@
  */
 
 import { useEffect, useRef, ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import { Button } from './button'
 
@@ -100,7 +101,7 @@ export function Modal({
         }
     }
 
-    return (
+    return createPortal(
         <div
             className="modal-overlay"
             onClick={handleOverlayClick}
@@ -135,7 +136,8 @@ export function Modal({
                 )}
                 <div className="modal-body">{children}</div>
             </div>
-        </div>
+        </div>,
+        document.body
     )
 }
 

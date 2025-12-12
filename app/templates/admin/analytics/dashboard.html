@@ -6,18 +6,42 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-chart-line me-2"></i>Analytics Dashboard</h2>
-        <div class="btn-group">
+<div class="container-fluid mt-4 analytics-page">
+    <!-- Page Header -->
+    <div class="analytics-page-header">
+        <div class="analytics-page-title">
+            <h2><i class="fas fa-chart-line"></i>Analytics Dashboard</h2>
+            <p class="analytics-page-description">Monitor your website traffic, visitor behavior, and conversion metrics
+            </p>
+        </div>
+        <div class="analytics-date-controls">
             <a href="{{ url_for('analytics.dashboard', days=7) }}"
-                class="btn btn-{{ 'primary' if days == 7 else 'outline-secondary' }}">7 Days</a>
+                class="analytics-date-btn {{ 'active' if days == 7 else '' }}">7 Days</a>
             <a href="{{ url_for('analytics.dashboard', days=30) }}"
-                class="btn btn-{{ 'primary' if days == 30 else 'outline-secondary' }}">30 Days</a>
+                class="analytics-date-btn {{ 'active' if days == 30 else '' }}">30 Days</a>
             <a href="{{ url_for('analytics.dashboard', days=90) }}"
-                class="btn btn-{{ 'primary' if days == 90 else 'outline-secondary' }}">90 Days</a>
+                class="analytics-date-btn {{ 'active' if days == 90 else '' }}">90 Days</a>
         </div>
     </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="analytics-nav-tabs">
+        <a href="{{ url_for('analytics.dashboard') }}" class="analytics-nav-tab active">
+            <i class="fas fa-chart-line"></i> Overview
+        </a>
+        <a href="{{ url_for('analytics.traffic') }}" class="analytics-nav-tab">
+            <i class="fas fa-signal"></i> Traffic
+        </a>
+        <a href="{{ url_for('analytics.visitors') }}" class="analytics-nav-tab">
+            <i class="fas fa-user-friends"></i> Visitors
+        </a>
+        <a href="{{ url_for('analytics.sessions') }}" class="analytics-nav-tab">
+            <i class="fas fa-route"></i> Sessions
+        </a>
+        <a href="{{ url_for('analytics.funnels') }}" class="analytics-nav-tab">
+            <i class="fas fa-filter"></i> Funnels
+        </a>
+    </nav>
 
     <!-- React AnalyticsDashboard Component for KPI Cards and Charts -->
     <div data-react-component="AnalyticsDashboard" data-react-props='{
@@ -28,130 +52,161 @@
                 "avg_session_duration": {{ metrics.avg_session_duration | default(0) }}
             },
             "days": {{ days | default(30) }},
-            "trafficUrl": "{{ url_for('analytics.daily_traffic', days=days) }}", "sourcesUrl"
-        : "{{ url_for('analytics.utm_breakdown', days=days) }}" , "devicesUrl"
-        : "{{ url_for('analytics.device_breakdown', days=days) }}" }'>
+            "trafficUrl": "{{ url_for('analytics.daily_traffic', days=days) }}",
+            "sourcesUrl": "{{ url_for('analytics.utm_breakdown', days=days) }}",
+            "devicesUrl": "{{ url_for('analytics.device_breakdown', days=days) }}" }'>
         <!-- Fallback content while React loads -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="card bg-primary text-white h-100">
-                    <div class="card-body">
-                        <h6 class="card-subtitle mb-2 text-white-50">Page Views</h6>
-                        <h3 class="mb-0">{{ "{:,}".format(metrics.page_views) }}</h3>
+        <div class="analytics-kpi-grid">
+            <div class="analytics-kpi-card">
+                <div class="analytics-kpi-content">
+                    <div class="analytics-kpi-text">
+                        <span class="analytics-kpi-title">Page Views</span>
+                        <span class="analytics-kpi-value">{{ "{:,}".format(metrics.page_views) }}</span>
                     </div>
+                    <div class="analytics-kpi-icon"><i class="fas fa-eye"></i></div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card bg-success text-white h-100">
-                    <div class="card-body">
-                        <h6 class="card-subtitle mb-2 text-white-50">Unique Sessions</h6>
-                        <h3 class="mb-0">{{ "{:,}".format(metrics.unique_sessions) }}</h3>
+            <div class="analytics-kpi-card kpi-success">
+                <div class="analytics-kpi-content">
+                    <div class="analytics-kpi-text">
+                        <span class="analytics-kpi-title">Unique Sessions</span>
+                        <span class="analytics-kpi-value">{{ "{:,}".format(metrics.unique_sessions) }}</span>
                     </div>
+                    <div class="analytics-kpi-icon"><i class="fas fa-users"></i></div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card bg-warning text-dark h-100">
-                    <div class="card-body">
-                        <h6 class="card-subtitle mb-2">Bounce Rate</h6>
-                        <h3 class="mb-0">{{ metrics.bounce_rate }}%</h3>
+            <div class="analytics-kpi-card kpi-warning">
+                <div class="analytics-kpi-content">
+                    <div class="analytics-kpi-text">
+                        <span class="analytics-kpi-title">Bounce Rate</span>
+                        <span class="analytics-kpi-value">{{ metrics.bounce_rate }}%</span>
                     </div>
+                    <div class="analytics-kpi-icon"><i class="fas fa-sign-out-alt"></i></div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card bg-info text-white h-100">
-                    <div class="card-body">
-                        <h6 class="card-subtitle mb-2 text-white-50">Avg. Duration</h6>
-                        <h3 class="mb-0">{{ (metrics.avg_session_duration // 60) }}m {{ metrics.avg_session_duration %
-                            60 }}s</h3>
+            <div class="analytics-kpi-card kpi-info">
+                <div class="analytics-kpi-content">
+                    <div class="analytics-kpi-text">
+                        <span class="analytics-kpi-title">Avg. Duration</span>
+                        <span class="analytics-kpi-value">{{ (metrics.avg_session_duration // 60) }}m {{
+                            metrics.avg_session_duration % 60 }}s</span>
                     </div>
+                    <div class="analytics-kpi-icon"><i class="fas fa-clock"></i></div>
                 </div>
             </div>
         </div>
-        <p class="text-muted">Loading interactive charts...</p>
+        <p class="text-muted mt-3">Loading interactive charts...</p>
     </div>
 
-    <div class="row mb-4">
-        <!-- Top Pages (server-rendered, kept as Jinja) -->
-        <div class="col-lg-6">
-            <div class="card h-100">
-                <div class="card-header d-flex justify-content-between">
-                    <span><i class="fas fa-file me-2"></i>Top Pages</span>
-                    <a href="{{ url_for('analytics.traffic') }}" class="btn btn-sm btn-outline-primary">View All</a>
-                </div>
-                <ul class="list-group list-group-flush">
-                    {% for page in top_pages[:10] %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span class="text-truncate" style="max-width: 400px;" title="{{ page.url }}">{{ page.url
-                            }}</span>
-                        <span class="badge bg-primary rounded-pill">{{ "{:,}".format(page.count) }}</span>
-                    </li>
-                    {% else %}
-                    <li class="list-group-item text-muted">No page views yet</li>
-                    {% endfor %}
-                </ul>
+    <div class="analytics-grid-2 mt-4">
+        <!-- Top Pages -->
+        <div class="analytics-card">
+            <div class="analytics-card-header">
+                <h3 class="analytics-card-title"><i class="fas fa-file"></i> Top Pages</h3>
+                <a href="{{ url_for('analytics.traffic') }}" class="analytics-date-btn">View All</a>
+            </div>
+            <div class="analytics-card-body no-padding">
+                <table class="analytics-table">
+                    <thead>
+                        <tr>
+                            <th>Page</th>
+                            <th class="text-end">Views</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for page in top_pages[:10] %}
+                        <tr>
+                            <td class="text-truncate" title="{{ page.url }}">{{ page.url }}</td>
+                            <td class="text-end"><span class="analytics-badge badge-primary">{{
+                                    "{:,}".format(page.count) }}</span></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="2" class="text-muted">No page views yet</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <!-- Conversion Goals (server-rendered, kept as Jinja) -->
-        <div class="col-lg-3">
-            <div class="card h-100">
-                <div class="card-header d-flex justify-content-between">
-                    <span><i class="fas fa-bullseye me-2"></i>Goals</span>
-                    <a href="{{ url_for('analytics.goals') }}" class="btn btn-sm btn-outline-primary">Manage</a>
-                </div>
-                <ul class="list-group list-group-flush">
-                    {% for stat in goal_stats[:5] %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>{{ stat.goal.name }}</span>
-                        <span class="badge bg-success rounded-pill">{{ stat.conversions }}</span>
-                    </li>
-                    {% else %}
-                    <li class="list-group-item text-muted">
-                        <a href="{{ url_for('analytics.create_goal') }}">Create your first goal</a>
-                    </li>
-                    {% endfor %}
-                </ul>
+        <!-- Conversion Goals -->
+        <div class="analytics-card">
+            <div class="analytics-card-header">
+                <h3 class="analytics-card-title"><i class="fas fa-bullseye"></i> Goals</h3>
+                <a href="{{ url_for('analytics.goals') }}" class="analytics-date-btn">Manage</a>
             </div>
-        </div>
-
-        <!-- Devices placeholder - React renders this in the component above -->
-        <div class="col-lg-3">
-            <!-- Devices chart is rendered by React AnalyticsDashboard component -->
+            <div class="analytics-card-body no-padding">
+                <table class="analytics-table">
+                    <thead>
+                        <tr>
+                            <th>Goal</th>
+                            <th class="text-end">Conversions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stat in goal_stats[:5] %}
+                        <tr>
+                            <td>{{ stat.goal.name }}</td>
+                            <td class="text-end"><span class="analytics-badge badge-success">{{ stat.conversions
+                                    }}</span></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="2" class="text-muted">
+                                <a href="{{ url_for('analytics.create_goal') }}">Create your first goal</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <!-- Quick Links (server-rendered, kept as Jinja) -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <div class="row text-center">
-                        <div class="col-md-3">
-                            <a href="{{ url_for('analytics.traffic') }}" class="btn btn-outline-primary btn-lg w-100">
-                                <i class="fas fa-signal mb-2 d-block"></i>
-                                Traffic Details
-                            </a>
+    <!-- Quick Links -->
+    <div class="analytics-card mt-4">
+        <div class="analytics-card-body">
+            <div class="analytics-kpi-grid">
+                <a href="{{ url_for('analytics.traffic') }}" class="analytics-kpi-card" style="text-decoration: none;">
+                    <div class="analytics-kpi-content">
+                        <div class="analytics-kpi-text">
+                            <span class="analytics-kpi-title">Traffic Details</span>
+                            <span class="analytics-kpi-subtitle">Sources, devices, browsers</span>
                         </div>
-                        <div class="col-md-3">
-                            <a href="{{ url_for('analytics.visitors') }}" class="btn btn-outline-success btn-lg w-100">
-                                <i class="fas fa-user-friends mb-2 d-block"></i>
-                                Visitor Analysis
-                            </a>
-                        </div>
-                        <div class="col-md-3">
-                            <a href="{{ url_for('analytics.sessions') }}" class="btn btn-outline-info btn-lg w-100">
-                                <i class="fas fa-route mb-2 d-block"></i>
-                                Session Flow
-                            </a>
-                        </div>
-                        <div class="col-md-3">
-                            <a href="{{ url_for('analytics.funnels') }}" class="btn btn-outline-warning btn-lg w-100">
-                                <i class="fas fa-filter mb-2 d-block"></i>
-                                Funnels
-                            </a>
-                        </div>
+                        <div class="analytics-kpi-icon"><i class="fas fa-signal"></i></div>
                     </div>
-                </div>
+                </a>
+                <a href="{{ url_for('analytics.visitors') }}" class="analytics-kpi-card kpi-success"
+                    style="text-decoration: none;">
+                    <div class="analytics-kpi-content">
+                        <div class="analytics-kpi-text">
+                            <span class="analytics-kpi-title">Visitor Analysis</span>
+                            <span class="analytics-kpi-subtitle">New vs returning, referrers</span>
+                        </div>
+                        <div class="analytics-kpi-icon"><i class="fas fa-user-friends"></i></div>
+                    </div>
+                </a>
+                <a href="{{ url_for('analytics.sessions') }}" class="analytics-kpi-card kpi-info"
+                    style="text-decoration: none;">
+                    <div class="analytics-kpi-content">
+                        <div class="analytics-kpi-text">
+                            <span class="analytics-kpi-title">Session Flow</span>
+                            <span class="analytics-kpi-subtitle">Duration, bounce rate trends</span>
+                        </div>
+                        <div class="analytics-kpi-icon"><i class="fas fa-route"></i></div>
+                    </div>
+                </a>
+                <a href="{{ url_for('analytics.funnels') }}" class="analytics-kpi-card kpi-warning"
+                    style="text-decoration: none;">
+                    <div class="analytics-kpi-content">
+                        <div class="analytics-kpi-text">
+                            <span class="analytics-kpi-title">Funnels</span>
+                            <span class="analytics-kpi-subtitle">Conversion tracking</span>
+                        </div>
+                        <div class="analytics-kpi-icon"><i class="fas fa-filter"></i></div>
+                    </div>
+                </a>
             </div>
         </div>
     </div>

@@ -4,253 +4,663 @@
 
 {% block additional_css %}
 <style>
-    /* Customer Portal Styles */
-    .portal-container {
-        max-width: 1200px;
-        margin: 2rem auto;
-        padding: 0 1rem;
+    /* =============================================================================
+       Customer Portal - Enterprise Glassmorphism Design
+       ============================================================================= */
+
+    /* Design Tokens */
+    :root {
+        --cp-gradient-start: #1a1a2e;
+        --cp-gradient-mid: #16213e;
+        --cp-gradient-end: #0f0f1a;
+        --cp-glass-bg: rgba(30, 30, 50, 0.85);
+        --cp-glass-border: rgba(255, 255, 255, 0.08);
+        --cp-glass-highlight: rgba(255, 255, 255, 0.12);
+        --cp-text-primary: #ffffff;
+        --cp-text-secondary: rgba(255, 255, 255, 0.7);
+        --cp-text-muted: rgba(255, 255, 255, 0.5);
+        --cp-accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --cp-success: #10b981;
+        --cp-warning: #f59e0b;
+        --cp-danger: #ef4444;
+        --cp-info: #3b82f6;
     }
 
+    /* Container */
+    .portal-container {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+        min-height: calc(100vh - 200px);
+    }
+
+    /* Header - Premium Glassmorphism */
     .portal-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 2rem;
-        padding: 1.5rem;
-        background: linear-gradient(135deg, rgba(42, 42, 42, 0.95), rgba(30, 30, 30, 0.95));
-        border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 2rem 2.5rem;
+        background: var(--cp-glass-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: 20px;
+        border: 1px solid var(--cp-glass-border);
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 var(--cp-glass-highlight);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .portal-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--cp-accent-gradient);
     }
 
     .portal-header h1 {
-        font-size: 1.75rem;
-        font-weight: 700;
+        font-family: 'Neon-Heavy', system-ui, sans-serif;
+        font-size: 2rem;
+        font-weight: 800;
         margin: 0;
-        color: #fff;
+        background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.8) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: -0.02em;
     }
 
     .portal-header .user-info {
-        color: rgba(255, 255, 255, 0.7);
-        font-size: 0.9rem;
+        color: var(--cp-text-secondary);
+        font-family: 'Neon-Regular', system-ui, sans-serif;
+        font-size: 0.95rem;
+        margin-top: 0.35rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
-    /* Tab Navigation */
+    .portal-header .user-info::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        background: var(--cp-success);
+        border-radius: 50%;
+        box-shadow: 0 0 8px var(--cp-success);
+    }
+
+    /* Tab Navigation - Premium Pills */
     .portal-tabs {
         display: flex;
         flex-wrap: wrap;
         gap: 0.5rem;
-        margin-bottom: 1.5rem;
-        background: rgba(42, 42, 42, 0.8);
-        padding: 0.5rem;
-        border-radius: 8px;
+        margin-bottom: 2rem;
+        background: var(--cp-glass-bg);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        padding: 0.75rem;
+        border-radius: 16px;
+        border: 1px solid var(--cp-glass-border);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     }
 
     .portal-tabs a {
-        padding: 0.75rem 1.25rem;
-        color: rgba(255, 255, 255, 0.7);
+        padding: 0.875rem 1.5rem;
+        color: var(--cp-text-secondary);
         text-decoration: none;
-        border-radius: 6px;
-        font-weight: 500;
+        border-radius: 12px;
+        font-family: 'Neon-Regular', system-ui, sans-serif;
+        font-weight: 600;
         font-size: 0.9rem;
-        transition: all 0.2s;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.6rem;
+        position: relative;
+    }
+
+    .portal-tabs a i {
+        font-size: 1rem;
+        opacity: 0.8;
+        transition: opacity 0.3s;
     }
 
     .portal-tabs a:hover {
-        background: rgba(255, 255, 255, 0.1);
-        color: #fff;
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--cp-text-primary);
+        transform: translateY(-1px);
+    }
+
+    .portal-tabs a:hover i {
+        opacity: 1;
     }
 
     .portal-tabs a.active {
-        background: var(--primary-color, #4169e1);
+        background: var(--cp-accent-gradient);
         color: #fff;
+        box-shadow:
+            0 4px 15px rgba(102, 126, 234, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .portal-tabs a.active i {
+        opacity: 1;
     }
 
     .portal-tabs a .badge {
-        background: rgba(255, 255, 255, 0.2);
-        padding: 0.15rem 0.5rem;
-        border-radius: 10px;
-        font-size: 0.75rem;
+        background: rgba(255, 255, 255, 0.25);
+        padding: 0.2rem 0.6rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        min-width: 20px;
+        text-align: center;
     }
 
-    /* Stats Cards */
+    /* Stats Cards - Animated KPIs */
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 1rem;
-        margin-bottom: 2rem;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 2.5rem;
     }
 
     .stat-card {
-        background: rgba(42, 42, 42, 0.9);
-        border-radius: 10px;
-        padding: 1.25rem;
+        background: var(--cp-glass-bg);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-radius: 16px;
+        padding: 1.75rem;
         text-align: center;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid var(--cp-glass-border);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--cp-accent-gradient);
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(102, 126, 234, 0.3);
+        box-shadow:
+            0 12px 40px rgba(0, 0, 0, 0.25),
+            0 0 0 1px rgba(102, 126, 234, 0.2);
+    }
+
+    .stat-card:hover::before {
+        opacity: 1;
     }
 
     .stat-card .stat-value {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #fff;
+        font-family: 'Neon-Heavy', system-ui, sans-serif;
+        font-size: 2.75rem;
+        font-weight: 800;
+        background: var(--cp-accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1.1;
     }
 
     .stat-card .stat-label {
-        font-size: 0.85rem;
-        color: rgba(255, 255, 255, 0.6);
-        margin-top: 0.25rem;
+        font-family: 'Neon-Regular', system-ui, sans-serif;
+        font-size: 0.875rem;
+        color: var(--cp-text-secondary);
+        margin-top: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
     }
 
-    /* Content Cards */
+    /* Content Cards - Glass Panels */
     .portal-card {
-        background: rgba(42, 42, 42, 0.9);
-        border-radius: 12px;
-        margin-bottom: 1.5rem;
+        background: var(--cp-glass-bg);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-radius: 20px;
+        margin-bottom: 1.75rem;
         overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid var(--cp-glass-border);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     }
 
     .portal-card-header {
-        padding: 1rem 1.25rem;
-        background: rgba(0, 0, 0, 0.3);
+        padding: 1.25rem 1.75rem;
+        background: rgba(0, 0, 0, 0.25);
         display: flex;
         justify-content: space-between;
         align-items: center;
+        border-bottom: 1px solid var(--cp-glass-border);
     }
 
     .portal-card-header h3 {
         margin: 0;
+        font-family: 'Neon-Heavy', system-ui, sans-serif;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--cp-text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .portal-card-header h3 i {
+        background: var(--cp-accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
         font-size: 1.1rem;
-        color: #fff;
     }
 
     .portal-card-body {
-        padding: 1.25rem;
+        padding: 1.5rem 1.75rem;
     }
 
-    /* Table Styles */
+    /* Table Styles - Premium Data Display */
     .portal-table {
         width: 100%;
-        border-collapse: collapse;
+        border-collapse: separate;
+        border-spacing: 0;
     }
 
     .portal-table th,
     .portal-table td {
-        padding: 0.75rem 1rem;
+        padding: 1rem 1.25rem;
         text-align: left;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .portal-table th {
-        font-weight: 600;
-        color: rgba(255, 255, 255, 0.7);
-        font-size: 0.85rem;
+        font-family: 'Neon-Regular', system-ui, sans-serif;
+        font-weight: 700;
+        color: var(--cp-text-muted);
+        font-size: 0.75rem;
         text-transform: uppercase;
+        letter-spacing: 0.08em;
+        border-bottom: 1px solid var(--cp-glass-border);
+        background: rgba(0, 0, 0, 0.15);
     }
 
     .portal-table td {
-        color: #fff;
+        color: var(--cp-text-primary);
+        font-family: 'Neon-Regular', system-ui, sans-serif;
         font-size: 0.9rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        transition: background 0.2s;
     }
 
-    .portal-table tr:last-child td {
+    .portal-table tbody tr {
+        transition: all 0.2s;
+    }
+
+    .portal-table tbody tr:hover {
+        background: rgba(102, 126, 234, 0.08);
+    }
+
+    .portal-table tbody tr:hover td {
+        border-bottom-color: rgba(102, 126, 234, 0.15);
+    }
+
+    .portal-table tbody tr:last-child td {
         border-bottom: none;
     }
 
-    .portal-table tr:hover {
-        background: rgba(255, 255, 255, 0.05);
+    /* Status Badges - Pill Style */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.35rem 0.9rem;
+        border-radius: 20px;
+        font-family: 'Neon-Regular', system-ui, sans-serif;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
     }
 
-    /* Status Badges */
-    .status-badge {
-        display: inline-block;
-        padding: 0.25rem 0.75rem;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
+    .status-badge::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
     }
 
     .status-badge.paid,
     .status-badge.active,
-    .status-badge.delivered {
-        background: rgba(40, 167, 69, 0.2);
-        color: #28a745;
+    .status-badge.delivered,
+    .status-badge.completed {
+        background: rgba(16, 185, 129, 0.15);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    .status-badge.paid::before,
+    .status-badge.active::before,
+    .status-badge.delivered::before,
+    .status-badge.completed::before {
+        background: #34d399;
+        box-shadow: 0 0 6px #34d399;
     }
 
     .status-badge.pending,
-    .status-badge.trialing {
-        background: rgba(255, 193, 7, 0.2);
-        color: #ffc107;
+    .status-badge.trialing,
+    .status-badge.processing {
+        background: rgba(245, 158, 11, 0.15);
+        color: #fbbf24;
+        border: 1px solid rgba(245, 158, 11, 0.25);
     }
 
-    .status-badge.shipped,
-    .status-badge.processing {
-        background: rgba(23, 162, 184, 0.2);
-        color: #17a2b8;
+    .status-badge.pending::before,
+    .status-badge.trialing::before,
+    .status-badge.processing::before {
+        background: #fbbf24;
+        box-shadow: 0 0 6px #fbbf24;
+    }
+
+    .status-badge.shipped {
+        background: rgba(59, 130, 246, 0.15);
+        color: #60a5fa;
+        border: 1px solid rgba(59, 130, 246, 0.25);
+    }
+
+    .status-badge.shipped::before {
+        background: #60a5fa;
+        box-shadow: 0 0 6px #60a5fa;
     }
 
     .status-badge.cancelled,
     .status-badge.canceled,
-    .status-badge.past_due {
-        background: rgba(220, 53, 69, 0.2);
-        color: #dc3545;
+    .status-badge.past_due,
+    .status-badge.failed {
+        background: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+
+    .status-badge.cancelled::before,
+    .status-badge.canceled::before,
+    .status-badge.past_due::before,
+    .status-badge.failed::before {
+        background: #f87171;
+        box-shadow: 0 0 6px #f87171;
     }
 
     /* Empty State */
     .empty-state {
         text-align: center;
-        padding: 3rem 2rem;
-        color: rgba(255, 255, 255, 0.6);
+        padding: 4rem 2rem;
+        color: var(--cp-text-secondary);
     }
 
     .empty-state i {
-        font-size: 3rem;
-        margin-bottom: 1rem;
-        opacity: 0.5;
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        background: var(--cp-accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        opacity: 0.6;
     }
 
     .empty-state h4 {
-        color: #fff;
-        margin-bottom: 0.5rem;
+        font-family: 'Neon-Heavy', system-ui, sans-serif;
+        color: var(--cp-text-primary);
+        font-size: 1.35rem;
+        margin-bottom: 0.75rem;
     }
 
-    /* Action Buttons */
+    .empty-state p {
+        font-family: 'Neon-Regular', system-ui, sans-serif;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Action Buttons - Premium Style */
     .btn-portal {
-        padding: 0.5rem 1rem;
+        padding: 0.6rem 1.25rem;
+        font-family: 'Neon-Regular', system-ui, sans-serif;
         font-size: 0.85rem;
-        border-radius: 6px;
+        font-weight: 600;
+        border-radius: 10px;
         text-decoration: none;
         display: inline-flex;
         align-items: center;
-        gap: 0.35rem;
-        transition: all 0.2s;
-    }
-
-    .btn-portal-primary {
-        background: var(--primary-color, #4169e1);
-        color: #fff;
+        gap: 0.4rem;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
         border: none;
     }
 
+    .btn-portal-primary {
+        background: var(--cp-accent-gradient);
+        color: #fff;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.35);
+    }
+
     .btn-portal-primary:hover {
-        opacity: 0.9;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
         color: #fff;
     }
 
     .btn-portal-outline {
         background: transparent;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        color: rgba(255, 255, 255, 0.8);
+        border: 1px solid var(--cp-glass-highlight);
+        color: var(--cp-text-secondary);
     }
 
     .btn-portal-outline:hover {
-        background: rgba(255, 255, 255, 0.1);
-        color: #fff;
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.2);
+        color: var(--cp-text-primary);
     }
 
+    .btn-portal-sm,
+    .btn-sm {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8rem;
+    }
+
+    .btn-cancel {
+        background: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+
+    .btn-cancel:hover {
+        background: rgba(239, 68, 68, 0.25);
+        color: #fca5a5;
+    }
+
+    /* Modal Styles - Premium Glassmorphism */
+    .portal-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .portal-modal-backdrop {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+
+    .portal-modal-content {
+        position: relative;
+        background: var(--cp-glass-bg);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border-radius: 20px;
+        border: 1px solid var(--cp-glass-border);
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow:
+            0 25px 50px -12px rgba(0, 0, 0, 0.5),
+            inset 0 1px 0 var(--cp-glass-highlight);
+    }
+
+    .portal-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem 1.75rem;
+        border-bottom: 1px solid var(--cp-glass-border);
+    }
+
+    .portal-modal-header h4 {
+        margin: 0;
+        font-family: 'Neon-Heavy', system-ui, sans-serif;
+        color: var(--cp-text-primary);
+        font-size: 1.15rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+
+    .portal-modal-close {
+        background: none;
+        border: none;
+        color: var(--cp-text-muted);
+        font-size: 1.75rem;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+        transition: color 0.2s;
+    }
+
+    .portal-modal-close:hover {
+        color: var(--cp-text-primary);
+    }
+
+    .portal-modal-body {
+        padding: 1.75rem;
+    }
+
+    .portal-modal-body p {
+        font-family: 'Neon-Regular', system-ui, sans-serif;
+        color: var(--cp-text-secondary);
+        margin-bottom: 1rem;
+    }
+
+    .portal-modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+        margin-top: 1.75rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid var(--cp-glass-border);
+    }
+
+    /* Form Styles */
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-family: 'Neon-Regular', system-ui, sans-serif;
+        color: var(--cp-text-secondary);
+        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--cp-glass-border);
+        border-radius: 10px;
+        color: var(--cp-text-primary);
+        font-family: 'Neon-Regular', system-ui, sans-serif;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: rgba(102, 126, 234, 0.5);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+    }
+
+    .form-control::placeholder {
+        color: var(--cp-text-muted);
+    }
+
+    select.form-control {
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(255,255,255,0.5)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        padding-right: 2.5rem;
+    }
+
+    /* Loading State */
+    .btn-loading {
+        opacity: 0.7;
+        pointer-events: none;
+        position: relative;
+    }
+
+    .btn-loading::after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        border: 2px solid transparent;
+        border-top-color: currentColor;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin-left: 0.5rem;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Order Row Highlight */
+    .portal-table td:first-child {
+        font-weight: 700;
+        color: rgba(102, 126, 234, 1);
+    }
+
+    /* Responsive */
     @media (max-width: 768px) {
+        .portal-container {
+            padding: 1rem;
+        }
+
         .portal-tabs {
             flex-direction: column;
         }
@@ -258,15 +668,39 @@
         .portal-header {
             flex-direction: column;
             text-align: center;
-            gap: 1rem;
+            gap: 1.25rem;
+            padding: 1.5rem;
+        }
+
+        .portal-header h1 {
+            font-size: 1.5rem;
         }
 
         .stats-grid {
             grid-template-columns: repeat(2, 1fr);
         }
+
+        .stat-card .stat-value {
+            font-size: 2rem;
+        }
+
+        .portal-table {
+            font-size: 0.8rem;
+        }
+
+        .portal-table th,
+        .portal-table td {
+            padding: 0.6rem 0.75rem;
+        }
+    }
+
+    /* Muted text helper */
+    .text-muted {
+        color: var(--cp-text-muted) !important;
     }
 </style>
 {% endblock %}
+
 
 {% block content %}
 <div class="section-spacer"></div>
@@ -464,6 +898,9 @@
     <div class="portal-card">
         <div class="portal-card-header">
             <h3><i class="fas fa-calendar-alt"></i> My Appointments</h3>
+            <a href="{{ url_for('booking_pages_public.booking_page') }}" class="btn-portal btn-portal-primary">
+                <i class="fas fa-plus"></i> Book New
+            </a>
         </div>
         <div class="portal-card-body">
             {% if all_appointments %}
@@ -474,12 +911,12 @@
                         <th>Date & Time</th>
                         <th>With</th>
                         <th>Status</th>
-                        <th>Notes</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for appt in all_appointments %}
-                    <tr>
+                    <tr data-appointment-id="{{ appt.id }}">
                         <td>{{ appt.service.name if appt.service else 'Consultation' }}</td>
                         <td>
                             {{ appt.preferred_date_time.strftime('%b %d, %Y at %I:%M %p') if appt.preferred_date_time
@@ -489,10 +926,53 @@
                                 {% endif %}
                         </td>
                         <td>{{ appt.estimator.name if appt.estimator else 'TBA' }}</td>
-                        <td><span class="status-badge {{ appt.status or 'pending' }}">{{ (appt.status or
-                                'Scheduled')|capitalize }}</span></td>
-                        <td>{{ (appt.notes[:50] + '...' if appt.notes and appt.notes|length > 50 else appt.notes) or '-'
-                            }}</td>
+                        <td>
+                            <span class="status-badge {{ appt.status or 'pending' }}">{{ (appt.status or
+                                'Scheduled')|capitalize }}</span>
+                            {% if appt.reschedule_requests %}
+                            {% set pending_reschedule = appt.reschedule_requests|selectattr('status', 'equalto',
+                            'pending')|first %}
+                            {% if pending_reschedule %}
+                            <span class="status-badge pending" style="font-size: 0.7rem; margin-left: 0.3rem;">
+                                Reschedule Pending
+                            </span>
+                            {% endif %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% set is_past = appt.preferred_date_time and appt.preferred_date_time < now %} {% set
+                                can_modify=appt.status not in ['Cancelled', 'Completed' , 'No Show' ] and not is_past %}
+                                {% set has_pending_reschedule=appt.reschedule_requests and
+                                (appt.reschedule_requests|selectattr('status', 'equalto' , 'pending' )|list|length> 0)
+                                %}
+
+                                {% if can_modify %}
+                                {% if has_pending_reschedule %}
+                                {% set pending = appt.reschedule_requests|selectattr('status', 'equalto',
+                                'pending')|first %}
+                                <button class="btn-portal btn-portal-outline btn-sm"
+                                    onclick="showPendingReschedule({{ appt.id }}, {{ pending.id }}, '{{ pending.proposed_datetime.strftime('%b %d, %Y at %I:%M %p') }}')"
+                                    title="View pending reschedule">
+                                    <i class="fas fa-clock"></i> Pending
+                                </button>
+                                {% else %}
+                                <button class="btn-portal btn-portal-outline btn-sm"
+                                    onclick="showRescheduleModal({{ appt.id }}, '{{ appt.service.name if appt.service else 'Consultation' }}', {{ appt.estimator_id }})"
+                                    title="Request reschedule">
+                                    <i class="fas fa-calendar-plus"></i>
+                                </button>
+                                {% endif %}
+                                <button class="btn-portal btn-cancel btn-sm"
+                                    onclick="showCancelModal({{ appt.id }}, '{{ appt.service.name if appt.service else 'Consultation' }}')"
+                                    title="Cancel appointment">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                {% elif appt.status == 'Cancelled' %}
+                                <span class="text-muted" style="font-size: 0.8rem;">Cancelled</span>
+                                {% elif is_past %}
+                                <span class="text-muted" style="font-size: 0.8rem;">Completed</span>
+                                {% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -502,8 +982,117 @@
                 <i class="fas fa-calendar-alt"></i>
                 <h4>No appointments</h4>
                 <p>Schedule an appointment to get started.</p>
+                <a href="{{ url_for('booking_pages_public.booking_page') }}" class="btn-portal btn-portal-primary">
+                    <i class="fas fa-calendar-plus"></i> Book Appointment
+                </a>
             </div>
             {% endif %}
+        </div>
+    </div>
+
+    <!-- Reschedule Modal -->
+    <div id="rescheduleModal" class="portal-modal" style="display: none;">
+        <div class="portal-modal-backdrop" onclick="closeRescheduleModal()"></div>
+        <div class="portal-modal-content">
+            <div class="portal-modal-header">
+                <h4><i class="fas fa-calendar-plus"></i> Request Reschedule</h4>
+                <button class="portal-modal-close" onclick="closeRescheduleModal()">&times;</button>
+            </div>
+            <div class="portal-modal-body">
+                <p>Reschedule <strong id="rescheduleServiceName"></strong></p>
+                <form id="rescheduleForm">
+                    <input type="hidden" id="rescheduleAppointmentId" value="">
+                    <input type="hidden" id="rescheduleEstimatorId" value="">
+
+                    <div class="form-group">
+                        <label for="rescheduleDate">New Date</label>
+                        <input type="date" id="rescheduleDate" class="form-control" required
+                            min="{{ now.strftime('%Y-%m-%d') }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="rescheduleTime">New Time</label>
+                        <select id="rescheduleTime" class="form-control" required>
+                            <option value="">Select a date first</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="rescheduleReason">Reason (optional)</label>
+                        <textarea id="rescheduleReason" class="form-control" rows="2"
+                            placeholder="Why do you need to reschedule?"></textarea>
+                    </div>
+
+                    <div class="portal-modal-actions">
+                        <button type="button" class="btn-portal btn-portal-outline"
+                            onclick="closeRescheduleModal()">Cancel</button>
+                        <button type="submit" class="btn-portal btn-portal-primary" id="rescheduleSubmitBtn">
+                            <i class="fas fa-paper-plane"></i> Submit Request
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancel Confirmation Modal -->
+    <div id="cancelModal" class="portal-modal" style="display: none;">
+        <div class="portal-modal-backdrop" onclick="closeCancelModal()"></div>
+        <div class="portal-modal-content">
+            <div class="portal-modal-header">
+                <h4><i class="fas fa-exclamation-triangle" style="color: #dc3545;"></i> Cancel Appointment</h4>
+                <button class="portal-modal-close" onclick="closeCancelModal()">&times;</button>
+            </div>
+            <div class="portal-modal-body">
+                <p>Are you sure you want to cancel your <strong id="cancelServiceName"></strong> appointment?</p>
+                <p class="text-muted" style="font-size: 0.9rem;">This action cannot be undone.</p>
+
+                <form id="cancelForm">
+                    <input type="hidden" id="cancelAppointmentId" value="">
+
+                    <div class="form-group">
+                        <label for="cancelReason">Reason (optional)</label>
+                        <textarea id="cancelReason" class="form-control" rows="2"
+                            placeholder="Why are you cancelling?"></textarea>
+                    </div>
+
+                    <div class="portal-modal-actions">
+                        <button type="button" class="btn-portal btn-portal-outline" onclick="closeCancelModal()">Keep
+                            Appointment</button>
+                        <button type="submit" class="btn-portal btn-cancel" id="cancelSubmitBtn">
+                            <i class="fas fa-times"></i> Cancel Appointment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Reschedule Modal -->
+    <div id="pendingRescheduleModal" class="portal-modal" style="display: none;">
+        <div class="portal-modal-backdrop" onclick="closePendingRescheduleModal()"></div>
+        <div class="portal-modal-content">
+            <div class="portal-modal-header">
+                <h4><i class="fas fa-clock"></i> Pending Reschedule Request</h4>
+                <button class="portal-modal-close" onclick="closePendingRescheduleModal()">&times;</button>
+            </div>
+            <div class="portal-modal-body">
+                <p>You have a pending reschedule request for this appointment.</p>
+                <p><strong>Requested new time:</strong> <span id="pendingNewTime"></span></p>
+                <p class="text-muted" style="font-size: 0.9rem;">Our team will review your request and notify you once
+                    approved.</p>
+
+                <input type="hidden" id="pendingAppointmentId" value="">
+                <input type="hidden" id="pendingRequestId" value="">
+
+                <div class="portal-modal-actions">
+                    <button type="button" class="btn-portal btn-portal-outline"
+                        onclick="closePendingRescheduleModal()">Close</button>
+                    <button type="button" class="btn-portal btn-cancel" onclick="cancelPendingReschedule()">
+                        <i class="fas fa-times"></i> Cancel Request
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -608,4 +1197,215 @@
 </div>
 
 <div class="section-spacer"></div>
+
+{% block additional_js %}
+<script>
+    // Appointment Management JavaScript
+
+    // Modal management
+    function showRescheduleModal(appointmentId, serviceName, estimatorId) {
+        document.getElementById('rescheduleAppointmentId').value = appointmentId;
+        document.getElementById('rescheduleEstimatorId').value = estimatorId;
+        document.getElementById('rescheduleServiceName').textContent = serviceName;
+        document.getElementById('rescheduleDate').value = '';
+        document.getElementById('rescheduleTime').innerHTML = '<option value="">Select a date first</option>';
+        document.getElementById('rescheduleReason').value = '';
+        document.getElementById('rescheduleModal').style.display = 'flex';
+    }
+
+    function closeRescheduleModal() {
+        document.getElementById('rescheduleModal').style.display = 'none';
+    }
+
+    function showCancelModal(appointmentId, serviceName) {
+        document.getElementById('cancelAppointmentId').value = appointmentId;
+        document.getElementById('cancelServiceName').textContent = serviceName;
+        document.getElementById('cancelReason').value = '';
+        document.getElementById('cancelModal').style.display = 'flex';
+    }
+
+    function closeCancelModal() {
+        document.getElementById('cancelModal').style.display = 'none';
+    }
+
+    function showPendingReschedule(appointmentId, requestId, proposedDateTime) {
+        document.getElementById('pendingAppointmentId').value = appointmentId;
+        document.getElementById('pendingRequestId').value = requestId;
+        document.getElementById('pendingNewTime').textContent = proposedDateTime;
+        document.getElementById('pendingRescheduleModal').style.display = 'flex';
+    }
+
+    function closePendingRescheduleModal() {
+        document.getElementById('pendingRescheduleModal').style.display = 'none';
+    }
+
+    // Fetch available time slots when date changes
+    document.getElementById('rescheduleDate')?.addEventListener('change', async function () {
+        const date = this.value;
+        const estimatorId = document.getElementById('rescheduleEstimatorId').value;
+        const timeSelect = document.getElementById('rescheduleTime');
+
+        if (!date) {
+            timeSelect.innerHTML = '<option value="">Select a date first</option>';
+            return;
+        }
+
+        timeSelect.innerHTML = '<option value="">Loading...</option>';
+
+        try {
+            const response = await fetch(`/api/booking/slots?estimator_id=${estimatorId}&date=${date}`);
+            const data = await response.json();
+
+            if (data.slots && data.slots.length > 0) {
+                timeSelect.innerHTML = '<option value="">Select a time</option>' +
+                    data.slots.map(slot => `<option value="${slot}">${formatTime(slot)}</option>`).join('');
+            } else {
+                timeSelect.innerHTML = '<option value="">No available slots</option>';
+            }
+        } catch (error) {
+            console.error('Error fetching slots:', error);
+            timeSelect.innerHTML = '<option value="">Error loading slots</option>';
+        }
+    });
+
+    function formatTime(time24) {
+        const [hours, minutes] = time24.split(':');
+        const h = parseInt(hours);
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        const h12 = h % 12 || 12;
+        return `${h12}:${minutes} ${ampm}`;
+    }
+
+    // Reschedule form submission
+    document.getElementById('rescheduleForm')?.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const appointmentId = document.getElementById('rescheduleAppointmentId').value;
+        const date = document.getElementById('rescheduleDate').value;
+        const time = document.getElementById('rescheduleTime').value;
+        const reason = document.getElementById('rescheduleReason').value;
+        const submitBtn = document.getElementById('rescheduleSubmitBtn');
+
+        if (!date || !time) {
+            alert('Please select a date and time.');
+            return;
+        }
+
+        submitBtn.classList.add('btn-loading');
+        submitBtn.disabled = true;
+
+        try {
+            const response = await fetch(`/api/booking/my/${appointmentId}/reschedule`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    new_date: date,
+                    new_time: time,
+                    reason: reason
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                closeRescheduleModal();
+                // Show success message and reload
+                alert(`Reschedule request submitted for ${data.proposed_datetime}. You'll be notified when reviewed.`);
+                location.reload();
+            } else {
+                alert(data.error || 'Failed to submit reschedule request');
+            }
+        } catch (error) {
+            console.error('Reschedule error:', error);
+            alert('An error occurred. Please try again.');
+        } finally {
+            submitBtn.classList.remove('btn-loading');
+            submitBtn.disabled = false;
+        }
+    });
+
+    // Cancel form submission
+    document.getElementById('cancelForm')?.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const appointmentId = document.getElementById('cancelAppointmentId').value;
+        const reason = document.getElementById('cancelReason').value;
+        const submitBtn = document.getElementById('cancelSubmitBtn');
+
+        submitBtn.classList.add('btn-loading');
+        submitBtn.disabled = true;
+
+        try {
+            const response = await fetch(`/api/booking/my/${appointmentId}/cancel`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    reason: reason
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                closeCancelModal();
+                alert('Appointment cancelled successfully.');
+                location.reload();
+            } else {
+                alert(data.error || 'Failed to cancel appointment');
+            }
+        } catch (error) {
+            console.error('Cancel error:', error);
+            alert('An error occurred. Please try again.');
+        } finally {
+            submitBtn.classList.remove('btn-loading');
+            submitBtn.disabled = false;
+        }
+    });
+
+    // Cancel pending reschedule request
+    async function cancelPendingReschedule() {
+        const appointmentId = document.getElementById('pendingAppointmentId').value;
+        const requestId = document.getElementById('pendingRequestId').value;
+
+        if (!confirm('Are you sure you want to cancel this reschedule request?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/booking/my/${appointmentId}/reschedule/${requestId}/cancel`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                closePendingRescheduleModal();
+                alert('Reschedule request cancelled.');
+                location.reload();
+            } else {
+                alert(data.error || 'Failed to cancel reschedule request');
+            }
+        } catch (error) {
+            console.error('Cancel reschedule error:', error);
+            alert('An error occurred. Please try again.');
+        }
+    }
+
+    // Close modals on escape key
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            closeRescheduleModal();
+            closeCancelModal();
+            closePendingRescheduleModal();
+        }
+    });
+</script>
+{% endblock %}
 {% endblock %}

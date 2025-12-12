@@ -1,0 +1,406 @@
+/**
+ * PageEditorWidget Component Styles
+ * 
+ * Floating widget for in-page content editing with theme variable compliance.
+ */
+
+/* =============================================================================
+   Main Widget Container
+   ============================================================================= */
+
+.page-editor-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Toggle Button (collapsed state) */
+.page-editor-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border: none;
+    border-radius: 50%;
+    background: var(--primary-color, #4169e1);
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease;
+}
+
+.page-editor-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* Control Bar (expanded state) */
+.page-editor-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: var(--bg-secondary, rgba(30, 30, 30, 0.95));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.page-editor-widget.editing .page-editor-controls {
+    background: var(--bg-primary, rgba(20, 20, 20, 0.98));
+    border-color: var(--primary-color, #4169e1);
+}
+
+/* Control Buttons */
+.page-editor-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-family: var(--font-family, sans-serif);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.page-editor-btn.primary {
+    background: var(--primary-color, #4169e1);
+    color: white;
+}
+
+.page-editor-btn.primary:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.page-editor-btn.secondary {
+    background: transparent;
+    color: var(--text-secondary, #adb5bd);
+    padding: 0.6rem;
+}
+
+.page-editor-btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary, #fff);
+}
+
+.page-editor-btn.info {
+    background: var(--info-color, #17a2b8);
+    color: white;
+}
+
+.page-editor-btn.info:hover {
+    filter: brightness(1.1);
+}
+
+.page-editor-btn.cancel {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-secondary, #adb5bd);
+}
+
+.page-editor-btn.cancel:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--text-primary, #fff);
+}
+
+.page-editor-btn.success {
+    background: var(--success-color, #28a745);
+    color: white;
+}
+
+.page-editor-btn.success:hover:not(:disabled) {
+    filter: brightness(1.1);
+}
+
+.page-editor-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* =============================================================================
+   Editable Content Styling
+   ============================================================================= */
+
+.page-editor-editable {
+    outline: 2px dashed var(--primary-color, #4169e1) !important;
+    outline-offset: 4px;
+    min-height: 1em;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: outline-color 0.2s ease, background 0.2s ease;
+    cursor: text;
+}
+
+.page-editor-editable:focus {
+    outline-color: var(--success-color, #28a745) !important;
+    outline-style: solid;
+    background: rgba(65, 105, 225, 0.05);
+}
+
+.page-editor-editable:hover {
+    background: rgba(65, 105, 225, 0.05);
+}
+
+/* =============================================================================
+   SEO Panel
+   ============================================================================= */
+
+.page-editor-seo-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 380px;
+    height: 100vh;
+    background: var(--bg-primary, #1a1a1a);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    animation: slideInRight 0.3s ease-out;
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+.seo-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--bg-secondary, #252525);
+}
+
+.seo-panel-header h3 {
+    font-family: var(--font-family, sans-serif);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary, #fff);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.seo-panel-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-secondary, #adb5bd);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.seo-panel-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary, #fff);
+}
+
+.seo-panel-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+}
+
+.seo-panel-content h4 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary, #adb5bd);
+    margin: 0 0 1rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* SEO Fields */
+.seo-field {
+    margin-bottom: 1.25rem;
+}
+
+.seo-field label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-secondary, #adb5bd);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.seo-field input,
+.seo-field textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--bg-secondary, #252525);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: var(--text-primary, #fff);
+    font-family: var(--font-family, sans-serif);
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.seo-field input:focus,
+.seo-field textarea:focus {
+    outline: none;
+    border-color: var(--primary-color, #4169e1);
+    box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.15);
+}
+
+.seo-field textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.char-count {
+    font-size: 0.7rem;
+    font-weight: 400;
+}
+
+.char-count.good {
+    color: var(--success-color, #28a745);
+}
+
+.char-count.short,
+.char-count.empty {
+    color: var(--warning-color, #ffc107);
+}
+
+.char-count.long {
+    color: var(--danger-color, #dc3545);
+}
+
+.field-hint {
+    display: block;
+    font-size: 0.7rem;
+    margin-top: 0.25rem;
+}
+
+.field-hint.info {
+    color: var(--info-color, #17a2b8);
+}
+
+.field-hint.warning {
+    color: var(--warning-color, #ffc107);
+}
+
+.seo-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 1.5rem 0;
+}
+
+/* Social Preview Card */
+.seo-preview {
+    margin-top: 1rem;
+}
+
+.seo-preview>label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-secondary, #adb5bd);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.seo-preview-card {
+    background: var(--bg-secondary, #252525);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.seo-preview-image {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.seo-preview-content {
+    padding: 0.75rem;
+}
+
+.seo-preview-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary, #fff);
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.seo-preview-desc {
+    font-size: 0.75rem;
+    color: var(--text-secondary, #adb5bd);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* =============================================================================
+   Responsive
+   ============================================================================= */
+
+@media (max-width: 768px) {
+    .page-editor-widget {
+        bottom: 10px;
+        right: 10px;
+        left: 10px;
+    }
+
+    .page-editor-controls {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .page-editor-seo-panel {
+        width: 100%;
+    }
+}

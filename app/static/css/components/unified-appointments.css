@@ -1,23 +1,32 @@
 /**
- * Unified Appointments Dashboard Styles
+ * Unified Appointments Dashboard Styles - Enterprise Glassmorphism Design
  * 
- * Enterprise glassmorphism styling for the appointments management dashboard
- * Uses CSS variables for theme editor compatibility
+ * Premium appointments dashboard interface using base.css color scheme with
+ * glassmorphism effects, gradient accents, and animated interactions.
+ * All colors use CSS variables for theme editor compatibility.
  */
 
 /* =============================================================================
-   Dashboard Container
+   Dashboard Container - Glassmorphism Wrapper
    ============================================================================= */
 
 .unified-appointments-dashboard {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    padding: 0;
-    animation: fadeInUp 0.5s ease-out;
+    padding: 1.5rem;
+    background: var(--glass-bg, rgba(31, 31, 31, 0.8));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 12px;
+    border: 1px solid rgba(65, 105, 225, 0.2);
+    box-shadow: var(--shadow-light, 0 4px 12px rgba(0, 0, 0, 0.5));
+    position: relative;
+    overflow: hidden;
+    animation: apptFadeIn 0.6s ease-out;
 }
 
-@keyframes fadeInUp {
+@keyframes apptFadeIn {
     from {
         opacity: 0;
         transform: translateY(20px);
@@ -27,6 +36,76 @@
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* Animated pulse background */
+.unified-appointments-dashboard::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: var(--pulse-effect, radial-gradient(circle, rgba(82, 80, 194, 0.2) 0%, transparent 70%));
+    opacity: 0.3;
+    z-index: 0;
+    animation: apptPulse 15s infinite ease-in-out;
+    pointer-events: none;
+}
+
+@keyframes apptPulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.3;
+    }
+
+    50% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+
+    100% {
+        transform: scale(0.8);
+        opacity: 0.3;
+    }
+}
+
+.unified-appointments-dashboard>* {
+    position: relative;
+    z-index: 1;
+}
+
+/* =============================================================================
+   Dashboard Header
+   ============================================================================= */
+
+.unified-appt-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(65, 105, 225, 0.2);
+    margin-bottom: 0.5rem;
+}
+
+.unified-appt-header h2 {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 1.5rem;
+    color: var(--text-primary, #fff);
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0;
+}
+
+.unified-appt-header h2::before {
+    content: '';
+    width: 5px;
+    height: 24px;
+    background: var(--btn-gradient, linear-gradient(90deg, #4169e1 0%, #1348e7 100%));
+    border-radius: 3px;
+    box-shadow: 0 0 15px rgba(65, 105, 225, 0.4);
 }
 
 /* =============================================================================
@@ -151,17 +230,22 @@
 }
 
 /* =============================================================================
-   Calendar Container
+   Calendar Container - Glass Panel
    ============================================================================= */
 
 .unified-appt-calendar {
-    background: var(--glass-bg, rgba(31, 31, 31, 0.8));
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: rgba(42, 42, 42, 0.9);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 10px;
     border: 1px solid rgba(65, 105, 225, 0.2);
-    border-radius: 12px;
+    box-shadow: var(--shadow-light, 0 4px 12px rgba(0, 0, 0, 0.5));
     padding: 1.5rem;
-    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.unified-appt-calendar:hover {
+    border-color: rgba(65, 105, 225, 0.3);
 }
 
 /* =============================================================================
@@ -215,21 +299,22 @@
 }
 
 /* =============================================================================
-   Detail Slideout
+   Detail Slideout - Enterprise Glassmorphism
    ============================================================================= */
 
 .unified-appt-slideout-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     z-index: 1000;
     display: flex;
     justify-content: flex-end;
-    animation: fadeIn 0.2s ease;
+    animation: slideoutFadeIn 0.25s ease;
 }
 
-@keyframes fadeIn {
+@keyframes slideoutFadeIn {
     from {
         opacity: 0;
     }
@@ -240,23 +325,42 @@
 }
 
 .unified-appt-slideout {
-    width: 450px;
-    max-width: 90vw;
+    width: 480px;
+    max-width: 95vw;
     height: 100%;
-    background: var(--card-bg, #1a1a1a);
+    background: var(--glass-bg, rgba(31, 31, 31, 0.95));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border-left: 1px solid rgba(65, 105, 225, 0.3);
+    box-shadow: -8px 0 32px rgba(0, 0, 0, 0.5);
     display: flex;
     flex-direction: column;
-    animation: slideInRight 0.3s ease;
+    animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Gradient accent bar */
+.unified-appt-slideout::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--btn-gradient, linear-gradient(180deg, #4169e1 0%, #1348e7 100%));
+    box-shadow: 0 0 20px rgba(65, 105, 225, 0.4);
 }
 
 @keyframes slideInRight {
     from {
         transform: translateX(100%);
+        opacity: 0.8;
     }
 
     to {
         transform: translateX(0);
+        opacity: 1;
     }
 }
 
@@ -264,31 +368,49 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(0, 0, 0, 0.2);
+    padding: 1.5rem 1.75rem 1.5rem 2rem;
+    border-bottom: 1px solid rgba(65, 105, 225, 0.2);
+    background: rgba(31, 31, 31, 0.5);
 }
 
 .slideout-header h3 {
     margin: 0;
-    font-size: 1.1rem;
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 1.25rem;
     font-weight: 600;
-    color: #fff;
+    color: var(--text-primary, #fff);
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.slideout-header h3::before {
+    content: '';
+    width: 4px;
+    height: 20px;
+    background: var(--btn-gradient, linear-gradient(90deg, #4169e1 0%, #1348e7 100%));
+    border-radius: 2px;
 }
 
 .slideout-close {
-    background: none;
-    border: none;
-    color: rgba(255, 255, 255, 0.5);
+    background: rgba(65, 105, 225, 0.1);
+    border: 1px solid rgba(65, 105, 225, 0.2);
+    color: rgba(255, 255, 255, 0.6);
     cursor: pointer;
     padding: 0.5rem;
     border-radius: 8px;
-    transition: all 0.2s;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .slideout-close:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(65, 105, 225, 0.2);
+    border-color: rgba(65, 105, 225, 0.4);
     color: #fff;
+    transform: rotate(90deg);
 }
 
 .slideout-content {
@@ -629,6 +751,388 @@
     to {
         transform: rotate(360deg);
     }
+}
+
+/* =============================================================================
+   FullCalendar Theme Overrides - Enterprise Dark Theme
+   ============================================================================= */
+
+.unified-appt-calendar .fc {
+    font-family: 'Neon-Regular', sans-serif;
+}
+
+/* Toolbar Header */
+.unified-appt-calendar .fc-toolbar {
+    margin-bottom: 1.5rem !important;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.unified-appt-calendar .fc-toolbar-title {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary, #fff);
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Navigation Buttons */
+.unified-appt-calendar .fc-button-group {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.25rem;
+    border-radius: 8px;
+}
+
+.unified-appt-calendar .fc-button-primary {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-family: 'Neon-Regular', sans-serif;
+    font-weight: 500;
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.unified-appt-calendar .fc-button-primary:hover {
+    background: rgba(65, 105, 225, 0.2);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.unified-appt-calendar .fc-button-primary:not(:disabled).fc-button-active,
+.unified-appt-calendar .fc-button-primary:not(:disabled):active {
+    background: var(--btn-gradient, linear-gradient(90deg, #4169e1 0%, #1348e7 100%)) !important;
+    color: #fff !important;
+    box-shadow: 0 4px 15px -3px rgba(65, 105, 225, 0.4);
+}
+
+.unified-appt-calendar .fc-button-primary:focus {
+    box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.3);
+}
+
+.unified-appt-calendar .fc-button-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Today Button */
+.unified-appt-calendar .fc-today-button {
+    background: rgba(65, 105, 225, 0.1) !important;
+    border: 1px solid rgba(65, 105, 225, 0.3) !important;
+    color: var(--accent-blue, #4169e1) !important;
+    margin-right: 0.5rem;
+}
+
+.unified-appt-calendar .fc-today-button:hover:not(:disabled) {
+    background: var(--btn-gradient, linear-gradient(90deg, #4169e1 0%, #1348e7 100%)) !important;
+    border-color: var(--accent-blue, #4169e1) !important;
+    color: #fff !important;
+}
+
+/* Prev/Next Buttons */
+.unified-appt-calendar .fc-prev-button,
+.unified-appt-calendar .fc-next-button {
+    background: rgba(65, 105, 225, 0.1) !important;
+    border: 1px solid rgba(65, 105, 225, 0.2) !important;
+}
+
+.unified-appt-calendar .fc-prev-button:hover,
+.unified-appt-calendar .fc-next-button:hover {
+    background: rgba(65, 105, 225, 0.2) !important;
+    border-color: rgba(65, 105, 225, 0.4) !important;
+}
+
+/* Calendar Grid - Day Cells */
+.unified-appt-calendar .fc-scrollgrid {
+    border-color: rgba(65, 105, 225, 0.15) !important;
+}
+
+.unified-appt-calendar .fc-scrollgrid td,
+.unified-appt-calendar .fc-scrollgrid th {
+    border-color: rgba(65, 105, 225, 0.1) !important;
+}
+
+/* Column Headers */
+.unified-appt-calendar .fc-col-header {
+    background: rgba(31, 31, 31, 0.5);
+}
+
+.unified-appt-calendar .fc-col-header-cell {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(65, 105, 225, 0.2) !important;
+}
+
+.unified-appt-calendar .fc-col-header-cell-cushion {
+    color: rgba(255, 255, 255, 0.5);
+    font-family: 'Neon-Heavy', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 1.5px;
+    text-decoration: none;
+}
+
+/* Day Grid Cells */
+.unified-appt-calendar .fc-daygrid-day {
+    background: transparent;
+    transition: all 0.2s ease;
+}
+
+.unified-appt-calendar .fc-daygrid-day:hover {
+    background: rgba(65, 105, 225, 0.05);
+}
+
+.unified-appt-calendar .fc-daygrid-day-frame {
+    min-height: 100px;
+}
+
+.unified-appt-calendar .fc-daygrid-day-number {
+    color: rgba(255, 255, 255, 0.6);
+    font-family: 'Neon-Regular', sans-serif;
+    font-weight: 500;
+    font-size: 0.9rem;
+    padding: 0.5rem;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.unified-appt-calendar .fc-daygrid-day:hover .fc-daygrid-day-number {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Today Highlight */
+.unified-appt-calendar .fc-day-today {
+    background: rgba(65, 105, 225, 0.1) !important;
+    position: relative;
+}
+
+.unified-appt-calendar .fc-day-today::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--btn-gradient, linear-gradient(90deg, #4169e1 0%, #1348e7 100%));
+}
+
+.unified-appt-calendar .fc-day-today .fc-daygrid-day-number {
+    color: var(--accent-blue, #4169e1);
+    font-weight: 700;
+}
+
+/* Other Month Days */
+.unified-appt-calendar .fc-day-other {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.unified-appt-calendar .fc-day-other .fc-daygrid-day-number {
+    color: rgba(255, 255, 255, 0.25);
+}
+
+/* Events - Glassmorphic Event Cards */
+.unified-appt-calendar .fc-event {
+    background: var(--btn-gradient, linear-gradient(90deg, #4169e1 0%, #1348e7 100%));
+    border: none;
+    border-radius: 6px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(65, 105, 225, 0.3);
+    overflow: hidden;
+    position: relative;
+}
+
+.unified-appt-calendar .fc-event::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.unified-appt-calendar .fc-event:hover::before {
+    left: 100%;
+}
+
+.unified-appt-calendar .fc-event:hover {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 4px 12px rgba(65, 105, 225, 0.5);
+}
+
+.unified-appt-calendar .fc-event-title {
+    font-family: 'Neon-Regular', sans-serif;
+    font-weight: 500;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.unified-appt-calendar .fc-event-time {
+    font-weight: 400;
+    opacity: 0.9;
+}
+
+/* Day Grid Events */
+.unified-appt-calendar .fc-daygrid-event {
+    margin: 1px 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.unified-appt-calendar .fc-daygrid-event-dot {
+    display: none;
+}
+
+/* More Events Link */
+.unified-appt-calendar .fc-daygrid-more-link {
+    color: var(--accent-blue, #4169e1);
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.unified-appt-calendar .fc-daygrid-more-link:hover {
+    color: #fff;
+}
+
+/* Time Grid Events */
+.unified-appt-calendar .fc-timegrid-event {
+    border-radius: 6px;
+    border-left: 3px solid rgba(255, 255, 255, 0.5);
+}
+
+.unified-appt-calendar .fc-timegrid-event .fc-event-main {
+    padding: 0.25rem 0.5rem;
+}
+
+/* Time Grid Styling */
+.unified-appt-calendar .fc-timegrid-slot {
+    height: 48px;
+}
+
+.unified-appt-calendar .fc-timegrid-slot-label-cushion {
+    color: rgba(255, 255, 255, 0.4);
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 0.75rem;
+}
+
+.unified-appt-calendar .fc-timegrid-now-indicator-line {
+    border-color: var(--accent-blue, #4169e1);
+    border-width: 2px;
+}
+
+.unified-appt-calendar .fc-timegrid-now-indicator-arrow {
+    border-color: var(--accent-blue, #4169e1);
+    border-top-color: transparent;
+    border-bottom-color: transparent;
+}
+
+/* List View Styling */
+.unified-appt-calendar .fc-list {
+    border-color: rgba(65, 105, 225, 0.2);
+}
+
+.unified-appt-calendar .fc-list-day-cushion {
+    background: rgba(31, 31, 31, 0.8) !important;
+    padding: 1rem 1.5rem;
+}
+
+.unified-appt-calendar .fc-list-day-text,
+.unified-appt-calendar .fc-list-day-side-text {
+    color: var(--text-primary, #fff);
+    font-family: 'Neon-Heavy', sans-serif;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.unified-appt-calendar .fc-list-event {
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.unified-appt-calendar .fc-list-event:hover td {
+    background: rgba(65, 105, 225, 0.1) !important;
+}
+
+.unified-appt-calendar .fc-list-event-title a {
+    color: var(--text-primary, #fff);
+    text-decoration: none;
+    font-family: 'Neon-Regular', sans-serif;
+}
+
+.unified-appt-calendar .fc-list-event-time {
+    color: rgba(255, 255, 255, 0.6);
+    font-family: 'Neon-Regular', sans-serif;
+}
+
+.unified-appt-calendar .fc-list-event-graphic {
+    padding-right: 1rem;
+}
+
+.unified-appt-calendar .fc-list-event-dot {
+    border-color: var(--accent-blue, #4169e1);
+}
+
+/* Popover - Event Details */
+.unified-appt-calendar .fc-popover {
+    background: var(--glass-bg, rgba(31, 31, 31, 0.95));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(65, 105, 225, 0.3);
+    border-radius: 10px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.unified-appt-calendar .fc-popover-header {
+    background: rgba(31, 31, 31, 0.5);
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(65, 105, 225, 0.2);
+}
+
+.unified-appt-calendar .fc-popover-title {
+    color: var(--text-primary, #fff);
+    font-family: 'Neon-Heavy', sans-serif;
+    font-weight: 600;
+}
+
+.unified-appt-calendar .fc-popover-close {
+    color: rgba(255, 255, 255, 0.6);
+    transition: color 0.2s ease;
+}
+
+.unified-appt-calendar .fc-popover-close:hover {
+    color: #fff;
+}
+
+.unified-appt-calendar .fc-popover-body {
+    padding: 0.5rem;
+}
+
+/* Custom Scrollbar */
+.unified-appt-calendar .fc-scroller::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.unified-appt-calendar .fc-scroller::-webkit-scrollbar-track {
+    background: rgba(31, 31, 31, 0.5);
+}
+
+.unified-appt-calendar .fc-scroller::-webkit-scrollbar-thumb {
+    background: rgba(65, 105, 225, 0.4);
+    border-radius: 3px;
+}
+
+.unified-appt-calendar .fc-scroller::-webkit-scrollbar-thumb:hover {
+    background: rgba(65, 105, 225, 0.6);
 }
 
 /* =============================================================================

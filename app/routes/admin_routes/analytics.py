@@ -142,8 +142,8 @@ def visitors():
     end_date = datetime.utcnow()
     start_date = end_date - timedelta(days=days)
     
-    # Daily unique visitors
-    daily_visitors = db.session.query(
+    # Daily unique visitors - convert to dicts for JSON serialization
+    daily_visitors_query = db.session.query(
         func.date(VisitorSession.started_at).label('date'),
         func.count(VisitorSession.id).label('sessions'),
         func.count(func.distinct(VisitorSession.ip_hash)).label('unique_visitors')
@@ -155,6 +155,12 @@ def visitors():
     ).order_by(
         func.date(VisitorSession.started_at)
     ).all()
+    
+    # Convert Row objects to dicts for JSON serialization
+    daily_visitors = [
+        {'date': str(r.date), 'sessions': r.sessions, 'unique_visitors': r.unique_visitors}
+        for r in daily_visitors_query
+    ]
     
     # New vs returning (based on user_id presence)
     new_visitors = VisitorSession.query.filter(
@@ -214,8 +220,8 @@ def sessions():
         VisitorSession.started_at >= start_date
     ).order_by(desc(VisitorSession.started_at)).limit(100).all()
     
-    # Session duration distribution
-    durations = db.session.query(
+    # Session duration distribution - convert to dicts
+    durations_query = db.session.query(
         case(
             (VisitorSession.duration_seconds < 30, '0-30s'),
             (VisitorSession.duration_seconds < 120, '30s-2m'),
@@ -229,8 +235,10 @@ def sessions():
         VisitorSession.duration_seconds.isnot(None)
     ).group_by('bucket').all()
     
-    # Pages per session distribution
-    pages_dist = db.session.query(
+    durations = [{'bucket': r.bucket, 'count': r.count} for r in durations_query]
+    
+    # Pages per session distribution - convert to dicts
+    pages_dist_query = db.session.query(
         case(
             (VisitorSession.pages_viewed == 1, '1 page'),
             (VisitorSession.pages_viewed <= 3, '2-3 pages'),
@@ -243,8 +251,10 @@ def sessions():
         VisitorSession.started_at >= start_date
     ).group_by('bucket').all()
     
-    # Bounce rate trend
-    bounce_trend = db.session.query(
+    pages_dist = [{'bucket': r.bucket, 'count': r.count} for r in pages_dist_query]
+    
+    # Bounce rate trend - convert to dicts
+    bounce_trend_query = db.session.query(
         func.date(VisitorSession.started_at).label('date'),
         func.count(VisitorSession.id).label('total'),
         func.sum(func.cast(VisitorSession.bounce, db.Integer)).label('bounces')
@@ -255,6 +265,11 @@ def sessions():
     ).order_by(
         func.date(VisitorSession.started_at)
     ).all()
+    
+    bounce_trend = [
+        {'date': str(r.date), 'total': r.total, 'bounces': r.bounces or 0}
+        for r in bounce_trend_query
+    ]
     
     return render_template('admin/analytics/sessions.html',
         recent_sessions=recent_sessions,

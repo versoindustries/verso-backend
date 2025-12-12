@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+
+{% block title %}Account Settings - Verso{% endblock %}
+
+{% block content %}
+<div class="section-spacer"></div>
+<div data-react-component="UnifiedUserSettingsDashboard" data-react-props='{{ props_json | safe }}'></div>
+{% endblock %}

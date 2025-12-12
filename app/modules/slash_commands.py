@@ -2,12 +2,14 @@
 Slash Commands Module for Enterprise Messaging.
 
 Provides data referencing commands for internal channels:
-- /order <id> - Display order summary
-- /lead <id> - Display lead/contact info
+- /order <id> - Display order summary (Admin/Manager only)
+- /lead <id> - Display lead/contact info (Admin/Manager only)
 - /appointment <id> - Display appointment details
 - /product <id|sku> - Display product card
 - /contact <email|id> - Search for contact
 - /help - List available commands
+- /service <id|name> - Display service details
+- /analytics - Show quick business stats (Admin/Manager only)
 
 Usage:
     from app.modules.slash_commands import process_slash_command
@@ -22,17 +24,30 @@ from flask_login import current_user
 # Command registry
 COMMANDS = {}
 
+# Role-based access control for commands
+ADMIN_ONLY_COMMANDS = {'order', 'lead', 'analytics'}  # Commands requiring Admin/Manager role
 
-def register_command(name: str, description: str, usage: str):
+
+def user_has_admin_access(user) -> bool:
+    """Check if user has admin or manager role for restricted commands."""
+    if not user or not hasattr(user, 'roles'):
+        return False
+    user_role_names = [role.name.lower() for role in user.roles]
+    return 'admin' in user_role_names or 'manager' in user_role_names
+
+
+def register_command(name: str, description: str, usage: str, admin_only: bool = False):
     """Decorator to register a slash command handler."""
     def decorator(func):
         COMMANDS[name] = {
             'handler': func,
             'description': description,
             'usage': usage,
+            'admin_only': admin_only,
         }
         return func
     return decorator
+
 
 
 def process_slash_command(content: str, user, channel_id: int) -> Dict[str, Any]:
@@ -69,6 +84,14 @@ def process_slash_command(content: str, user, channel_id: int) -> Dict[str, Any]
     
     command = COMMANDS[command_name]
     
+    # Check role-based access for restricted commands
+    if command.get('admin_only') and not user_has_admin_access(user):
+        return {
+            'success': False,
+            'display_text': content,
+            'error': f'Permission denied: /{command_name} requires Admin or Manager role.'
+        }
+    
     try:
         result = command['handler'](args, user, channel_id)
         return {
@@ -101,7 +124,7 @@ def cmd_help(args: str, user, channel_id: int) -> Dict[str, Any]:
     }
 
 
-@register_command('order', 'Display order details', '/order <order_id>')
+@register_command('order', 'Display order details (Admin/Manager)', '/order <order_id>', admin_only=True)
 def cmd_order(args: str, user, channel_id: int) -> Dict[str, Any]:
     """Look up and display order information."""
     from app.models import Order
@@ -142,7 +165,7 @@ def cmd_order(args: str, user, channel_id: int) -> Dict[str, Any]:
     return {'display_text': display, 'card': card}
 
 
-@register_command('lead', 'Display lead/contact details', '/lead <lead_id>')
+@register_command('lead', 'Display lead/contact details (Admin/Manager)', '/lead <lead_id>', admin_only=True)
 def cmd_lead(args: str, user, channel_id: int) -> Dict[str, Any]:
     """Look up and display lead information."""
     from app.models import ContactFormSubmission, Lead
@@ -362,6 +385,123 @@ def cmd_ticket(args: str, user, channel_id: int) -> Dict[str, Any]:
     display = f"🎫 **Ticket #{ticket.id}** | {ticket.subject[:50]} | {ticket.status}"
     
     return {'display_text': display, 'card': card}
+
+
+@register_command('service', 'Display service details', '/service <id|name>')
+def cmd_service(args: str, user, channel_id: int) -> Dict[str, Any]:
+    """Look up and display service information."""
+    from app.models import Service
+    
+    if not args:
+        return {'display_text': '❌ Usage: `/service <id|name>`', 'card': None}
+    
+    query = args.strip()
+    
+    # Try by ID first
+    service = None
+    try:
+        service_id = int(query)
+        service = Service.query.get(service_id)
+    except ValueError:
+        # Try by name (case-insensitive)
+        service = Service.query.filter(
+            Service.name.ilike(f'%{query}%')
+        ).first()
+    
+    if not service:
+        return {'display_text': f'❌ Service "{query}" not found', 'card': None}
+    
+    # Format price
+    price_str = '$0.00'
+    if hasattr(service, 'price') and service.price:
+        price_str = f'${service.price / 100:.2f}'
+    elif hasattr(service, 'base_price') and service.base_price:
+        price_str = f'${service.base_price / 100:.2f}'
+    
+    # Format duration
+    duration_str = 'N/A'
+    if hasattr(service, 'duration') and service.duration:
+        duration_str = f'{service.duration} min'
+    
+    card = {
+        'type': 'service',
+        'id': service.id,
+        'title': service.name,
+        'price': price_str,
+        'duration': duration_str,
+        'description': (service.description or '')[:150],
+        'is_active': getattr(service, 'is_active', True),
+        'url': url_for('booking_pages.booking_dashboard', _external=True)
+    }
+    
+    display = f"🛠️ **{service.name}** | {price_str} | {duration_str}"
+    
+    return {'display_text': display, 'card': card}
+
+
+@register_command('analytics', 'Show quick business stats (Admin/Manager)', '/analytics', admin_only=True)
+def cmd_analytics(args: str, user, channel_id: int) -> Dict[str, Any]:
+    """Display quick business analytics snapshot."""
+    from app.models import Appointment, ContactFormSubmission, Order
+    from datetime import datetime, timedelta
+    
+    today = datetime.utcnow().date()
+    today_start = datetime.combine(today, datetime.min.time())
+    today_end = datetime.combine(today, datetime.max.time())
+    week_start = today_start - timedelta(days=7)
+    
+    # Today's appointments
+    todays_appointments = Appointment.query.filter(
+        Appointment.date >= today_start,
+        Appointment.date <= today_end
+    ).count()
+    
+    # Open leads (new status)
+    open_leads = ContactFormSubmission.query.filter(
+        ContactFormSubmission.status.in_(['new', 'contacted'])
+    ).count()
+    
+    # Pending orders
+    pending_orders = 0
+    try:
+        pending_orders = Order.query.filter(
+            Order.status.in_(['pending', 'processing'])
+        ).count()
+    except Exception:
+        pass  # Order table might not have status column
+    
+    # Week's revenue (simplified)
+    week_revenue = 0
+    try:
+        paid_orders = Order.query.filter(
+            Order.created_at >= week_start,
+            Order.status.in_(['paid', 'completed', 'shipped'])
+        ).all()
+        week_revenue = sum(o.total_amount or 0 for o in paid_orders)
+    except Exception:
+        pass
+    
+    card = {
+        'type': 'analytics',
+        'title': 'Business Snapshot',
+        'data': {
+            'todays_appointments': todays_appointments,
+            'open_leads': open_leads,
+            'pending_orders': pending_orders,
+            'week_revenue': f'${week_revenue / 100:.2f}' if week_revenue else '$0.00'
+        },
+        'generated_at': datetime.utcnow().strftime('%Y-%m-%d %H:%M')
+    }
+    
+    lines = [
+        f"📊 **Business Snapshot** ({today.strftime('%b %d')})",
+        f"• Today's Appointments: **{todays_appointments}**",
+        f"• Open Leads: **{open_leads}**",
+        f"• Pending Orders: **{pending_orders}**",
+        f"• Week Revenue: **{card['data']['week_revenue']}**"
+    ]
+    
+    return {'display_text': '\n'.join(lines), 'card': card}
 
 
 def is_slash_command(content: str) -> bool:

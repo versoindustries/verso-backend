@@ -126,39 +126,8 @@ def delete_notification(notification_id):
 @notifications_bp.route('/preferences', methods=['GET', 'POST'])
 @login_required
 def preferences():
-    """View/update notification preferences."""
-    prefs = NotificationPreference.query.filter_by(user_id=current_user.id).first()
-    if not prefs:
-        prefs = NotificationPreference(user_id=current_user.id)
-        db.session.add(prefs)
-        db.session.commit()
-    
-    if request.method == 'POST':
-        prefs.email_digest_enabled = request.form.get('email_digest_enabled') == 'on'
-        prefs.email_digest_frequency = request.form.get('email_digest_frequency', 'daily')
-        
-        # Handle muted types
-        muted = request.form.getlist('muted_types')
-        prefs.muted_types = muted
-        
-        db.session.commit()
-        flash('Notification preferences updated.', 'success')
-        return redirect(url_for('notifications.preferences'))
-    
-    notification_types = [
-        ('message', 'New Messages'),
-        ('mention', '@Mentions'),
-        ('leave_approved', 'Leave Approved'),
-        ('leave_rejected', 'Leave Rejected'),
-        ('appointment_reminder', 'Appointment Reminders'),
-        ('order_placed', 'Order Placed'),
-        ('order_shipped', 'Order Shipped'),
-        ('comment', 'New Comments'),
-    ]
-    
-    return render_template('notifications/preferences.html', 
-                         prefs=prefs, 
-                         notification_types=notification_types)
+    """Redirect to unified settings dashboard notifications tab."""
+    return redirect(url_for('user.unified_settings', tab='notifications'))
 
 
 # ============================================================================

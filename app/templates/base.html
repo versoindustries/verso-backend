@@ -50,11 +50,39 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         :root {
+
             /* Dynamic theme variables from BusinessConfig */
-            --primary-color: {{ business_config.get('primary_color', '#4169e1') }};
-            --secondary-color: {{ business_config.get('secondary_color', '#6c757d') }};
-            --accent-color: {{ business_config.get('accent_color', '#28a745') }};
-            --font-family: {{ business_config.get('font_family', "'Neon-Regular', sans-serif") }};
+            --primary-color: {
+                    {
+                    business_config.get('primary_color', '#4169e1')
+                }
+            }
+
+            ;
+
+            --secondary-color: {
+                    {
+                    business_config.get('secondary_color', '#6c757d')
+                }
+            }
+
+            ;
+
+            --accent-color: {
+                    {
+                    business_config.get('accent_color', '#28a745')
+                }
+            }
+
+            ;
+
+            --font-family: {
+                    {
+                    business_config.get('font_family', "'Neon-Regular', sans-serif")
+                }
+            }
+
+            ;
 
             /* Override base.css aliases with dynamic values */
             --accent-blue: var(--primary-color);
@@ -85,7 +113,7 @@
             user: {
                 isAuthenticated: {{ current_user.is_authenticated | tojson }}{% if current_user.is_authenticated %},
                 firstName: {{ current_user.first_name | tojson }},
-                roles: [{% for role in current_user.roles %}"{{ role.name }}"{% if not loop.last %}, {% endif %} {% endfor %}]{% endif %}
+                roles: [{% for role in current_user.roles %}"{{ role.name }}"{% if not loop.last %}, {% endif %}{% endfor %}]{% endif %}
             },
             config: {
                 site_name: "{{ business_config.get('site_name', business_config.get('business_name', 'Verso Backend')) }}",
@@ -117,13 +145,20 @@
                 ecommerceEnabled: {{ feature_flags.ecommerce_enabled | tojson }},
                 bookingEnabled: {{ feature_flags.booking_enabled | tojson }}
             },
+            pageEditor: {
+                contentType: "{{ page_editor_type | default('static') }}",
+                contentId: {{ page_editor_id | default(0) }},
+                canEdit: {% if current_user.is_authenticated and current_user.roles %}{{ (current_user.roles | selectattr('name', 'in', ['Admin', 'Manager', 'Marketing', 'Owner']) | list | length > 0) | tojson }}{% else %}false{% endif %}
+            },
             year: new Date().getFullYear(),
-            version: "{{ current_version }}"
+            version: "{{ current_version }}",
+            currentLanguage: "{{ session.get('lang', 'en') }}"
         };
     </script>
     <title>{% block title %}DemoSite{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components/index.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/page-editor-widget.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome/all.min.css') }}">
     <script src="{{ url_for('static', filename='js/fullcalendar/index.global.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
@@ -230,6 +265,9 @@
     {% if rum_script %}
     {{ rum_script|safe }}
     {% endif %}
+
+    {# Phase D: In-Page Content Editor Widget for authorized users #}
+    <div data-react-component="PageEditorWidget"></div>
 
 </body>
 

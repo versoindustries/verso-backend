@@ -2,7 +2,7 @@
  * UserManagement Component
  * 
  * Unified enterprise dashboard for user and role management.
- * Features tabbed interface, user profile slideout, and inline role assignment.
+ * Features tabbed interface, user profile slideout, location assignment, and inline role assignment.
  */
 
 import { useState, useCallback, useEffect } from 'react'
@@ -19,7 +19,8 @@ import {
     Phone,
     Calendar,
     ChevronRight,
-    AlertCircle
+    AlertCircle,
+    MapPin
 } from 'lucide-react'
 import api from '../../../api'
 
@@ -32,6 +33,14 @@ interface Role {
     name: string
 }
 
+interface Location {
+    id: number
+    name: string
+    address: string
+    user_count: number
+    is_primary: boolean
+}
+
 interface User {
     id: number
     username: string
@@ -41,6 +50,8 @@ interface User {
     phone: string
     roles: Role[]
     role_names: string
+    location_id: number | null
+    location_name: string
     last_login: string
     is_active: boolean
 }
@@ -53,6 +64,8 @@ interface RoleWithUsers extends Role {
 interface UserManagementProps {
     initialUsers: User[]
     initialRoles: RoleWithUsers[]
+    initialLocations: Location[]
+    isOwner: boolean
     csrfToken: string
 }
 
@@ -65,12 +78,15 @@ type TabType = 'users' | 'roles'
 export default function UserManagement({
     initialUsers,
     initialRoles,
+    initialLocations,
+    isOwner,
     csrfToken: _csrfToken
 }: UserManagementProps) {
     // csrfToken available via _csrfToken if needed for future API calls
     const [activeTab, setActiveTab] = useState<TabType>('users')
     const [users, setUsers] = useState<User[]>(initialUsers)
     const [roles, setRoles] = useState<RoleWithUsers[]>(initialRoles)
+    const [locations] = useState<Location[]>(initialLocations)
     const [searchQuery, setSearchQuery] = useState('')
     const [selectedUser, setSelectedUser] = useState<User | null>(null)
     const [isSlideoutOpen, setIsSlideoutOpen] = useState(false)
@@ -156,6 +172,41 @@ export default function UserManagement({
             }
         } catch {
             setError('Failed to update roles')
+        } finally {
+            setIsSaving(false)
+        }
+    }, [selectedUser, isSaving])
+
+    // Update user location
+    const updateUserLocation = useCallback(async (locationId: number | null) => {
+        if (!selectedUser || isSaving) return
+
+        setIsSaving(true)
+        try {
+            const response = await api.put(`/admin/api/user/${selectedUser.id}/location`, {
+                location_id: locationId
+            })
+
+            if (response.data.success) {
+                const newLocationId = response.data.location_id
+                const newLocationName = response.data.location_name
+
+                // Update selected user
+                setSelectedUser(prev => prev ? {
+                    ...prev,
+                    location_id: newLocationId,
+                    location_name: newLocationName
+                } : null)
+
+                // Update users list
+                setUsers(prev => prev.map(u =>
+                    u.id === selectedUser.id
+                        ? { ...u, location_id: newLocationId, location_name: newLocationName }
+                        : u
+                ))
+            }
+        } catch {
+            setError('Failed to update location')
         } finally {
             setIsSaving(false)
         }
@@ -324,6 +375,12 @@ export default function UserManagement({
                                                 </span>
                                             )}
                                         </div>
+                                        {user.location_name && user.location_name !== 'No location' && (
+                                            <div className="um-user-location">
+                                                <MapPin size={12} />
+                                                <span>{user.location_name}</span>
+                                            </div>
+                                        )}
                                     </div>
                                     <ChevronRight className="um-user-arrow" size={20} />
                                 </div>
@@ -441,6 +498,29 @@ export default function UserManagement({
                                     <span>Last login: {selectedUser.last_login || 'Never'}</span>
                                 </div>
                             </div>
+
+                            {/* Location Assignment - Owner/Admin only */}
+                            {isOwner && locations.length > 0 && (
+                                <div className="um-profile-section">
+                                    <h4 className="um-profile-section-title">
+                                        <MapPin size={16} />
+                                        Location Assignment
+                                    </h4>
+                                    <select
+                                        className="um-location-select"
+                                        value={selectedUser.location_id || ''}
+                                        onChange={(e) => updateUserLocation(e.target.value ? parseInt(e.target.value) : null)}
+                                        disabled={isSaving}
+                                    >
+                                        <option value="">No location assigned</option>
+                                        {locations.map(loc => (
+                                            <option key={loc.id} value={loc.id}>
+                                                {loc.name} {loc.is_primary && '(Primary)'}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
 
                             {/* Role Assignment */}
                             <div className="um-profile-section">

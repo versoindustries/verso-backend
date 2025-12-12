@@ -1,159 +1,203 @@
 {% extends "base.html" %}
 
+{% block additional_css %}
+<link rel="stylesheet" type="text/css"
+    href="{{ url_for('static', filename='css/components/analytics-dashboard.css') }}">
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-user-friends me-2"></i>Visitor Analysis</h2>
-        <div class="btn-group">
+<div class="container-fluid mt-4 analytics-page">
+    <!-- Page Header -->
+    <div class="analytics-page-header">
+        <div class="analytics-page-title">
+            <h2><i class="fas fa-user-friends"></i>Visitor Analysis</h2>
+            <p class="analytics-page-description">Track visitor behavior, new vs returning, and geographic distribution
+            </p>
+        </div>
+        <div class="analytics-date-controls">
             <a href="{{ url_for('analytics.visitors', days=7) }}"
-                class="btn btn-{{ 'primary' if days == 7 else 'outline-secondary' }}">7 Days</a>
+                class="analytics-date-btn {{ 'active' if days == 7 else '' }}">7 Days</a>
             <a href="{{ url_for('analytics.visitors', days=30) }}"
-                class="btn btn-{{ 'primary' if days == 30 else 'outline-secondary' }}">30 Days</a>
+                class="analytics-date-btn {{ 'active' if days == 30 else '' }}">30 Days</a>
             <a href="{{ url_for('analytics.visitors', days=90) }}"
-                class="btn btn-{{ 'primary' if days == 90 else 'outline-secondary' }}">90 Days</a>
+                class="analytics-date-btn {{ 'active' if days == 90 else '' }}">90 Days</a>
         </div>
     </div>
 
-    <!-- Summary Cards -->
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <h6 class="card-subtitle mb-2 text-white-50">New Visitors</h6>
-                    <h3 class="mb-0">{{ "{:,}".format(new_visitors) }}</h3>
+    <!-- Navigation Tabs -->
+    <nav class="analytics-nav-tabs">
+        <a href="{{ url_for('analytics.dashboard') }}" class="analytics-nav-tab">
+            <i class="fas fa-chart-line"></i> Overview
+        </a>
+        <a href="{{ url_for('analytics.traffic') }}" class="analytics-nav-tab">
+            <i class="fas fa-signal"></i> Traffic
+        </a>
+        <a href="{{ url_for('analytics.visitors') }}" class="analytics-nav-tab active">
+            <i class="fas fa-user-friends"></i> Visitors
+        </a>
+        <a href="{{ url_for('analytics.sessions') }}" class="analytics-nav-tab">
+            <i class="fas fa-route"></i> Sessions
+        </a>
+        <a href="{{ url_for('analytics.funnels') }}" class="analytics-nav-tab">
+            <i class="fas fa-filter"></i> Funnels
+        </a>
+    </nav>
+
+    <!-- Summary KPI Cards -->
+    <div class="analytics-kpi-grid" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="analytics-kpi-card">
+            <div class="analytics-kpi-content">
+                <div class="analytics-kpi-text">
+                    <span class="analytics-kpi-title">New Visitors</span>
+                    <span class="analytics-kpi-value">{{ "{:,}".format(new_visitors) }}</span>
+                    <span class="analytics-kpi-subtitle">First-time sessions</span>
                 </div>
+                <div class="analytics-kpi-icon"><i class="fas fa-user-plus"></i></div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <h6 class="card-subtitle mb-2 text-white-50">Returning Visitors</h6>
-                    <h3 class="mb-0">{{ "{:,}".format(returning_visitors) }}</h3>
+        <div class="analytics-kpi-card kpi-success">
+            <div class="analytics-kpi-content">
+                <div class="analytics-kpi-text">
+                    <span class="analytics-kpi-title">Returning Visitors</span>
+                    <span class="analytics-kpi-value">{{ "{:,}".format(returning_visitors) }}</span>
+                    <span class="analytics-kpi-subtitle">Known users</span>
                 </div>
+                <div class="analytics-kpi-icon"><i class="fas fa-user-check"></i></div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card bg-info text-white">
-                <div class="card-body">
-                    <h6 class="card-subtitle mb-2 text-white-50">Return Rate</h6>
-                    <h3 class="mb-0">
+        <div class="analytics-kpi-card kpi-info">
+            <div class="analytics-kpi-content">
+                <div class="analytics-kpi-text">
+                    <span class="analytics-kpi-title">Return Rate</span>
+                    <span class="analytics-kpi-value">
                         {% if (new_visitors + returning_visitors) > 0 %}
                         {{ "%.1f"|format(returning_visitors / (new_visitors + returning_visitors) * 100) }}%
                         {% else %}
                         0%
                         {% endif %}
-                    </h3>
+                    </span>
+                    <span class="analytics-kpi-subtitle">Visitor loyalty</span>
                 </div>
+                <div class="analytics-kpi-icon"><i class="fas fa-redo"></i></div>
             </div>
         </div>
     </div>
 
-    <div class="row mb-4">
+    <!-- Charts Row -->
+    <div class="analytics-grid-2-1">
         <!-- Daily Visitors Chart -->
-        <div class="col-lg-8">
-            <div class="card h-100">
-                <div class="card-header">
-                    <i class="fas fa-chart-bar me-2"></i>Daily Visitors
-                </div>
-                <div class="card-body">
-                    <canvas id="visitorsChart" height="300"></canvas>
-                </div>
+        <div class="analytics-card">
+            <div class="analytics-card-header">
+                <h3 class="analytics-card-title"><i class="fas fa-chart-bar"></i> Daily Visitors</h3>
+            </div>
+            <div class="analytics-chart-container">
+                <canvas id="visitorsChart" height="300"></canvas>
             </div>
         </div>
 
         <!-- New vs Returning -->
-        <div class="col-lg-4">
-            <div class="card h-100">
-                <div class="card-header">
-                    <i class="fas fa-user-clock me-2"></i>New vs Returning
-                </div>
-                <div class="card-body">
-                    <canvas id="newReturningChart" height="250"></canvas>
-                </div>
+        <div class="analytics-card">
+            <div class="analytics-card-header">
+                <h3 class="analytics-card-title"><i class="fas fa-user-clock"></i> New vs Returning</h3>
+            </div>
+            <div class="analytics-chart-container">
+                <canvas id="newReturningChart" height="250"></canvas>
             </div>
         </div>
     </div>
 
-    <div class="row mb-4">
+    <!-- Referrers & Countries -->
+    <div class="analytics-grid-2">
         <!-- Top Referrers -->
-        <div class="col-lg-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <i class="fas fa-external-link-alt me-2"></i>Top Referrers
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>Referrer</th>
-                                <th class="text-end">Sessions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for ref in referrers %}
-                            <tr>
-                                <td class="text-truncate" style="max-width: 400px;" title="{{ ref.referrer }}">
-                                    <i class="fas fa-link text-muted me-2"></i>{{ ref.referrer }}
-                                </td>
-                                <td class="text-end">{{ "{:,}".format(ref.sessions) }}</td>
-                            </tr>
-                            {% else %}
-                            <tr>
-                                <td colspan="2" class="text-muted">No referrer data</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+        <div class="analytics-card">
+            <div class="analytics-card-header">
+                <h3 class="analytics-card-title"><i class="fas fa-external-link-alt"></i> Top Referrers</h3>
+            </div>
+            <div class="analytics-card-body no-padding">
+                <table class="analytics-table">
+                    <thead>
+                        <tr>
+                            <th>Referrer</th>
+                            <th class="text-end">Sessions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ref in referrers %}
+                        <tr>
+                            <td class="text-truncate" title="{{ ref.referrer }}">
+                                <i class="fas fa-link text-muted me-2"></i>{{ ref.referrer }}
+                            </td>
+                            <td class="text-end"><span class="analytics-badge badge-primary">{{
+                                    "{:,}".format(ref.sessions) }}</span></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="2" class="text-muted">No referrer data</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
 
         <!-- Countries -->
-        <div class="col-lg-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <i class="fas fa-globe-americas me-2"></i>Top Countries
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>Country</th>
-                                <th class="text-end">Sessions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for country in countries %}
-                            <tr>
-                                <td>
-                                    <i class="fas fa-map-marker-alt text-muted me-2"></i>{{ country.country or 'Unknown'
-                                    }}
-                                </td>
-                                <td class="text-end">{{ "{:,}".format(country.sessions) }}</td>
-                            </tr>
-                            {% else %}
-                            <tr>
-                                <td colspan="2" class="text-muted">No country data (geo-lookup not configured)</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+        <div class="analytics-card">
+            <div class="analytics-card-header">
+                <h3 class="analytics-card-title"><i class="fas fa-globe-americas"></i> Top Countries</h3>
+            </div>
+            <div class="analytics-card-body no-padding">
+                <table class="analytics-table">
+                    <thead>
+                        <tr>
+                            <th>Country</th>
+                            <th class="text-end">Sessions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for country in countries %}
+                        <tr>
+                            <td>
+                                <i class="fas fa-map-marker-alt text-muted me-2"></i>{{ country.country or 'Unknown' }}
+                            </td>
+                            <td class="text-end"><span class="analytics-badge badge-success">{{
+                                    "{:,}".format(country.sessions) }}</span></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="2" class="text-muted">No country data (geo-lookup not configured)</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
-    <a href="{{ url_for('analytics.dashboard') }}" class="btn btn-outline-secondary">
-        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
-    </a>
+    <!-- Back Button -->
+    <div class="mt-4">
+        <a href="{{ url_for('analytics.dashboard') }}" class="analytics-back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        // Daily Visitors Chart
         const dailyData = {{ daily_visitors | tojson
     }};
+
+    // Theme colors for dark mode
+    const chartColors = {
+        primary: 'rgba(65, 105, 225, 0.8)',
+        primaryBg: 'rgba(65, 105, 225, 0.2)',
+        success: 'rgba(40, 167, 69, 0.8)',
+        successBg: 'rgba(40, 167, 69, 0.2)',
+        gridColor: 'rgba(255, 255, 255, 0.1)',
+        textColor: 'rgba(255, 255, 255, 0.7)'
+    };
+
+    // Daily Visitors Chart
     const ctx = document.getElementById('visitorsChart').getContext('2d');
     new Chart(ctx, {
         type: 'bar',
@@ -162,18 +206,35 @@
             datasets: [{
                 label: 'Unique Visitors',
                 data: dailyData.map(d => d.unique_visitors),
-                backgroundColor: 'rgba(78, 115, 223, 0.8)',
+                backgroundColor: chartColors.primary,
+                borderColor: chartColors.primary,
+                borderRadius: 4,
             }, {
                 label: 'Sessions',
                 data: dailyData.map(d => d.sessions),
-                backgroundColor: 'rgba(28, 200, 138, 0.8)',
+                backgroundColor: chartColors.success,
+                borderColor: chartColors.success,
+                borderRadius: 4,
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: { color: chartColors.textColor }
+                }
+            },
             scales: {
-                y: { beginAtZero: true }
+                x: {
+                    ticks: { color: chartColors.textColor },
+                    grid: { color: chartColors.gridColor }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: chartColors.textColor },
+                    grid: { color: chartColors.gridColor }
+                }
             }
         }
     });
@@ -186,14 +247,19 @@
             labels: ['New Visitors', 'Returning Visitors'],
             datasets: [{
                 data: [{{ new_visitors }}, {{ returning_visitors }}],
-        backgroundColor: ['#4e73df', '#1cc88a']
+        backgroundColor: [chartColors.primary, chartColors.success],
+        borderColor: 'rgba(31, 31, 31, 0.8)',
+        borderWidth: 2
     }]
         },
         options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-            legend: { position: 'bottom' }
+            legend: {
+                position: 'bottom',
+                labels: { color: chartColors.textColor }
+            }
         }
     }
     });

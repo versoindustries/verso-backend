@@ -10,8 +10,13 @@
 Industries') }}.{% endblock %}
 
 {% block head %}
-{{ seo_meta('Shop | ' ~ business_config.get('business_name', 'Verso Industries'), 'Browse our collection of products.
-Quality items available for purchase.', url_for('static', filename='images/logo.png', _external=True)) }}
+{{ seo_meta('Shop | ' ~ business_config.get('business_name', 'Verso Industries'),
+'Browse our collection of products. Quality items available for purchase.',
+url_for('static', filename='images/logo.png', _external=True)) }}
+{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/components/public-shop.css') }}">
 {% endblock %}
 
 {% block schema %}
@@ -19,34 +24,99 @@ Quality items available for purchase.', url_for('static', filename='images/logo.
 {% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h1 class="mb-4 text-center">Shop</h1>
+{# Prepare initial data for React component #}
+{% set initial_products = [] %}
+{% for product in products %}
+{% set product_data = {
+'id': product.id,
+'name': product.name,
+'description': product.description or '',
+'price': product.price,
+'price_display': '${:.2f}'.format(product.price / 100),
+'inventory_count': product.inventory_count,
+'is_digital': product.is_digital,
+'category_id': product.category_id,
+'category_name': product.category.name if product.category_id and product.category else None,
+'image_url': url_for('media_bp.serve_media', media_id=product.media_id) if product.media_id else None,
+'rating': 4.5,
+'reviews_count': 0,
+'is_new': false,
+'is_featured': false,
+'in_wishlist': false
+} %}
+{% set _ = initial_products.append(product_data) %}
+{% endfor %}
 
-    <div class="row">
-        {% for product in products %}
-        <div class="col-md-4 mb-4">
-            <div class="card h-100 shadow-sm border-0">
-                {% if product.image %}
-                <img src="{{ url_for('media_bp.serve_media', media_id=product.media_id) }}" class="card-img-top"
-                    alt="{{ product.name }}" style="height: 250px; object-fit: cover;">
-                {% else %}
-                <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
-                    style="height: 250px;">
-                    <span class="text-muted">No Image</span>
-                </div>
-                {% endif %}
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">{{ product.name }}</h5>
-                    <p class="card-text text-primary font-weight-bold">${{ "{:.2f}".format(product.price / 100) }}</p>
-                    <p class="card-text text-muted small">{{ (product.description or '')[:100] }}...</p>
-                    <div class="mt-auto">
-                        <a href="{{ url_for('shop.product_detail', product_id=product.id) }}"
-                            class="btn btn-outline-primary btn-block">View Details</a>
+{% set initial_categories = [] %}
+{% for cat in categories %}
+{% set cat_data = {
+'id': cat.id,
+'name': cat.name,
+'slug': cat.slug,
+'product_count': 0
+} %}
+{% set _ = initial_categories.append(cat_data) %}
+{% endfor %}
+
+{# Mount React ShopStorefront component #}
+<div data-react-component="ShopStorefront" data-react-props='{{ {
+         "initialProducts": initial_products,
+         "initialCategories": initial_categories,
+         "addToCartUrlTemplate": "/shop/cart/add/{id}",
+         "productUrlTemplate": "/shop/{id}",
+         "wishlistUrlTemplate": "/ecommerce/wishlist/add/{id}",
+         "showHero": true,
+         "heroTitle": business_config.get("shop_hero_title", "Discover Our Collection"),
+         "heroSubtitle": business_config.get("shop_hero_subtitle", "Premium products crafted for excellence")
+     } | tojson }}'>
+
+    {# Fallback content for SEO and while React loads #}
+    <noscript>
+        <div class="container mt-5">
+            <h1 class="mb-4 text-center">Shop</h1>
+            <div class="row">
+                {% for product in products %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        {% if product.media_id %}
+                        <img src="{{ url_for('media_bp.serve_media', media_id=product.media_id) }}" class="card-img-top"
+                            alt="{{ product.name }}" style="height: 250px; object-fit: cover;">
+                        {% else %}
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
+                            style="height: 250px;">
+                            <span class="text-muted">No Image</span>
+                        </div>
+                        {% endif %}
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">{{ product.name }}</h5>
+                            <p class="card-text text-primary font-weight-bold">${{ "{:.2f}".format(product.price / 100)
+                                }}</p>
+                            <p class="card-text text-muted small">{{ (product.description or '')[:100] }}...</p>
+                            <div class="mt-auto">
+                                <a href="{{ url_for('shop.product_detail', product_id=product.id) }}"
+                                    class="btn btn-outline-primary btn-block">View Details</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
+                {% endfor %}
             </div>
         </div>
-        {% endfor %}
+    </noscript>
+
+    {# Loading state #}
+    <div class="shop-loading" style="padding: 4rem 2rem; text-align: center;">
+        <div class="shop-spinner"
+            style="width: 48px; height: 48px; margin: 0 auto 1rem; border: 3px solid rgba(65, 105, 225, 0.2); border-top-color: #4169e1; border-radius: 50%; animation: spin 0.8s linear infinite;">
+        </div>
+        <span style="color: rgba(255, 255, 255, 0.5);">Loading shop...</span>
     </div>
+    <style>
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
 </div>
 {% endblock %}

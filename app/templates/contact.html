@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% set hide_estimate_form = true %}
 {% from 'seo_macros.html' import seo_meta, contact_page_schema %}
 
 {% block additional_css %}
@@ -25,55 +26,20 @@ _external=True)) }}
 {% block content %}
 <div class="section-spacer"></div>
 
-<div class="contactus">
-    <h1>Contact Us</h1>
-    <form method="POST" action="{{ url_for('main_routes.contact') }}"
-        onsubmit='return gtag_report_conversion({{ url_for("main_routes.contact_confirmation")|tojson }});'>
-        {{ form.hidden_tag() }}
-        <div class="form-group" style="display:none;">
-            {{ form.hp_field.label(class="form-label") }}
-            {{ form.hp_field(class="form-control", tabindex="-1", autocomplete="off") }}
-        </div>
-        <div class="form-group">
-            {{ form.first_name.label(class="form-label") }}
-            {{ form.first_name(class="form-control", size=32) }}
-            {% for error in form.first_name.errors %}
-            <div class="text-danger">{{ error }}</div>
-            {% endfor %}
-        </div>
-        <div class="form-group">
-            {{ form.last_name.label(class="form-label") }}
-            {{ form.last_name(class="form-control", size=32) }}
-            {% for error in form.last_name.errors %}
-            <div class="text-danger">{{ error }}</div>
-            {% endfor %}
-        </div>
-        <div class="form-group">
-            {{ form.email.label(class="form-label") }}
-            {{ form.email(class="form-control", size=32) }}
-            {% for error in form.email.errors %}
-            <div class="text-danger">{{ error }}</div>
-            {% endfor %}
-        </div>
-        <div class="form-group">
-            {{ form.phone.label(class="form-label") }}
-            {{ form.phone(class="form-control", size=32) }}
-            {% for error in form.phone.errors %}
-            <div class="text-danger">{{ error }}</div>
-            {% endfor %}
-        </div>
-        <div class="form-group">
-            {{ form.message.label(class="form-label") }}
-            {{ form.message(class="form-control", rows=5, cols=40) }}
-            {% for error in form.message.errors %}
-            <div class="text-danger">{{ error }}</div>
-            {% endfor %}
-        </div>
-        <div class="form-group">
-            {{ form.submit(class="btn btn-primary") }}
-        </div>
-    </form>
-</div>
+<!-- React Island: ContactPage Component -->
+<div 
+    data-react-component="ContactPage"
+    data-react-props='{{ {
+        "csrfToken": csrf_token(),
+        "submitUrl": url_for("main_routes.contact"),
+        "confirmationUrl": url_for("main_routes.contact_confirmation"),
+        "businessName": business_data.business_name if business_data else "Verso Industries",
+        "businessEmail": business_data.business_email if business_data else "contact@versoindustries.com",
+        "businessPhone": business_data.business_phone if business_data else "(555) 123-4567",
+        "businessAddress": business_data.business_address if business_data else "Denver, Colorado",
+        "businessHours": business_data.business_hours if business_data else "Mon-Fri: 9AM - 6PM"
+    } | tojson | safe }}'
+></div>
 
 <div class="section-spacer"></div>
 {% endblock %}

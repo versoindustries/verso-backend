@@ -98,6 +98,34 @@ def my_subscriptions():
     return render_template('account/subscriptions.html', subscriptions=subscriptions)
 
 
+@subscriptions_bp.route('/account/subscriptions/api')
+@login_required
+def subscriptions_api():
+    """JSON API for subscriptions dashboard React component."""
+    from flask_wtf.csrf import generate_csrf
+    
+    subscriptions = Subscription.query.filter_by(user_id=current_user.id).order_by(Subscription.created_at.desc()).all()
+    
+    return jsonify({
+        'subscriptions': [{
+            'id': s.id,
+            'product_name': s.product.name if s.product else 'Unknown Product',
+            'product_description': s.product.description if s.product else '',
+            'status': s.status or 'unknown',
+            'cancel_at_period_end': s.cancel_at_period_end or False,
+            'current_period_end': s.current_period_end.isoformat() if s.current_period_end else None,
+            'created_at': s.created_at.isoformat() if s.created_at else None
+        } for s in subscriptions],
+        'stats': {
+            'active': sum(1 for s in subscriptions if s.status == 'active'),
+            'trialing': sum(1 for s in subscriptions if s.status == 'trialing'),
+            'past_due': sum(1 for s in subscriptions if s.status == 'past_due'),
+            'canceled': sum(1 for s in subscriptions if s.status == 'canceled')
+        },
+        'csrf_token': generate_csrf()
+    })
+
+
 @subscriptions_bp.route('/account/subscriptions/<int:subscription_id>/cancel', methods=['POST'])
 @login_required
 def cancel_subscription(subscription_id):

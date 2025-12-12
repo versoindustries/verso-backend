@@ -112,6 +112,7 @@ export async function apiRequest<T = any>(
             ...fetchOptions,
             headers,
             body: processedBody,
+            credentials: 'include', // Always include cookies for session auth
         })
 
         // Try to parse JSON, fall back to text

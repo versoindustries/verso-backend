@@ -6,12 +6,13 @@
  */
 
 import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react'
-import { DollarSign, UserPlus, CalendarCheck, Users, TrendingUp, TrendingDown, Activity, Zap, LayoutDashboard, Calendar } from 'lucide-react'
+import { DollarSign, UserPlus, CalendarCheck, Users, TrendingUp, TrendingDown, Activity, Zap, LayoutDashboard, Calendar, Clock } from 'lucide-react'
 import api from '../../../api'
 import { Spinner } from '../../ui/spinner'
 
-// Lazy load the appointments dashboard
+// Lazy load the appointments dashboard and time cards tab
 const UnifiedAppointmentsDashboard = lazy(() => import('./UnifiedAppointmentsDashboard'))
+const AdminTimeCardsTab = lazy(() => import('./AdminTimeCardsTab'))
 
 // =============================================================================
 // Types
@@ -49,8 +50,8 @@ export interface AdminDashboardProps {
     metricsUrl?: string
     /** Additional class */
     className?: string
-    /** Active tab: 'overview' or 'appointments' */
-    activeTab?: 'overview' | 'appointments'
+    /** Active tab: 'overview', 'appointments', or 'timecards' */
+    activeTab?: 'overview' | 'appointments' | 'timecards'
 }
 
 // =============================================================================
@@ -207,7 +208,7 @@ export function AdminDashboard({
     const [chartData, setChartData] = useState<ChartData | null>(null)
     const [selectedDays, setSelectedDays] = useState(30)
     const [loading, setLoading] = useState(false)
-    const [activeTab, setActiveTab] = useState<'overview' | 'appointments'>(initialTab)
+    const [activeTab, setActiveTab] = useState<'overview' | 'appointments' | 'timecards'>(initialTab)
     const chartRef = useRef<any>(null)
     const leadsChartRef = useRef<any>(null)
 
@@ -425,12 +426,23 @@ export function AdminDashboard({
                     <Calendar size={18} />
                     Appointments
                 </button>
+                <button
+                    className={`dashboard-tab ${activeTab === 'timecards' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('timecards')}
+                >
+                    <Clock size={18} />
+                    Time Cards
+                </button>
             </div>
 
             {/* Tab Content */}
             {activeTab === 'appointments' ? (
                 <Suspense fallback={<div className="dashboard-loading"><Spinner size="lg" /><span>Loading appointments...</span></div>}>
                     <UnifiedAppointmentsDashboard />
+                </Suspense>
+            ) : activeTab === 'timecards' ? (
+                <Suspense fallback={<div className="dashboard-loading"><Spinner size="lg" /><span>Loading time cards...</span></div>}>
+                    <AdminTimeCardsTab />
                 </Suspense>
             ) : (
                 <>

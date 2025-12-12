@@ -1,35 +1,256 @@
 /**
- * Employee Calendar Styles
+ * Employee Calendar Styles - Enterprise Glassmorphism Design
  * 
- * Component-specific styles for the employee calendar interface.
+ * Premium calendar styling matching the employee dashboard design.
  */
 
+/* =============================================================================
+   Container & Layout
+   ============================================================================= */
+
 .employee-calendar-container {
-    padding: 1rem;
+    padding: 0 !important;
 }
 
-/* Calendar customization */
-.employee-calendar-container #calendar {
-    max-width: 1100px;
-    margin: 0 auto;
+.employee-calendar-container .row {
+    margin: 0;
 }
 
+.employee-calendar-container .col-lg-8,
+.employee-calendar-container .col-lg-4 {
+    padding: 0.75rem;
+}
+
+/* =============================================================================
+   Calendar Card
+   ============================================================================= */
+
+.employee-calendar-container .card {
+    background: rgba(42, 42, 42, 0.95) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(65, 105, 225, 0.25) !important;
+    border-radius: 12px !important;
+    overflow: hidden;
+}
+
+.employee-calendar-container .card-body {
+    background: transparent !important;
+    padding: 1rem !important;
+}
+
+.employee-calendar-container .card-header {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border-bottom: 1px solid rgba(65, 105, 225, 0.2) !important;
+    color: #fff !important;
+    font-weight: 600;
+    padding: 1rem 1.25rem !important;
+}
+
+.employee-calendar-container .card-header.bg-primary {
+    background: linear-gradient(90deg, #4169e1 0%, #1348e7 100%) !important;
+}
+
+/* =============================================================================
+   FullCalendar Theme
+   ============================================================================= */
+
+.employee-calendar-container .fc {
+    --fc-border-color: rgba(65, 105, 225, 0.15);
+    --fc-button-bg-color: rgba(65, 105, 225, 0.2);
+    --fc-button-border-color: rgba(65, 105, 225, 0.3);
+    --fc-button-text-color: #fff;
+    --fc-button-hover-bg-color: rgba(65, 105, 225, 0.4);
+    --fc-button-hover-border-color: rgba(65, 105, 225, 0.5);
+    --fc-button-active-bg-color: #4169e1;
+    --fc-button-active-border-color: #4169e1;
+    --fc-today-bg-color: rgba(65, 105, 225, 0.1);
+    --fc-page-bg-color: transparent;
+    --fc-neutral-bg-color: rgba(42, 42, 42, 0.5);
+}
+
+/* Toolbar */
+.employee-calendar-container .fc-toolbar-title {
+    font-family: 'Neon-Heavy', sans-serif !important;
+    font-size: 1.25rem !important;
+    color: #fff !important;
+}
+
+.employee-calendar-container .fc-button {
+    background: rgba(65, 105, 225, 0.2) !important;
+    border: 1px solid rgba(65, 105, 225, 0.3) !important;
+    border-radius: 8px !important;
+    color: #fff !important;
+    font-size: 0.85rem !important;
+    padding: 0.5rem 1rem !important;
+    transition: all 0.2s ease !important;
+}
+
+.employee-calendar-container .fc-button:hover {
+    background: rgba(65, 105, 225, 0.4) !important;
+    border-color: rgba(65, 105, 225, 0.5) !important;
+}
+
+.employee-calendar-container .fc-button-active,
+.employee-calendar-container .fc-button:active {
+    background: #4169e1 !important;
+    border-color: #4169e1 !important;
+}
+
+.employee-calendar-container .fc-button-primary:disabled {
+    opacity: 0.5;
+}
+
+/* Day headers */
+.employee-calendar-container .fc-col-header-cell {
+    background: rgba(0, 0, 0, 0.2) !important;
+    padding: 0.75rem 0 !important;
+}
+
+.employee-calendar-container .fc-col-header-cell-cushion {
+    color: rgba(255, 255, 255, 0.7) !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    font-size: 0.75rem !important;
+    letter-spacing: 0.5px !important;
+}
+
+/* Day cells */
+.employee-calendar-container .fc-daygrid-day {
+    transition: background 0.2s ease;
+}
+
+.employee-calendar-container .fc-daygrid-day:hover {
+    background: rgba(65, 105, 225, 0.05) !important;
+}
+
+.employee-calendar-container .fc-daygrid-day-number {
+    color: rgba(255, 255, 255, 0.8) !important;
+    padding: 0.5rem !important;
+}
+
+.employee-calendar-container .fc-day-today {
+    background: rgba(65, 105, 225, 0.1) !important;
+}
+
+.employee-calendar-container .fc-day-today .fc-daygrid-day-number {
+    color: #4169e1 !important;
+    font-weight: 700 !important;
+}
+
+/* Events */
 .employee-calendar-container .fc-event {
     cursor: pointer;
+    border-radius: 6px !important;
+    border: none !important;
+    padding: 2px 6px !important;
+    font-size: 0.8rem !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
 }
 
-/* Appointment panel */
+.employee-calendar-container .fc-event:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Time grid */
+.employee-calendar-container .fc-timegrid-slot-label {
+    color: rgba(255, 255, 255, 0.5) !important;
+    font-size: 0.75rem !important;
+}
+
+.employee-calendar-container .fc-timegrid-now-indicator-line {
+    border-color: #10b981 !important;
+}
+
+/* =============================================================================
+   Appointment Panel
+   ============================================================================= */
+
 .appointment-panel {
-    border-left: 4px solid var(--bs-primary, #0d6efd);
+    background: rgba(42, 42, 42, 0.95) !important;
+    backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(65, 105, 225, 0.25) !important;
+    border-left: 4px solid #4169e1 !important;
+    border-radius: 12px !important;
 }
 
 .appointment-panel .card-header {
-    font-weight: 600;
+    background: linear-gradient(90deg, #4169e1 0%, #1348e7 100%) !important;
+    border: none !important;
+    color: #fff !important;
 }
 
-/* Status badges in the panel */
-.appointment-panel .badge {
-    font-size: 0.75rem;
+.appointment-panel .card-body {
+    background: transparent !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.appointment-panel strong {
+    color: #fff !important;
+}
+
+.appointment-panel p,
+.appointment-panel small {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Form controls in panel */
+.appointment-panel .form-control,
+.appointment-panel textarea {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(65, 105, 225, 0.25) !important;
+    color: #fff !important;
+    border-radius: 8px !important;
+}
+
+.appointment-panel .form-control:focus,
+.appointment-panel textarea:focus {
+    border-color: #4169e1 !important;
+    box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.2) !important;
+    outline: none !important;
+}
+
+.appointment-panel textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Buttons in panel */
+.appointment-panel .btn-primary {
+    background: linear-gradient(90deg, #4169e1 0%, #1348e7 100%) !important;
+    border: none !important;
+    border-radius: 8px !important;
+}
+
+.appointment-panel .btn-success {
+    background: linear-gradient(90deg, #10b981, #059669) !important;
+    border: none !important;
+    border-radius: 8px !important;
+}
+
+.appointment-panel .btn-warning {
+    background: linear-gradient(90deg, #f59e0b, #d97706) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    color: #fff !important;
+}
+
+.appointment-panel .btn-danger {
+    background: linear-gradient(90deg, #ef4444, #dc2626) !important;
+    border: none !important;
+    border-radius: 8px !important;
+}
+
+.appointment-panel .btn-outline-secondary {
+    background: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    border-radius: 8px !important;
+}
+
+.appointment-panel .btn-outline-secondary:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
 }
 
 /* Check-in/out buttons */
@@ -39,26 +260,45 @@
     flex-wrap: wrap;
 }
 
-/* Staff notes textarea */
-.appointment-panel textarea {
-    resize: vertical;
-    min-height: 80px;
+/* Status badges */
+.appointment-panel .badge {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
 }
 
-/* Reschedule form */
-.appointment-panel form .form-group label {
-    font-size: 0.9rem;
-    margin-bottom: 0.25rem;
+/* =============================================================================
+   No Appointments State
+   ============================================================================= */
+
+.employee-calendar-container .text-muted {
+    color: rgba(255, 255, 255, 0.5) !important;
 }
 
-/* Responsive adjustments */
+/* =============================================================================
+   Responsive
+   ============================================================================= */
+
+@media (max-width: 992px) {
+
+    .employee-calendar-container .col-lg-8,
+    .employee-calendar-container .col-lg-4 {
+        padding: 0.5rem;
+    }
+}
+
 @media (max-width: 768px) {
+    .employee-calendar-container .fc-toolbar {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
     .employee-calendar-container .fc-toolbar-title {
         font-size: 1rem !important;
     }
 
     .employee-calendar-container .fc-button {
-        padding: 0.25rem 0.5rem !important;
+        padding: 0.35rem 0.75rem !important;
         font-size: 0.8rem !important;
     }
 
@@ -66,12 +306,4 @@
     .employee-calendar-container .col-lg-4 {
         margin-bottom: 1rem;
     }
-}
-
-/* Color legend styles */
-.employee-calendar-container .card-body.bg-light h6 {
-    margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
 }

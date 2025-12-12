@@ -659,6 +659,369 @@
 }
 
 /* =============================================================================
+   Admin Time Cards Tab
+   ============================================================================= */
+
+.admin-time-cards-tab {
+    padding: 0;
+}
+
+.admin-tc-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    gap: 1rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.admin-tc-loading.inline {
+    padding: 2rem;
+    flex-direction: row;
+}
+
+.admin-tc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+}
+
+.admin-tc-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 0;
+}
+
+.admin-tc-title svg {
+    color: var(--primary-color, #4169e1);
+}
+
+.admin-tc-subtitle {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+    margin: 0.5rem 0 0 0;
+}
+
+.admin-tc-export-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--btn-gradient, linear-gradient(90deg, #4169e1 0%, #1348e7 100%));
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.admin-tc-export-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(65, 105, 225, 0.4);
+}
+
+/* Filters */
+.admin-tc-filters {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: rgba(42, 42, 42, 0.95);
+    border: 1px solid rgba(65, 105, 225, 0.25);
+    border-radius: 12px;
+}
+
+.admin-tc-month-nav {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.admin-tc-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: rgba(65, 105, 225, 0.1);
+    border: 1px solid rgba(65, 105, 225, 0.2);
+    border-radius: 8px;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.admin-tc-nav-btn:hover {
+    background: var(--btn-gradient, linear-gradient(90deg, #4169e1 0%, #1348e7 100%));
+    border-color: var(--primary-color, #4169e1);
+}
+
+.admin-tc-month-label {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #fff;
+    min-width: 150px;
+    text-align: center;
+}
+
+.admin-tc-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.admin-tc-select {
+    padding: 0.5rem 1rem;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(65, 105, 225, 0.2);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.9rem;
+    min-width: 180px;
+}
+
+.admin-tc-select:focus {
+    outline: none;
+    border-color: var(--primary-color, #4169e1);
+}
+
+.admin-tc-select option {
+    background: #2a2a2a;
+    color: #fff;
+}
+
+/* Summary Cards */
+.admin-tc-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.admin-tc-summary-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: rgba(42, 42, 42, 0.95);
+    border: 1px solid rgba(65, 105, 225, 0.25);
+    border-radius: 12px;
+}
+
+.admin-tc-summary-icon {
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+}
+
+.admin-tc-summary-value {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.admin-tc-summary-label {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Employee Cards */
+.admin-tc-employees {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.admin-tc-employee-card {
+    background: rgba(42, 42, 42, 0.95);
+    border: 1px solid rgba(65, 105, 225, 0.25);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+}
+
+.admin-tc-employee-card:hover {
+    border-color: rgba(65, 105, 225, 0.5);
+}
+
+.admin-tc-employee-header {
+    display: flex;
+    align-items: center;
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.admin-tc-employee-header:hover {
+    background: rgba(65, 105, 225, 0.05);
+}
+
+.admin-tc-employee-info {
+    flex: 1;
+}
+
+.admin-tc-employee-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 0.25rem;
+}
+
+.admin-tc-employee-meta {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.admin-tc-employee-stats {
+    display: flex;
+    gap: 2rem;
+    margin-right: 1rem;
+}
+
+.admin-tc-stat {
+    text-align: center;
+}
+
+.admin-tc-stat-value {
+    display: block;
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary-color, #4169e1);
+}
+
+.admin-tc-stat-label {
+    display: block;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+}
+
+.admin-tc-expand-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(65, 105, 225, 0.1);
+    border: 1px solid rgba(65, 105, 225, 0.2);
+    border-radius: 8px;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.admin-tc-expand-btn.expanded {
+    transform: rotate(90deg);
+}
+
+.admin-tc-expand-btn:hover {
+    background: rgba(65, 105, 225, 0.2);
+}
+
+/* Entries Table */
+.admin-tc-employee-entries {
+    border-top: 1px solid rgba(65, 105, 225, 0.2);
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+    }
+
+    to {
+        opacity: 1;
+        max-height: 500px;
+    }
+}
+
+.admin-tc-entries-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-tc-entries-table th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: rgba(255, 255, 255, 0.5);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.admin-tc-entries-table td {
+    padding: 0.75rem 1rem;
+    color: #fff;
+    font-size: 0.9rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.admin-tc-entries-table tbody tr:hover {
+    background: rgba(65, 105, 225, 0.05);
+}
+
+.admin-tc-entries-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-tc-badge {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.admin-tc-badge.active {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+/* Empty State */
+.admin-tc-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.5);
+    background: rgba(42, 42, 42, 0.95);
+    border: 1px solid rgba(65, 105, 225, 0.25);
+    border-radius: 12px;
+}
+
+.admin-tc-empty svg {
+    margin-bottom: 1rem;
+    opacity: 0.4;
+}
+
+.admin-tc-empty h3 {
+    color: #fff;
+    margin-bottom: 0.5rem;
+}
+
+/* =============================================================================
    Responsive Design
    ============================================================================= */
 @media (max-width: 1200px) {

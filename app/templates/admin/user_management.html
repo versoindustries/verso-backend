@@ -19,6 +19,8 @@
     <div data-react-component="UserManagement" data-react-props='{
         "initialUsers": {{ users_json | safe }},
         "initialRoles": {{ roles_json | safe }},
+        "initialLocations": {{ locations_json | safe }},
+        "isOwner": {{ is_owner | tojson }},
         "csrfToken": "{{ form.csrf_token._value() }}"
     }'>
         <!-- Loading fallback -->

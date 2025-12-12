@@ -1,143 +1,112 @@
-\contentsline {section}{\numberline {1}Executive Summary}{5}{section.1}%
-\contentsline {subsection}{\numberline {1.1}Platform Statistics}{5}{subsection.1.1}%
-\contentsline {section}{\numberline {2}Philosophy: The Four Pillars}{5}{section.2}%
-\contentsline {subsection}{\numberline {2.1}Sovereignty}{5}{subsection.2.1}%
-\contentsline {subsection}{\numberline {2.2}Simplicity}{5}{subsection.2.2}%
-\contentsline {subsection}{\numberline {2.3}Frugality}{6}{subsection.2.3}%
-\contentsline {subsection}{\numberline {2.4}Resilience}{6}{subsection.2.4}%
+\contentsline {section}{\numberline {1}The Case for Sovereignty: Why This Matters}{5}{section.1}%
+\contentsline {subsection}{\numberline {1.1}The SaaS Trap}{5}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}The Sovereignty Thesis}{5}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Platform Statistics (v3.0)}{5}{subsection.1.3}%
+\contentsline {section}{\numberline {2}Executive Summary: The Replacement Matrix}{5}{section.2}%
 \contentsline {section}{\numberline {3}Technical Architecture}{6}{section.3}%
-\contentsline {subsection}{\numberline {3.1}Application Factory Pattern}{6}{subsection.3.1}%
-\contentsline {subsection}{\numberline {3.2}Complete Blueprint Registry}{6}{subsection.3.2}%
-\contentsline {subsection}{\numberline {3.3}Database Schema Overview}{7}{subsection.3.3}%
-\contentsline {section}{\numberline {4}Identity \& Access Management}{9}{section.4}%
-\contentsline {subsection}{\numberline {4.1}User Model}{9}{subsection.4.1}%
-\contentsline {subsection}{\numberline {4.2}Role-Based Access Control}{9}{subsection.4.2}%
-\contentsline {subsection}{\numberline {4.3}Multi-Factor Authentication}{9}{subsection.4.3}%
-\contentsline {subsection}{\numberline {4.4}OAuth Integration}{9}{subsection.4.4}%
-\contentsline {subsection}{\numberline {4.5}Security Features}{9}{subsection.4.5}%
-\contentsline {section}{\numberline {5}E-Commerce Platform}{9}{section.5}%
-\contentsline {subsection}{\numberline {5.1}Product Management}{10}{subsection.5.1}%
-\contentsline {subsubsection}{\numberline {5.1.1}Core Product Model}{10}{subsubsection.5.1.1}%
-\contentsline {subsubsection}{\numberline {5.1.2}Product Variants}{10}{subsubsection.5.1.2}%
-\contentsline {subsubsection}{\numberline {5.1.3}Product Attributes}{10}{subsubsection.5.1.3}%
-\contentsline {subsubsection}{\numberline {5.1.4}Product Images}{10}{subsubsection.5.1.4}%
-\contentsline {subsection}{\numberline {5.2}Collections}{10}{subsection.5.2}%
-\contentsline {subsection}{\numberline {5.3}Product Bundles}{11}{subsection.5.3}%
-\contentsline {subsection}{\numberline {5.4}Discount System}{11}{subsection.5.4}%
-\contentsline {subsubsection}{\numberline {5.4.1}Discount Types}{11}{subsubsection.5.4.1}%
-\contentsline {subsubsection}{\numberline {5.4.2}Discount Features}{11}{subsubsection.5.4.2}%
-\contentsline {subsection}{\numberline {5.5}Gift Cards}{11}{subsection.5.5}%
-\contentsline {subsection}{\numberline {5.6}Shipping}{11}{subsection.5.6}%
-\contentsline {subsubsection}{\numberline {5.6.1}ShippingZone}{12}{subsubsection.5.6.1}%
-\contentsline {subsubsection}{\numberline {5.6.2}ShippingRate}{12}{subsubsection.5.6.2}%
-\contentsline {subsection}{\numberline {5.7}Tax}{12}{subsection.5.7}%
-\contentsline {subsection}{\numberline {5.8}Orders}{12}{subsection.5.8}%
-\contentsline {subsection}{\numberline {5.9}Digital Products}{12}{subsection.5.9}%
-\contentsline {subsection}{\numberline {5.10}Subscriptions}{12}{subsection.5.10}%
-\contentsline {subsection}{\numberline {5.11}Customer Engagement}{13}{subsection.5.11}%
-\contentsline {subsection}{\numberline {5.12}Reviews}{13}{subsection.5.12}%
-\contentsline {section}{\numberline {6}Scheduling \& Calendar}{13}{section.6}%
-\contentsline {subsection}{\numberline {6.1}Appointment Types}{13}{subsection.6.1}%
-\contentsline {subsection}{\numberline {6.2}Staff Availability}{13}{subsection.6.2}%
-\contentsline {subsection}{\numberline {6.3}Resources}{13}{subsection.6.3}%
-\contentsline {subsection}{\numberline {6.4}Waitlist}{14}{subsection.6.4}%
-\contentsline {subsection}{\numberline {6.5}Booking Policies}{14}{subsection.6.5}%
-\contentsline {subsection}{\numberline {6.6}Group Appointments}{14}{subsection.6.6}%
-\contentsline {subsection}{\numberline {6.7}QR Check-In}{14}{subsection.6.7}%
-\contentsline {subsection}{\numberline {6.8}Reschedule Workflow}{14}{subsection.6.8}%
-\contentsline {section}{\numberline {7}CRM \& Lead Management}{14}{section.7}%
-\contentsline {subsection}{\numberline {7.1}Pipeline Stages}{14}{subsection.7.1}%
-\contentsline {subsection}{\numberline {7.2}Lead Sources}{15}{subsection.7.2}%
-\contentsline {subsection}{\numberline {7.3}Lead Scoring}{15}{subsection.7.3}%
-\contentsline {subsection}{\numberline {7.4}Activity Timeline}{15}{subsection.7.4}%
-\contentsline {subsection}{\numberline {7.5}Follow-Up Reminders}{15}{subsection.7.5}%
-\contentsline {section}{\numberline {8}Communication Hub}{15}{section.8}%
-\contentsline {subsection}{\numberline {8.1}Messaging}{15}{subsection.8.1}%
-\contentsline {subsection}{\numberline {8.2}Email Marketing}{16}{subsection.8.2}%
-\contentsline {subsubsection}{\numberline {8.2.1}Email Templates}{16}{subsubsection.8.2.1}%
-\contentsline {subsubsection}{\numberline {8.2.2}Audiences}{16}{subsubsection.8.2.2}%
-\contentsline {subsubsection}{\numberline {8.2.3}Email Campaigns}{16}{subsubsection.8.2.3}%
-\contentsline {subsubsection}{\numberline {8.2.4}Email Tracking}{16}{subsubsection.8.2.4}%
-\contentsline {subsection}{\numberline {8.3}Drip Sequences}{16}{subsection.8.3}%
-\contentsline {subsection}{\numberline {8.4}Push Notifications}{17}{subsection.8.4}%
-\contentsline {subsection}{\numberline {8.5}SMS}{17}{subsection.8.5}%
-\contentsline {subsection}{\numberline {8.6}Suppression}{17}{subsection.8.6}%
-\contentsline {subsection}{\numberline {8.7}Notifications}{17}{subsection.8.7}%
-\contentsline {section}{\numberline {9}Content Management System}{17}{section.9}%
-\contentsline {subsection}{\numberline {9.1}Blog}{17}{subsection.9.1}%
-\contentsline {subsubsection}{\numberline {9.1.1}Posts}{17}{subsubsection.9.1.1}%
-\contentsline {subsubsection}{\numberline {9.1.2}Categories \& Tags}{18}{subsubsection.9.1.2}%
-\contentsline {subsubsection}{\numberline {9.1.3}Series}{18}{subsubsection.9.1.3}%
-\contentsline {subsubsection}{\numberline {9.1.4}Comments}{18}{subsubsection.9.1.4}%
-\contentsline {subsubsection}{\numberline {9.1.5}Revisions}{18}{subsubsection.9.1.5}%
-\contentsline {subsubsection}{\numberline {9.1.6}Analytics}{18}{subsubsection.9.1.6}%
-\contentsline {subsection}{\numberline {9.2}Pages}{18}{subsection.9.2}%
-\contentsline {subsection}{\numberline {9.3}Media}{19}{subsection.9.3}%
-\contentsline {section}{\numberline {10}Forms \& Data Collection}{19}{section.10}%
-\contentsline {subsection}{\numberline {10.1}Form Definitions}{19}{subsection.10.1}%
-\contentsline {subsection}{\numberline {10.2}Form Submissions}{19}{subsection.10.2}%
-\contentsline {subsection}{\numberline {10.3}Form Integrations}{19}{subsection.10.3}%
-\contentsline {subsection}{\numberline {10.4}Surveys}{19}{subsection.10.4}%
-\contentsline {subsection}{\numberline {10.5}Survey Responses}{20}{subsection.10.5}%
-\contentsline {section}{\numberline {11}Analytics \& Reporting}{20}{section.11}%
-\contentsline {subsection}{\numberline {11.1}Page Tracking}{20}{subsection.11.1}%
-\contentsline {subsection}{\numberline {11.2}Visitor Sessions}{20}{subsection.11.2}%
-\contentsline {subsection}{\numberline {11.3}Conversion Tracking}{20}{subsection.11.3}%
-\contentsline {subsection}{\numberline {11.4}Funnels}{20}{subsection.11.4}%
-\contentsline {subsection}{\numberline {11.5}Report Builder}{20}{subsection.11.5}%
-\contentsline {section}{\numberline {12}HR \& Employee Portal}{21}{section.12}%
-\contentsline {subsection}{\numberline {12.1}Leave Management}{21}{subsection.12.1}%
-\contentsline {subsection}{\numberline {12.2}Time Tracking}{21}{subsection.12.2}%
-\contentsline {subsection}{\numberline {12.3}Document Management}{21}{subsection.12.3}%
-\contentsline {subsection}{\numberline {12.4}Employee Profile}{21}{subsection.12.4}%
-\contentsline {section}{\numberline {13}Automation \& Workflows}{21}{section.13}%
-\contentsline {subsection}{\numberline {13.1}Workflow Engine}{21}{subsection.13.1}%
-\contentsline {subsection}{\numberline {13.2}Webhooks}{22}{subsection.13.2}%
-\contentsline {subsection}{\numberline {13.3}Background Tasks}{22}{subsection.13.3}%
-\contentsline {section}{\numberline {14}Security Architecture}{22}{section.14}%
-\contentsline {subsection}{\numberline {14.1}Input Validation}{22}{subsection.14.1}%
-\contentsline {subsection}{\numberline {14.2}Security Headers}{22}{subsection.14.2}%
-\contentsline {subsection}{\numberline {14.3}CSRF Protection}{23}{subsection.14.3}%
-\contentsline {subsection}{\numberline {14.4}Rate Limiting}{23}{subsection.14.4}%
-\contentsline {subsection}{\numberline {14.5}Attack Prevention}{23}{subsection.14.5}%
-\contentsline {section}{\numberline {15}Compliance \& Privacy}{23}{section.15}%
-\contentsline {subsection}{\numberline {15.1}GDPR Compliance}{23}{subsection.15.1}%
-\contentsline {subsection}{\numberline {15.2}Data Retention}{23}{subsection.15.2}%
-\contentsline {subsection}{\numberline {15.3}Audit Logging}{23}{subsection.15.3}%
-\contentsline {subsection}{\numberline {15.4}Accessibility (WCAG 2.1 AA)}{24}{subsection.15.4}%
-\contentsline {section}{\numberline {16}Infrastructure \& Operations}{24}{section.16}%
-\contentsline {subsection}{\numberline {16.1}Backup System}{24}{subsection.16.1}%
-\contentsline {subsection}{\numberline {16.2}Feature Flags}{24}{subsection.16.2}%
-\contentsline {subsection}{\numberline {16.3}Deployment Tracking}{24}{subsection.16.3}%
-\contentsline {subsection}{\numberline {16.4}Observability}{24}{subsection.16.4}%
-\contentsline {section}{\numberline {17}React Component Library}{25}{section.17}%
-\contentsline {subsection}{\numberline {17.1}Admin Components}{25}{subsection.17.1}%
-\contentsline {subsection}{\numberline {17.2}Analytics}{25}{subsection.17.2}%
-\contentsline {subsection}{\numberline {17.3}Booking}{25}{subsection.17.3}%
-\contentsline {subsection}{\numberline {17.4}Calendar}{25}{subsection.17.4}%
-\contentsline {subsection}{\numberline {17.5}Cart \& Shop}{25}{subsection.17.5}%
-\contentsline {subsection}{\numberline {17.6}Charts}{25}{subsection.17.6}%
-\contentsline {subsection}{\numberline {17.7}CRM}{25}{subsection.17.7}%
-\contentsline {subsection}{\numberline {17.8}Forms}{25}{subsection.17.8}%
-\contentsline {subsection}{\numberline {17.9}Messaging}{25}{subsection.17.9}%
-\contentsline {subsection}{\numberline {17.10}Notifications}{26}{subsection.17.10}%
-\contentsline {subsection}{\numberline {17.11}UI Components}{26}{subsection.17.11}%
-\contentsline {subsection}{\numberline {17.12}Layout}{26}{subsection.17.12}%
-\contentsline {section}{\numberline {18}API Reference}{26}{section.18}%
-\contentsline {subsection}{\numberline {18.1}Authentication}{26}{subsection.18.1}%
-\contentsline {subsection}{\numberline {18.2}Available Scopes}{26}{subsection.18.2}%
-\contentsline {subsection}{\numberline {18.3}Core Endpoints}{26}{subsection.18.3}%
-\contentsline {section}{\numberline {19}Deployment Options}{26}{section.19}%
-\contentsline {subsection}{\numberline {19.1}Sovereign Path: Raw VPS}{26}{subsection.19.1}%
-\contentsline {subsection}{\numberline {19.2}Hybrid Path: PaaS}{27}{subsection.19.2}%
-\contentsline {subsection}{\numberline {19.3}Container Path: Docker/Kubernetes}{27}{subsection.19.3}%
-\contentsline {subsection}{\numberline {19.4}Edge Path: On-Premises}{27}{subsection.19.4}%
-\contentsline {section}{\numberline {20}Economic Analysis}{27}{section.20}%
-\contentsline {subsection}{\numberline {20.1}SaaS Stack Cost Comparison}{27}{subsection.20.1}%
-\contentsline {section}{\numberline {21}Future Roadmap}{27}{section.21}%
-\contentsline {subsection}{\numberline {21.1}Phase 34: Mobile Applications}{27}{subsection.21.1}%
-\contentsline {subsection}{\numberline {21.2}Phase 35: Multi-Tenancy}{27}{subsection.21.2}%
-\contentsline {subsection}{\numberline {21.3}Phase 36: Marketplace}{27}{subsection.21.3}%
-\contentsline {subsection}{\numberline {21.4}Phase 37: AI Expansion}{28}{subsection.21.4}%
-\contentsline {subsection}{\numberline {21.5}Phase 38: CalDAV/CardDAV}{28}{subsection.21.5}%
-\contentsline {section}{\numberline {22}Conclusion}{28}{section.22}%
+\contentsline {subsection}{\numberline {3.1}Design Philosophy: The Sovereign Monolith}{6}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Technology Stack}{7}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Directory Structure}{7}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Blueprint Architecture}{7}{subsection.3.4}%
+\contentsline {section}{\numberline {4}Data Model Reference}{8}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Identity \& Authentication (12 Models)}{8}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}E-commerce Core (18 Models)}{8}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Orders \& Payments (10 Models)}{9}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}Shipping \& Tax (3 Models)}{9}{subsection.4.4}%
+\contentsline {subsection}{\numberline {4.5}Scheduling \& Calendar (14 Models)}{9}{subsection.4.5}%
+\contentsline {subsection}{\numberline {4.6}CRM \& Lead Management (8 Models)}{9}{subsection.4.6}%
+\contentsline {subsection}{\numberline {4.7}Communications (20 Models)}{9}{subsection.4.7}%
+\contentsline {subsection}{\numberline {4.8}Content Management (14 Models)}{10}{subsection.4.8}%
+\contentsline {subsection}{\numberline {4.9}Forms \& Surveys (6 Models)}{10}{subsection.4.9}%
+\contentsline {subsection}{\numberline {4.10}Analytics \& Reporting (8 Models)}{10}{subsection.4.10}%
+\contentsline {subsection}{\numberline {4.11}HR \& Employee (8 Models)}{11}{subsection.4.11}%
+\contentsline {subsection}{\numberline {4.12}Automation \& Operations (12 Models)}{11}{subsection.4.12}%
+\contentsline {subsection}{\numberline {4.13}Compliance \& Privacy (5 Models)}{11}{subsection.4.13}%
+\contentsline {section}{\numberline {5}Feature Deep Dives}{11}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Identity \& Multi-Factor Authentication}{11}{subsection.5.1}%
+\contentsline {subsubsection}{\numberline {5.1.1}Authentication Methods}{11}{subsubsection.5.1.1}%
+\contentsline {subsubsection}{\numberline {5.1.2}Security Features}{12}{subsubsection.5.1.2}%
+\contentsline {subsubsection}{\numberline {5.1.3}Role-Based Access Control}{12}{subsubsection.5.1.3}%
+\contentsline {subsection}{\numberline {5.2}E-commerce Platform}{12}{subsection.5.2}%
+\contentsline {subsubsection}{\numberline {5.2.1}Product Management}{12}{subsubsection.5.2.1}%
+\contentsline {subsubsection}{\numberline {5.2.2}Smart Collections}{12}{subsubsection.5.2.2}%
+\contentsline {subsubsection}{\numberline {5.2.3}Discount Engine}{12}{subsubsection.5.2.3}%
+\contentsline {subsubsection}{\numberline {5.2.4}Gift Cards}{13}{subsubsection.5.2.4}%
+\contentsline {subsection}{\numberline {5.3}Scheduling \& Booking System}{13}{subsection.5.3}%
+\contentsline {subsubsection}{\numberline {5.3.1}Appointment Types}{13}{subsubsection.5.3.1}%
+\contentsline {subsubsection}{\numberline {5.3.2}Staff Availability}{13}{subsubsection.5.3.2}%
+\contentsline {subsubsection}{\numberline {5.3.3}Group Appointments}{13}{subsubsection.5.3.3}%
+\contentsline {subsubsection}{\numberline {5.3.4}QR Check-In}{13}{subsubsection.5.3.4}%
+\contentsline {subsection}{\numberline {5.4}CRM \& Pipeline Management}{14}{subsection.5.4}%
+\contentsline {subsubsection}{\numberline {5.4.1}Pipeline Features}{14}{subsubsection.5.4.1}%
+\contentsline {subsubsection}{\numberline {5.4.2}Lead Scoring}{14}{subsubsection.5.4.2}%
+\contentsline {subsection}{\numberline {5.5}Enterprise Messaging Platform}{14}{subsection.5.5}%
+\contentsline {subsubsection}{\numberline {5.5.1}Channel Types}{14}{subsubsection.5.5.1}%
+\contentsline {subsubsection}{\numberline {5.5.2}Message Features}{14}{subsubsection.5.5.2}%
+\contentsline {subsubsection}{\numberline {5.5.3}Slash Commands}{14}{subsubsection.5.5.3}%
+\contentsline {subsection}{\numberline {5.6}Email Marketing Engine}{14}{subsection.5.6}%
+\contentsline {subsubsection}{\numberline {5.6.1}Template System}{15}{subsubsection.5.6.1}%
+\contentsline {subsubsection}{\numberline {5.6.2}Campaign Features}{15}{subsubsection.5.6.2}%
+\contentsline {subsubsection}{\numberline {5.6.3}Drip Sequences}{15}{subsubsection.5.6.3}%
+\contentsline {subsubsection}{\numberline {5.6.4}Tracking \& Analytics}{15}{subsubsection.5.6.4}%
+\contentsline {subsection}{\numberline {5.7}Sovereign Analytics}{15}{subsection.5.7}%
+\contentsline {subsubsection}{\numberline {5.7.1}Traffic Tracking}{15}{subsubsection.5.7.1}%
+\contentsline {subsubsection}{\numberline {5.7.2}Conversion Tracking}{15}{subsubsection.5.7.2}%
+\contentsline {subsubsection}{\numberline {5.7.3}Funnel Analysis}{16}{subsubsection.5.7.3}%
+\contentsline {subsubsection}{\numberline {5.7.4}Custom Reports}{16}{subsubsection.5.7.4}%
+\contentsline {section}{\numberline {6}React Component Library}{16}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Admin Components (15)}{16}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}CRM Components (6)}{16}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}E-commerce Components (5)}{16}{subsection.6.3}%
+\contentsline {subsection}{\numberline {6.4}Booking Components (3)}{17}{subsection.6.4}%
+\contentsline {subsection}{\numberline {6.5}Calendar Components (3)}{17}{subsection.6.5}%
+\contentsline {subsection}{\numberline {6.6}Messaging Components (3)}{17}{subsection.6.6}%
+\contentsline {subsection}{\numberline {6.7}User \& Employee Components (4)}{17}{subsection.6.7}%
+\contentsline {subsection}{\numberline {6.8}Content Components (4)}{17}{subsection.6.8}%
+\contentsline {subsection}{\numberline {6.9}Analytics \& Charts (3)}{17}{subsection.6.9}%
+\contentsline {subsection}{\numberline {6.10}Forms Components (3)}{17}{subsection.6.10}%
+\contentsline {subsection}{\numberline {6.11}UI Components (16)}{17}{subsection.6.11}%
+\contentsline {subsection}{\numberline {6.12}Layout Components (5)}{18}{subsection.6.12}%
+\contentsline {subsection}{\numberline {6.13}Other Components (6)}{18}{subsection.6.13}%
+\contentsline {section}{\numberline {7}Security Architecture}{18}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Input Validation}{18}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}Security Headers}{18}{subsection.7.2}%
+\contentsline {subsection}{\numberline {7.3}CSRF Protection}{18}{subsection.7.3}%
+\contentsline {subsection}{\numberline {7.4}Rate Limiting}{18}{subsection.7.4}%
+\contentsline {subsection}{\numberline {7.5}Attack Prevention}{19}{subsection.7.5}%
+\contentsline {subsection}{\numberline {7.6}Audit Logging}{19}{subsection.7.6}%
+\contentsline {section}{\numberline {8}Compliance \& Privacy}{19}{section.8}%
+\contentsline {subsection}{\numberline {8.1}GDPR Compliance}{19}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}TCPA Compliance (SMS)}{19}{subsection.8.2}%
+\contentsline {subsection}{\numberline {8.3}Accessibility (WCAG 2.1 AA)}{19}{subsection.8.3}%
+\contentsline {subsection}{\numberline {8.4}Data Retention}{19}{subsection.8.4}%
+\contentsline {section}{\numberline {9}Infrastructure \& Operations}{20}{section.9}%
+\contentsline {subsection}{\numberline {9.1}Backup System}{20}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}Feature Flags}{20}{subsection.9.2}%
+\contentsline {subsection}{\numberline {9.3}Background Tasks}{20}{subsection.9.3}%
+\contentsline {subsection}{\numberline {9.4}Observability}{20}{subsection.9.4}%
+\contentsline {section}{\numberline {10}API Reference}{20}{section.10}%
+\contentsline {subsection}{\numberline {10.1}Authentication}{20}{subsection.10.1}%
+\contentsline {subsection}{\numberline {10.2}Available Scopes}{21}{subsection.10.2}%
+\contentsline {subsection}{\numberline {10.3}Core Endpoints}{21}{subsection.10.3}%
+\contentsline {section}{\numberline {11}Deployment Options}{21}{section.11}%
+\contentsline {subsection}{\numberline {11.1}Sovereign Path: Raw VPS}{21}{subsection.11.1}%
+\contentsline {subsection}{\numberline {11.2}Hybrid Path: PaaS}{21}{subsection.11.2}%
+\contentsline {subsection}{\numberline {11.3}Container Path: Docker/Kubernetes}{21}{subsection.11.3}%
+\contentsline {subsection}{\numberline {11.4}Edge Path: On-Premises}{21}{subsection.11.4}%
+\contentsline {section}{\numberline {12}Economic Analysis}{22}{section.12}%
+\contentsline {subsection}{\numberline {12.1}SaaS Stack Cost Comparison}{22}{subsection.12.1}%
+\contentsline {subsection}{\numberline {12.2}Hidden Costs Avoided}{22}{subsection.12.2}%
+\contentsline {subsection}{\numberline {12.3}ROI Model}{22}{subsection.12.3}%
+\contentsline {section}{\numberline {13}Future Roadmap}{22}{section.13}%
+\contentsline {subsection}{\numberline {13.1}Phase I: Mobile Applications}{22}{subsection.13.1}%
+\contentsline {subsection}{\numberline {13.2}Phase II: Multi-Tenancy}{22}{subsection.13.2}%
+\contentsline {subsection}{\numberline {13.3}Phase III: Marketplace}{23}{subsection.13.3}%
+\contentsline {subsection}{\numberline {13.4}Phase IV: AI Expansion}{23}{subsection.13.4}%
+\contentsline {subsection}{\numberline {13.5}Phase V: CalDAV/CardDAV}{23}{subsection.13.5}%
+\contentsline {subsection}{\numberline {13.6}Phase VI: Advanced Integrations}{23}{subsection.13.6}%
+\contentsline {section}{\numberline {14}Getting Started}{23}{section.14}%
+\contentsline {subsection}{\numberline {14.1}Local Development}{23}{subsection.14.1}%
+\contentsline {subsection}{\numberline {14.2}Frontend Build}{23}{subsection.14.2}%
+\contentsline {subsection}{\numberline {14.3}Production Deployment}{24}{subsection.14.3}%
+\contentsline {section}{\numberline {15}Conclusion}{24}{section.15}%

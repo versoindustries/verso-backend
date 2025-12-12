@@ -1,0 +1,1023 @@
+/**
+ * Employee Dashboard Styles - Enterprise Glassmorphism Design
+ * 
+ * Premium employee dashboard interface using base.css color scheme with
+ * glassmorphism effects, gradient accents, and animated interactions.
+ * All colors use CSS variables for theme editor compatibility.
+ */
+
+/* =============================================================================
+   Wrapper & Layout
+   ============================================================================= */
+
+.employee-dashboard-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+.section-spacer {
+    height: 2rem;
+}
+
+/* =============================================================================
+   Dashboard Container
+   ============================================================================= */
+
+.employee-dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem !important;
+    background: rgba(31, 31, 31, 0.85) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(65, 105, 225, 0.25) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+    position: relative;
+    overflow: hidden;
+    animation: empFadeIn 0.6s ease-out;
+}
+
+@keyframes empFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Animated pulse background */
+.employee-dashboard::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(82, 80, 194, 0.15) 0%, transparent 70%);
+    opacity: 0.4;
+    z-index: 0;
+    animation: empPulse 15s infinite ease-in-out;
+    pointer-events: none;
+}
+
+@keyframes empPulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.3;
+    }
+
+    50% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+
+    100% {
+        transform: scale(0.8);
+        opacity: 0.3;
+    }
+}
+
+.employee-dashboard>* {
+    position: relative;
+    z-index: 1;
+}
+
+/* =============================================================================
+   Tab Navigation
+   ============================================================================= */
+
+.emp-tabs {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    width: fit-content;
+}
+
+.emp-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.6);
+    font-family: 'Neon-Regular', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.emp-tab:hover {
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(65, 105, 225, 0.1);
+}
+
+.emp-tab.active {
+    background: var(--btn-gradient, linear-gradient(90deg, #4169e1 0%, #1348e7 100%));
+    color: #fff;
+    box-shadow: 0 4px 15px -3px rgba(65, 105, 225, 0.4);
+}
+
+.emp-tab svg {
+    opacity: 0.8;
+}
+
+.emp-tab.active svg {
+    opacity: 1;
+}
+
+/* =============================================================================
+   KPI Grid
+   ============================================================================= */
+
+.emp-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+
+.emp-kpi-card {
+    display: flex !important;
+    align-items: center !important;
+    gap: 1rem !important;
+    padding: 1.25rem !important;
+    background: rgba(42, 42, 42, 0.95) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(65, 105, 225, 0.25) !important;
+    border-radius: 12px !important;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.emp-kpi-card::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 4px !important;
+    background: linear-gradient(90deg, #4169e1 0%, #1348e7 100%) !important;
+}
+
+.emp-kpi-card:nth-child(1)::before {
+    background: linear-gradient(90deg, #10b981, #059669) !important;
+}
+
+.emp-kpi-card:nth-child(2)::before {
+    background: linear-gradient(90deg, #6366f1, #4f46e5) !important;
+}
+
+.emp-kpi-card:nth-child(3)::before {
+    background: linear-gradient(90deg, #f59e0b, #d97706) !important;
+}
+
+.emp-kpi-card:nth-child(4)::before {
+    background: linear-gradient(90deg, #a855f7, #9333ea) !important;
+}
+
+.emp-kpi-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(65, 105, 225, 0.5) !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 20px rgba(65, 105, 225, 0.2) !important;
+}
+
+.emp-kpi-icon {
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    flex-shrink: 0;
+}
+
+.emp-kpi-content {
+    flex: 1;
+}
+
+.emp-kpi-value {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.1;
+}
+
+.emp-kpi-title {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 0.25rem;
+}
+
+.emp-kpi-subtitle {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* =============================================================================
+   Content Grid
+   ============================================================================= */
+
+.emp-content-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+}
+
+.emp-column-main,
+.emp-column-side {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* =============================================================================
+   Widgets - Shared Styles
+   ============================================================================= */
+
+.emp-widget {
+    background: rgba(42, 42, 42, 0.95) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(65, 105, 225, 0.25) !important;
+    border-radius: 12px !important;
+    overflow: hidden;
+}
+
+.emp-widget-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem !important;
+    background: rgba(0, 0, 0, 0.3) !important;
+    border-bottom: 1px solid rgba(65, 105, 225, 0.2) !important;
+    color: #fff !important;
+    font-weight: 600;
+}
+
+.emp-widget-header svg {
+    color: #4169e1 !important;
+}
+
+.emp-widget-link {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: #4169e1 !important;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-decoration: none !important;
+    transition: color 0.2s;
+}
+
+.emp-widget-link:hover {
+    color: #fff !important;
+}
+
+.emp-widget-empty {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.emp-widget-empty svg {
+    margin-bottom: 1rem;
+    opacity: 0.4;
+}
+
+.emp-widget-list {
+    padding: 0.5rem;
+}
+
+/* =============================================================================
+   Time Clock Widget
+   ============================================================================= */
+
+.emp-time-clock {
+    background: rgba(42, 42, 42, 0.95) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(65, 105, 225, 0.25) !important;
+    border-radius: 12px !important;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.emp-time-clock.clocked-in {
+    border-color: rgba(16, 185, 129, 0.5) !important;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.15) !important;
+}
+
+.emp-time-clock-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem !important;
+    background: rgba(0, 0, 0, 0.3) !important;
+    border-bottom: 1px solid rgba(65, 105, 225, 0.2) !important;
+    color: #fff !important;
+    font-weight: 600;
+}
+
+.emp-time-clock-header svg {
+    color: var(--primary-color, #4169e1);
+}
+
+.emp-time-clock.clocked-in .emp-time-clock-header svg {
+    color: #10b981;
+}
+
+.emp-time-clock-body {
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.emp-time-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 1rem;
+}
+
+.status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.status-indicator.active {
+    background: #10b981;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.emp-time-elapsed {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 2.5rem;
+    color: #10b981;
+    margin-bottom: 1rem;
+    text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+.emp-clock-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.875rem 2rem;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.emp-clock-btn.clock-in {
+    background: linear-gradient(90deg, #10b981, #059669);
+    color: #fff;
+}
+
+.emp-clock-btn.clock-in:hover {
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+    transform: translateY(-2px);
+}
+
+.emp-clock-btn.clock-out {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #ef4444;
+}
+
+.emp-clock-btn.clock-out:hover {
+    background: rgba(239, 68, 68, 0.3);
+}
+
+.emp-clock-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* =============================================================================
+   Upcoming Appointments Widget
+   ============================================================================= */
+
+.emp-appointment-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 10px;
+    transition: background 0.2s;
+}
+
+.emp-appointment-item:hover {
+    background: rgba(65, 105, 225, 0.05);
+}
+
+.emp-appointment-time {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 70px;
+    padding: 0.75rem;
+    background: rgba(65, 105, 225, 0.1);
+    border-radius: 10px;
+}
+
+.emp-appointment-time .date {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+}
+
+.emp-appointment-time .time {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 0.9rem;
+    color: #fff;
+}
+
+.emp-appointment-details {
+    flex: 1;
+}
+
+.emp-appointment-details .name {
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 0.25rem;
+}
+
+.emp-appointment-details .service {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.emp-appointment-actions .badge {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.emp-appointment-actions .badge.completed {
+    background: rgba(108, 117, 125, 0.2);
+    color: #6c757d;
+}
+
+.emp-appointment-actions .badge.in-progress {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+.emp-checkin-btn {
+    padding: 0.5rem 1rem;
+    background: var(--btn-gradient, linear-gradient(90deg, #4169e1 0%, #1348e7 100%));
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.emp-checkin-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(65, 105, 225, 0.4);
+}
+
+/* =============================================================================
+   Leave Balances Widget
+   ============================================================================= */
+
+.emp-leave-balances {
+    padding: 1rem;
+}
+
+.emp-leave-item {
+    margin-bottom: 1rem;
+}
+
+.emp-leave-item:last-child {
+    margin-bottom: 0;
+}
+
+.emp-leave-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.emp-leave-header .type {
+    font-weight: 500;
+    color: #fff;
+    text-transform: capitalize;
+}
+
+.emp-leave-header .remaining {
+    font-size: 0.85rem;
+    color: var(--primary-color, #4169e1);
+}
+
+.emp-leave-bar {
+    height: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.emp-leave-fill {
+    height: 100%;
+    background: var(--btn-gradient, linear-gradient(90deg, #4169e1 0%, #1348e7 100%));
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.emp-leave-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.35rem;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* =============================================================================
+   Quick Links
+   ============================================================================= */
+
+.emp-quick-links {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.emp-quick-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: rgba(65, 105, 225, 0.1);
+    border: 1px solid rgba(65, 105, 225, 0.2);
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.emp-quick-link:hover {
+    background: var(--btn-gradient, linear-gradient(90deg, #4169e1 0%, #1348e7 100%));
+    border-color: var(--primary-color, #4169e1);
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+.emp-quick-link svg {
+    opacity: 0.7;
+}
+
+.emp-quick-link:hover svg {
+    opacity: 1;
+}
+
+/* =============================================================================
+   Calendar Tab
+   ============================================================================= */
+
+.emp-calendar-tab {
+    min-height: 600px;
+}
+
+.emp-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    gap: 1rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.emp-no-estimator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.emp-no-estimator svg {
+    color: #f59e0b;
+    margin-bottom: 1rem;
+}
+
+.emp-no-estimator h3 {
+    color: #fff;
+    margin-bottom: 0.5rem;
+}
+
+.emp-no-estimator p {
+    max-width: 400px;
+}
+
+/* =============================================================================
+   Time Tracking Tab
+   ============================================================================= */
+
+.emp-time-tracking-tab,
+.emp-leave-tab {
+    padding: 1rem 0;
+}
+
+.emp-tab-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.emp-month-nav {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.emp-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: rgba(65, 105, 225, 0.1);
+    border: 1px solid rgba(65, 105, 225, 0.2);
+    border-radius: 8px;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.emp-nav-btn:hover {
+    background: var(--btn-gradient, linear-gradient(90deg, #4169e1 0%, #1348e7 100%));
+    border-color: var(--primary-color, #4169e1);
+}
+
+.emp-month-title {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 1.5rem;
+    color: #fff;
+    margin: 0;
+    min-width: 180px;
+    text-align: center;
+}
+
+/* Summary Cards */
+.emp-summary-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.emp-summary-card {
+    background: rgba(42, 42, 42, 0.95);
+    border: 1px solid rgba(65, 105, 225, 0.25);
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-align: center;
+}
+
+.emp-summary-value {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 2rem;
+    color: var(--primary-color, #4169e1);
+}
+
+.emp-summary-label {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Data Table */
+.emp-table-wrapper {
+    background: rgba(42, 42, 42, 0.95);
+    border: 1px solid rgba(65, 105, 225, 0.25);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.emp-data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.emp-data-table thead {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.emp-data-table th {
+    padding: 1rem;
+    text-align: left;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: rgba(255, 255, 255, 0.6);
+    border-bottom: 1px solid rgba(65, 105, 225, 0.2);
+}
+
+.emp-data-table td {
+    padding: 1rem;
+    color: #fff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.emp-data-table tbody tr:hover {
+    background: rgba(65, 105, 225, 0.05);
+}
+
+.emp-data-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Status Badges */
+.emp-status-badge {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.emp-status-badge.active {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+.emp-status-badge.approved {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+.emp-status-badge.pending {
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+}
+
+.emp-status-badge.rejected {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+/* Empty State */
+.emp-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.5);
+    background: rgba(42, 42, 42, 0.95);
+    border: 1px solid rgba(65, 105, 225, 0.25);
+    border-radius: 12px;
+}
+
+.emp-empty-state svg {
+    margin-bottom: 1rem;
+    opacity: 0.4;
+}
+
+.emp-empty-state h3 {
+    color: #fff;
+    margin-bottom: 0.5rem;
+}
+
+.emp-empty-state.small {
+    padding: 2rem;
+}
+
+/* =============================================================================
+   Leave Tab
+   ============================================================================= */
+
+.emp-tab-section {
+    margin-bottom: 2rem;
+}
+
+.emp-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.emp-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 1rem 0;
+}
+
+.emp-section-title svg {
+    color: var(--primary-color, #4169e1);
+}
+
+.emp-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.25rem;
+    background: var(--btn-gradient, linear-gradient(90deg, #4169e1 0%, #1348e7 100%));
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.emp-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(65, 105, 225, 0.4);
+    color: #fff;
+}
+
+/* Balance Cards */
+.emp-balance-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.emp-balance-card {
+    background: rgba(42, 42, 42, 0.95);
+    border: 1px solid rgba(65, 105, 225, 0.25);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.emp-balance-card:hover {
+    border-color: rgba(65, 105, 225, 0.5);
+    transform: translateY(-4px);
+}
+
+.emp-balance-type {
+    font-size: 0.9rem;
+    text-transform: capitalize;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 0.5rem;
+}
+
+.emp-balance-remaining {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.emp-balance-number {
+    font-family: 'Neon-Heavy', sans-serif;
+    font-size: 2.5rem;
+    color: var(--primary-color, #4169e1);
+}
+
+.emp-balance-label {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.emp-balance-bar {
+    height: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+}
+
+.emp-balance-fill {
+    height: 100%;
+    background: var(--btn-gradient, linear-gradient(90deg, #4169e1 0%, #1348e7 100%));
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.emp-balance-details {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* =============================================================================
+   Responsive Design
+   ============================================================================= */
+
+@media (max-width: 1200px) {
+    .emp-kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .emp-content-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .emp-column-side {
+        order: -1;
+    }
+
+    .emp-summary-cards {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .employee-dashboard {
+        padding: 1rem;
+    }
+
+    .emp-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .emp-tabs {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .emp-tab {
+        flex: 1 1 45%;
+        justify-content: center;
+        font-size: 0.85rem;
+    }
+
+    .emp-quick-links {
+        flex-direction: column;
+    }
+
+    .emp-quick-link {
+        justify-content: center;
+    }
+
+    .emp-balance-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .emp-table-wrapper {
+        overflow-x: auto;
+    }
+
+    .emp-data-table th,
+    .emp-data-table td {
+        padding: 0.75rem;
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
+}

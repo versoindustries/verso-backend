@@ -135,8 +135,12 @@ registerComponent('UserManagement', () => import('./components/features/admin/Us
 registerComponent('BookingAdmin', () => import('./components/features/admin/BookingAdmin'))
 registerComponent('LocationManagement', () => import('./components/features/admin/LocationManagement'))
 registerComponent('UnifiedAppointmentsDashboard', () => import('./components/features/admin/UnifiedAppointmentsDashboard'))
+registerComponent('DataManagement', () => import('./components/features/admin/DataManagement'))
+registerComponent('UnifiedShopDashboard', () => import('./components/features/admin/UnifiedShopDashboard'))
+registerComponent('UnifiedAutomationDashboard', () => import('./components/features/admin/UnifiedAutomationDashboard'))
 
 // Feature Components - Shop
+registerComponent('ShopStorefront', () => import('./components/features/shop/ShopStorefront'))
 registerComponent('ProductView', () => import('./components/features/shop/ProductView'))
 registerComponent('CartPage', () => import('./components/features/shop/CartPage'))
 
@@ -145,9 +149,18 @@ registerComponent('AnalyticsDashboard', () => import('./components/features/anal
 
 // Feature Components - Messaging
 registerComponent('MessagingChannel', () => import('./components/features/messaging/MessagingChannel'))
+registerComponent('UnifiedMessagingDashboard', () => import('./components/features/messaging/UnifiedMessagingDashboard'))
 
 // Feature Components - User Dashboard
 registerComponent('UserDashboard', () => import('./components/features/user/UserDashboard'))
+registerComponent('UnifiedUserSettingsDashboard', () => import('./components/features/user/UnifiedUserSettingsDashboard'))
+
+
+// Feature Components - Subscriptions
+registerComponent('SubscriptionsDashboard', () => import('./components/features/subscriptions/SubscriptionsDashboard'))
+
+// Feature Components - Employee Dashboard
+registerComponent('EmployeeDashboard', () => import('./components/features/employee/EmployeeDashboard'))
 
 // Feature Components - Blog
 registerComponent('BlogPostUtils', () => import('./components/features/blog/BlogPostUtils'))
@@ -156,5 +169,9 @@ registerComponent('BlogPostEditor', () => import('./components/features/blog/Blo
 
 // Feature Components - Content Editing (Phase D)
 registerComponent('InlineEditor', () => import('./components/features/content/InlineEditor'))
+registerComponent('PageEditorWidget', () => import('./components/features/content/PageEditorWidget'))
+
+// Feature Components - Contact
+registerComponent('ContactPage', () => import('./components/features/contact/ContactPage'))
 
 export default componentRegistry

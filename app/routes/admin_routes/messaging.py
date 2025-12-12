@@ -41,9 +41,8 @@ def render_message_content(message):
 
 def user_can_access_channel(channel):
     """Return True if current_user can access the channel."""
-    if channel.type in ('private', 'direct') and current_user not in channel.members:
-        return False
-    return True
+    # Use the new model method for access control
+    return channel.can_user_access(current_user)
 
 
 def get_or_create_dm_channel(user1_id, user2_id):
@@ -173,52 +172,30 @@ def update_read_receipt(channel_id, user_id, message_id=None):
 @messaging_bp.route('/')
 @login_required
 def index():
-    """List all channels accessible to the user."""
-    show_archived = request.args.get('archived', '0') == '1'
+    """Render the unified messaging dashboard (React SPA)."""
+    # Pass user roles for role-based UI features
+    user_roles = [role.name for role in current_user.roles] if current_user.roles else []
     
-    # Get public and private channels
-    if show_archived:
-        public_channels = Channel.query.filter(
-            Channel.type == 'public'
-        ).order_by(Channel.name).all()
-    else:
-        public_channels = Channel.query.filter(
-            Channel.type == 'public',
-            Channel.is_archived == False
-        ).order_by(Channel.name).all()
-    
-    # Get user's private channels
-    private_channels = Channel.query.filter(
-        Channel.type == 'private',
-        Channel.members.any(id=current_user.id)
-    ).all()
-    if not show_archived:
-        private_channels = [c for c in private_channels if not c.is_archived]
-    
-    # Get user's DM channels
-    dm_channels = Channel.query.filter(
-        Channel.is_direct == True,
-        Channel.members.any(id=current_user.id)
-    ).all()
-    
-    # Get all users for DM creation
-    users = User.query.filter(User.id != current_user.id).order_by(User.username).all()
-    
-    return render_template('messaging/index.html', 
-                         public_channels=public_channels,
-                         private_channels=private_channels,
-                         dm_channels=dm_channels,
-                         users=users,
-                         show_archived=show_archived)
+    return render_template('messaging/index.html', user_roles=user_roles, hide_estimate_form=True)
 
 
 @messaging_bp.route('/create_channel', methods=['POST'])
 @login_required
 def create_channel():
-    """Create a new channel."""
+    """Create a new channel. Requires Admin or Manager role."""
+    # RBAC: Only Admin/Manager can create channels
+    if not Channel.can_user_create_channels(current_user):
+        flash('You do not have permission to create channels.', 'error')
+        return redirect(url_for('messaging.index'))
+    
     name = request.form.get('name')
     channel_type = request.form.get('type', 'public')
     description = request.form.get('description', '')
+    category = request.form.get('category', 'general')
+    
+    # Role-based access control for public channels
+    allowed_roles = request.form.getlist('allowed_roles')
+    is_restricted = request.form.get('is_restricted') == '1' or len(allowed_roles) > 0
     
     if not name:
         flash('Channel name is required.', 'error')
@@ -228,7 +205,10 @@ def create_channel():
         name=name, 
         type=channel_type,
         description=description,
-        created_by_id=current_user.id
+        category=category,
+        created_by_id=current_user.id,
+        allowed_roles=allowed_roles if is_restricted else [],
+        is_restricted=is_restricted
     )
     
     # For private channels, add creator as a member
@@ -570,6 +550,38 @@ def unarchive_channel(channel_id):
     return redirect(url_for('messaging.channel', channel_id=channel_id))
 
 
+@messaging_bp.route('/channel/<int:channel_id>/delete', methods=['POST', 'DELETE'])
+@login_required
+def delete_channel(channel_id):
+    """Permanently delete a channel. Only channel owner or admin can delete."""
+    channel = Channel.query.get_or_404(channel_id)
+    
+    # Only channel owner or admin can delete
+    is_owner = channel.created_by_id == current_user.id
+    is_admin = current_user.has_role('admin') or current_user.has_role('owner')
+    
+    if not is_owner and not is_admin:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'success': False, 'error': 'Permission denied. Only channel owner or admin can delete.'}), 403
+        flash("You don't have permission to delete this channel.", 'error')
+        return redirect(url_for('messaging.channel', channel_id=channel_id))
+    
+    channel_name = channel.name
+    
+    # Delete associated data
+    # Messages are cascade deleted via relationship
+    # ChannelMember records are cascade deleted via relationship
+    
+    db.session.delete(channel)
+    db.session.commit()
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({'success': True, 'message': f'Channel "{channel_name}" has been permanently deleted.'})
+    
+    flash(f'Channel "{channel_name}" has been permanently deleted.', 'success')
+    return redirect(url_for('messaging.index'))
+
+
 @messaging_bp.route('/channel/<int:channel_id>/members', methods=['GET', 'POST'])
 @login_required
 def manage_members(channel_id):
@@ -903,6 +915,139 @@ def search_messages():
         })
     
     return jsonify({'results': results, 'count': len(results)})
+
+
+# ============================================================================
+# JSON API Endpoints for React Components
+# ============================================================================
+
+@messaging_bp.route('/api/channels')
+@login_required
+def api_channels():
+    """Get all accessible channels as JSON for React components."""
+    from app.models import Role
+    
+    # Get public channels user can access
+    all_public = Channel.query.filter(
+        Channel.type == 'public',
+        Channel.is_archived == False
+    ).order_by(Channel.category, Channel.name).all()
+    public_channels = [c for c in all_public if c.can_user_access(current_user)]
+    
+    # Get private channels
+    private_channels = Channel.query.filter(
+        Channel.type == 'private',
+        Channel.is_archived == False,
+        Channel.members.any(id=current_user.id)
+    ).order_by(Channel.name).all()
+    
+    # Get DM channels
+    dm_channels = Channel.query.filter(
+        Channel.is_direct == True,
+        Channel.members.any(id=current_user.id)
+    ).all()
+    
+    def serialize_channel(ch):
+        return {
+            'id': ch.id,
+            'name': ch.name,
+            'display_name': ch.get_display_name(current_user),
+            'type': ch.type,
+            'category': ch.category or 'general',
+            'is_archived': ch.is_archived,
+            'is_direct': ch.is_direct,
+            'is_restricted': ch.is_restricted if hasattr(ch, 'is_restricted') else False,
+            'allowed_roles': ch.allowed_roles if hasattr(ch, 'allowed_roles') else [],
+            'description': ch.description,
+            'created_by_id': ch.created_by_id,
+            'member_count': len(ch.members)
+        }
+    
+    # Get available roles for channel creation
+    roles = [{'name': r.name, 'id': r.id} for r in Role.query.all()]
+    
+    return jsonify({
+        'public': [serialize_channel(c) for c in public_channels],
+        'private': [serialize_channel(c) for c in private_channels],
+        'dm': [serialize_channel(c) for c in dm_channels],
+        'can_create': Channel.can_user_create_channels(current_user),
+        'roles': roles
+    })
+
+
+@messaging_bp.route('/api/users')
+@login_required
+def api_users():
+    """Get users available for DM as JSON."""
+    users = User.query.filter(User.id != current_user.id).order_by(User.username).all()
+    
+    return jsonify({
+        'users': [
+            {
+                'id': u.id,
+                'username': u.username,
+                'email': u.email,
+                'initial': u.username[0].upper() if u.username else '?'
+            }
+            for u in users
+        ]
+    })
+
+
+@messaging_bp.route('/channel/<int:channel_id>/settings', methods=['GET', 'POST'])
+@login_required
+def channel_settings(channel_id):
+    """Get or update channel settings."""
+    from app.models import Role
+    
+    channel = Channel.query.get_or_404(channel_id)
+    
+    # Only creator or admin can manage settings
+    if channel.created_by_id != current_user.id and not current_user.has_role('admin'):
+        return jsonify({'error': 'Permission denied'}), 403
+    
+    if request.method == 'GET':
+        roles = [{'name': r.name, 'id': r.id} for r in Role.query.all()]
+        return jsonify({
+            'id': channel.id,
+            'name': channel.name,
+            'type': channel.type,
+            'description': channel.description,
+            'category': channel.category or 'general',
+            'is_archived': channel.is_archived,
+            'is_restricted': channel.is_restricted if hasattr(channel, 'is_restricted') else False,
+            'allowed_roles': channel.allowed_roles if hasattr(channel, 'allowed_roles') else [],
+            'members': [{'id': m.id, 'username': m.username} for m in channel.members],
+            'available_roles': roles,
+            'can_archive': channel.created_by_id == current_user.id or current_user.has_role('admin')
+        })
+    
+    # POST: Update settings
+    data = request.get_json() or request.form
+    
+    if 'name' in data:
+        channel.name = data['name']
+    if 'description' in data:
+        channel.description = data['description']
+    if 'category' in data:
+        channel.category = data['category']
+    if 'is_restricted' in data:
+        channel.is_restricted = bool(data['is_restricted'])
+    if 'allowed_roles' in data:
+        channel.allowed_roles = data['allowed_roles'] if isinstance(data['allowed_roles'], list) else []
+    
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'message': 'Channel settings updated',
+        'channel': {
+            'id': channel.id,
+            'name': channel.name,
+            'is_restricted': channel.is_restricted,
+            'allowed_roles': channel.allowed_roles
+        }
+    })
 
 
 # ============================================================================

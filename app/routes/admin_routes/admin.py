@@ -284,19 +284,29 @@ def delete_user(user_id):
 @login_required
 @admin_required
 def user_management():
-    """Unified user and role management dashboard."""
+    """Unified user and role management dashboard with location assignment."""
     import json
     
-    # Get users with roles eager loaded
+    # Get users with roles and location eager loaded
     if current_user.location_id:
-        users = User.query.options(selectinload(User.roles)).filter_by(location_id=current_user.location_id).order_by(User.username).all()
+        users = User.query.options(
+            selectinload(User.roles),
+            selectinload(User.location)
+        ).filter_by(location_id=current_user.location_id).order_by(User.username).all()
     else:
-        users = User.query.options(selectinload(User.roles)).order_by(User.username).all()
+        users = User.query.options(
+            selectinload(User.roles),
+            selectinload(User.location)
+        ).order_by(User.username).all()
     
     roles = Role.query.order_by(Role.name).all()
+    locations = Location.query.filter_by(is_active=True).order_by(Location.name).all()
     form = CSRFTokenForm()
     
-    # Serialize users for React component
+    # Determine if user has owner role for conditional UI
+    is_owner = current_user.has_role('owner')
+    
+    # Serialize users for React component - include location
     users_data = [{
         'id': user.id,
         'username': user.username,
@@ -306,6 +316,8 @@ def user_management():
         'phone': user.phone or '',
         'roles': [{'id': r.id, 'name': r.name} for r in user.roles],
         'role_names': ', '.join([r.name for r in user.roles]) or 'No roles',
+        'location_id': user.location_id,
+        'location_name': user.location.name if user.location else 'No location',
         'last_login': user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else 'Never',
         'is_active': getattr(user, 'is_active', True)
     } for user in users]
@@ -318,9 +330,20 @@ def user_management():
         'users': [{'id': u.id, 'username': u.username} for u in role.users[:5]]  # First 5 users
     } for role in roles]
     
+    # Serialize locations for dropdown
+    locations_data = [{
+        'id': loc.id,
+        'name': loc.name,
+        'address': loc.full_address,
+        'user_count': loc.user_count,
+        'is_primary': loc.is_primary
+    } for loc in locations]
+    
     return render_template('admin/user_management.html', 
                           users_json=json.dumps(users_data),
                           roles_json=json.dumps(roles_data),
+                          locations_json=json.dumps(locations_data),
+                          is_owner=is_owner,
                           form=form)
 
 @admin.route('/api/user/<int:user_id>')
@@ -375,6 +398,49 @@ def api_update_user_roles(user_id):
     except SQLAlchemyError as e:
         db.session.rollback()
         current_app.logger.error(f'Error updating user roles: {e}')
+        return jsonify({'success': False, 'error': 'Database error'}), 500
+
+
+@admin.route('/api/user/<int:user_id>/location', methods=['PUT'])
+@login_required
+@admin_required
+def api_update_user_location(user_id):
+    """Update user location assignment via AJAX. Owner role recommended for bulk changes."""
+    user = User.query.get_or_404(user_id)
+    data = request.get_json()
+    
+    if data is None:
+        return jsonify({'success': False, 'error': 'Invalid JSON data'}), 400
+    
+    location_id = data.get('location_id')
+    
+    # Handle null/None location (unassign)
+    if location_id is None or location_id == '' or location_id == 0:
+        user.location_id = None
+        new_location_name = 'No location'
+    else:
+        # Validate location exists and is active
+        location = Location.query.get(location_id)
+        if not location:
+            return jsonify({'success': False, 'error': 'Location not found'}), 404
+        if not location.is_active:
+            return jsonify({'success': False, 'error': 'Location is not active'}), 400
+        
+        user.location_id = location_id
+        new_location_name = location.name
+    
+    try:
+        db.session.commit()
+        log_audit_event(current_user.id, 'update_user_location', 'User', user.id, 
+                       {'location_id': location_id, 'location_name': new_location_name}, request.remote_addr)
+        return jsonify({
+            'success': True,
+            'location_id': user.location_id,
+            'location_name': new_location_name
+        })
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        current_app.logger.error(f'Error updating user location: {e}')
         return jsonify({'success': False, 'error': 'Database error'}), 500
 
 @admin.route('/api/role', methods=['POST'])
@@ -905,6 +971,64 @@ def data_management():
     form = CSRFTokenForm()
     return render_template('admin/data_management.html', form=form)
 
+
+@admin.route('/api/data-stats')
+@login_required
+@admin_required
+def data_stats():
+    """JSON API for database statistics."""
+    import os
+    from app.models import User, Appointment, Order, Product
+    
+    # Get record counts
+    total_users = User.query.count()
+    total_appointments = Appointment.query.count()
+    total_orders = Order.query.count() if hasattr(Order, 'query') else 0
+    total_products = Product.query.count() if hasattr(Product, 'query') else 0
+    
+    # Get database file size (for SQLite)
+    db_path = current_app.config.get('SQLALCHEMY_DATABASE_URI', '')
+    db_size = 'N/A'
+    if 'sqlite' in db_path:
+        db_file = db_path.replace('sqlite:///', '')
+        if os.path.exists(db_file):
+            size_bytes = os.path.getsize(db_file)
+            if size_bytes < 1024:
+                db_size = f'{size_bytes} B'
+            elif size_bytes < 1024 * 1024:
+                db_size = f'{size_bytes / 1024:.1f} KB'
+            else:
+                db_size = f'{size_bytes / 1024 / 1024:.1f} MB'
+    
+    # Get last backup from audit log
+    last_backup_log = AuditLog.query.filter_by(action='download_backup').order_by(AuditLog.timestamp.desc()).first()
+    last_backup = last_backup_log.timestamp.strftime('%Y-%m-%d %H:%M') if last_backup_log else None
+    
+    # Get recent data management activities
+    activities = AuditLog.query.filter(
+        AuditLog.action.in_(['download_backup', 'restore_data', 'export_user_data'])
+    ).order_by(AuditLog.timestamp.desc()).limit(10).all()
+    
+    activities_list = [{
+        'id': a.id,
+        'action': a.action.replace('_', ' ').title(),
+        'timestamp': a.timestamp.strftime('%Y-%m-%d %H:%M'),
+        'details': str(a.details) if a.details else ''
+    } for a in activities]
+    
+    return jsonify({
+        'stats': {
+            'totalUsers': total_users,
+            'totalAppointments': total_appointments,
+            'totalOrders': total_orders,
+            'totalProducts': total_products,
+            'lastBackup': last_backup,
+            'databaseSize': db_size
+        },
+        'activities': activities_list
+    })
+
+
 @admin.route('/backup/download')
 @login_required
 @admin_required
@@ -969,34 +1093,74 @@ def export_user_data():
 @login_required
 @admin_required
 def list_locations():
+    """Location management dashboard - enterprise UI with full location details."""
     import json
-    locations = Location.query.all()
+    locations = Location.query.order_by(Location.is_primary.desc(), Location.name).all()
+    users = User.query.order_by(User.username).all()
     form = CSRFTokenForm()
     
-    # Serialize for LocationManagement React component
+    # Determine if user has owner role for conditional UI
+    is_owner = current_user.has_role('owner')
+    
+    # Serialize for LocationManagement React component - include all new fields
     locations_json = json.dumps([{
         'id': loc.id,
         'name': loc.name,
-        'address': loc.address or None,
-        'userCount': len(loc.users) if hasattr(loc, 'users') else 0,
-        'createdAt': loc.created_at.isoformat() if loc.created_at else None
+        'address': loc.address or '',
+        'city': loc.city or '',
+        'state': loc.state or '',
+        'zipCode': loc.zip_code or '',
+        'phone': loc.phone or '',
+        'email': loc.email or '',
+        'timezone': loc.timezone or '',
+        'isActive': loc.is_active if loc.is_active is not None else True,
+        'isPrimary': loc.is_primary if loc.is_primary is not None else False,
+        'managerId': loc.manager_id,
+        'managerName': f"{loc.manager.first_name or ''} {loc.manager.last_name or ''}".strip() if loc.manager else None,
+        'userCount': loc.user_count,
+        'fullAddress': loc.full_address,
+        'createdAt': loc.created_at.isoformat() if loc.created_at else None,
+        'updatedAt': loc.updated_at.isoformat() if loc.updated_at else None
     } for loc in locations])
     
-    return render_template('admin/list_locations.html', locations=locations, locations_json=locations_json, form=form)
+    # Serialize users for manager dropdown
+    users_json = json.dumps([{
+        'id': u.id,
+        'name': f"{u.first_name or ''} {u.last_name or ''}".strip() or u.username,
+        'username': u.username
+    } for u in users])
+    
+    return render_template('admin/list_locations.html', 
+                          locations=locations, 
+                          locations_json=locations_json, 
+                          users_json=users_json,
+                          is_owner=is_owner,
+                          form=form)
 
 
 @admin.route('/api/locations', methods=['GET'])
 @login_required
 @admin_required
 def api_list_locations():
-    """JSON API for listing locations."""
-    locations = Location.query.all()
+    """JSON API for listing locations with all fields."""
+    locations = Location.query.order_by(Location.is_primary.desc(), Location.name).all()
     return jsonify({
         'locations': [{
             'id': loc.id,
             'name': loc.name,
-            'address': loc.address or None,
-            'userCount': len(loc.users) if hasattr(loc, 'users') else 0,
+            'address': loc.address or '',
+            'city': loc.city or '',
+            'state': loc.state or '',
+            'zipCode': loc.zip_code or '',
+            'phone': loc.phone or '',
+            'email': loc.email or '',
+            'timezone': loc.timezone or '',
+            'isActive': loc.is_active if loc.is_active is not None else True,
+            'isPrimary': loc.is_primary if loc.is_primary is not None else False,
+            'managerId': loc.manager_id,
+            'managerName': f"{loc.manager.first_name or ''} {loc.manager.last_name or ''}".strip() if loc.manager else None,
+            'userCount': loc.user_count,
+            'fullAddress': loc.full_address,
             'createdAt': loc.created_at.isoformat() if loc.created_at else None
         } for loc in locations]
     })
@@ -1006,7 +1170,7 @@ def api_list_locations():
 @login_required
 @admin_required
 def api_create_location():
-    """JSON API for creating a location."""
+    """JSON API for creating a location with all fields."""
     data = request.get_json()
     
     if not data or not data.get('name'):
@@ -1017,9 +1181,22 @@ def api_create_location():
     if existing:
         return jsonify({'error': 'Location name already exists'}), 400
     
+    # If marking as primary, unset other primaries
+    if data.get('isPrimary'):
+        Location.query.filter_by(is_primary=True).update({'is_primary': False})
+    
     location = Location(
         name=data['name'],
-        address=data.get('address')
+        address=data.get('address'),
+        city=data.get('city'),
+        state=data.get('state'),
+        zip_code=data.get('zipCode'),
+        phone=data.get('phone'),
+        email=data.get('email'),
+        timezone=data.get('timezone'),
+        is_active=data.get('isActive', True),
+        is_primary=data.get('isPrimary', False),
+        manager_id=data.get('managerId') or None
     )
     
     try:
@@ -1031,8 +1208,19 @@ def api_create_location():
             'location': {
                 'id': location.id,
                 'name': location.name,
-                'address': location.address,
+                'address': location.address or '',
+                'city': location.city or '',
+                'state': location.state or '',
+                'zipCode': location.zip_code or '',
+                'phone': location.phone or '',
+                'email': location.email or '',
+                'timezone': location.timezone or '',
+                'isActive': location.is_active,
+                'isPrimary': location.is_primary,
+                'managerId': location.manager_id,
+                'managerName': f"{location.manager.first_name or ''} {location.manager.last_name or ''}".strip() if location.manager else None,
                 'userCount': 0,
+                'fullAddress': location.full_address,
                 'createdAt': location.created_at.isoformat() if location.created_at else None
             },
             'message': 'Location created successfully'
@@ -1046,7 +1234,7 @@ def api_create_location():
 @login_required
 @admin_required
 def api_update_location(location_id):
-    """JSON API for updating a location."""
+    """JSON API for updating a location with all fields."""
     location = Location.query.get_or_404(location_id)
     data = request.get_json()
     
@@ -1058,8 +1246,21 @@ def api_update_location(location_id):
     if existing:
         return jsonify({'error': 'Location name already exists'}), 400
     
+    # If marking as primary, unset other primaries
+    if data.get('isPrimary') and not location.is_primary:
+        Location.query.filter(Location.id != location_id, Location.is_primary == True).update({'is_primary': False})
+    
     location.name = data['name']
     location.address = data.get('address')
+    location.city = data.get('city')
+    location.state = data.get('state')
+    location.zip_code = data.get('zipCode')
+    location.phone = data.get('phone')
+    location.email = data.get('email')
+    location.timezone = data.get('timezone')
+    location.is_active = data.get('isActive', True)
+    location.is_primary = data.get('isPrimary', False)
+    location.manager_id = data.get('managerId') or None
     
     try:
         db.session.commit()
@@ -1069,8 +1270,19 @@ def api_update_location(location_id):
             'location': {
                 'id': location.id,
                 'name': location.name,
-                'address': location.address,
-                'userCount': len(location.users) if hasattr(location, 'users') else 0,
+                'address': location.address or '',
+                'city': location.city or '',
+                'state': location.state or '',
+                'zipCode': location.zip_code or '',
+                'phone': location.phone or '',
+                'email': location.email or '',
+                'timezone': location.timezone or '',
+                'isActive': location.is_active,
+                'isPrimary': location.is_primary,
+                'managerId': location.manager_id,
+                'managerName': f"{location.manager.first_name or ''} {location.manager.last_name or ''}".strip() if location.manager else None,
+                'userCount': location.user_count,
+                'fullAddress': location.full_address,
                 'createdAt': location.created_at.isoformat() if location.created_at else None
             },
             'message': 'Location updated successfully'
@@ -1596,6 +1808,168 @@ def hr_timesheets():
         users_entries[entry.user_id]['total_minutes'] += entry.duration_minutes or 0
     
     return render_template('admin/hr/timesheets.html', users_entries=users_entries, month=month, year=year)
+
+
+@admin.route('/api/timecards')
+@login_required
+@admin_required
+def api_timecards():
+    """JSON API: Get all employee time cards with filtering."""
+    from app.models import TimeEntry, User
+    
+    # Get filter parameters
+    month = request.args.get('month', datetime.utcnow().month, type=int)
+    year = request.args.get('year', datetime.utcnow().year, type=int)
+    employee_id = request.args.get('employee_id', type=int)
+    
+    start_date = datetime(year, month, 1).date()
+    if month == 12:
+        end_date = datetime(year + 1, 1, 1).date()
+    else:
+        end_date = datetime(year, month + 1, 1).date()
+    
+    # Build query
+    query = TimeEntry.query.filter(
+        TimeEntry.date >= start_date,
+        TimeEntry.date < end_date
+    )
+    
+    if employee_id:
+        query = query.filter(TimeEntry.user_id == employee_id)
+    
+    entries = query.order_by(TimeEntry.user_id, TimeEntry.date.desc()).all()
+    
+    # Group by employee
+    employees_data = {}
+    for entry in entries:
+        uid = entry.user_id
+        if uid not in employees_data:
+            user = entry.user
+            employees_data[uid] = {
+                'employee_id': uid,
+                'employee_name': f"{user.first_name or ''} {user.last_name or ''}".strip() or user.username,
+                'employee_email': user.email,
+                'department': user.department or 'Unassigned',
+                'entries': [],
+                'total_minutes': 0,
+                'days_worked': 0
+            }
+        
+        employees_data[uid]['entries'].append({
+            'id': entry.id,
+            'date': entry.date.isoformat() if entry.date else None,
+            'clock_in': entry.clock_in.strftime('%H:%M') if entry.clock_in else None,
+            'clock_out': entry.clock_out.strftime('%H:%M') if entry.clock_out else None,
+            'duration_minutes': entry.duration_minutes,
+            'notes': entry.notes,
+            'is_active': entry.clock_out is None
+        })
+        
+        if entry.duration_minutes:
+            employees_data[uid]['total_minutes'] += entry.duration_minutes
+            employees_data[uid]['days_worked'] += 1
+    
+    # Calculate totals
+    employees_list = list(employees_data.values())
+    for emp in employees_list:
+        emp['total_hours'] = round(emp['total_minutes'] / 60, 2)
+        emp['avg_hours_per_day'] = round(emp['total_hours'] / emp['days_worked'], 2) if emp['days_worked'] else 0
+    
+    # Get list of all employees for filter dropdown
+    all_employees = User.query.filter(
+        User.roles.any(name='Employee')
+    ).order_by(User.last_name, User.first_name).all()
+    
+    return jsonify({
+        'month': month,
+        'year': year,
+        'month_name': ['January', 'February', 'March', 'April', 'May', 'June', 
+                       'July', 'August', 'September', 'October', 'November', 'December'][month - 1],
+        'employees': employees_list,
+        'available_employees': [
+            {
+                'id': emp.id,
+                'name': f"{emp.first_name or ''} {emp.last_name or ''}".strip() or emp.username
+            }
+            for emp in all_employees
+        ],
+        'summary': {
+            'total_employees': len(employees_list),
+            'total_hours': sum(e['total_hours'] for e in employees_list),
+            'total_entries': sum(len(e['entries']) for e in employees_list)
+        }
+    })
+
+
+@admin.route('/api/timecards/export')
+@login_required
+@admin_required
+def export_timecards():
+    """Export time cards to CSV."""
+    from app.models import TimeEntry
+    import io
+    import csv
+    
+    # Get filter parameters
+    month = request.args.get('month', datetime.utcnow().month, type=int)
+    year = request.args.get('year', datetime.utcnow().year, type=int)
+    employee_id = request.args.get('employee_id', type=int)
+    
+    start_date = datetime(year, month, 1).date()
+    if month == 12:
+        end_date = datetime(year + 1, 1, 1).date()
+    else:
+        end_date = datetime(year, month + 1, 1).date()
+    
+    # Build query
+    query = TimeEntry.query.filter(
+        TimeEntry.date >= start_date,
+        TimeEntry.date < end_date
+    )
+    
+    if employee_id:
+        query = query.filter(TimeEntry.user_id == employee_id)
+    
+    entries = query.order_by(TimeEntry.user_id, TimeEntry.date.desc()).all()
+    
+    # Generate CSV
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Employee', 'Email', 'Department', 'Date', 'Clock In', 'Clock Out', 'Hours', 'Notes'])
+    
+    for entry in entries:
+        user = entry.user
+        hours = round(entry.duration_minutes / 60, 2) if entry.duration_minutes else ''
+        writer.writerow([
+            f"{user.first_name or ''} {user.last_name or ''}".strip() or user.username,
+            user.email,
+            user.department or '',
+            entry.date.strftime('%Y-%m-%d') if entry.date else '',
+            entry.clock_in.strftime('%H:%M') if entry.clock_in else '',
+            entry.clock_out.strftime('%H:%M') if entry.clock_out else 'Active',
+            hours,
+            entry.notes or ''
+        ])
+    
+    output.seek(0)
+    month_names = ['january', 'february', 'march', 'april', 'may', 'june', 
+                   'july', 'august', 'september', 'october', 'november', 'december']
+    filename = f"timecards_{month_names[month-1]}_{year}.csv"
+    
+    log_audit_event(
+        current_user.id, 
+        'export_timecards', 
+        'TimeEntry', 
+        None, 
+        {'month': month, 'year': year, 'count': len(entries)}, 
+        request.remote_addr
+    )
+    
+    return Response(
+        output.getvalue(),
+        mimetype='text/csv',
+        headers={'Content-Disposition': f'attachment; filename={filename}'}
+    )
 
 
 @admin.route('/hr/org-chart')

@@ -90,19 +90,52 @@ def accept_terms():
 @main.route('/contact', methods=['GET', 'POST'])
 def contact():
     form = ContactForm()
-    if form.validate_on_submit():
-        # Honeypot check
-        if form.hp_field.data:
+    
+    # Handle AJAX/JSON POST from React component
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    
+    if request.method == 'POST':
+        # Check honeypot field (from form data)
+        hp_value = request.form.get('hp_field', '')
+        if hp_value:
             current_app.logger.warning(f"Honeypot caught spam from {request.remote_addr}")
-            # Silent fail (or redirect as if success)
+            if is_ajax:
+                return jsonify({'success': True}), 200  # Silent success for bots
             return redirect(url_for('main_routes.contact_confirmation'))
-
+        
+        # Get form data (works for both traditional form and FormData from React)
+        first_name = request.form.get('first_name', '').strip()
+        last_name = request.form.get('last_name', '').strip()
+        email = request.form.get('email', '').strip()
+        phone = request.form.get('phone', '').strip()
+        message = request.form.get('message', '').strip()
+        
+        # Basic validation
+        errors = {}
+        if not first_name:
+            errors['first_name'] = 'First name is required'
+        if not last_name:
+            errors['last_name'] = 'Last name is required'
+        if not email:
+            errors['email'] = 'Email is required'
+        if not message:
+            errors['message'] = 'Message is required'
+        
+        if errors:
+            if is_ajax:
+                return jsonify({'success': False, 'errors': errors}), 400
+            # For traditional form, flash errors
+            for error in errors.values():
+                flash(error, 'danger')
+            return render_template('contact.html', form=form)
+        
+        # Create submission
         submission = ContactFormSubmission(
-            first_name=form.first_name.data,
-            last_name=form.last_name.data,
-            email=form.email.data,
-            phone=form.phone.data,
-            message=form.message.data
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            phone=phone,
+            message=message
         )
         db.session.add(submission)
         db.session.commit()
@@ -112,8 +145,37 @@ def contact():
         db.session.add(task)
         db.session.commit()
         
+        if is_ajax:
+            return jsonify({
+                'success': True,
+                'redirect': url_for('main_routes.contact_confirmation')
+            }), 200
+        
         return redirect(url_for('main_routes.contact_confirmation'))
-    return render_template('contact.html', form=form)
+    
+    # GET request - pass business config for React component
+    configs = BusinessConfig.query.all()
+    config_dict = {config.setting_name: config.setting_value for config in configs}
+    
+    # Check for primary/HQ location first
+    from app.models import Location
+    primary_location = Location.query.filter_by(is_primary=True, is_active=True).first()
+    
+    # Use primary location's address if available, otherwise fall back to BusinessConfig
+    if primary_location and primary_location.full_address and primary_location.full_address != 'No address':
+        business_address = primary_location.full_address
+    else:
+        business_address = config_dict.get('company_address', 'Denver, Colorado')
+    
+    business_data = {
+        'business_name': config_dict.get('company_name', 'Verso Industries'),
+        'business_email': config_dict.get('contact_email', 'contact@versoindustries.com'),
+        'business_phone': config_dict.get('contact_phone', '(555) 123-4567'),
+        'business_address': business_address,
+        'business_hours': config_dict.get('business_hours', 'Mon-Fri: 9AM - 6PM')
+    }
+    
+    return render_template('contact.html', form=form, business_data=business_data)
 
 @main.route('/contact-confirmation')
 def contact_confirmation():
@@ -441,3 +503,21 @@ def set_language(language=None):
     session['lang'] = language
     flash(f"Language changed to {current_app.config['LANGUAGES'][language]}")
     return redirect(request.referrer or url_for('main_routes.index'))
+
+
+# ============================================================================
+# Shortcut Routes (Fix 404s)
+# ============================================================================
+
+@main.route('/downloads')
+@login_required
+def downloads_redirect():
+    """Redirect /downloads to /shop/my-downloads for convenience."""
+    return redirect(url_for('cart.my_downloads'))
+
+
+@main.route('/subscriptions')
+@login_required
+def subscriptions_redirect():
+    """Redirect /subscriptions to /account/subscriptions for convenience."""
+    return redirect(url_for('subscriptions.my_subscriptions'))

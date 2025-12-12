@@ -1,0 +1,354 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Stripe Settings{% endblock %}
+
+{% block admin_css %}
+<style>
+    .stripe-settings {
+        max-width: 800px;
+        padding: 2rem;
+    }
+
+    .stripe-settings__header {
+        margin-bottom: 2rem;
+    }
+
+    .stripe-settings__title {
+        font-family: 'Neon-Heavy', 'Inter', sans-serif;
+        font-size: 1.75rem;
+        color: #fff;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .stripe-settings__subtitle {
+        color: rgba(255, 255, 255, 0.5);
+        margin: 0;
+    }
+
+    .stripe-settings__status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 2rem;
+    }
+
+    .stripe-settings__status--live {
+        background: rgba(16, 185, 129, 0.15);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .stripe-settings__status--test {
+        background: rgba(245, 158, 11, 0.15);
+        color: #fbbf24;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .stripe-settings__status--unconfigured {
+        background: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .stripe-settings__card {
+        background: rgba(20, 20, 25, 0.85);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 1.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stripe-settings__card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(135deg, #635bff 0%, #4169e1 100%);
+        border-radius: 16px 16px 0 0;
+    }
+
+    .stripe-settings__card-title {
+        font-family: 'Neon-Heavy', 'Inter', sans-serif;
+        font-size: 1.1rem;
+        color: #fff;
+        margin: 0 0 1.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .stripe-settings__card-title svg {
+        color: #635bff;
+    }
+
+    .stripe-settings__row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .stripe-settings__row:last-child {
+        border-bottom: none;
+    }
+
+    .stripe-settings__label {
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .stripe-settings__value {
+        font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+        font-size: 0.9rem;
+        color: #fff;
+        background: rgba(0, 0, 0, 0.3);
+        padding: 0.5rem 0.85rem;
+        border-radius: 6px;
+    }
+
+    .stripe-settings__value--unconfigured {
+        color: #f87171;
+        background: rgba(239, 68, 68, 0.1);
+    }
+
+    .stripe-settings__info {
+        background: rgba(99, 91, 255, 0.08);
+        border: 1px solid rgba(99, 91, 255, 0.2);
+        border-radius: 10px;
+        padding: 1.25rem;
+        margin-top: 1.5rem;
+    }
+
+    .stripe-settings__info h4 {
+        color: #a5b4fc;
+        font-size: 0.95rem;
+        margin: 0 0 0.75rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .stripe-settings__info p {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.9rem;
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    .stripe-settings__info code {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        color: #f0abfc;
+    }
+
+    .stripe-settings__btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.85rem 1.5rem;
+        background: linear-gradient(135deg, #635bff 0%, #4454c3 100%);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-family: 'Neon-Regular', 'Inter', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+    }
+
+    .stripe-settings__btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px -4px rgba(99, 91, 255, 0.4);
+    }
+
+    .stripe-settings__btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .stripe-settings__test-result {
+        margin-top: 1rem;
+        padding: 1rem;
+        border-radius: 8px;
+        display: none;
+    }
+
+    .stripe-settings__test-result--success {
+        display: block;
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.25);
+        color: #34d399;
+    }
+
+    .stripe-settings__test-result--error {
+        display: block;
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.25);
+        color: #f87171;
+    }
+
+    /* Stripe logo colors */
+    .stripe-logo {
+        width: 60px;
+        height: 25px;
+        fill: #635bff;
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="stripe-settings">
+    <header class="stripe-settings__header">
+        <h1 class="stripe-settings__title">Stripe Payment Settings</h1>
+        <p class="stripe-settings__subtitle">Configure your Stripe payment integration</p>
+    </header>
+
+    {% if settings.is_configured %}
+    {% if settings.is_test_mode %}
+    <div class="stripe-settings__status stripe-settings__status--test">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 6v6l4 2" />
+        </svg>
+        Test Mode
+    </div>
+    {% else %}
+    <div class="stripe-settings__status stripe-settings__status--live">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12" />
+        </svg>
+        Live Mode
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="stripe-settings__status stripe-settings__status--unconfigured">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="15" y1="9" x2="9" y2="15" />
+            <line x1="9" y1="9" x2="15" y2="15" />
+        </svg>
+        Not Configured
+    </div>
+    {% endif %}
+
+    <div class="stripe-settings__card" style="position: relative;">
+        <h3 class="stripe-settings__card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0110 0v4" />
+            </svg>
+            API Keys
+        </h3>
+
+        <div class="stripe-settings__row">
+            <span class="stripe-settings__label">Publishable Key</span>
+            <span
+                class="stripe-settings__value {% if 'Not configured' in settings.publishable_key %}stripe-settings__value--unconfigured{% endif %}">
+                {{ settings.publishable_key }}
+            </span>
+        </div>
+
+        <div class="stripe-settings__row">
+            <span class="stripe-settings__label">Secret Key</span>
+            <span
+                class="stripe-settings__value {% if 'Not configured' in settings.secret_key %}stripe-settings__value--unconfigured{% endif %}">
+                {{ settings.secret_key }}
+            </span>
+        </div>
+
+        <div class="stripe-settings__row">
+            <span class="stripe-settings__label">Webhook Secret</span>
+            <span
+                class="stripe-settings__value {% if 'Not configured' in settings.webhook_secret %}stripe-settings__value--unconfigured{% endif %}">
+                {{ settings.webhook_secret }}
+            </span>
+        </div>
+
+        {% if settings.is_configured %}
+        <button class="stripe-settings__btn" id="testConnection" onclick="testStripeConnection()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+            Test Connection
+        </button>
+
+        <div id="testResult" class="stripe-settings__test-result"></div>
+        {% endif %}
+    </div>
+
+    <div class="stripe-settings__info">
+        <h4>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="16" x2="12" y2="12" />
+                <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            Configuration
+        </h4>
+        <p>
+            Stripe keys are configured via environment variables for security. Set the following in your
+            <code>.env</code> file:
+        </p>
+        <p style="margin-top: 0.75rem;">
+            <code>STRIPE_PUBLISHABLE_KEY</code> - Your Stripe publishable key<br>
+            <code>STRIPE_SECRET_KEY</code> - Your Stripe secret key<br>
+            <code>STRIPE_WEBHOOK_SECRET</code> - Webhook signing secret for event verification
+        </p>
+    </div>
+</div>
+
+<script>
+    async function testStripeConnection() {
+        const btn = document.getElementById('testConnection');
+        const result = document.getElementById('testResult');
+
+        btn.disabled = true;
+        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="animate-spin"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg> Testing...';
+
+        try {
+            const response = await fetch('/admin/api/stripe-settings/test', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                result.className = 'stripe-settings__test-result stripe-settings__test-result--success';
+                result.innerHTML = `
+                <strong>✓ Connection Successful</strong><br>
+                Account: ${data.account_id}<br>
+                Business: ${data.business_name || 'N/A'}<br>
+                Country: ${data.country} | Currency: ${data.default_currency?.toUpperCase()}
+            `;
+            } else {
+                result.className = 'stripe-settings__test-result stripe-settings__test-result--error';
+                result.innerHTML = `<strong>✗ Connection Failed</strong><br>${data.error}`;
+            }
+        } catch (e) {
+            result.className = 'stripe-settings__test-result stripe-settings__test-result--error';
+            result.innerHTML = `<strong>✗ Error</strong><br>${e.message}`;
+        }
+
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Test Connection';
+    }
+</script>
+{% endblock %}

@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from markupsafe import Markup
 from app.models import Page, PageRender
 from app.database import db
-from app.modules.decorators import role_required
+from app.modules.auth_manager import role_required
 import bleach
 
 pages_bp = Blueprint('pages', __name__)
@@ -41,11 +41,11 @@ def show_page(slug):
 
 @pages_bp.route('/api/page/<int:id>/content', methods=['PATCH'])
 @login_required
-@role_required('admin')
+@role_required('Admin', 'Manager', 'Marketing', 'Owner')
 def update_page_content(id):
     """
     Update page content via inline editor.
-    Accessible to Admin and Marketing roles.
+    Accessible to Admin, Manager, Marketing, and Owner roles.
     """
     page = Page.query.get_or_404(id)
     data = request.get_json()

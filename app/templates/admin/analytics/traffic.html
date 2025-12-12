@@ -1,191 +1,243 @@
 {% extends "base.html" %}
 
+{% block additional_css %}
+<link rel="stylesheet" type="text/css"
+    href="{{ url_for('static', filename='css/components/analytics-dashboard.css') }}">
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-signal me-2"></i>Traffic Analysis</h2>
-        <div class="btn-group">
+<div class="container-fluid mt-4 analytics-page">
+    <!-- Page Header -->
+    <div class="analytics-page-header">
+        <div class="analytics-page-title">
+            <h2><i class="fas fa-signal"></i>Traffic Analysis</h2>
+            <p class="analytics-page-description">Monitor traffic sources, landing pages, devices, and browsers</p>
+        </div>
+        <div class="analytics-date-controls">
             <a href="{{ url_for('analytics.traffic', days=7) }}"
-                class="btn btn-{{ 'primary' if days == 7 else 'outline-secondary' }}">7 Days</a>
+                class="analytics-date-btn {{ 'active' if days == 7 else '' }}">7 Days</a>
             <a href="{{ url_for('analytics.traffic', days=30) }}"
-                class="btn btn-{{ 'primary' if days == 30 else 'outline-secondary' }}">30 Days</a>
+                class="analytics-date-btn {{ 'active' if days == 30 else '' }}">30 Days</a>
             <a href="{{ url_for('analytics.traffic', days=90) }}"
-                class="btn btn-{{ 'primary' if days == 90 else 'outline-secondary' }}">90 Days</a>
+                class="analytics-date-btn {{ 'active' if days == 90 else '' }}">90 Days</a>
         </div>
     </div>
 
-    <div class="row mb-4">
+    <!-- Navigation Tabs -->
+    <nav class="analytics-nav-tabs">
+        <a href="{{ url_for('analytics.dashboard') }}" class="analytics-nav-tab">
+            <i class="fas fa-chart-line"></i> Overview
+        </a>
+        <a href="{{ url_for('analytics.traffic') }}" class="analytics-nav-tab active">
+            <i class="fas fa-signal"></i> Traffic
+        </a>
+        <a href="{{ url_for('analytics.visitors') }}" class="analytics-nav-tab">
+            <i class="fas fa-user-friends"></i> Visitors
+        </a>
+        <a href="{{ url_for('analytics.sessions') }}" class="analytics-nav-tab">
+            <i class="fas fa-route"></i> Sessions
+        </a>
+        <a href="{{ url_for('analytics.funnels') }}" class="analytics-nav-tab">
+            <i class="fas fa-filter"></i> Funnels
+        </a>
+    </nav>
+
+    <!-- Traffic Sources & Mediums -->
+    <div class="analytics-grid-2">
         <!-- Traffic Sources -->
-        <div class="col-lg-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <i class="fas fa-globe me-2"></i>Traffic Sources (UTM Source)
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>Source</th>
-                                <th class="text-end">Views</th>
-                                <th class="text-end">Sessions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for source in sources %}
-                            <tr>
-                                <td>
-                                    <i class="fas fa-link text-muted me-2"></i>
-                                    {{ source.utm_source or 'Direct / None' }}
-                                </td>
-                                <td class="text-end">{{ "{:,}".format(source.views) }}</td>
-                                <td class="text-end">{{ "{:,}".format(source.sessions) }}</td>
-                            </tr>
-                            {% else %}
-                            <tr>
-                                <td colspan="3" class="text-muted">No traffic data yet</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+        <div class="analytics-card">
+            <div class="analytics-card-header">
+                <h3 class="analytics-card-title"><i class="fas fa-globe"></i> Traffic Sources (UTM Source)</h3>
+            </div>
+            <div class="analytics-card-body no-padding">
+                <table class="analytics-table">
+                    <thead>
+                        <tr>
+                            <th>Source</th>
+                            <th class="text-end">Views</th>
+                            <th class="text-end">Sessions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for source in sources %}
+                        <tr>
+                            <td>
+                                <i class="fas fa-link text-muted me-2"></i>
+                                {{ source.utm_source or 'Direct / None' }}
+                            </td>
+                            <td class="text-end"><span class="analytics-badge badge-primary">{{
+                                    "{:,}".format(source.views) }}</span></td>
+                            <td class="text-end"><span class="analytics-badge badge-info">{{
+                                    "{:,}".format(source.sessions) }}</span></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="text-muted">No traffic data yet</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
 
         <!-- Traffic Mediums -->
-        <div class="col-lg-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <i class="fas fa-bullhorn me-2"></i>Traffic Medium
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>Medium</th>
-                                <th class="text-end">Views</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for medium in mediums %}
-                            <tr>
-                                <td>
-                                    {% if medium.utm_medium == 'cpc' %}
-                                    <i class="fas fa-ad text-warning me-2"></i>
-                                    {% elif medium.utm_medium == 'email' %}
-                                    <i class="fas fa-envelope text-info me-2"></i>
-                                    {% elif medium.utm_medium == 'social' %}
-                                    <i class="fas fa-share-alt text-primary me-2"></i>
-                                    {% elif medium.utm_medium == 'organic' %}
-                                    <i class="fas fa-search text-success me-2"></i>
-                                    {% else %}
-                                    <i class="fas fa-globe text-muted me-2"></i>
-                                    {% endif %}
-                                    {{ medium.utm_medium or 'Direct / None' }}
-                                </td>
-                                <td class="text-end">{{ "{:,}".format(medium.views) }}</td>
-                            </tr>
-                            {% else %}
-                            <tr>
-                                <td colspan="2" class="text-muted">No traffic data yet</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+        <div class="analytics-card">
+            <div class="analytics-card-header">
+                <h3 class="analytics-card-title"><i class="fas fa-bullhorn"></i> Traffic Medium</h3>
+            </div>
+            <div class="analytics-card-body no-padding">
+                <table class="analytics-table">
+                    <thead>
+                        <tr>
+                            <th>Medium</th>
+                            <th class="text-end">Views</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for medium in mediums %}
+                        <tr>
+                            <td>
+                                {% if medium.utm_medium == 'cpc' %}
+                                <i class="fas fa-ad text-warning me-2"></i>
+                                {% elif medium.utm_medium == 'email' %}
+                                <i class="fas fa-envelope text-info me-2"></i>
+                                {% elif medium.utm_medium == 'social' %}
+                                <i class="fas fa-share-alt text-primary me-2"></i>
+                                {% elif medium.utm_medium == 'organic' %}
+                                <i class="fas fa-search text-success me-2"></i>
+                                {% else %}
+                                <i class="fas fa-globe text-muted me-2"></i>
+                                {% endif %}
+                                {{ medium.utm_medium or 'Direct / None' }}
+                            </td>
+                            <td class="text-end"><span class="analytics-badge badge-primary">{{
+                                    "{:,}".format(medium.views) }}</span></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="2" class="text-muted">No traffic data yet</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
-    <div class="row mb-4">
+    <!-- Landing Pages, Devices & Browsers -->
+    <div class="analytics-grid-3 mt-0">
         <!-- Landing Pages -->
-        <div class="col-lg-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <i class="fas fa-door-open me-2"></i>Top Landing Pages
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>Page</th>
-                                <th class="text-end">Sessions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for page in landing_pages %}
-                            <tr>
-                                <td class="text-truncate" style="max-width: 400px;" title="{{ page.entry_page }}">
-                                    {{ page.entry_page }}
-                                </td>
-                                <td class="text-end">{{ "{:,}".format(page.sessions) }}</td>
-                            </tr>
-                            {% else %}
-                            <tr>
-                                <td colspan="2" class="text-muted">No data yet</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+        <div class="analytics-card">
+            <div class="analytics-card-header">
+                <h3 class="analytics-card-title"><i class="fas fa-door-open"></i> Top Landing Pages</h3>
+            </div>
+            <div class="analytics-card-body no-padding">
+                <table class="analytics-table">
+                    <thead>
+                        <tr>
+                            <th>Page</th>
+                            <th class="text-end">Sessions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for page in landing_pages %}
+                        <tr>
+                            <td class="text-truncate" title="{{ page.entry_page }}">{{ page.entry_page }}</td>
+                            <td class="text-end"><span class="analytics-badge badge-success">{{
+                                    "{:,}".format(page.sessions) }}</span></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="2" class="text-muted">No data yet</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <!-- Device & Browser -->
-        <div class="col-lg-3">
-            <div class="card h-100">
-                <div class="card-header">
-                    <i class="fas fa-mobile-alt me-2"></i>Devices
-                </div>
-                <ul class="list-group list-group-flush">
-                    {% for device in devices %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
+        <!-- Devices -->
+        <div class="analytics-card">
+            <div class="analytics-card-header">
+                <h3 class="analytics-card-title"><i class="fas fa-mobile-alt"></i> Devices</h3>
+            </div>
+            <div class="analytics-card-body">
+                {% for device in devices %}
+                <div class="analytics-funnel-stat">
+                    <span class="analytics-funnel-stat-label">
                         {% if device.device_type == 'mobile' %}
-                        <span><i class="fas fa-mobile-alt text-primary me-2"></i>Mobile</span>
+                        <i class="fas fa-mobile-alt text-primary me-2"></i>Mobile
                         {% elif device.device_type == 'tablet' %}
-                        <span><i class="fas fa-tablet-alt text-info me-2"></i>Tablet</span>
+                        <i class="fas fa-tablet-alt text-info me-2"></i>Tablet
                         {% else %}
-                        <span><i class="fas fa-desktop text-secondary me-2"></i>Desktop</span>
+                        <i class="fas fa-desktop text-secondary me-2"></i>Desktop
                         {% endif %}
-                        <span class="badge bg-primary rounded-pill">{{ "{:,}".format(device.views) }}</span>
-                    </li>
-                    {% else %}
-                    <li class="list-group-item text-muted">No data yet</li>
-                    {% endfor %}
-                </ul>
+                    </span>
+                    <span class="analytics-badge badge-primary">{{ "{:,}".format(device.views) }}</span>
+                </div>
+                {% if not loop.last %}
+                <div class="analytics-progress-container mb-3">
+                    {% set max_views = devices|map(attribute='views')|max|default(1) %}
+                    <div class="analytics-progress-bar progress-{% if device.device_type == 'mobile' %}primary{% elif device.device_type == 'tablet' %}info{% else %}secondary{% endif %}"
+                        style="width: {{ (device.views / max_views * 100)|round }}%">
+                    </div>
+                </div>
+                {% endif %}
+                {% else %}
+                <p class="text-muted">No data yet</p>
+                {% endfor %}
             </div>
         </div>
 
-        <div class="col-lg-3">
-            <div class="card h-100">
-                <div class="card-header">
-                    <i class="fas fa-window-maximize me-2"></i>Browsers
-                </div>
-                <ul class="list-group list-group-flush">
-                    {% for browser in browsers %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        {% if 'chrome' in (browser.browser or '')|lower %}
-                        <span><i class="fab fa-chrome text-warning me-2"></i>{{ browser.browser or 'Unknown' }}</span>
-                        {% elif 'firefox' in (browser.browser or '')|lower %}
-                        <span><i class="fab fa-firefox text-orange me-2"></i>{{ browser.browser or 'Unknown' }}</span>
-                        {% elif 'safari' in (browser.browser or '')|lower %}
-                        <span><i class="fab fa-safari text-info me-2"></i>{{ browser.browser or 'Unknown' }}</span>
-                        {% elif 'edge' in (browser.browser or '')|lower %}
-                        <span><i class="fab fa-edge text-primary me-2"></i>{{ browser.browser or 'Unknown' }}</span>
+        <!-- Browsers -->
+        <div class="analytics-card">
+            <div class="analytics-card-header">
+                <h3 class="analytics-card-title"><i class="fas fa-window-maximize"></i> Browsers</h3>
+            </div>
+            <div class="analytics-card-body no-padding">
+                <table class="analytics-table">
+                    <thead>
+                        <tr>
+                            <th>Browser</th>
+                            <th class="text-end">Views</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for browser in browsers %}
+                        <tr>
+                            <td>
+                                {% if 'chrome' in (browser.browser or '')|lower %}
+                                <i class="fab fa-chrome text-warning me-2"></i>
+                                {% elif 'firefox' in (browser.browser or '')|lower %}
+                                <i class="fab fa-firefox-browser text-warning me-2"></i>
+                                {% elif 'safari' in (browser.browser or '')|lower %}
+                                <i class="fab fa-safari text-info me-2"></i>
+                                {% elif 'edge' in (browser.browser or '')|lower %}
+                                <i class="fab fa-edge text-primary me-2"></i>
+                                {% else %}
+                                <i class="fas fa-globe text-muted me-2"></i>
+                                {% endif %}
+                                {{ browser.browser or 'Unknown' }}
+                            </td>
+                            <td class="text-end"><span class="analytics-badge badge-secondary">{{
+                                    "{:,}".format(browser.views) }}</span></td>
+                        </tr>
                         {% else %}
-                        <span><i class="fas fa-globe text-muted me-2"></i>{{ browser.browser or 'Unknown' }}</span>
-                        {% endif %}
-                        <span class="badge bg-secondary rounded-pill">{{ "{:,}".format(browser.views) }}</span>
-                    </li>
-                    {% else %}
-                    <li class="list-group-item text-muted">No data yet</li>
-                    {% endfor %}
-                </ul>
+                        <tr>
+                            <td colspan="2" class="text-muted">No data yet</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
-    <a href="{{ url_for('analytics.dashboard') }}" class="btn btn-outline-secondary">
-        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
-    </a>
+    <!-- Back Button -->
+    <div class="mt-4">
+        <a href="{{ url_for('analytics.dashboard') }}" class="analytics-back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
 </div>
 {% endblock %}

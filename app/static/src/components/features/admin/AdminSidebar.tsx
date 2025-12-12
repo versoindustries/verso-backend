@@ -10,7 +10,7 @@ import {
     LayoutDashboard, Users, ShoppingCart, FileText, Mail,
     Calendar, BarChart3, Palette, Database, MapPin,
     History, Building, MessageSquare, FileEdit, ChevronLeft,
-    ChevronRight, Kanban, ClipboardList, Zap
+    ChevronRight, Kanban, Zap
 } from 'lucide-react'
 
 // =============================================================================
@@ -61,8 +61,7 @@ function getNavCategories(_urls: Record<string, string>): NavCategory[] {
         {
             label: 'E-Commerce',
             items: [
-                { label: 'Orders', href: '/admin/shop/orders', icon: <ShoppingCart size={18} /> },
-                { label: 'Products', href: '/admin/shop/products', icon: <ClipboardList size={18} /> },
+                { label: 'Shop', href: '/admin/shop', icon: <ShoppingCart size={18} /> },
             ]
         },
         {

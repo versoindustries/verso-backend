@@ -1,0 +1,16 @@
+{% extends 'admin_base.html' %}
+
+{% block title %}Shop Management - Admin{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components/shop-dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Shop Management</h1>
+</div>
+
+<div data-react-component="UnifiedShopDashboard" 
+     data-react-props='{"initialTab": "{{ initial_tab | default('overview') }}"}'></div>
+{% endblock %}

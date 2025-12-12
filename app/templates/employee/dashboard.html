@@ -2,141 +2,25 @@
 
 {% block title %}Employee Dashboard - Verso{% endblock %}
 
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components/employee-dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components/employee-calendar.css') }}">
+{% endblock %}
+
 {% block content %}
-<div class="row">
-    <!-- Profile Section -->
-    <div class="col-md-4">
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">My Profile</div>
-            <div class="card-body">
-                <form action="{{ url_for('employee.update_profile') }}" method="POST">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="section-spacer"></div>
 
-                    <div class="form-group">
-                        <label>First Name</label>
-                        <input type="text" name="first_name" class="form-control"
-                            value="{{ current_user.first_name or '' }}">
-                    </div>
-                    <div class="form-group">
-                        <label>Last Name</label>
-                        <input type="text" name="last_name" class="form-control"
-                            value="{{ current_user.last_name or '' }}">
-                    </div>
-                    <div class="form-group">
-                        <label>Phone</label>
-                        <input type="text" name="phone" class="form-control" value="{{ current_user.phone or '' }}">
-                    </div>
-                    <div class="form-group">
-                        <label>Bio</label>
-                        <textarea name="bio" class="form-control">{{ current_user.bio or '' }}</textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Skills (comma separated)</label>
-                        <input type="text" name="skills" class="form-control" value="{{ current_user.skills or '' }}">
-                    </div>
-                    <div class="form-group">
-                        <label>Emergency Contacts</label>
-                        <textarea name="emergency_contacts"
-                            class="form-control">{{ current_user.emergency_contacts or '' }}</textarea>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">Update Profile</button>
-                </form>
+<div class="employee-dashboard-wrapper">
+    {% set events_url = url_for('employee.calendar_events') %}
+    <div data-react-component="EmployeeDashboard" data-react-props='{"initialStats": {{ initial_stats_json | safe }}, "upcomingAppointments": {{ upcoming_appointments_json | safe }}, "leaveBalances": {{ leave_balances_json | safe }}, "eventsUrl": "{{ events_url }}", "hasEstimatorProfile": {{ "true" if estimator else "false" }}, "estimatorId": {{ estimator.id if estimator else "null" }}}'>
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading dashboard...</span>
             </div>
+            <p class="mt-2 text-muted">Loading dashboard...</p>
         </div>
-    </div>
-
-    <!-- Right Column -->
-    <div class="col-md-8">
-
-        <!-- Leave Requests -->
-        <div class="card mb-4">
-            <div class="card-header">Leave Requests</div>
-            <div class="card-body">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Start</th>
-                            <th>End</th>
-                            <th>Reason</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for leave in leave_requests %}
-                        <tr>
-                            <td>{{ leave.start_date.strftime('%Y-%m-%d') }}</td>
-                            <td>{{ leave.end_date.strftime('%Y-%m-%d') }}</td>
-                            <td>{{ leave.reason }}</td>
-                            <td>
-                                <span
-                                    class="badge badge-{% if leave.status == 'approved' %}success{% elif leave.status == 'rejected' %}danger{% else %}warning{% endif %}">
-                                    {{ leave.status }}
-                                </span>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-
-                <hr>
-                <h5>Request Time Off</h5>
-                <form action="{{ url_for('employee.request_leave') }}" method="POST" class="form-inline">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <div class="form-group mr-2">
-                        <input type="date" name="start_date" class="form-control" required>
-                    </div>
-                    <div class="form-group mr-2">
-                        <input type="date" name="end_date" class="form-control" required>
-                    </div>
-                    <div class="form-group mr-2">
-                        <input type="text" name="reason" class="form-control" placeholder="Reason" required>
-                    </div>
-                    <button type="submit" class="btn btn-success">Submit</button>
-                </form>
-            </div>
-        </div>
-
-        <!-- Private Documents -->
-        <div class="card mb-4">
-            <div class="card-header">My Encrypted Documents</div>
-            <div class="card-body">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Title</th>
-                            <th>Date</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for doc in documents %}
-                        <tr>
-                            <td>{{ doc.title }}</td>
-                            <td>{{ doc.created_at.strftime('%Y-%m-%d') }}</td>
-                            <td>
-                                <a href="{{ url_for('employee.view_doc', doc_id=doc.id) }}"
-                                    class="btn btn-sm btn-info">Decrypt & Download</a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-
-                <hr>
-                <h5>Upload Document</h5>
-                <form action="{{ url_for('employee.upload_doc') }}" method="POST" enctype="multipart/form-data">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <div class="form-group">
-                        <input type="text" name="title" class="form-control mb-2"
-                            placeholder="Document Title (Optional)">
-                        <input type="file" name="file" class="form-control-file" required>
-                    </div>
-                    <button type="submit" class="btn btn-warning">Upload Encrypted</button>
-                </form>
-            </div>
-        </div>
-
     </div>
 </div>
+
+<div class="section-spacer"></div>
 {% endblock %}

@@ -35,13 +35,40 @@ export interface Urls {
     setLanguageEs: string;
 }
 
+export interface FeatureFlags {
+    ecommerceEnabled: boolean;
+    bookingEnabled: boolean;
+}
+
+export interface PageEditorContext {
+    contentType: 'page' | 'post' | 'product' | 'static';
+    contentId: number;
+    canEdit: boolean;
+    initialData?: ContentFields;
+}
+
+export interface ContentFields {
+    title?: string;
+    content?: string;
+    excerpt?: string;
+    metaTitle?: string;
+    metaDescription?: string;
+    ogTitle?: string;
+    ogDescription?: string;
+    ogImage?: string;
+    slug?: string;
+}
+
 export interface VersoContext {
     user: User;
     config: BusinessConfig;
     urls: Urls;
     unreadNotificationsCount: number;
+    featureFlags?: FeatureFlags;
+    pageEditor?: PageEditorContext;
     year: number;
     version: string;
+    currentLanguage: string;
 }
 
 declare global {
@@ -49,3 +76,4 @@ declare global {
         versoContext: VersoContext;
     }
 }
+

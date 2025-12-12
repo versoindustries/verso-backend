@@ -3,6 +3,7 @@
 {% block title %}{{ current_channel.get_display_name(current_user) }} - Messages{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components/enterprise-messaging.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/components/messaging-channel.css') }}">
 {% endblock %}
 

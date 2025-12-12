@@ -1,90 +1,118 @@
 {% extends "base.html" %}
 
+{% block additional_css %}
+<link rel="stylesheet" type="text/css"
+    href="{{ url_for('static', filename='css/components/analytics-dashboard.css') }}">
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-filter me-2"></i>Conversion Funnels</h2>
-        <a href="{{ url_for('analytics.create_funnel') }}" class="btn btn-primary">
-            <i class="fas fa-plus me-2"></i>Create Funnel
+<div class="container-fluid mt-4 analytics-page">
+    <!-- Page Header -->
+    <div class="analytics-page-header">
+        <div class="analytics-page-title">
+            <h2><i class="fas fa-filter"></i>Conversion Funnels</h2>
+            <p class="analytics-page-description">Track user journeys through your conversion goals</p>
+        </div>
+        <a href="{{ url_for('analytics.create_funnel') }}" class="analytics-date-btn active">
+            <i class="fas fa-plus me-1"></i> Create Funnel
         </a>
     </div>
 
-    <div class="row">
+    <!-- Navigation Tabs -->
+    <nav class="analytics-nav-tabs">
+        <a href="{{ url_for('analytics.dashboard') }}" class="analytics-nav-tab">
+            <i class="fas fa-chart-line"></i> Overview
+        </a>
+        <a href="{{ url_for('analytics.traffic') }}" class="analytics-nav-tab">
+            <i class="fas fa-signal"></i> Traffic
+        </a>
+        <a href="{{ url_for('analytics.visitors') }}" class="analytics-nav-tab">
+            <i class="fas fa-user-friends"></i> Visitors
+        </a>
+        <a href="{{ url_for('analytics.sessions') }}" class="analytics-nav-tab">
+            <i class="fas fa-route"></i> Sessions
+        </a>
+        <a href="{{ url_for('analytics.funnels') }}" class="analytics-nav-tab active">
+            <i class="fas fa-filter"></i> Funnels
+        </a>
+    </nav>
+
+    <!-- Funnels Grid -->
+    <div class="analytics-funnel-grid">
         {% for item in funnels %}
-        <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <span>
-                        {% if item.funnel.is_active %}
-                        <i class="fas fa-circle text-success me-2" style="font-size: 0.6rem;"></i>
-                        {% else %}
-                        <i class="fas fa-circle text-secondary me-2" style="font-size: 0.6rem;"></i>
-                        {% endif %}
-                        {{ item.funnel.name }}
+        <div class="analytics-funnel-card">
+            <div class="analytics-funnel-header">
+                <span class="analytics-funnel-title">
+                    <span
+                        class="analytics-funnel-status {{ 'active' if item.funnel.is_active else 'inactive' }}"></span>
+                    {{ item.funnel.name }}
+                </span>
+                <div class="dropdown">
+                    <button class="analytics-date-btn" data-bs-toggle="dropdown" style="padding: 0.4rem 0.6rem;">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item"
+                                href="{{ url_for('analytics.funnel_detail', funnel_id=item.funnel.id) }}">
+                                <i class="fas fa-chart-bar me-2"></i>View Details
+                            </a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <form action="{{ url_for('analytics.delete_funnel', funnel_id=item.funnel.id) }}"
+                                method="POST" onsubmit="return confirm('Delete this funnel?');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="dropdown-item text-danger">
+                                    <i class="fas fa-trash me-2"></i>Delete
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="analytics-funnel-body">
+                <p class="analytics-funnel-description">{{ item.funnel.description or 'No description' }}</p>
+
+                <div class="analytics-funnel-stat">
+                    <span class="analytics-funnel-stat-label">Steps</span>
+                    <span class="analytics-badge badge-info">{{ item.step_count }}</span>
+                </div>
+
+                <div class="analytics-funnel-stat">
+                    <span class="analytics-funnel-stat-label">Conversion Rate</span>
+                    <span
+                        class="analytics-conversion-rate {{ 'rate-high' if item.conversion_rate >= 50 else 'rate-medium' if item.conversion_rate >= 20 else 'rate-low' }}">
+                        {{ item.conversion_rate }}%
                     </span>
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">
-                            <i class="fas fa-ellipsis-v"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item"
-                                    href="{{ url_for('analytics.funnel_detail', funnel_id=item.funnel.id) }}"><i
-                                        class="fas fa-chart-bar me-2"></i>View Details</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li>
-                                <form action="{{ url_for('analytics.delete_funnel', funnel_id=item.funnel.id) }}"
-                                    method="POST" onsubmit="return confirm('Delete this funnel?');">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <button type="submit" class="dropdown-item text-danger"><i
-                                            class="fas fa-trash me-2"></i>Delete</button>
-                                </form>
-                            </li>
-                        </ul>
-                    </div>
                 </div>
-                <div class="card-body">
-                    <p class="text-muted mb-3">{{ item.funnel.description or 'No description' }}</p>
-
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="text-muted">Steps</span>
-                        <span class="badge bg-info">{{ item.step_count }}</span>
-                    </div>
-
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted">Conversion Rate</span>
-                        <span
-                            class="badge bg-{{ 'success' if item.conversion_rate >= 50 else 'warning' if item.conversion_rate >= 20 else 'danger' }} fs-6">
-                            {{ item.conversion_rate }}%
-                        </span>
-                    </div>
-                </div>
-                <div class="card-footer bg-transparent">
-                    <a href="{{ url_for('analytics.funnel_detail', funnel_id=item.funnel.id) }}"
-                        class="btn btn-outline-primary w-100">
-                        <i class="fas fa-chart-bar me-2"></i>View Analysis
-                    </a>
-                </div>
+            </div>
+            <div class="analytics-funnel-footer">
+                <a href="{{ url_for('analytics.funnel_detail', funnel_id=item.funnel.id) }}" class="analytics-back-btn"
+                    style="width: 100%; justify-content: center;">
+                    <i class="fas fa-chart-bar"></i> View Analysis
+                </a>
             </div>
         </div>
         {% else %}
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body text-center py-5">
-                    <i class="fas fa-filter fa-3x text-muted mb-3"></i>
-                    <p class="text-muted">No funnels created yet</p>
-                    <a href="{{ url_for('analytics.create_funnel') }}" class="btn btn-primary">Create Your First
-                        Funnel</a>
-                </div>
+        <div class="analytics-card" style="grid-column: 1 / -1;">
+            <div class="analytics-empty-state">
+                <i class="fas fa-filter"></i>
+                <p>No funnels created yet</p>
+                <a href="{{ url_for('analytics.create_funnel') }}" class="analytics-date-btn active">
+                    Create Your First Funnel
+                </a>
             </div>
         </div>
         {% endfor %}
     </div>
 
-    <div class="mt-3">
-        <a href="{{ url_for('analytics.dashboard') }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+    <!-- Back Button -->
+    <div class="mt-4">
+        <a href="{{ url_for('analytics.dashboard') }}" class="analytics-back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
         </a>
     </div>
 </div>

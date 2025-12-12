@@ -9,6 +9,7 @@ from app.modules.encryption import encrypt_data, decrypt_data
 from datetime import datetime, timedelta
 import io
 import pytz
+import json
 
 employee_bp = Blueprint('employee', __name__, url_prefix='/employee')
 
@@ -18,7 +19,7 @@ employee_bp = Blueprint('employee', __name__, url_prefix='/employee')
 def dashboard():
     """Enhanced employee dashboard with leave balances and time tracking."""
     leave_requests = LeaveRequest.query.filter_by(user_id=current_user.id).order_by(LeaveRequest.created_at.desc()).limit(10).all()
-    documents = EncryptedDocument.query.filter_by(user_id=current_user.id).all()
+    documents = EncryptedDocument.query.filter_by(user_id=current_user.id).order_by(EncryptedDocument.created_at.desc()).limit(5).all()
     
     # Phase 5: Get leave balances for current year
     current_year = datetime.utcnow().year
@@ -38,10 +39,88 @@ def dashboard():
     # Phase 5: Get shared documents
     shared_docs_count = DocumentShare.query.filter_by(shared_with_user_id=current_user.id).count()
     
+    # Get estimator profile for calendar
+    estimator = None
+    if hasattr(current_user, 'estimator_profile') and current_user.estimator_profile:
+        estimator = current_user.estimator_profile
+    
     leave_form = LeaveRequestForm()
     doc_form = DocumentUploadForm()
     time_form = TimeEntryForm()
     profile_form = EmployeeProfileForm(obj=current_user)
+    
+    # Serialize initial data for React component
+    initial_stats = {
+        'today_appointments': 0,
+        'week_appointments': 0,
+        'pending_leave': 0,
+        'hours_this_week': 0,
+        'is_clocked_in': active_time_entry is not None,
+        'clock_in_time': active_time_entry.clock_in.isoformat() if active_time_entry else None,
+    }
+    
+    # Calculate appointment stats if estimator
+    if estimator:
+        now = datetime.utcnow()
+        today_start = datetime(now.year, now.month, now.day)
+        today_end = today_start + timedelta(days=1)
+        week_end = today_start + timedelta(days=7)
+        
+        initial_stats['today_appointments'] = Appointment.query.filter(
+            Appointment.estimator_id == estimator.id,
+            Appointment.preferred_date_time >= today_start,
+            Appointment.preferred_date_time < today_end
+        ).count()
+        
+        initial_stats['week_appointments'] = Appointment.query.filter(
+            Appointment.estimator_id == estimator.id,
+            Appointment.preferred_date_time >= today_start,
+            Appointment.preferred_date_time < week_end
+        ).count()
+    
+    # Pending leave requests
+    initial_stats['pending_leave'] = LeaveRequest.query.filter_by(
+        user_id=current_user.id,
+        status='pending'
+    ).count()
+    
+    # Hours this week
+    week_start = today - timedelta(days=today.weekday())
+    week_entries = TimeEntry.query.filter(
+        TimeEntry.user_id == current_user.id,
+        TimeEntry.date >= week_start
+    ).all()
+    initial_stats['hours_this_week'] = round(sum(e.duration_minutes or 0 for e in week_entries) / 60, 1)
+    
+    # Serialize upcoming appointments
+    upcoming_appointments = []
+    if estimator:
+        upcoming = Appointment.query.filter(
+            Appointment.estimator_id == estimator.id,
+            Appointment.preferred_date_time >= datetime.utcnow()
+        ).order_by(Appointment.preferred_date_time).limit(5).all()
+        
+        for appt in upcoming:
+            upcoming_appointments.append({
+                'id': appt.id,
+                'name': f"{appt.first_name} {appt.last_name}",
+                'datetime': appt.preferred_date_time.isoformat(),
+                'service': appt.service.name if appt.service else 'N/A',
+                'status': appt.status,
+                'checked_in': appt.checked_in_at is not None,
+                'checked_out': appt.checked_out_at is not None
+            })
+    
+    # Serialize leave balances
+    leave_balances_data = [
+        {
+            'type': lb.leave_type,
+            'total': lb.total_days,
+            'used': lb.used_days,
+            'remaining': lb.total_days - lb.used_days
+        }
+        for lb in leave_balances
+    ]
     
     return render_template('employee/dashboard.html', 
                            leave_requests=leave_requests, 
@@ -53,7 +132,232 @@ def dashboard():
                            leave_form=leave_form,
                            doc_form=doc_form,
                            time_form=time_form,
-                           profile_form=profile_form)
+                           profile_form=profile_form,
+                           estimator=estimator,
+                           initial_stats_json=json.dumps(initial_stats),
+                           upcoming_appointments_json=json.dumps(upcoming_appointments),
+                           leave_balances_json=json.dumps(leave_balances_data))
+
+
+@employee_bp.route('/api/dashboard-stats')
+@login_required
+def dashboard_stats():
+    """JSON API for dashboard statistics - used by React component."""
+    today = datetime.utcnow().date()
+    now = datetime.utcnow()
+    
+    # Clock status
+    active_time_entry = TimeEntry.query.filter_by(
+        user_id=current_user.id,
+        date=today,
+        clock_out=None
+    ).first()
+    
+    stats = {
+        'is_clocked_in': active_time_entry is not None,
+        'clock_in_time': active_time_entry.clock_in.isoformat() if active_time_entry else None,
+        'today_appointments': 0,
+        'week_appointments': 0,
+        'pending_leave': 0,
+        'hours_this_week': 0,
+    }
+    
+    # Estimator appointments
+    estimator = getattr(current_user, 'estimator_profile', None)
+    if estimator:
+        today_start = datetime(now.year, now.month, now.day)
+        today_end = today_start + timedelta(days=1)
+        week_end = today_start + timedelta(days=7)
+        
+        stats['today_appointments'] = Appointment.query.filter(
+            Appointment.estimator_id == estimator.id,
+            Appointment.preferred_date_time >= today_start,
+            Appointment.preferred_date_time < today_end
+        ).count()
+        
+        stats['week_appointments'] = Appointment.query.filter(
+            Appointment.estimator_id == estimator.id,
+            Appointment.preferred_date_time >= today_start,
+            Appointment.preferred_date_time < week_end
+        ).count()
+    
+    # Leave
+    stats['pending_leave'] = LeaveRequest.query.filter_by(
+        user_id=current_user.id,
+        status='pending'
+    ).count()
+    
+    # Hours
+    week_start = today - timedelta(days=today.weekday())
+    week_entries = TimeEntry.query.filter(
+        TimeEntry.user_id == current_user.id,
+        TimeEntry.date >= week_start
+    ).all()
+    stats['hours_this_week'] = round(sum(e.duration_minutes or 0 for e in week_entries) / 60, 1)
+    
+    return jsonify(stats)
+
+
+# ============================================================================
+# JSON API Endpoints for React Dashboard
+# ============================================================================
+
+@employee_bp.route('/api/clock-in', methods=['POST'])
+@login_required
+def api_clock_in():
+    """JSON API: Clock in for the day."""
+    today = datetime.utcnow().date()
+    now = datetime.utcnow()
+    
+    # Check if already clocked in
+    existing = TimeEntry.query.filter_by(
+        user_id=current_user.id,
+        date=today,
+        clock_out=None
+    ).first()
+    
+    if existing:
+        return jsonify({
+            'success': False,
+            'message': 'You are already clocked in.',
+            'clock_in_time': existing.clock_in.isoformat()
+        })
+    
+    entry = TimeEntry(
+        user_id=current_user.id,
+        clock_in=now,
+        date=today
+    )
+    db.session.add(entry)
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'message': f'Clocked in at {now.strftime("%H:%M")}.',
+        'clock_in_time': now.isoformat()
+    })
+
+
+@employee_bp.route('/api/clock-out', methods=['POST'])
+@login_required
+def api_clock_out():
+    """JSON API: Clock out for the day."""
+    today = datetime.utcnow().date()
+    now = datetime.utcnow()
+    
+    entry = TimeEntry.query.filter_by(
+        user_id=current_user.id,
+        date=today,
+        clock_out=None
+    ).first()
+    
+    if not entry:
+        return jsonify({
+            'success': False,
+            'message': 'You are not clocked in.'
+        })
+    
+    entry.clock_out = now
+    entry.duration_minutes = entry.calculate_duration()
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'message': f'Clocked out at {now.strftime("%H:%M")}. Total: {entry.duration_minutes} minutes.',
+        'duration_minutes': entry.duration_minutes
+    })
+
+
+@employee_bp.route('/api/leave-balances')
+@login_required
+def api_leave_balances():
+    """JSON API: Get leave balances and requests."""
+    current_year = datetime.utcnow().year
+    balances = LeaveBalance.query.filter_by(user_id=current_user.id, year=current_year).all()
+    
+    # Get all leave requests for this year
+    year_start = datetime(current_year, 1, 1).date()
+    year_end = datetime(current_year, 12, 31).date()
+    leave_requests = LeaveRequest.query.filter(
+        LeaveRequest.user_id == current_user.id,
+        LeaveRequest.start_date >= year_start,
+        LeaveRequest.start_date <= year_end
+    ).order_by(LeaveRequest.start_date.desc()).all()
+    
+    return jsonify({
+        'year': current_year,
+        'balances': [
+            {
+                'id': lb.id,
+                'leave_type': lb.leave_type,
+                'total_days': lb.total_days,
+                'used_days': lb.used_days,
+                'remaining_days': lb.total_days - lb.used_days
+            }
+            for lb in balances
+        ],
+        'requests': [
+            {
+                'id': lr.id,
+                'leave_type': lr.leave_type,
+                'start_date': lr.start_date.isoformat() if lr.start_date else None,
+                'end_date': lr.end_date.isoformat() if lr.end_date else None,
+                'status': lr.status,
+                'reason': lr.reason,
+                'created_at': lr.created_at.isoformat() if lr.created_at else None
+            }
+            for lr in leave_requests
+        ]
+    })
+
+
+@employee_bp.route('/api/time-history')
+@login_required
+def api_time_history():
+    """JSON API: Get time entries for a given period."""
+    month = request.args.get('month', datetime.utcnow().month, type=int)
+    year = request.args.get('year', datetime.utcnow().year, type=int)
+    
+    start_date = datetime(year, month, 1).date()
+    if month == 12:
+        end_date = datetime(year + 1, 1, 1).date()
+    else:
+        end_date = datetime(year, month + 1, 1).date()
+    
+    entries = TimeEntry.query.filter(
+        TimeEntry.user_id == current_user.id,
+        TimeEntry.date >= start_date,
+        TimeEntry.date < end_date
+    ).order_by(TimeEntry.date.desc()).all()
+    
+    # Calculate totals
+    total_minutes = sum(e.duration_minutes or 0 for e in entries)
+    total_hours = round(total_minutes / 60, 2)
+    
+    return jsonify({
+        'month': month,
+        'year': year,
+        'month_name': ['January', 'February', 'March', 'April', 'May', 'June', 
+                       'July', 'August', 'September', 'October', 'November', 'December'][month - 1],
+        'entries': [
+            {
+                'id': e.id,
+                'date': e.date.isoformat() if e.date else None,
+                'clock_in': e.clock_in.strftime('%H:%M') if e.clock_in else None,
+                'clock_out': e.clock_out.strftime('%H:%M') if e.clock_out else None,
+                'duration_minutes': e.duration_minutes,
+                'notes': e.notes,
+                'is_active': e.clock_out is None
+            }
+            for e in entries
+        ],
+        'summary': {
+            'total_hours': total_hours,
+            'total_minutes': total_minutes,
+            'days_worked': len([e for e in entries if e.duration_minutes]),
+            'avg_hours_per_day': round(total_hours / len([e for e in entries if e.duration_minutes]), 2) if [e for e in entries if e.duration_minutes] else 0
+        }
+    })
 
 
 # ============================================================================
