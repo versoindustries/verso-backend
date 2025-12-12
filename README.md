@@ -358,6 +358,8 @@ Verso is built with enterprise security requirements in mind:
 
 **Security documentation:** [docs/compliance/](docs/compliance/)
 
+**Note:** Verso Industries is not SOC2 certified. Software is built to the best of our ability following guidelines and best practices. Compliance for each organization is the responsibility of the organization. Verso Industries is not liable for any non-compliance.
+
 ---
 
 ## 🧪 Testing
