@@ -62,6 +62,8 @@
 | [Accessibility Checklist](compliance/accessibility_checklist.md) | WCAG 2.1 compliance |
 | [License Compliance](compliance/license_compliance.md) | Open source license audit |
 
+**Note:** Compliance documentation is a work in progress. Verso Industries is not SOC2 certified. Software is built to the best of our ability following guidelines and best practices. Compliance for each organization is the responsibility of the organization. Verso Industries is not liable for any non-compliance.
+
 ---
 
 ## 🏗️ Repository Structure
