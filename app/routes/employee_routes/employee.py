@@ -6,12 +6,23 @@ from app.forms import (RescheduleRequestForm, AppointmentNotesForm, CSRFTokenFor
                         DocumentShareForm, DocumentUploadForm, TimeEntryForm, EmployeeSearchForm, EmployeeProfileForm)
 from app.database import db
 from app.modules.encryption import encrypt_data, decrypt_data
+from app.modules.auth_manager import role_required
 from datetime import datetime, timedelta
 import io
 import pytz
 import json
 
 employee_bp = Blueprint('employee', __name__, url_prefix='/employee')
+
+
+@employee_bp.before_request
+@login_required
+def require_employee_role():
+    """Require employee, admin, manager, or owner role for all employee routes."""
+    allowed_roles = ['employee', 'admin', 'manager', 'owner']
+    if not any(current_user.has_role(role) for role in allowed_roles):
+        flash('You do not have permission to access the Employee Portal.', 'warning')
+        return redirect(url_for('main.index'))
 
 
 @employee_bp.route('/dashboard')

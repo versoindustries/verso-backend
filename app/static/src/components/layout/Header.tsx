@@ -162,6 +162,7 @@ const Header: React.FC = () => {
     const { user, config, urls } = context;
     const isAdmin = user.roles?.some(role => ['Admin', 'Owner', 'Manager'].includes(role));
     const isBlogger = user.roles?.includes('blogger');
+    const isEmployee = user.roles?.some(role => ['employee', 'Employee', 'Admin', 'Owner', 'Manager'].includes(role));
 
     // Navigation items
     const aboutItems = [
@@ -251,10 +252,12 @@ const Header: React.FC = () => {
                                     </div>
 
                                     <div className="enterprise-header__user-section">
-                                        <a href={urls.employeeDashboard} className="enterprise-header__user-item">
-                                            <Briefcase size={18} />
-                                            <span>Employee Portal</span>
-                                        </a>
+                                        {isEmployee && (
+                                            <a href={urls.employeeDashboard} className="enterprise-header__user-item">
+                                                <Briefcase size={18} />
+                                                <span>Employee Portal</span>
+                                            </a>
+                                        )}
                                         <a href={urls.messaging} className="enterprise-header__user-item">
                                             <MessageSquare size={18} />
                                             <span>Messages</span>
@@ -336,10 +339,12 @@ const Header: React.FC = () => {
 
                         {/* Mobile Portal Links */}
                         <nav className="enterprise-header__mobile-nav enterprise-header__mobile-nav--secondary">
-                            <a href={urls.employeeDashboard} className="enterprise-header__mobile-link">
-                                <Briefcase size={20} />
-                                <span>Employee Portal</span>
-                            </a>
+                            {isEmployee && (
+                                <a href={urls.employeeDashboard} className="enterprise-header__mobile-link">
+                                    <Briefcase size={20} />
+                                    <span>Employee Portal</span>
+                                </a>
+                            )}
                             <a href={urls.messaging} className="enterprise-header__mobile-link">
                                 <MessageSquare size={20} />
                                 <span>Messages</span>
