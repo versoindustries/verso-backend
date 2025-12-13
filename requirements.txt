@@ -61,3 +61,4 @@ bandit>=1.7
 # redis>=4.0  # Disabled - using app's own worker setup instead
 # boto3>=1.0  # For S3 backups (uncomment if needed)
 
+fonttools>=4.61.0 # not directly required, pinned by Snyk to avoid a vulnerability
