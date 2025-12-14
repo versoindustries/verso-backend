@@ -1,2 +1,9 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Preserve user customizations during upstream merges
+# These files will favor the user's version when merging from upstream
+.env merge=ours
+app/static/images/logo.png merge=ours
+app/static/css/custom.css merge=ours
+app/static/css/theme-overrides.css merge=ours

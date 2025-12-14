@@ -434,6 +434,38 @@ If Verso saves you from the Integration Tax, consider supporting development:
 
 ---
 
+## 🔄 Staying Updated
+
+Verso-Backend receives regular updates with new features, security patches, and improvements. To pull updates without losing your customizations:
+
+```bash
+# First time: Add upstream remote (if you cloned from template)
+git remote add upstream https://github.com/versoindustries/verso-backend.git
+
+# When updates are released:
+git fetch upstream
+git merge upstream/main
+
+# Resolve any conflicts (usually in templates/CSS you customized)
+# Then apply any new migrations:
+flask db upgrade
+npm run build
+```
+
+> **Tip:** Keep customizations in clearly marked files (e.g., `custom.css`, `theme-overrides.css`) to minimize merge conflicts. Files like `.env` and `app/static/images/logo.png` are configured in `.gitattributes` to favor your version during merges.
+
+---
+
+## ⚠️ Known Issues
+
+| Issue | Status | Workaround |
+|-------|--------|------------|
+| **Page Editor** | 🚧 In Progress | The WYSIWYG page editor has known stability issues. We're actively working on a fix (see roadmap). |
+
+> **Note:** The CMS for blogging works fully. Only the standalone page editor for static pages is affected.
+
+---
+
 ## 🗺️ Roadmap
 
 ### Current Focus (v2.x)
@@ -441,6 +473,7 @@ If Verso saves you from the Integration Tax, consider supporting development:
 - [x] Unified Admin Dashboard
 - [x] Enterprise Messaging Platform
 - [x] Theme Editor with live preview
+- [ ] Page editor stability fixes
 - [ ] Advanced automation workflows
 - [ ] Mobile-responsive admin UI
 - [ ] Plugin/extension system
