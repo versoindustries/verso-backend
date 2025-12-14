@@ -363,8 +363,12 @@ const Header: React.FC = () => {
                     </>
                 ) : (
                     <div className="enterprise-header__mobile-auth">
+                        <a href={urls.contact} className="enterprise-header__mobile-auth-btn">
+                            <Phone size={18} />
+                            Contact Us
+                        </a>
                         <a href={urls.login} className="enterprise-header__mobile-auth-link">Login</a>
-                        <a href={urls.register} className="enterprise-header__mobile-auth-btn">Register</a>
+                        <a href={urls.register} className="enterprise-header__mobile-auth-link">Create Account</a>
                     </div>
                 )}
             </div>
