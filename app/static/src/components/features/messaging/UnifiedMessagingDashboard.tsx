@@ -4,9 +4,19 @@
  * Enterprise-level messaging platform with Discord/Slack-style UX.
  * Single-page experience with in-place channel switching, role-based access,
  * and premium glassmorphism design.
+ * 
+ * Features:
+ * - Real-time messaging (SSE + polling fallback)
+ * - Channel management (create, archive, delete)
+ * - Member management for private channels
+ * - Role-based access control
+ * - Message reactions
+ * - File attachments
+ * - Confirmation modals for destructive actions
+ * - Toast notifications for feedback
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, createContext, useContext } from 'react'
 import api from '../../../api'
 
 // =============================================================================
@@ -56,9 +66,16 @@ interface User {
     initial: string
 }
 
+interface Toast {
+    id: string
+    type: 'success' | 'error' | 'info' | 'warning'
+    message: string
+}
+
 interface UnifiedMessagingDashboardProps {
     currentUserId: number
     userRoles?: string[]
+    initialChannelId?: number
 }
 
 // Common emojis for reactions
@@ -73,12 +90,164 @@ const CHANNEL_CATEGORIES = [
 ]
 
 // =============================================================================
+// Toast Context
+// =============================================================================
+
+const ToastContext = createContext<{
+    toasts: Toast[]
+    addToast: (type: Toast['type'], message: string) => void
+    removeToast: (id: string) => void
+}>({
+    toasts: [],
+    addToast: () => { },
+    removeToast: () => { },
+})
+
+function ToastProvider({ children }: { children: React.ReactNode }) {
+    const [toasts, setToasts] = useState<Toast[]>([])
+
+    const addToast = useCallback((type: Toast['type'], message: string) => {
+        const id = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        setToasts(prev => [...prev, { id, type, message }])
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            setToasts(prev => prev.filter(t => t.id !== id))
+        }, 5000)
+    }, [])
+
+    const removeToast = useCallback((id: string) => {
+        setToasts(prev => prev.filter(t => t.id !== id))
+    }, [])
+
+    return (
+        <ToastContext.Provider value={{ toasts, addToast, removeToast }}>
+            {children}
+            <ToastContainer />
+        </ToastContext.Provider>
+    )
+}
+
+function ToastContainer() {
+    const { toasts, removeToast } = useContext(ToastContext)
+
+    if (toasts.length === 0) return null
+
+    return (
+        <div className="toast-container">
+            {toasts.map(toast => (
+                <div key={toast.id} className={`toast toast-${toast.type}`}>
+                    <i className={`fas ${toast.type === 'success' ? 'fa-check-circle' :
+                        toast.type === 'error' ? 'fa-exclamation-circle' :
+                            toast.type === 'warning' ? 'fa-exclamation-triangle' :
+                                'fa-info-circle'
+                        }`}></i>
+                    <span>{toast.message}</span>
+                    <button className="toast-close" onClick={() => removeToast(toast.id)}>
+                        <i className="fas fa-times"></i>
+                    </button>
+                </div>
+            ))}
+        </div>
+    )
+}
+
+// =============================================================================
+// Confirmation Modal Component
+// =============================================================================
+
+interface ConfirmationModalProps {
+    isOpen: boolean
+    title: string
+    message: string
+    confirmText?: string
+    cancelText?: string
+    danger?: boolean
+    loading?: boolean
+    onConfirm: () => void
+    onCancel: () => void
+}
+
+function ConfirmationModal({
+    isOpen,
+    title,
+    message,
+    confirmText = 'Confirm',
+    cancelText = 'Cancel',
+    danger = false,
+    loading = false,
+    onConfirm,
+    onCancel,
+}: ConfirmationModalProps) {
+    if (!isOpen) return null
+
+    return (
+        <div className="modal-overlay" onClick={onCancel}>
+            <div className="modal-content confirmation-modal" onClick={e => e.stopPropagation()}>
+                <div className="modal-header">
+                    <h3>
+                        {danger && <i className="fas fa-exclamation-triangle danger-icon"></i>}
+                        {title}
+                    </h3>
+                    <button className="modal-close" onClick={onCancel} disabled={loading}>
+                        <i className="fas fa-times"></i>
+                    </button>
+                </div>
+                <div className="modal-body">
+                    <p>{message}</p>
+                </div>
+                <div className="modal-actions">
+                    <button
+                        className="btn-cancel"
+                        onClick={onCancel}
+                        disabled={loading}
+                    >
+                        {cancelText}
+                    </button>
+                    <button
+                        className={`btn-confirm ${danger ? 'btn-danger' : 'btn-primary'}`}
+                        onClick={onConfirm}
+                        disabled={loading}
+                    >
+                        {loading ? (
+                            <><i className="fas fa-spinner fa-spin"></i> Processing...</>
+                        ) : (
+                            <><i className={`fas ${danger ? 'fa-trash-alt' : 'fa-check'}`}></i> {confirmText}</>
+                        )}
+                    </button>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+// =============================================================================
+// Skeleton Loaders
+// =============================================================================
+
+function MessageSkeleton() {
+    return (
+        <div className="message-skeleton">
+            <div className="skeleton-avatar"></div>
+            <div className="skeleton-content">
+                <div className="skeleton-line short"></div>
+                <div className="skeleton-line"></div>
+                <div className="skeleton-line medium"></div>
+            </div>
+        </div>
+    )
+}
+
+// =============================================================================
 // Main Component
 // =============================================================================
 
-export function UnifiedMessagingDashboard({
+function MessagingDashboard({
     currentUserId,
+    initialChannelId,
 }: UnifiedMessagingDashboardProps) {
+    const { addToast } = useContext(ToastContext)
+
     // State
     const [channels, setChannels] = useState<{
         public: Channel[]
@@ -99,6 +268,22 @@ export function UnifiedMessagingDashboard({
     const [messagesLoading, setMessagesLoading] = useState(false)
     const [showEmojiPicker, setShowEmojiPicker] = useState<number | null>(null)
     const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set())
+
+    // Channel settings state
+    const [channelSettings, setChannelSettings] = useState<{
+        members: { id: number; username: string }[]
+        available_roles: { id: number; name: string }[]
+        is_restricted: boolean
+        allowed_roles: string[]
+    } | null>(null)
+    const [settingsLoading, setSettingsLoading] = useState(false)
+    const [addMemberSearch, setAddMemberSearch] = useState('')
+
+    // Confirmation modal state
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+    const [showArchiveConfirm, setShowArchiveConfirm] = useState(false)
+    const [deleteLoading, setDeleteLoading] = useState(false)
+    const [archiveLoading, setArchiveLoading] = useState(false)
 
     // Channel creation state
     const [newChannel, setNewChannel] = useState({
@@ -146,10 +331,11 @@ export function UnifiedMessagingDashboard({
             }
         } catch (error) {
             console.error('Failed to load channels:', error)
+            addToast('error', 'Failed to load channels')
         } finally {
             setLoading(false)
         }
-    }, [])
+    }, [addToast])
 
     // Load users for DM
     const loadUsers = useCallback(async () => {
@@ -177,10 +363,11 @@ export function UnifiedMessagingDashboard({
             }
         } catch (error) {
             console.error('Failed to load messages:', error)
+            addToast('error', 'Failed to load messages')
         } finally {
             setMessagesLoading(false)
         }
-    }, [scrollToBottom])
+    }, [scrollToBottom, addToast])
 
     // Setup real-time updates for selected channel
     const setupRealTimeUpdates = useCallback((channelId: number) => {
@@ -237,6 +424,7 @@ export function UnifiedMessagingDashboard({
         setSelectedChannel(channel)
         setMessages([])
         lastIdRef.current = 0
+        setShowSettings(false)
         await loadMessages(channel.id)
         setupRealTimeUpdates(channel.id)
     }, [loadMessages, setupRealTimeUpdates])
@@ -260,25 +448,32 @@ export function UnifiedMessagingDashboard({
                 if (fileInputRef.current) {
                     fileInputRef.current.value = ''
                 }
+            } else {
+                addToast('error', 'Failed to send message')
             }
         } catch (error) {
             console.error('Send error:', error)
+            addToast('error', 'Failed to send message')
         }
     }
 
     // Toggle reaction
     const handleReaction = async (messageId: number, emoji: string) => {
         try {
-            const response = await api.post<{ success: boolean; reactions: Message['reactions'] }>(
+            const response = await api.post<{ success: boolean; action: string }>(
                 `/messaging/message/${messageId}/react`,
                 { emoji }
             )
             if (response.ok && response.data?.success) {
-                setMessages(prev => prev.map(msg =>
-                    msg.id === messageId
-                        ? { ...msg, reactions: response.data!.reactions }
-                        : msg
-                ))
+                // Reload messages to get updated reactions
+                if (selectedChannel) {
+                    const msgResponse = await api.get<Message[]>(
+                        `/messaging/channel/${selectedChannel.id}/poll?last_id=0`
+                    )
+                    if (msgResponse.ok && msgResponse.data) {
+                        setMessages(msgResponse.data)
+                    }
+                }
             }
         } catch (error) {
             console.error('Reaction error:', error)
@@ -303,8 +498,11 @@ export function UnifiedMessagingDashboard({
         }
 
         try {
-            const response = await api.post('/messaging/create_channel', formData)
-            if (response.ok) {
+            const response = await api.post<{ success: boolean; channel_id: number; message?: string }>(
+                '/messaging/create_channel',
+                formData
+            )
+            if (response.ok && response.data?.success) {
                 setShowCreateModal(false)
                 setNewChannel({
                     name: '',
@@ -315,9 +513,13 @@ export function UnifiedMessagingDashboard({
                     allowed_roles: []
                 })
                 await loadChannels()
+                addToast('success', 'Channel created successfully')
+            } else {
+                addToast('error', response.data?.message || 'Failed to create channel')
             }
         } catch (error) {
             console.error('Create channel error:', error)
+            addToast('error', 'Failed to create channel')
         }
     }
 
@@ -337,6 +539,155 @@ export function UnifiedMessagingDashboard({
             }
             return newSet
         })
+    }
+
+    // Load channel settings (for settings panel)
+    const loadChannelSettings = useCallback(async (channelId: number) => {
+        setSettingsLoading(true)
+        try {
+            const response = await api.get<{
+                members: { id: number; username: string }[]
+                available_roles: { id: number; name: string }[]
+                is_restricted: boolean
+                allowed_roles: string[]
+            }>(`/messaging/channel/${channelId}/settings`)
+            if (response.ok && response.data) {
+                setChannelSettings(response.data)
+            }
+        } catch (error) {
+            console.error('Failed to load channel settings:', error)
+            addToast('error', 'Failed to load channel settings')
+        } finally {
+            setSettingsLoading(false)
+        }
+    }, [addToast])
+
+    // Add member to channel
+    const handleAddMember = async (userId: number) => {
+        if (!selectedChannel) return
+        try {
+            const response = await api.post<{ success: boolean; message: string }>(
+                `/messaging/channel/${selectedChannel.id}/members/add`,
+                { user_id: userId }
+            )
+            if (response.ok && response.data?.success) {
+                await loadChannelSettings(selectedChannel.id)
+                await loadChannels()
+                setAddMemberSearch('')
+                addToast('success', response.data.message)
+            } else {
+                addToast('error', response.data?.message || 'Failed to add member')
+            }
+        } catch (error) {
+            console.error('Add member error:', error)
+            addToast('error', 'Failed to add member')
+        }
+    }
+
+    // Remove member from channel
+    const handleRemoveMember = async (userId: number, username: string) => {
+        if (!selectedChannel) return
+
+        try {
+            const response = await api.post<{ success: boolean; message: string }>(
+                `/messaging/channel/${selectedChannel.id}/members/remove`,
+                { user_id: userId }
+            )
+            if (response.ok && response.data?.success) {
+                await loadChannelSettings(selectedChannel.id)
+                await loadChannels()
+                addToast('success', `${username} removed from channel`)
+            } else {
+                addToast('error', response.data?.message || 'Failed to remove member')
+            }
+        } catch (error) {
+            console.error('Remove member error:', error)
+            addToast('error', 'Failed to remove member')
+        }
+    }
+
+    // Update channel access roles
+    const handleUpdateRoles = async (newRoles: string[], isRestricted: boolean) => {
+        if (!selectedChannel) return
+        try {
+            const response = await api.post<{ success: boolean }>(
+                `/messaging/channel/${selectedChannel.id}/settings`,
+                { allowed_roles: newRoles, is_restricted: isRestricted }
+            )
+            if (response.ok && response.data?.success) {
+                await loadChannelSettings(selectedChannel.id)
+                await loadChannels()
+                addToast('success', 'Channel settings updated')
+            }
+        } catch (error) {
+            console.error('Update roles error:', error)
+            addToast('error', 'Failed to update settings')
+        }
+    }
+
+    // Delete channel - now using confirmation modal
+    const handleDeleteChannel = async () => {
+        if (!selectedChannel) return
+        setDeleteLoading(true)
+
+        try {
+            const response = await api.delete<{ success: boolean; error?: string; message?: string }>(
+                `/messaging/channel/${selectedChannel.id}/delete`
+            )
+
+            if (response.ok && response.data?.success) {
+                addToast('success', response.data.message || 'Channel deleted successfully')
+                setShowDeleteConfirm(false)
+                setShowSettings(false)
+                setSelectedChannel(null)
+                await loadChannels()
+            } else {
+                addToast('error', response.data?.error || 'Failed to delete channel')
+            }
+        } catch (error) {
+            console.error('Delete error:', error)
+            addToast('error', 'Failed to delete channel. Please try again.')
+        } finally {
+            setDeleteLoading(false)
+        }
+    }
+
+    // Archive/Unarchive channel
+    const handleToggleArchive = async () => {
+        if (!selectedChannel) return
+        setArchiveLoading(true)
+
+        const endpoint = selectedChannel.is_archived ? 'unarchive' : 'archive'
+
+        try {
+            const response = await api.post<{ success: boolean; message?: string; is_archived: boolean }>(
+                `/messaging/channel/${selectedChannel.id}/${endpoint}`,
+                {}
+            )
+
+            if (response.ok && response.data?.success) {
+                addToast('success', response.data.message || `Channel ${endpoint}d successfully`)
+                setShowArchiveConfirm(false)
+                // Update the selected channel's archived status
+                setSelectedChannel(prev => prev ? { ...prev, is_archived: response.data!.is_archived } : null)
+                await loadChannels()
+            } else {
+                addToast('error', `Failed to ${endpoint} channel`)
+            }
+        } catch (error) {
+            console.error(`${endpoint} error:`, error)
+            addToast('error', `Failed to ${endpoint} channel`)
+        } finally {
+            setArchiveLoading(false)
+        }
+    }
+
+    // Open settings panel
+    const openSettings = () => {
+        if (selectedChannel) {
+            loadChannelSettings(selectedChannel.id)
+            setShowSettings(true)
+        }
     }
 
     // Filter channels by search
@@ -369,6 +720,17 @@ export function UnifiedMessagingDashboard({
             }
         }
     }, [loadChannels, loadUsers])
+
+    // Auto-select initial channel if provided
+    useEffect(() => {
+        if (initialChannelId && !loading) {
+            const allChannels = [...channels.public, ...channels.private, ...channels.dm]
+            const channel = allChannels.find(c => c.id === initialChannelId)
+            if (channel) {
+                selectChannel(channel)
+            }
+        }
+    }, [initialChannelId, loading, channels, selectChannel])
 
     // ==========================================================================
     // Render
@@ -556,6 +918,11 @@ export function UnifiedMessagingDashboard({
                                                     <i className="fas fa-shield-alt"></i> Restricted
                                                 </span>
                                             )}
+                                            {selectedChannel.is_archived && (
+                                                <span className="header-badge archived">
+                                                    <i className="fas fa-archive"></i> Archived
+                                                </span>
+                                            )}
                                         </>
                                     )}
                                 </h3>
@@ -574,7 +941,7 @@ export function UnifiedMessagingDashboard({
                                 <button
                                     className="btn-icon"
                                     title="Settings"
-                                    onClick={() => setShowSettings(true)}
+                                    onClick={openSettings}
                                 >
                                     <i className="fas fa-cog"></i>
                                 </button>
@@ -584,10 +951,11 @@ export function UnifiedMessagingDashboard({
                         {/* Messages */}
                         <div className="chat-container" ref={chatBoxRef}>
                             {messagesLoading ? (
-                                <div className="messages-loading">
-                                    <i className="fas fa-spinner fa-spin"></i>
-                                    <span>Loading messages...</span>
-                                </div>
+                                <>
+                                    <MessageSkeleton />
+                                    <MessageSkeleton />
+                                    <MessageSkeleton />
+                                </>
                             ) : messages.length === 0 ? (
                                 <div className="empty-messages">
                                     <div className="empty-icon">
@@ -673,45 +1041,52 @@ export function UnifiedMessagingDashboard({
                         </div>
 
                         {/* Message Input */}
-                        <div className="message-input-container">
-                            <form className="message-input-form" onSubmit={handleSendMessage}>
-                                <button
-                                    type="button"
-                                    className="btn-attach"
-                                    onClick={() => fileInputRef.current?.click()}
-                                >
-                                    <i className="fas fa-plus-circle"></i>
-                                </button>
-                                <input
-                                    type="text"
-                                    value={messageInput}
-                                    onChange={(e) => setMessageInput(e.target.value)}
-                                    placeholder={`Message #${selectedChannel.name}`}
-                                    autoComplete="off"
-                                />
-                                <input
-                                    type="file"
-                                    ref={fileInputRef}
-                                    onChange={(e) => e.target.files?.[0] && setSelectedFile(e.target.files[0])}
-                                    style={{ display: 'none' }}
-                                />
-                                <button type="submit" className="btn-send">
-                                    <i className="fas fa-paper-plane"></i>
-                                </button>
-                            </form>
-                            {selectedFile && (
-                                <div className="file-preview">
-                                    <i className="fas fa-file"></i>
-                                    <span>{selectedFile.name}</span>
-                                    <button onClick={() => {
-                                        setSelectedFile(null)
-                                        if (fileInputRef.current) fileInputRef.current.value = ''
-                                    }}>
-                                        <i className="fas fa-times"></i>
+                        {!selectedChannel.is_archived ? (
+                            <div className="message-input-container">
+                                <form className="message-input-form" onSubmit={handleSendMessage}>
+                                    <button
+                                        type="button"
+                                        className="btn-attach"
+                                        onClick={() => fileInputRef.current?.click()}
+                                    >
+                                        <i className="fas fa-plus-circle"></i>
                                     </button>
-                                </div>
-                            )}
-                        </div>
+                                    <input
+                                        type="text"
+                                        value={messageInput}
+                                        onChange={(e) => setMessageInput(e.target.value)}
+                                        placeholder={`Message #${selectedChannel.name}`}
+                                        autoComplete="off"
+                                    />
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        onChange={(e) => e.target.files?.[0] && setSelectedFile(e.target.files[0])}
+                                        style={{ display: 'none' }}
+                                    />
+                                    <button type="submit" className="btn-send">
+                                        <i className="fas fa-paper-plane"></i>
+                                    </button>
+                                </form>
+                                {selectedFile && (
+                                    <div className="file-preview">
+                                        <i className="fas fa-file"></i>
+                                        <span>{selectedFile.name}</span>
+                                        <button onClick={() => {
+                                            setSelectedFile(null)
+                                            if (fileInputRef.current) fileInputRef.current.value = ''
+                                        }}>
+                                            <i className="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="archived-notice">
+                                <i className="fas fa-archive"></i>
+                                <span>This channel is archived. Messages are read-only.</span>
+                            </div>
+                        )}
                     </>
                 ) : (
                     <div className="welcome-state">
@@ -919,35 +1294,140 @@ export function UnifiedMessagingDashboard({
                                 )}
                             </div>
 
+                            {/* Member Management - Private Channels Only */}
+                            {selectedChannel.type === 'private' && (
+                                <div className="settings-section">
+                                    <h5><i className="fas fa-users"></i> Members</h5>
+                                    {settingsLoading ? (
+                                        <div className="loading-mini"><i className="fas fa-spinner fa-spin"></i></div>
+                                    ) : (
+                                        <>
+                                            <div className="members-list">
+                                                {channelSettings?.members.map(member => (
+                                                    <div key={member.id} className="member-item">
+                                                        <div className="member-avatar">{member.username[0].toUpperCase()}</div>
+                                                        <span className="member-name">{member.username}</span>
+                                                        {member.id !== selectedChannel.created_by_id ? (
+                                                            <button
+                                                                className="btn-remove-member"
+                                                                onClick={() => handleRemoveMember(member.id, member.username)}
+                                                                title="Remove member"
+                                                            >
+                                                                <i className="fas fa-times"></i>
+                                                            </button>
+                                                        ) : (
+                                                            <span className="owner-badge">Owner</span>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div className="add-member-section">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Search users to add..."
+                                                    value={addMemberSearch}
+                                                    onChange={(e) => setAddMemberSearch(e.target.value)}
+                                                    className="add-member-input"
+                                                />
+                                                {addMemberSearch && (
+                                                    <div className="user-search-results">
+                                                        {users
+                                                            .filter(u =>
+                                                                u.username.toLowerCase().includes(addMemberSearch.toLowerCase()) &&
+                                                                !channelSettings?.members.some(m => m.id === u.id)
+                                                            )
+                                                            .slice(0, 5)
+                                                            .map(user => (
+                                                                <button
+                                                                    key={user.id}
+                                                                    className="user-result"
+                                                                    onClick={() => handleAddMember(user.id)}
+                                                                >
+                                                                    <div className="user-avatar">{user.initial}</div>
+                                                                    <span>{user.username}</span>
+                                                                    <i className="fas fa-plus"></i>
+                                                                </button>
+                                                            ))
+                                                        }
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Role-Based Access - All Channels */}
+                            {!selectedChannel.is_direct && (
+                                <div className="settings-section">
+                                    <h5><i className="fas fa-shield-alt"></i> Role-Based Access</h5>
+                                    {settingsLoading ? (
+                                        <div className="loading-mini"><i className="fas fa-spinner fa-spin"></i></div>
+                                    ) : (
+                                        <>
+                                            <label className="checkbox-label">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={channelSettings?.is_restricted ?? false}
+                                                    onChange={(e) => {
+                                                        handleUpdateRoles(
+                                                            channelSettings?.allowed_roles ?? [],
+                                                            e.target.checked
+                                                        )
+                                                    }}
+                                                />
+                                                <span>Restrict to specific roles</span>
+                                            </label>
+                                            {channelSettings?.is_restricted && (
+                                                <div className="role-checkboxes">
+                                                    {channelSettings.available_roles.map(role => (
+                                                        <label key={role.id} className="role-checkbox">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={channelSettings.allowed_roles.includes(role.name)}
+                                                                onChange={(e) => {
+                                                                    const newRoles = e.target.checked
+                                                                        ? [...channelSettings.allowed_roles, role.name]
+                                                                        : channelSettings.allowed_roles.filter(r => r !== role.name)
+                                                                    handleUpdateRoles(newRoles, true)
+                                                                }}
+                                                            />
+                                                            <span className="role-badge">{role.name}</span>
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Archive Section */}
+                            {!selectedChannel.is_direct && (
+                                <div className="settings-section">
+                                    <h5><i className="fas fa-archive"></i> Archive Channel</h5>
+                                    <button
+                                        className={`btn-archive ${selectedChannel.is_archived ? 'archived' : ''}`}
+                                        onClick={() => setShowArchiveConfirm(true)}
+                                    >
+                                        <i className={`fas ${selectedChannel.is_archived ? 'fa-box-open' : 'fa-archive'}`}></i>
+                                        {selectedChannel.is_archived ? 'Unarchive Channel' : 'Archive Channel'}
+                                    </button>
+                                    <p className="archive-note">
+                                        {selectedChannel.is_archived
+                                            ? 'Unarchive to enable messaging again.'
+                                            : 'Archived channels become read-only.'}
+                                    </p>
+                                </div>
+                            )}
+
                             {/* Danger Zone */}
                             {!selectedChannel.is_direct && (
                                 <div className="settings-section danger-zone">
-                                    <h5>Danger Zone</h5>
+                                    <h5><i className="fas fa-exclamation-triangle"></i> Danger Zone</h5>
                                     <button
                                         className="btn-delete"
-                                        onClick={async () => {
-                                            const confirmDelete = window.confirm(
-                                                `Are you sure you want to permanently delete #${selectedChannel.name}? This action cannot be undone.`
-                                            )
-                                            if (confirmDelete) {
-                                                try {
-                                                    const response = await api.post(
-                                                        `/messaging/channel/${selectedChannel.id}/delete`,
-                                                        {} // Empty body to ensure proper request format
-                                                    )
-                                                    if (response.ok) {
-                                                        setShowSettings(false)
-                                                        setSelectedChannel(null)
-                                                        await loadChannels()
-                                                    } else {
-                                                        alert('Failed to delete channel. You may not have permission.')
-                                                    }
-                                                } catch (error) {
-                                                    console.error('Delete error:', error)
-                                                    alert('Failed to delete channel.')
-                                                }
-                                            }
-                                        }}
+                                        onClick={() => setShowDeleteConfirm(true)}
                                     >
                                         <i className="fas fa-trash-alt"></i>
                                         Delete Channel
@@ -961,7 +1441,46 @@ export function UnifiedMessagingDashboard({
                     </aside>
                 </div>
             )}
+
+            {/* ============================================================
+                CONFIRMATION MODALS
+                ============================================================ */}
+            <ConfirmationModal
+                isOpen={showDeleteConfirm}
+                title="Delete Channel"
+                message={`Are you sure you want to permanently delete #${selectedChannel?.name}? This will remove all messages and cannot be undone.`}
+                confirmText="Delete Channel"
+                danger={true}
+                loading={deleteLoading}
+                onConfirm={handleDeleteChannel}
+                onCancel={() => setShowDeleteConfirm(false)}
+            />
+
+            <ConfirmationModal
+                isOpen={showArchiveConfirm}
+                title={selectedChannel?.is_archived ? "Unarchive Channel" : "Archive Channel"}
+                message={selectedChannel?.is_archived
+                    ? `Are you sure you want to unarchive #${selectedChannel?.name}? Members will be able to send messages again.`
+                    : `Are you sure you want to archive #${selectedChannel?.name}? The channel will become read-only.`}
+                confirmText={selectedChannel?.is_archived ? "Unarchive" : "Archive"}
+                danger={false}
+                loading={archiveLoading}
+                onConfirm={handleToggleArchive}
+                onCancel={() => setShowArchiveConfirm(false)}
+            />
         </div>
+    )
+}
+
+// =============================================================================
+// Export with Provider
+// =============================================================================
+
+export function UnifiedMessagingDashboard(props: UnifiedMessagingDashboardProps) {
+    return (
+        <ToastProvider>
+            <MessagingDashboard {...props} />
+        </ToastProvider>
     )
 }
 

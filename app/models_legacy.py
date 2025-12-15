@@ -4733,3 +4733,279 @@ class TicketReply(db.Model):
 
     def __repr__(self):
         return f'<TicketReply {self.id} on ticket {self.ticket_id}>'
+
+
+# ============================================================================
+# Employee Scheduling System
+# ============================================================================
+
+class ShiftTemplate(db.Model):
+    """Reusable shift templates for quick scheduling."""
+    __tablename__ = 'shift_template'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(255), nullable=True)
+    
+    # Shift timing
+    start_time = db.Column(db.Time, nullable=False)
+    end_time = db.Column(db.Time, nullable=False)
+    duration_minutes = db.Column(db.Integer, nullable=True)  # Auto-calculated or override
+    
+    # Visual customization
+    color = db.Column(db.String(7), default='#3B82F6')  # Hex color for calendar display
+    icon = db.Column(db.String(50), nullable=True)  # FontAwesome icon class
+    
+    # Classification
+    shift_type = db.Column(db.String(30), default='regular')  # regular, overtime, on_call, field, training
+    
+    # Status
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    __table_args__ = (
+        Index('idx_shift_template_active', 'is_active'),
+    )
+    
+    def calculate_duration(self):
+        """Calculate duration in minutes from start/end times."""
+        if self.start_time and self.end_time:
+            start_dt = datetime.combine(datetime.today(), self.start_time)
+            end_dt = datetime.combine(datetime.today(), self.end_time)
+            if end_dt < start_dt:  # Overnight shift
+                end_dt += timedelta(days=1)
+            return int((end_dt - start_dt).total_seconds() / 60)
+        return self.duration_minutes
+    
+    def to_dict(self):
+        """Convert to dictionary for API response."""
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'start_time': self.start_time.strftime('%H:%M') if self.start_time else None,
+            'end_time': self.end_time.strftime('%H:%M') if self.end_time else None,
+            'duration_minutes': self.calculate_duration(),
+            'color': self.color,
+            'icon': self.icon,
+            'shift_type': self.shift_type,
+            'is_active': self.is_active
+        }
+    
+    def __repr__(self):
+        return f'<ShiftTemplate {self.name} {self.start_time}-{self.end_time}>'
+
+
+class EmployeeSchedule(db.Model):
+    """Scheduled shifts for employees."""
+    __tablename__ = 'employee_schedule'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    # Shift timing
+    date = db.Column(db.Date, nullable=False)
+    start_time = db.Column(db.Time, nullable=False)
+    end_time = db.Column(db.Time, nullable=False)
+    
+    # Classification
+    shift_type = db.Column(db.String(30), default='regular')  # regular, overtime, on_call, field, training
+    
+    # Optional template reference
+    template_id = db.Column(db.Integer, db.ForeignKey('shift_template.id'), nullable=True)
+    
+    # Optional location for field service
+    location_id = db.Column(db.Integer, db.ForeignKey('location.id'), nullable=True)
+    
+    # Status tracking
+    status = db.Column(db.String(20), default='scheduled')  # scheduled, confirmed, in_progress, completed, cancelled, no_show
+    
+    # Notes and metadata
+    notes = db.Column(db.Text, nullable=True)
+    color = db.Column(db.String(7), nullable=True)  # Override template color
+    
+    # Audit trail
+    created_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Clock in/out linking
+    time_entry_id = db.Column(db.Integer, db.ForeignKey('time_entry.id'), nullable=True)
+    
+    # Relationships
+    user = db.relationship('User', foreign_keys=[user_id], backref=db.backref('schedules', lazy='dynamic'))
+    created_by = db.relationship('User', foreign_keys=[created_by_id])
+    template = db.relationship('ShiftTemplate', backref=db.backref('schedules', lazy=True))
+    location = db.relationship('Location', backref=db.backref('scheduled_shifts', lazy=True))
+    time_entry = db.relationship('TimeEntry', backref=db.backref('schedule', uselist=False))
+    
+    __table_args__ = (
+        Index('idx_schedule_user_date', 'user_id', 'date'),
+        Index('idx_schedule_date_status', 'date', 'status'),
+        Index('idx_schedule_location', 'location_id', 'date'),
+    )
+    
+    def duration_minutes(self):
+        """Calculate shift duration in minutes."""
+        if self.start_time and self.end_time:
+            start_dt = datetime.combine(self.date, self.start_time)
+            end_dt = datetime.combine(self.date, self.end_time)
+            if end_dt < start_dt:  # Overnight shift
+                end_dt += timedelta(days=1)
+            return int((end_dt - start_dt).total_seconds() / 60)
+        return 0
+    
+    def overlaps_with(self, other):
+        """Check if this schedule overlaps with another."""
+        if self.user_id != other.user_id or self.date != other.date:
+            return False
+        
+        self_start = datetime.combine(self.date, self.start_time)
+        self_end = datetime.combine(self.date, self.end_time)
+        other_start = datetime.combine(other.date, other.start_time)
+        other_end = datetime.combine(other.date, other.end_time)
+        
+        # Handle overnight shifts
+        if self_end < self_start:
+            self_end += timedelta(days=1)
+        if other_end < other_start:
+            other_end += timedelta(days=1)
+        
+        return self_start < other_end and other_start < self_end
+    
+    def to_dict(self):
+        """Convert to dictionary for API response."""
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'user_name': f"{self.user.first_name or ''} {self.user.last_name or ''}".strip() or self.user.username if self.user else None,
+            'date': self.date.isoformat() if self.date else None,
+            'start_time': self.start_time.strftime('%H:%M') if self.start_time else None,
+            'end_time': self.end_time.strftime('%H:%M') if self.end_time else None,
+            'duration_minutes': self.duration_minutes(),
+            'shift_type': self.shift_type,
+            'status': self.status,
+            'notes': self.notes,
+            'color': self.color or (self.template.color if self.template else '#3B82F6'),
+            'location_id': self.location_id,
+            'location_name': self.location.name if self.location else None,
+            'template_id': self.template_id,
+            'template_name': self.template.name if self.template else None,
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
+    
+    def __repr__(self):
+        return f'<EmployeeSchedule {self.user_id} {self.date} {self.start_time}-{self.end_time}>'
+
+
+class ShiftSwapRequest(db.Model):
+    """Employee-initiated shift swap requests."""
+    __tablename__ = 'shift_swap_request'
+    id = db.Column(db.Integer, primary_key=True)
+    
+    # The schedule being offered for swap
+    schedule_id = db.Column(db.Integer, db.ForeignKey('employee_schedule.id'), nullable=False)
+    
+    # The employee wanting to give away the shift
+    requesting_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    # Optional: specific employee they want to swap with (None = open request)
+    target_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    
+    # Status
+    status = db.Column(db.String(20), default='pending')  # pending, accepted, approved, rejected, cancelled
+    reason = db.Column(db.Text, nullable=True)
+    
+    # Admin approval
+    approved_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    approved_at = db.Column(db.DateTime, nullable=True)
+    admin_notes = db.Column(db.Text, nullable=True)
+    
+    # Timestamps
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    schedule = db.relationship('EmployeeSchedule', backref=db.backref('swap_requests', lazy=True))
+    requesting_user = db.relationship('User', foreign_keys=[requesting_user_id], backref='shift_swap_requests_made')
+    target_user = db.relationship('User', foreign_keys=[target_user_id], backref='shift_swap_requests_received')
+    approved_by = db.relationship('User', foreign_keys=[approved_by_id])
+    
+    __table_args__ = (
+        Index('idx_swap_status', 'status'),
+        Index('idx_swap_requesting_user', 'requesting_user_id', 'status'),
+    )
+    
+    def to_dict(self):
+        """Convert to dictionary for API response."""
+        return {
+            'id': self.id,
+            'schedule_id': self.schedule_id,
+            'schedule': self.schedule.to_dict() if self.schedule else None,
+            'requesting_user_id': self.requesting_user_id,
+            'requesting_user_name': f"{self.requesting_user.first_name or ''} {self.requesting_user.last_name or ''}".strip() if self.requesting_user else None,
+            'target_user_id': self.target_user_id,
+            'target_user_name': f"{self.target_user.first_name or ''} {self.target_user.last_name or ''}".strip() if self.target_user else None,
+            'status': self.status,
+            'reason': self.reason,
+            'admin_notes': self.admin_notes,
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
+    
+    def __repr__(self):
+        return f'<ShiftSwapRequest {self.id} {self.status}>'
+
+
+class ScheduleRecurrence(db.Model):
+    """Recurring schedule patterns for auto-generation."""
+    __tablename__ = 'schedule_recurrence'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    # Shift template to apply
+    template_id = db.Column(db.Integer, db.ForeignKey('shift_template.id'), nullable=False)
+    
+    # Day of week (0=Monday, 6=Sunday)
+    day_of_week = db.Column(db.Integer, nullable=False)
+    
+    # Optional location for field service
+    location_id = db.Column(db.Integer, db.ForeignKey('location.id'), nullable=True)
+    
+    # Effective date range
+    effective_from = db.Column(db.Date, nullable=False)
+    effective_until = db.Column(db.Date, nullable=True)  # None = indefinite
+    
+    # Status
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    user = db.relationship('User', backref=db.backref('schedule_recurrences', lazy=True))
+    template = db.relationship('ShiftTemplate', backref=db.backref('recurrences', lazy=True))
+    location = db.relationship('Location', backref=db.backref('recurring_schedules', lazy=True))
+    
+    __table_args__ = (
+        Index('idx_recurrence_user_active', 'user_id', 'is_active'),
+        Index('idx_recurrence_day', 'day_of_week'),
+    )
+    
+    def to_dict(self):
+        """Convert to dictionary for API response."""
+        days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'user_name': f"{self.user.first_name or ''} {self.user.last_name or ''}".strip() if self.user else None,
+            'template_id': self.template_id,
+            'template_name': self.template.name if self.template else None,
+            'day_of_week': self.day_of_week,
+            'day_name': days[self.day_of_week] if 0 <= self.day_of_week <= 6 else None,
+            'location_id': self.location_id,
+            'effective_from': self.effective_from.isoformat() if self.effective_from else None,
+            'effective_until': self.effective_until.isoformat() if self.effective_until else None,
+            'is_active': self.is_active
+        }
+    
+    def __repr__(self):
+        days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        return f'<ScheduleRecurrence user={self.user_id} {days[self.day_of_week]}>'

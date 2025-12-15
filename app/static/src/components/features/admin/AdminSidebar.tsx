@@ -10,7 +10,7 @@ import {
     LayoutDashboard, Users, ShoppingCart, FileText, Mail,
     Calendar, BarChart3, Palette, Database, MapPin,
     History, Building, MessageSquare, FileEdit, ChevronLeft,
-    ChevronRight, Kanban, Zap
+    ChevronRight, Kanban, Zap, Clock
 } from 'lucide-react'
 
 // =============================================================================
@@ -98,6 +98,7 @@ function getNavCategories(_urls: Record<string, string>): NavCategory[] {
         {
             label: 'Scheduling',
             items: [
+                { label: 'Employee Schedule', href: '/admin/schedule', icon: <Clock size={18} /> },
                 { label: 'Booking', href: '/admin/booking', icon: <Calendar size={18} /> },
                 { label: 'Automation', href: '/admin/automation', icon: <Zap size={18} /> },
             ]

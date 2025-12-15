@@ -291,6 +291,11 @@ def create_app(config_class=Config):
     # Phase 17: Calendar & Scheduling Powerhouse
     from app.routes.admin_routes.scheduling import scheduling_bp
     app.register_blueprint(scheduling_bp)
+    
+    # Employee Schedule Management API
+    from app.routes.admin_routes.schedule_routes import schedule_bp
+    csrf.exempt(schedule_bp)  # API uses JSON requests
+    app.register_blueprint(schedule_bp)
 
     # Phase 13: E-Commerce Routes
     from app.routes.admin_routes.ecommerce_admin import ecommerce_admin_bp
@@ -568,6 +573,9 @@ def create_app(config_class=Config):
     # Exempt booking API from rate limiting for public booking flow
     if hasattr(rate_limiter, 'limiter') and rate_limiter.limiter:
         rate_limiter.limiter.exempt(booking_api_bp)
+        # Exempt schedule API - routes have @rate_limiter.exempt but that runs before init_app
+        from app.routes.admin_routes.schedule_routes import schedule_bp
+        rate_limiter.limiter.exempt(schedule_bp)
 
     return app
 

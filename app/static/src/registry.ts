@@ -138,6 +138,7 @@ registerComponent('UnifiedAppointmentsDashboard', () => import('./components/fea
 registerComponent('DataManagement', () => import('./components/features/admin/DataManagement'))
 registerComponent('UnifiedShopDashboard', () => import('./components/features/admin/UnifiedShopDashboard'))
 registerComponent('UnifiedAutomationDashboard', () => import('./components/features/admin/UnifiedAutomationDashboard'))
+registerComponent('ScheduleManager', () => import('./components/features/admin/ScheduleManager'))
 
 // Feature Components - Shop
 registerComponent('ShopStorefront', () => import('./components/features/shop/ShopStorefront'))

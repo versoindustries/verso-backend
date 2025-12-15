@@ -1298,6 +1298,483 @@
 }
 
 /* ============================================================================
+   Member Management - Settings Panel
+   ============================================================================ */
+
+.unified-messaging .members-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.unified-messaging .member-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: var(--msg-bg-tertiary);
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.unified-messaging .member-item:hover {
+    background: rgba(65, 105, 225, 0.1);
+}
+
+.unified-messaging .member-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--msg-accent), #7b68ee);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.unified-messaging .member-name {
+    flex: 1;
+    color: var(--msg-text-primary);
+    font-weight: 500;
+}
+
+.unified-messaging .owner-badge {
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.2), rgba(255, 193, 7, 0.1));
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    border-radius: 10px;
+    color: #ffc107;
+    font-weight: 600;
+}
+
+.unified-messaging .btn-remove-member {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(231, 76, 60, 0.1);
+    border: 1px solid rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    opacity: 0;
+}
+
+.unified-messaging .member-item:hover .btn-remove-member {
+    opacity: 1;
+}
+
+.unified-messaging .btn-remove-member:hover {
+    background: rgba(231, 76, 60, 0.25);
+    transform: scale(1.1);
+}
+
+.unified-messaging .add-member-section {
+    position: relative;
+}
+
+.unified-messaging .add-member-input {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--msg-bg-tertiary);
+    border: 1px solid var(--msg-border-color);
+    border-radius: 8px;
+    color: var(--msg-text-primary);
+    font-size: 0.9rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.unified-messaging .add-member-input:focus {
+    outline: none;
+    border-color: var(--msg-accent);
+    box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.15);
+}
+
+.unified-messaging .add-member-input::placeholder {
+    color: var(--msg-text-muted);
+}
+
+.unified-messaging .user-search-results {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--msg-bg-primary);
+    border: 1px solid var(--msg-border-active);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    z-index: 100;
+    overflow: hidden;
+}
+
+.unified-messaging .user-result {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 14px;
+    background: transparent;
+    border: none;
+    color: var(--msg-text-primary);
+    cursor: pointer;
+    transition: background 0.2s;
+    text-align: left;
+}
+
+.unified-messaging .user-result:hover {
+    background: rgba(65, 105, 225, 0.15);
+}
+
+.unified-messaging .user-result .user-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--msg-accent), #7b68ee);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+}
+
+.unified-messaging .user-result span {
+    flex: 1;
+}
+
+.unified-messaging .user-result i {
+    color: var(--msg-accent);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.unified-messaging .user-result:hover i {
+    opacity: 1;
+}
+
+.unified-messaging .loading-mini {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    color: var(--msg-text-muted);
+}
+
+.unified-messaging .loading-mini i {
+    font-size: 1.2rem;
+    color: var(--msg-accent);
+}
+
+/* ============================================================================
+   Toast Notifications
+   ============================================================================ */
+
+.toast-container {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 400px;
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    background: linear-gradient(135deg, rgba(31, 31, 31, 0.98), rgba(42, 42, 42, 0.98));
+    border-radius: 12px;
+    border: 1px solid rgba(65, 105, 225, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(20px);
+    animation: toastSlideIn 0.3s ease-out;
+    color: #ffffff;
+    font-size: 0.95rem;
+}
+
+@keyframes toastSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.toast.toast-success {
+    border-color: rgba(46, 204, 113, 0.5);
+}
+
+.toast.toast-success i {
+    color: #2ecc71;
+}
+
+.toast.toast-error {
+    border-color: rgba(231, 76, 60, 0.5);
+}
+
+.toast.toast-error i {
+    color: #e74c3c;
+}
+
+.toast.toast-warning {
+    border-color: rgba(255, 193, 7, 0.5);
+}
+
+.toast.toast-warning i {
+    color: #ffc107;
+}
+
+.toast.toast-info {
+    border-color: rgba(65, 105, 225, 0.5);
+}
+
+.toast.toast-info i {
+    color: #4169e1;
+}
+
+.toast i:first-child {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.toast span {
+    flex: 1;
+    line-height: 1.4;
+}
+
+.toast .toast-close {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    padding: 4px;
+    transition: color 0.2s;
+    flex-shrink: 0;
+}
+
+.toast .toast-close:hover {
+    color: #ffffff;
+}
+
+/* ============================================================================
+   Confirmation Modal
+   ============================================================================ */
+
+.unified-messaging .confirmation-modal {
+    max-width: 420px;
+}
+
+.unified-messaging .confirmation-modal .modal-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.unified-messaging .confirmation-modal .danger-icon {
+    color: #e74c3c;
+}
+
+.unified-messaging .confirmation-modal .modal-body {
+    padding: 20px 24px;
+}
+
+.unified-messaging .confirmation-modal .modal-body p {
+    margin: 0;
+    color: var(--msg-text-secondary);
+    line-height: 1.6;
+}
+
+.unified-messaging .btn-confirm {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.unified-messaging .btn-confirm.btn-primary {
+    background: linear-gradient(135deg, var(--msg-accent), #5a7fe0);
+    color: white;
+    box-shadow: 0 4px 15px rgba(65, 105, 225, 0.3);
+}
+
+.unified-messaging .btn-confirm.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(65, 105, 225, 0.4);
+}
+
+.unified-messaging .btn-confirm.btn-danger {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+}
+
+.unified-messaging .btn-confirm.btn-danger:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+}
+
+.unified-messaging .btn-confirm:disabled,
+.unified-messaging .btn-cancel:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* ============================================================================
+   Skeleton Loaders
+   ============================================================================ */
+
+.unified-messaging .channel-skeleton,
+.unified-messaging .message-skeleton {
+    padding: 16px;
+    animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeletonPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.unified-messaging .skeleton-line {
+    height: 12px;
+    background: linear-gradient(90deg, rgba(65, 105, 225, 0.1) 0%, rgba(65, 105, 225, 0.2) 50%, rgba(65, 105, 225, 0.1) 100%);
+    background-size: 200% 100%;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    animation: skeletonShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes skeletonShimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.unified-messaging .skeleton-line.short {
+    width: 40%;
+}
+
+.unified-messaging .skeleton-line.medium {
+    width: 70%;
+}
+
+.unified-messaging .message-skeleton {
+    display: flex;
+    gap: 14px;
+}
+
+.unified-messaging .skeleton-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(65, 105, 225, 0.2), rgba(65, 105, 225, 0.1));
+    flex-shrink: 0;
+}
+
+.unified-messaging .skeleton-content {
+    flex: 1;
+}
+
+/* ============================================================================
+   Archive Button & Notice
+   ============================================================================ */
+
+.unified-messaging .btn-archive {
+    width: 100%;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.15), rgba(255, 193, 7, 0.1));
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    border-radius: 8px;
+    color: #ffc107;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.unified-messaging .btn-archive:hover {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.25), rgba(255, 193, 7, 0.15));
+    border-color: #ffc107;
+    transform: translateY(-1px);
+}
+
+.unified-messaging .btn-archive.archived {
+    background: linear-gradient(135deg, rgba(46, 204, 113, 0.15), rgba(46, 204, 113, 0.1));
+    border-color: rgba(46, 204, 113, 0.3);
+    color: #2ecc71;
+}
+
+.unified-messaging .btn-archive.archived:hover {
+    background: linear-gradient(135deg, rgba(46, 204, 113, 0.25), rgba(46, 204, 113, 0.15));
+    border-color: #2ecc71;
+}
+
+.unified-messaging .archive-note {
+    margin: 12px 0 0;
+    font-size: 0.8rem;
+    color: var(--msg-text-muted);
+    text-align: center;
+}
+
+.unified-messaging .archived-notice {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 193, 7, 0.05));
+    border-top: 1px solid rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+    font-size: 0.9rem;
+}
+
+.unified-messaging .archived-notice i {
+    font-size: 1.1rem;
+}
+
+.unified-messaging .header-badge.archived {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+/* ============================================================================
    Responsive Design
    ============================================================================ */
 
@@ -1325,5 +1802,12 @@
 
     .unified-messaging .settings-panel {
         width: 100%;
+    }
+
+    .toast-container {
+        left: 16px;
+        right: 16px;
+        top: 16px;
+        max-width: none;
     }
 }

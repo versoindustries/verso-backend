@@ -1,0 +1,19 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Employee Schedules | Admin{% endblock %}
+
+{% block admin_css %}
+<style>
+    /* Full viewport scheduling interface */
+    .schedule-page {
+        margin: -1.5rem;
+        min-height: calc(100vh - 60px);
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="schedule-page">
+    <div data-react-component="ScheduleManager"></div>
+</div>
+{% endblock %}

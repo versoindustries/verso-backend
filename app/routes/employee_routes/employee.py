@@ -60,14 +60,25 @@ def dashboard():
     time_form = TimeEntryForm()
     profile_form = EmployeeProfileForm(obj=current_user)
     
-    # Serialize initial data for React component
+    # Get business timezone
+    from app.models import BusinessConfig
+    tz_config = BusinessConfig.query.filter_by(setting_name='company_timezone').first()
+    business_timezone = tz_config.setting_value if tz_config else 'America/Denver'
+    
+    # Serialize initial data for React component (with UTC 'Z' suffix for timestamps)
+    clock_in_time = None
+    if active_time_entry and active_time_entry.clock_in:
+        clock_in_time = active_time_entry.clock_in.isoformat() + 'Z'
+    
     initial_stats = {
         'today_appointments': 0,
         'week_appointments': 0,
         'pending_leave': 0,
         'hours_this_week': 0,
         'is_clocked_in': active_time_entry is not None,
-        'clock_in_time': active_time_entry.clock_in.isoformat() if active_time_entry else None,
+        'clock_in_time': clock_in_time,
+        'business_timezone': business_timezone,
+        'server_time_utc': datetime.utcnow().isoformat() + 'Z',
     }
     
     # Calculate appointment stats if estimator
@@ -102,6 +113,7 @@ def dashboard():
         TimeEntry.date >= week_start
     ).all()
     initial_stats['hours_this_week'] = round(sum(e.duration_minutes or 0 for e in week_entries) / 60, 1)
+
     
     # Serialize upcoming appointments
     upcoming_appointments = []
@@ -154,8 +166,14 @@ def dashboard():
 @login_required
 def dashboard_stats():
     """JSON API for dashboard statistics - used by React component."""
+    from app.models import BusinessConfig
+    
     today = datetime.utcnow().date()
     now = datetime.utcnow()
+    
+    # Get business timezone
+    tz_config = BusinessConfig.query.filter_by(setting_name='company_timezone').first()
+    business_timezone = tz_config.setting_value if tz_config else 'America/Denver'
     
     # Clock status
     active_time_entry = TimeEntry.query.filter_by(
@@ -164,13 +182,20 @@ def dashboard_stats():
         clock_out=None
     ).first()
     
+    # Ensure timestamps include 'Z' suffix for UTC
+    clock_in_time = None
+    if active_time_entry and active_time_entry.clock_in:
+        clock_in_time = active_time_entry.clock_in.isoformat() + 'Z'
+    
     stats = {
         'is_clocked_in': active_time_entry is not None,
-        'clock_in_time': active_time_entry.clock_in.isoformat() if active_time_entry else None,
+        'clock_in_time': clock_in_time,
         'today_appointments': 0,
         'week_appointments': 0,
         'pending_leave': 0,
         'hours_this_week': 0,
+        'business_timezone': business_timezone,
+        'server_time_utc': now.isoformat() + 'Z',
     }
     
     # Estimator appointments
@@ -217,8 +242,15 @@ def dashboard_stats():
 @login_required
 def api_clock_in():
     """JSON API: Clock in for the day."""
+    from app.models import BusinessConfig
+    
     today = datetime.utcnow().date()
     now = datetime.utcnow()
+    
+    # Get business timezone for display
+    tz_config = BusinessConfig.query.filter_by(setting_name='company_timezone').first()
+    business_tz = pytz.timezone(tz_config.setting_value if tz_config else 'America/Denver')
+    local_now = now.replace(tzinfo=pytz.UTC).astimezone(business_tz)
     
     # Check if already clocked in
     existing = TimeEntry.query.filter_by(
@@ -231,7 +263,7 @@ def api_clock_in():
         return jsonify({
             'success': False,
             'message': 'You are already clocked in.',
-            'clock_in_time': existing.clock_in.isoformat()
+            'clock_in_time': existing.clock_in.isoformat() + 'Z'
         })
     
     entry = TimeEntry(
@@ -244,8 +276,8 @@ def api_clock_in():
     
     return jsonify({
         'success': True,
-        'message': f'Clocked in at {now.strftime("%H:%M")}.',
-        'clock_in_time': now.isoformat()
+        'message': f'Clocked in at {local_now.strftime("%I:%M %p")} ({business_tz.zone}).',
+        'clock_in_time': now.isoformat() + 'Z'
     })
 
 
@@ -253,8 +285,15 @@ def api_clock_in():
 @login_required
 def api_clock_out():
     """JSON API: Clock out for the day."""
+    from app.models import BusinessConfig
+    
     today = datetime.utcnow().date()
     now = datetime.utcnow()
+    
+    # Get business timezone for display
+    tz_config = BusinessConfig.query.filter_by(setting_name='company_timezone').first()
+    business_tz = pytz.timezone(tz_config.setting_value if tz_config else 'America/Denver')
+    local_now = now.replace(tzinfo=pytz.UTC).astimezone(business_tz)
     
     entry = TimeEntry.query.filter_by(
         user_id=current_user.id,
@@ -272,9 +311,14 @@ def api_clock_out():
     entry.duration_minutes = entry.calculate_duration()
     db.session.commit()
     
+    # Format duration nicely
+    hours = entry.duration_minutes // 60
+    mins = entry.duration_minutes % 60
+    duration_str = f'{hours}h {mins}m' if hours > 0 else f'{mins}m'
+    
     return jsonify({
         'success': True,
-        'message': f'Clocked out at {now.strftime("%H:%M")}. Total: {entry.duration_minutes} minutes.',
+        'message': f'Clocked out at {local_now.strftime("%I:%M %p")}. Total: {duration_str}.',
         'duration_minutes': entry.duration_minutes
     })
 
@@ -369,6 +413,102 @@ def api_time_history():
             'avg_hours_per_day': round(total_hours / len([e for e in entries if e.duration_minutes]), 2) if [e for e in entries if e.duration_minutes] else 0
         }
     })
+
+
+@employee_bp.route('/api/leave-request', methods=['POST'])
+@login_required
+def api_request_leave():
+    """JSON API: Submit a leave request."""
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({'success': False, 'message': 'No data provided.'}), 400
+    
+    # Validate required fields
+    leave_type = data.get('leave_type')
+    start_date_str = data.get('start_date')
+    end_date_str = data.get('end_date')
+    reason = data.get('reason', '')
+    
+    if not leave_type:
+        return jsonify({'success': False, 'message': 'Leave type is required.'}), 400
+    if not start_date_str:
+        return jsonify({'success': False, 'message': 'Start date is required.'}), 400
+    if not end_date_str:
+        return jsonify({'success': False, 'message': 'End date is required.'}), 400
+    
+    # Validate leave type
+    valid_types = ['vacation', 'sick', 'personal', 'unpaid']
+    if leave_type not in valid_types:
+        return jsonify({'success': False, 'message': f'Invalid leave type. Must be one of: {", ".join(valid_types)}'}), 400
+    
+    # Parse dates
+    try:
+        start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+    except ValueError:
+        return jsonify({'success': False, 'message': 'Invalid date format. Use YYYY-MM-DD.'}), 400
+    
+    # Validate date range
+    if end_date < start_date:
+        return jsonify({'success': False, 'message': 'End date must be on or after start date.'}), 400
+    
+    if start_date < datetime.utcnow().date():
+        return jsonify({'success': False, 'message': 'Cannot request leave for past dates.'}), 400
+    
+    # Calculate days requested (simple weekday count)
+    days_requested = 0
+    current = start_date
+    while current <= end_date:
+        if current.weekday() < 5:  # Monday = 0, Friday = 4
+            days_requested += 1
+        current += timedelta(days=1)
+    
+    # Check leave balance (optional - warn if insufficient but still allow submission)
+    current_year = start_date.year
+    balance = LeaveBalance.query.filter_by(
+        user_id=current_user.id,
+        leave_type=leave_type,
+        year=current_year
+    ).first()
+    
+    balance_warning = None
+    if balance:
+        remaining = balance.total_days - balance.used_days
+        if days_requested > remaining:
+            balance_warning = f'Note: You are requesting {days_requested} day(s) but only have {remaining:.1f} day(s) remaining.'
+    else:
+        balance_warning = f'Note: No {leave_type} balance configured for {current_year}. Request will still be submitted.'
+    
+    # Create leave request
+    leave = LeaveRequest(
+        user_id=current_user.id,
+        leave_type=leave_type,
+        start_date=start_date,
+        end_date=end_date,
+        reason=reason[:1000] if reason else None,
+        status='pending'
+    )
+    db.session.add(leave)
+    db.session.commit()
+    
+    response_msg = f'Leave request submitted for {days_requested} day(s). Awaiting approval.'
+    if balance_warning:
+        response_msg += f' {balance_warning}'
+    
+    return jsonify({
+        'success': True,
+        'message': response_msg,
+        'leave_request': {
+            'id': leave.id,
+            'leave_type': leave.leave_type,
+            'start_date': leave.start_date.isoformat(),
+            'end_date': leave.end_date.isoformat(),
+            'days_requested': days_requested,
+            'status': leave.status
+        }
+    })
+
 
 
 # ============================================================================
@@ -992,3 +1132,199 @@ def update_profile():
     
     return redirect(url_for('employee.dashboard'))
 
+
+# ============================================================================
+# Employee Schedule API
+# ============================================================================
+
+@employee_bp.route('/api/my-schedule')
+@login_required
+def api_my_schedule():
+    """Get the current employee's schedule for a date range."""
+    from app.models import EmployeeSchedule
+    
+    start_date_str = request.args.get('start_date')
+    end_date_str = request.args.get('end_date')
+    
+    today = datetime.utcnow().date()
+    
+    # Default: current week
+    if not start_date_str:
+        start_date = today - timedelta(days=today.weekday())
+    else:
+        try:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            return jsonify({'success': False, 'message': 'Invalid start_date format'}), 400
+    
+    if not end_date_str:
+        end_date = start_date + timedelta(days=6)
+    else:
+        try:
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            return jsonify({'success': False, 'message': 'Invalid end_date format'}), 400
+    
+    # Get employee's schedules
+    schedules = EmployeeSchedule.query.filter(
+        EmployeeSchedule.user_id == current_user.id,
+        EmployeeSchedule.date >= start_date,
+        EmployeeSchedule.date <= end_date,
+        EmployeeSchedule.status != 'cancelled'
+    ).order_by(EmployeeSchedule.date, EmployeeSchedule.start_time).all()
+    
+    # Calculate totals
+    total_minutes = sum(s.duration_minutes() for s in schedules)
+    total_hours = round(total_minutes / 60, 1)
+    
+    return jsonify({
+        'success': True,
+        'start_date': start_date.isoformat(),
+        'end_date': end_date.isoformat(),
+        'schedules': [s.to_dict() for s in schedules],
+        'summary': {
+            'total_shifts': len(schedules),
+            'total_hours': total_hours
+        }
+    })
+
+
+@employee_bp.route('/api/upcoming-shifts')
+@login_required
+def api_upcoming_shifts():
+    """Get the employee's next 5 upcoming scheduled shifts."""
+    from app.models import EmployeeSchedule
+    
+    today = datetime.utcnow().date()
+    
+    schedules = EmployeeSchedule.query.filter(
+        EmployeeSchedule.user_id == current_user.id,
+        EmployeeSchedule.date >= today,
+        EmployeeSchedule.status.in_(['scheduled', 'confirmed'])
+    ).order_by(EmployeeSchedule.date, EmployeeSchedule.start_time).limit(5).all()
+    
+    return jsonify({
+        'success': True,
+        'shifts': [s.to_dict() for s in schedules]
+    })
+
+
+@employee_bp.route('/api/shift-swap-request', methods=['POST'])
+@login_required
+def api_request_shift_swap():
+    """Request a shift swap for one of the employee's scheduled shifts."""
+    from app.models import EmployeeSchedule, ShiftSwapRequest, User
+    
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({'success': False, 'message': 'No data provided'}), 400
+    
+    schedule_id = data.get('schedule_id')
+    if not schedule_id:
+        return jsonify({'success': False, 'message': 'schedule_id is required'}), 400
+    
+    # Verify the schedule belongs to the current user
+    schedule = EmployeeSchedule.query.get(schedule_id)
+    if not schedule:
+        return jsonify({'success': False, 'message': 'Schedule not found'}), 404
+    if schedule.user_id != current_user.id:
+        return jsonify({'success': False, 'message': 'Cannot request swap for another employee\'s shift'}), 403
+    
+    # Check if already has a pending swap request
+    existing = ShiftSwapRequest.query.filter(
+        ShiftSwapRequest.schedule_id == schedule_id,
+        ShiftSwapRequest.status.in_(['pending', 'accepted'])
+    ).first()
+    if existing:
+        return jsonify({'success': False, 'message': 'This shift already has a pending swap request'}), 409
+    
+    # Create swap request
+    swap = ShiftSwapRequest(
+        schedule_id=schedule_id,
+        requesting_user_id=current_user.id,
+        target_user_id=data.get('target_user_id'),  # Optional - can be None for open request
+        reason=data.get('reason', '')
+    )
+    
+    db.session.add(swap)
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'message': 'Shift swap request submitted. Awaiting approval.',
+        'swap': swap.to_dict()
+    }), 201
+
+
+@employee_bp.route('/api/my-shift-swaps')
+@login_required
+def api_my_shift_swaps():
+    """Get the employee's shift swap requests."""
+    from app.models import ShiftSwapRequest
+    
+    # Requests I've made
+    my_requests = ShiftSwapRequest.query.filter(
+        ShiftSwapRequest.requesting_user_id == current_user.id
+    ).order_by(ShiftSwapRequest.created_at.desc()).limit(10).all()
+    
+    # Requests offered to me
+    offers_to_me = ShiftSwapRequest.query.filter(
+        ShiftSwapRequest.target_user_id == current_user.id,
+        ShiftSwapRequest.status == 'pending'
+    ).order_by(ShiftSwapRequest.created_at.desc()).all()
+    
+    return jsonify({
+        'success': True,
+        'my_requests': [s.to_dict() for s in my_requests],
+        'offers_to_me': [s.to_dict() for s in offers_to_me]
+    })
+
+
+@employee_bp.route('/api/shift-swap/<int:swap_id>/accept', methods=['POST'])
+@login_required
+def api_accept_shift_swap(swap_id):
+    """Accept a shift swap offered to me (requires admin approval after)."""
+    from app.models import ShiftSwapRequest
+    
+    swap = ShiftSwapRequest.query.get_or_404(swap_id)
+    
+    # Verify this was offered to the current user
+    if swap.target_user_id != current_user.id:
+        return jsonify({'success': False, 'message': 'This swap was not offered to you'}), 403
+    
+    if swap.status != 'pending':
+        return jsonify({'success': False, 'message': f'Swap is already {swap.status}'}), 400
+    
+    swap.status = 'accepted'
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'message': 'Shift swap accepted. Awaiting admin approval.',
+        'swap': swap.to_dict()
+    })
+
+
+@employee_bp.route('/api/shift-swap/<int:swap_id>/cancel', methods=['POST'])
+@login_required
+def api_cancel_shift_swap(swap_id):
+    """Cancel a shift swap request I made."""
+    from app.models import ShiftSwapRequest
+    
+    swap = ShiftSwapRequest.query.get_or_404(swap_id)
+    
+    # Verify this is my request
+    if swap.requesting_user_id != current_user.id:
+        return jsonify({'success': False, 'message': 'Cannot cancel another user\'s request'}), 403
+    
+    if swap.status not in ['pending', 'accepted']:
+        return jsonify({'success': False, 'message': f'Cannot cancel a {swap.status} request'}), 400
+    
+    swap.status = 'cancelled'
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'message': 'Shift swap request cancelled.'
+    })

@@ -14,7 +14,7 @@ import { useState, useEffect, useCallback, lazy, Suspense } from 'react'
 import {
     Calendar, Clock, Briefcase, Users, LogIn, LogOut,
     LayoutDashboard, ChevronRight, ChevronLeft, FileText, AlertCircle,
-    History
+    History, Plus, X
 } from 'lucide-react'
 import api from '../../../api'
 import { useToast } from '../../ui/toast'
@@ -34,6 +34,8 @@ interface Stats {
     hours_this_week: number
     is_clocked_in: boolean
     clock_in_time: string | null
+    business_timezone?: string
+    server_time_utc?: string
 }
 
 interface Appointment {
@@ -145,60 +147,189 @@ function KPICard({ title, value, icon, iconColor, subtitle }: KPICardProps) {
 }
 
 // =============================================================================
-// Time Clock Widget
+// Time Clock Widget - Enterprise Edition
 // =============================================================================
 
 interface TimeClockProps {
     isClockedIn: boolean
     clockInTime: string | null
+    businessTimezone?: string
+    hoursThisWeek?: number
     onClockIn: () => void
     onClockOut: () => void
     loading: boolean
 }
 
-function TimeClock({ isClockedIn, clockInTime, onClockIn, onClockOut, loading }: TimeClockProps) {
-    const [elapsed, setElapsed] = useState('')
+/**
+ * Format a timezone string for display (e.g., "America/Denver" -> "Mountain Time")
+ */
+function formatTimezone(tz: string): string {
+    const tzMap: Record<string, string> = {
+        'America/New_York': 'Eastern',
+        'America/Chicago': 'Central',
+        'America/Denver': 'Mountain',
+        'America/Los_Angeles': 'Pacific',
+        'America/Phoenix': 'Arizona',
+        'UTC': 'UTC'
+    }
+    return tzMap[tz] || tz.split('/').pop()?.replace(/_/g, ' ') || tz
+}
 
+/**
+ * Get current time formatted in the given timezone
+ */
+function getCurrentTimeInTimezone(timezone: string): string {
+    try {
+        return new Date().toLocaleTimeString('en-US', {
+            timeZone: timezone,
+            hour: 'numeric',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        })
+    } catch {
+        return new Date().toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        })
+    }
+}
+
+function TimeClock({
+    isClockedIn,
+    clockInTime,
+    businessTimezone = 'America/Denver',
+    hoursThisWeek = 0,
+    onClockIn,
+    onClockOut,
+    loading
+}: TimeClockProps) {
+    const [elapsed, setElapsed] = useState({ hours: 0, mins: 0, secs: 0 })
+    const [currentTime, setCurrentTime] = useState('')
+    const [isOvertime, setIsOvertime] = useState(false)
+
+    // Live current time display
+    useEffect(() => {
+        const updateCurrentTime = () => {
+            setCurrentTime(getCurrentTimeInTimezone(businessTimezone))
+        }
+        updateCurrentTime()
+        const interval = setInterval(updateCurrentTime, 1000)
+        return () => clearInterval(interval)
+    }, [businessTimezone])
+
+    // Elapsed time calculation with proper UTC parsing
     useEffect(() => {
         if (!isClockedIn || !clockInTime) {
-            setElapsed('')
+            setElapsed({ hours: 0, mins: 0, secs: 0 })
+            setIsOvertime(false)
             return
         }
 
         const updateElapsed = () => {
-            const start = new Date(clockInTime)
-            const now = new Date()
-            const diff = Math.floor((now.getTime() - start.getTime()) / 1000)
-            const hours = Math.floor(diff / 3600)
-            const mins = Math.floor((diff % 3600) / 60)
-            setElapsed(`${hours}h ${mins}m`)
+            // clockInTime now includes 'Z' suffix, so Date.parse() correctly treats it as UTC
+            const startMs = Date.parse(clockInTime)
+            if (isNaN(startMs)) {
+                setElapsed({ hours: 0, mins: 0, secs: 0 })
+                return
+            }
+
+            const nowMs = Date.now()
+            const diffSec = Math.max(0, Math.floor((nowMs - startMs) / 1000))
+            const hours = Math.floor(diffSec / 3600)
+            const mins = Math.floor((diffSec % 3600) / 60)
+            const secs = diffSec % 60
+
+            setElapsed({ hours, mins, secs })
+            setIsOvertime(hours >= 8) // 8+ hours in a day = overtime indicator
         }
 
         updateElapsed()
-        const interval = setInterval(updateElapsed, 60000) // Update every minute
+        const interval = setInterval(updateElapsed, 1000) // Update every second for live feel
         return () => clearInterval(interval)
     }, [isClockedIn, clockInTime])
 
+    // Format elapsed time for display
+    const formatElapsed = () => {
+        const { hours, mins, secs } = elapsed
+        if (hours > 0) {
+            return `${hours}h ${mins}m`
+        }
+        if (mins > 0) {
+            return `${mins}m ${secs}s`
+        }
+        return `${secs}s`
+    }
+
+    // Calculate progress for 8-hour workday (capped at 100%)
+    const dayProgress = Math.min(100, ((elapsed.hours * 60 + elapsed.mins) / 480) * 100)
+
     return (
-        <div className={`emp-time-clock ${isClockedIn ? 'clocked-in' : ''}`}>
+        <div className={`emp-time-clock ${isClockedIn ? 'clocked-in' : ''} ${isOvertime ? 'overtime' : ''}`}>
             <div className="emp-time-clock-header">
                 <Clock size={20} />
                 <span>Time Clock</span>
+                <span className="emp-timezone-badge">{formatTimezone(businessTimezone)}</span>
             </div>
+
+            {/* Live Current Time */}
+            <div className="emp-current-time">
+                <span className="emp-current-time-value">{currentTime}</span>
+            </div>
+
             <div className="emp-time-clock-body">
                 {isClockedIn ? (
                     <>
                         <div className="emp-time-status">
                             <span className="status-indicator active" />
-                            Working
+                            <span className="status-text">Working</span>
+                            {isOvertime && (
+                                <span className="emp-overtime-badge">OT</span>
+                            )}
                         </div>
-                        <div className="emp-time-elapsed">{elapsed}</div>
+
+                        {/* Elapsed Time - Large Display */}
+                        <div className="emp-time-elapsed-container">
+                            <div className={`emp-time-elapsed ${isOvertime ? 'overtime' : ''}`}>
+                                {formatElapsed()}
+                            </div>
+                            <div className="emp-time-elapsed-label">elapsed today</div>
+                        </div>
+
+                        {/* Visual Progress Bar */}
+                        <div className="emp-day-progress">
+                            <div className="emp-day-progress-bar">
+                                <div
+                                    className={`emp-day-progress-fill ${isOvertime ? 'overtime' : ''}`}
+                                    style={{ width: `${dayProgress}%` }}
+                                />
+                            </div>
+                            <div className="emp-day-progress-labels">
+                                <span>0h</span>
+                                <span>8h goal</span>
+                            </div>
+                        </div>
+
+                        {/* Weekly Summary */}
+                        {hoursThisWeek > 0 && (
+                            <div className="emp-weekly-summary">
+                                <span className="emp-weekly-hours">{hoursThisWeek.toFixed(1)}h</span>
+                                <span className="emp-weekly-label">this week</span>
+                            </div>
+                        )}
+
                         <button
                             className="emp-clock-btn clock-out"
                             onClick={onClockOut}
                             disabled={loading}
                         >
-                            <LogOut size={18} />
+                            {loading ? (
+                                <span className="emp-btn-loading" />
+                            ) : (
+                                <LogOut size={18} />
+                            )}
                             Clock Out
                         </button>
                     </>
@@ -206,14 +337,31 @@ function TimeClock({ isClockedIn, clockInTime, onClockIn, onClockOut, loading }:
                     <>
                         <div className="emp-time-status">
                             <span className="status-indicator" />
-                            Not Clocked In
+                            <span className="status-text">Not Clocked In</span>
                         </div>
+
+                        <div className="emp-clock-prompt">
+                            Ready to start your day?
+                        </div>
+
+                        {/* Weekly Summary when not clocked in */}
+                        {hoursThisWeek > 0 && (
+                            <div className="emp-weekly-summary">
+                                <span className="emp-weekly-hours">{hoursThisWeek.toFixed(1)}h</span>
+                                <span className="emp-weekly-label">logged this week</span>
+                            </div>
+                        )}
+
                         <button
                             className="emp-clock-btn clock-in"
                             onClick={onClockIn}
                             disabled={loading}
                         >
-                            <LogIn size={18} />
+                            {loading ? (
+                                <span className="emp-btn-loading" />
+                            ) : (
+                                <LogIn size={18} />
+                            )}
                             Clock In
                         </button>
                     </>
@@ -222,6 +370,7 @@ function TimeClock({ isClockedIn, clockInTime, onClockIn, onClockOut, loading }:
         </div>
     )
 }
+
 
 // =============================================================================
 // Upcoming Appointments Widget
@@ -486,25 +635,78 @@ function TimeTrackingTab() {
 // Leave Tab Component
 // =============================================================================
 
+interface LeaveRequestFormData {
+    leave_type: string
+    start_date: string
+    end_date: string
+    reason: string
+}
+
 function LeaveTab() {
     const [loading, setLoading] = useState(true)
     const [data, setData] = useState<LeaveData | null>(null)
+    const [showForm, setShowForm] = useState(false)
+    const [submitting, setSubmitting] = useState(false)
+    const [formData, setFormData] = useState<LeaveRequestFormData>({
+        leave_type: 'vacation',
+        start_date: '',
+        end_date: '',
+        reason: ''
+    })
+    const { addToast } = useToast()
+
+    const fetchData = useCallback(async () => {
+        setLoading(true)
+        try {
+            const response = await api.get<LeaveData>('/employee/api/leave-balances')
+            if (response.ok && response.data) {
+                setData(response.data)
+            }
+        } catch {
+            // Silent fail
+        } finally {
+            setLoading(false)
+        }
+    }, [])
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await api.get<LeaveData>('/employee/api/leave-balances')
-                if (response.ok && response.data) {
-                    setData(response.data)
-                }
-            } catch {
-                // Silent fail
-            } finally {
-                setLoading(false)
-            }
-        }
         fetchData()
-    }, [])
+    }, [fetchData])
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target
+        setFormData(prev => ({ ...prev, [name]: value }))
+    }
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+
+        if (!formData.start_date || !formData.end_date) {
+            addToast({ type: 'error', message: 'Please select start and end dates.' })
+            return
+        }
+
+        setSubmitting(true)
+        try {
+            const response = await api.post<{ success: boolean; message: string }>('/employee/api/leave-request', formData)
+            if (response.ok && response.data) {
+                if (response.data.success) {
+                    addToast({ type: 'success', message: response.data.message })
+                    setShowForm(false)
+                    setFormData({ leave_type: 'vacation', start_date: '', end_date: '', reason: '' })
+                    fetchData() // Refresh data
+                } else {
+                    addToast({ type: 'warning', message: response.data.message })
+                }
+            } else {
+                addToast({ type: 'error', message: 'Failed to submit leave request.' })
+            }
+        } catch {
+            addToast({ type: 'error', message: 'Error submitting leave request.' })
+        } finally {
+            setSubmitting(false)
+        }
+    }
 
     const getStatusBadgeClass = (status: string) => {
         switch (status.toLowerCase()) {
@@ -514,6 +716,9 @@ function LeaveTab() {
             default: return 'emp-status-badge'
         }
     }
+
+    // Get today's date for min date validation
+    const today = new Date().toISOString().split('T')[0]
 
     if (loading) {
         return (
@@ -526,6 +731,92 @@ function LeaveTab() {
 
     return (
         <div className="emp-leave-tab">
+            {/* Leave Request Form */}
+            <div className="emp-tab-section">
+                <div className="emp-section-header">
+                    <h3 className="emp-section-title">
+                        <Plus size={20} />
+                        Request Leave
+                    </h3>
+                    <button
+                        className={`emp-action-btn ${showForm ? 'secondary' : ''}`}
+                        onClick={() => setShowForm(!showForm)}
+                    >
+                        {showForm ? <><X size={16} /> Cancel</> : <><Plus size={16} /> New Request</>}
+                    </button>
+                </div>
+
+                {showForm && (
+                    <form onSubmit={handleSubmit} className="emp-leave-form">
+                        <div className="emp-form-grid">
+                            <div className="emp-form-group">
+                                <label htmlFor="leave_type">Leave Type</label>
+                                <select
+                                    id="leave_type"
+                                    name="leave_type"
+                                    value={formData.leave_type}
+                                    onChange={handleInputChange}
+                                    className="emp-form-select"
+                                >
+                                    <option value="vacation">Vacation</option>
+                                    <option value="sick">Sick Leave</option>
+                                    <option value="personal">Personal Leave</option>
+                                    <option value="unpaid">Unpaid Leave</option>
+                                </select>
+                            </div>
+                            <div className="emp-form-group">
+                                <label htmlFor="start_date">Start Date</label>
+                                <input
+                                    type="date"
+                                    id="start_date"
+                                    name="start_date"
+                                    value={formData.start_date}
+                                    onChange={handleInputChange}
+                                    min={today}
+                                    className="emp-form-input"
+                                    required
+                                />
+                            </div>
+                            <div className="emp-form-group">
+                                <label htmlFor="end_date">End Date</label>
+                                <input
+                                    type="date"
+                                    id="end_date"
+                                    name="end_date"
+                                    value={formData.end_date}
+                                    onChange={handleInputChange}
+                                    min={formData.start_date || today}
+                                    className="emp-form-input"
+                                    required
+                                />
+                            </div>
+                        </div>
+                        <div className="emp-form-group">
+                            <label htmlFor="reason">Reason (Optional)</label>
+                            <textarea
+                                id="reason"
+                                name="reason"
+                                value={formData.reason}
+                                onChange={handleInputChange}
+                                placeholder="Brief reason for leave..."
+                                className="emp-form-textarea"
+                                rows={3}
+                                maxLength={1000}
+                            />
+                        </div>
+                        <div className="emp-form-actions">
+                            <button
+                                type="submit"
+                                className="emp-submit-btn"
+                                disabled={submitting}
+                            >
+                                {submitting ? 'Submitting...' : 'Submit Request'}
+                            </button>
+                        </div>
+                    </form>
+                )}
+            </div>
+
             {/* Leave Balances */}
             <div className="emp-tab-section">
                 <h3 className="emp-section-title">
@@ -562,22 +853,18 @@ function LeaveTab() {
                     </div>
                 ) : (
                     <div className="emp-empty-state small">
-                        <p>No leave balances configured for this year.</p>
+                        <AlertCircle size={24} />
+                        <p>No leave balances configured for this year. Contact your administrator.</p>
                     </div>
                 )}
             </div>
 
-            {/* Leave Requests */}
+            {/* Leave Requests History */}
             <div className="emp-tab-section">
-                <div className="emp-section-header">
-                    <h3 className="emp-section-title">
-                        <History size={20} />
-                        Leave Requests
-                    </h3>
-                    <a href="/employee/leave/request" className="emp-action-btn">
-                        + Request Leave
-                    </a>
-                </div>
+                <h3 className="emp-section-title">
+                    <History size={20} />
+                    Leave Requests
+                </h3>
 
                 {data?.requests && data.requests.length > 0 ? (
                     <div className="emp-table-wrapper">
@@ -614,7 +901,7 @@ function LeaveTab() {
                     </div>
                 ) : (
                     <div className="emp-empty-state small">
-                        <p>No leave requests found.</p>
+                        <p>No leave requests found. Submit your first request above!</p>
                     </div>
                 )}
             </div>
@@ -831,6 +1118,8 @@ export function EmployeeDashboard({
                             <TimeClock
                                 isClockedIn={stats.is_clocked_in}
                                 clockInTime={stats.clock_in_time}
+                                businessTimezone={stats.business_timezone}
+                                hoursThisWeek={stats.hours_this_week}
                                 onClockIn={handleClockIn}
                                 onClockOut={handleClockOut}
                                 loading={clockLoading}

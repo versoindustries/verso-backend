@@ -2025,6 +2025,18 @@ def update_reporting(user_id):
 
 
 # ============================================================================
+# Employee Schedule Management
+# ============================================================================
+
+@admin.route('/schedule')
+@login_required
+@admin_required
+def schedule_management():
+    """Employee schedule management interface."""
+    return render_template('admin/schedule.html')
+
+
+# ============================================================================
 # Phase 7: Admin Experience & Dashboard Enhancements
 # ============================================================================
 

@@ -183,8 +183,12 @@ def index():
 @login_required
 def create_channel():
     """Create a new channel. Requires Admin or Manager role."""
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    
     # RBAC: Only Admin/Manager can create channels
     if not Channel.can_user_create_channels(current_user):
+        if is_ajax:
+            return jsonify({'success': False, 'error': 'You do not have permission to create channels.'}), 403
         flash('You do not have permission to create channels.', 'error')
         return redirect(url_for('messaging.index'))
     
@@ -193,11 +197,13 @@ def create_channel():
     description = request.form.get('description', '')
     category = request.form.get('category', 'general')
     
-    # Role-based access control for public channels
+    # Role-based access control for both public and private channels
     allowed_roles = request.form.getlist('allowed_roles')
     is_restricted = request.form.get('is_restricted') == '1' or len(allowed_roles) > 0
     
     if not name:
+        if is_ajax:
+            return jsonify({'success': False, 'error': 'Channel name is required.'}), 400
         flash('Channel name is required.', 'error')
         return redirect(url_for('messaging.index'))
     
@@ -223,6 +229,19 @@ def create_channel():
         membership = ChannelMember(channel_id=channel.id, user_id=current_user.id)
         db.session.add(membership)
         db.session.commit()
+    
+    # Return JSON for AJAX requests (React SPA)
+    if is_ajax:
+        return jsonify({
+            'success': True,
+            'channel_id': channel.id,
+            'name': channel.name,
+            'type': channel.type,
+            'category': channel.category,
+            'is_restricted': channel.is_restricted,
+            'allowed_roles': channel.allowed_roles,
+            'message': 'Channel created successfully'
+        })
     
     flash('Channel created successfully.', 'success')
     return redirect(url_for('messaging.channel', channel_id=channel.id))
@@ -523,14 +542,12 @@ def archive_channel(channel_id):
     
     # Only creator or admin can archive
     if channel.created_by_id != current_user.id and not current_user.has_role('admin'):
-        flash("You don't have permission to archive this channel.", 'error')
-        return redirect(url_for('messaging.channel', channel_id=channel_id))
+        return jsonify({'success': False, 'error': 'Permission denied.'}), 403
     
     channel.is_archived = True
     db.session.commit()
     
-    flash(f'Channel "{channel.name}" has been archived.', 'success')
-    return redirect(url_for('messaging.index'))
+    return jsonify({'success': True, 'message': f'Channel "{channel.name}" has been archived.', 'is_archived': True})
 
 
 @messaging_bp.route('/channel/<int:channel_id>/unarchive', methods=['POST'])
@@ -540,14 +557,12 @@ def unarchive_channel(channel_id):
     channel = Channel.query.get_or_404(channel_id)
     
     if channel.created_by_id != current_user.id and not current_user.has_role('admin'):
-        flash("You don't have permission to unarchive this channel.", 'error')
-        return redirect(url_for('messaging.index'))
+        return jsonify({'success': False, 'error': 'Permission denied.'}), 403
     
     channel.is_archived = False
     db.session.commit()
     
-    flash(f'Channel "{channel.name}" has been unarchived.', 'success')
-    return redirect(url_for('messaging.channel', channel_id=channel_id))
+    return jsonify({'success': True, 'message': f'Channel "{channel.name}" has been unarchived.', 'is_archived': False})
 
 
 @messaging_bp.route('/channel/<int:channel_id>/delete', methods=['POST', 'DELETE'])
@@ -561,25 +576,30 @@ def delete_channel(channel_id):
     is_admin = current_user.has_role('admin') or current_user.has_role('owner')
     
     if not is_owner and not is_admin:
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return jsonify({'success': False, 'error': 'Permission denied. Only channel owner or admin can delete.'}), 403
-        flash("You don't have permission to delete this channel.", 'error')
-        return redirect(url_for('messaging.channel', channel_id=channel_id))
+        return jsonify({'success': False, 'error': 'Permission denied. Only channel owner or admin can delete.'}), 403
     
     channel_name = channel.name
     
-    # Delete associated data
-    # Messages are cascade deleted via relationship
-    # ChannelMember records are cascade deleted via relationship
-    
-    db.session.delete(channel)
-    db.session.commit()
-    
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+    try:
+        # Explicitly delete related records to ensure clean removal
+        # Delete message reactions first (foreign key to messages)
+        for msg in Message.query.filter_by(channel_id=channel_id).all():
+            MessageReaction.query.filter_by(message_id=msg.id).delete()
+        
+        # Delete messages
+        Message.query.filter_by(channel_id=channel_id).delete()
+        
+        # Delete channel memberships
+        ChannelMember.query.filter_by(channel_id=channel_id).delete()
+        
+        # Delete the channel itself
+        db.session.delete(channel)
+        db.session.commit()
+        
         return jsonify({'success': True, 'message': f'Channel "{channel_name}" has been permanently deleted.'})
-    
-    flash(f'Channel "{channel_name}" has been permanently deleted.', 'success')
-    return redirect(url_for('messaging.index'))
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': f'Failed to delete channel: {str(e)}'}), 500
 
 
 @messaging_bp.route('/channel/<int:channel_id>/members', methods=['GET', 'POST'])
@@ -1047,6 +1067,84 @@ def channel_settings(channel_id):
             'is_restricted': channel.is_restricted,
             'allowed_roles': channel.allowed_roles
         }
+    })
+
+
+@messaging_bp.route('/channel/<int:channel_id>/members/add', methods=['POST'])
+@login_required
+def api_add_member(channel_id):
+    """Add a member to a channel via JSON API."""
+    channel = Channel.query.get_or_404(channel_id)
+    
+    # Only private channels support explicit member management
+    if channel.type != 'private':
+        return jsonify({'success': False, 'error': 'Only private channels support member management.'}), 400
+    
+    # Permission check
+    if channel.created_by_id != current_user.id and not current_user.has_role('admin'):
+        return jsonify({'success': False, 'error': 'Permission denied.'}), 403
+    
+    data = request.get_json() or {}
+    user_id = data.get('user_id')
+    
+    if not user_id:
+        return jsonify({'success': False, 'error': 'User ID required.'}), 400
+    
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'success': False, 'error': 'User not found.'}), 404
+    
+    if user in channel.members:
+        return jsonify({'success': False, 'error': 'User is already a member.'}), 400
+    
+    channel.members.append(user)
+    membership = ChannelMember(channel_id=channel.id, user_id=user.id)
+    db.session.add(membership)
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'message': f'{user.username} added to channel.',
+        'member': {'id': user.id, 'username': user.username}
+    })
+
+
+@messaging_bp.route('/channel/<int:channel_id>/members/remove', methods=['POST'])
+@login_required
+def api_remove_member(channel_id):
+    """Remove a member from a channel via JSON API."""
+    channel = Channel.query.get_or_404(channel_id)
+    
+    if channel.type != 'private':
+        return jsonify({'success': False, 'error': 'Only private channels support member management.'}), 400
+    
+    if channel.created_by_id != current_user.id and not current_user.has_role('admin'):
+        return jsonify({'success': False, 'error': 'Permission denied.'}), 403
+    
+    data = request.get_json() or {}
+    user_id = data.get('user_id')
+    
+    if not user_id:
+        return jsonify({'success': False, 'error': 'User ID required.'}), 400
+    
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'success': False, 'error': 'User not found.'}), 404
+    
+    # Can't remove channel owner
+    if user.id == channel.created_by_id:
+        return jsonify({'success': False, 'error': 'Cannot remove channel owner.'}), 400
+    
+    if user not in channel.members:
+        return jsonify({'success': False, 'error': 'User is not a member.'}), 400
+    
+    channel.members.remove(user)
+    ChannelMember.query.filter_by(channel_id=channel.id, user_id=user.id).delete()
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'message': f'{user.username} removed from channel.'
     })
 
 
