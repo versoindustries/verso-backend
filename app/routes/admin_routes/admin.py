@@ -553,17 +553,185 @@ def delete_role(role_id):
 # Use the unified booking dashboard at /admin/booking instead.
 # Staff and services are now managed through the React-based BookingAdmin component.
 
-@admin.route('/generate-sitemap', methods=['GET'])
+@admin.route('/generate-sitemap', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def generate_sitemap_route():
+    """Generate and save sitemap.xml using the dynamic sitemap generator."""
+    from app.modules.seo import generate_dynamic_sitemap
+    import os
+    
     try:
-        generate_sitemap(current_app)
+        # Generate sitemap content
+        sitemap_content = generate_dynamic_sitemap()
+        
+        # Save to static folder
+        sitemap_path = os.path.join(current_app.static_folder, 'sitemap.xml')
+        with open(sitemap_path, 'w', encoding='utf-8') as f:
+            f.write(sitemap_content)
+        
+        log_audit_event(current_user.id, 'generate_sitemap', 'Sitemap', None, 
+                       {'path': sitemap_path}, request.remote_addr)
+        
+        # For API requests, return JSON
+        if request.method == 'POST' or request.headers.get('Accept') == 'application/json':
+            return jsonify({
+                'success': True,
+                'message': 'Sitemap generated successfully',
+                'path': '/static/sitemap.xml'
+            })
+        
         flash('Sitemap generated and saved successfully.', 'success')
-        flash('Sitemap submitted to Bing successfully.', 'success')
     except Exception as e:
-        flash(f'Error generating or submitting sitemap: {e}', 'error')
+        current_app.logger.error(f'Error generating sitemap: {e}')
+        if request.method == 'POST' or request.headers.get('Accept') == 'application/json':
+            return jsonify({'success': False, 'error': str(e)}), 500
+        flash(f'Error generating sitemap: {e}', 'error')
+    
     return redirect(url_for('admin.admin_dashboard'))
+
+
+@admin.route('/api/sitemap/stats')
+@login_required
+@admin_required
+def sitemap_stats():
+    """Get sitemap statistics including URL counts by type."""
+    from app.models import Page, Post, Product, Category
+    import os
+    
+    try:
+        # Count URLs by type
+        stats = {
+            'pages': Page.query.filter(
+                (Page.status == 'published') | (Page.is_published == True)
+            ).count(),
+            'posts': Post.query.filter_by(is_published=True).count(),
+            'products': 0,
+            'categories': 0,
+            'static_routes': 9,  # Homepage, about, contact, services, privacy, terms, blog, shop, booking
+            'total': 0,
+            'file_exists': False,
+            'file_size': None,
+            'last_modified': None
+        }
+        
+        # Try to count products and categories if they exist
+        try:
+            stats['products'] = Product.query.filter_by(is_active=True).count()
+        except Exception:
+            pass
+        
+        try:
+            stats['categories'] = Category.query.filter_by(is_active=True).count()
+        except Exception:
+            pass
+        
+        stats['total'] = (stats['pages'] + stats['posts'] + stats['products'] + 
+                         stats['categories'] + stats['static_routes'])
+        
+        # Check if sitemap file exists
+        sitemap_path = os.path.join(current_app.static_folder, 'sitemap.xml')
+        if os.path.exists(sitemap_path):
+            stats['file_exists'] = True
+            file_stat = os.stat(sitemap_path)
+            stats['file_size'] = file_stat.st_size
+            stats['last_modified'] = datetime.fromtimestamp(file_stat.st_mtime).isoformat()
+        
+        return jsonify(stats)
+    except Exception as e:
+        current_app.logger.error(f'Error getting sitemap stats: {e}')
+        return jsonify({'error': str(e)}), 500
+
+
+@admin.route('/api/sitemap/preview')
+@login_required
+@admin_required
+def sitemap_preview():
+    """Get a preview of sitemap URLs by parsing the dynamic sitemap."""
+    from app.modules.seo import generate_dynamic_sitemap
+    import xml.etree.ElementTree as ET
+    
+    try:
+        sitemap_content = generate_dynamic_sitemap()
+        
+        # Parse the XML to extract URLs
+        root = ET.fromstring(sitemap_content)
+        namespace = {'ns': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
+        
+        urls = []
+        for url_elem in root.findall('ns:url', namespace):
+            loc = url_elem.find('ns:loc', namespace)
+            lastmod = url_elem.find('ns:lastmod', namespace)
+            priority = url_elem.find('ns:priority', namespace)
+            changefreq = url_elem.find('ns:changefreq', namespace)
+            
+            urls.append({
+                'loc': loc.text if loc is not None else None,
+                'lastmod': lastmod.text if lastmod is not None else None,
+                'priority': priority.text if priority is not None else None,
+                'changefreq': changefreq.text if changefreq is not None else None
+            })
+        
+        return jsonify({
+            'total': len(urls),
+            'urls': urls
+        })
+    except Exception as e:
+        current_app.logger.error(f'Error previewing sitemap: {e}')
+        return jsonify({'error': str(e)}), 500
+
+
+@admin.route('/api/sitemap/submit', methods=['POST'])
+@login_required
+@admin_required
+def submit_sitemap():
+    """Submit sitemap to search engines (Google and Bing)."""
+    import requests as http_requests
+    
+    try:
+        sitemap_url = url_for('main_routes.sitemap_xml', _external=True)
+        results = {'google': None, 'bing': None}
+        
+        # Submit to Google (ping)
+        try:
+            google_url = f'https://www.google.com/ping?sitemap={sitemap_url}'
+            response = http_requests.get(google_url, timeout=10)
+            results['google'] = {
+                'success': response.status_code == 200,
+                'status_code': response.status_code
+            }
+        except Exception as e:
+            results['google'] = {'success': False, 'error': str(e)}
+        
+        # Submit to Bing (IndexNow if key available, otherwise ping)
+        try:
+            # Get Bing API key from config if available
+            bing_key = current_app.config.get('BING_INDEXNOW_KEY')
+            if bing_key:
+                bing_url = f'https://www.bing.com/indexnow?url={sitemap_url}&key={bing_key}'
+            else:
+                bing_url = f'https://www.bing.com/ping?sitemap={sitemap_url}'
+            
+            response = http_requests.get(bing_url, timeout=10)
+            results['bing'] = {
+                'success': response.status_code in [200, 202],
+                'status_code': response.status_code
+            }
+        except Exception as e:
+            results['bing'] = {'success': False, 'error': str(e)}
+        
+        log_audit_event(current_user.id, 'submit_sitemap', 'Sitemap', None, 
+                       results, request.remote_addr)
+        
+        return jsonify({
+            'success': True,
+            'results': results,
+            'sitemap_url': sitemap_url
+        })
+    except Exception as e:
+        current_app.logger.error(f'Error submitting sitemap: {e}')
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 
 @admin.route('/api/admin_appointments')
 @csrf.exempt

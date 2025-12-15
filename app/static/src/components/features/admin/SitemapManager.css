@@ -1,0 +1,329 @@
+/**
+ * SitemapManager Styles
+ * 
+ * Enterprise-level styling using CSS variables for consistency
+ * with the admin dashboard design system.
+ */
+
+.sitemap-manager {
+    background: var(--card-bg, rgba(42, 42, 42, 0.9));
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Header */
+.sitemap-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.sitemap-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #fff;
+}
+
+.sitemap-title h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.sitemap-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+/* Buttons */
+.sitemap-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sitemap-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.sitemap-btn.primary {
+    background: var(--btn-gradient, linear-gradient(135deg, #6366f1, #8b5cf6));
+    color: #fff;
+}
+
+.sitemap-btn.primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+}
+
+.sitemap-btn.secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.sitemap-btn.secondary:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.sitemap-btn.accent {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+}
+
+.sitemap-btn.accent:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+}
+
+/* Stats Grid */
+.sitemap-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.sitemap-stat-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: transform 0.2s ease;
+}
+
+.sitemap-stat-card:hover {
+    transform: translateY(-2px);
+}
+
+.stat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.stat-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* File Info */
+.sitemap-file-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.file-info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.875rem;
+}
+
+.file-info-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary-color, #6366f1);
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.file-info-link:hover {
+    color: #8b5cf6;
+}
+
+/* Submit Results */
+.sitemap-submit-results {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.submit-result {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.submit-result.success {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.submit-result.error {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Preview Section */
+.sitemap-preview {
+    margin-top: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.preview-header {
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.preview-header h4 {
+    margin: 0;
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.preview-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.preview-item {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.2s;
+}
+
+.preview-item:last-child {
+    border-bottom: none;
+}
+
+.preview-item:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.preview-item a {
+    color: var(--primary-color, #6366f1);
+    text-decoration: none;
+    font-size: 0.875rem;
+    word-break: break-all;
+}
+
+.preview-item a:hover {
+    text-decoration: underline;
+}
+
+.preview-meta {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.meta-badge {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    background: rgba(99, 102, 241, 0.15);
+    color: rgba(255, 255, 255, 0.7);
+    border-radius: 4px;
+    text-transform: capitalize;
+}
+
+.meta-date {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Loading State */
+.sitemap-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 3rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Spin Animation */
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .sitemap-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .sitemap-actions {
+        width: 100%;
+    }
+
+    .sitemap-btn {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .sitemap-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .sitemap-file-info {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+}
