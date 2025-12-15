@@ -38,6 +38,7 @@ export interface Urls {
 export interface FeatureFlags {
     ecommerceEnabled: boolean;
     bookingEnabled: boolean;
+    schedulingEnabled: boolean;
 }
 
 export interface PageEditorContext {

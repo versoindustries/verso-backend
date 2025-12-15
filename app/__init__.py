@@ -209,7 +209,8 @@ def create_app(config_class=Config):
         # Feature flags (default to True for existing deployments)
         feature_flags = {
             'ecommerce_enabled': config_dict.get('ecommerce_enabled', 'true') == 'true',
-            'booking_enabled': config_dict.get('booking_enabled', 'true') == 'true'
+            'booking_enabled': config_dict.get('booking_enabled', 'true') == 'true',
+            'scheduling_enabled': config_dict.get('scheduling_enabled', 'true') == 'true'
         }
         return dict(business_config=config_dict, erf_form=EstimateRequestForm(), feature_flags=feature_flags)
 

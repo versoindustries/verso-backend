@@ -112,47 +112,48 @@
         window.versoContext = {
             user: {
                 isAuthenticated: {{ current_user.is_authenticated | tojson }}{% if current_user.is_authenticated %},
-                firstName: {{ current_user.first_name | tojson }},
-                roles: [{% for role in current_user.roles %}"{{ role.name }}"{% if not loop.last %}, {% endif %}{% endfor %}]{% endif %}
+        firstName: {{ current_user.first_name | tojson }},
+        roles: [{% for role in current_user.roles %}"{{ role.name }}"{% if not loop.last %}, {% endif %} {% endfor %}]{% endif %}
             },
-            config: {
-                site_name: "{{ business_config.get('site_name', business_config.get('business_name', 'Verso Backend')) }}",
+        config: {
+            site_name: "{{ business_config.get('site_name', business_config.get('business_name', 'Verso Backend')) }}",
                 primary_color: "{{ business_config.get('primary_color', '#4169e1') }}",
-                secondary_color: "{{ business_config.get('secondary_color', '#6c757d') }}",
-                accent_color: "{{ business_config.get('accent_color', '#28a745') }}",
-                font_family: "{{ business_config.get('font_family', 'Neon-Regular, sans-serif') }}",
-                ga4_tracking_id: "{{ business_config.get('ga4_tracking_id', '') }}"
-            },
-            urls: {
-                index: "{{ url_for('main_routes.index') }}",
+                    secondary_color: "{{ business_config.get('secondary_color', '#6c757d') }}",
+                        accent_color: "{{ business_config.get('accent_color', '#28a745') }}",
+                            font_family: "{{ business_config.get('font_family', 'Neon-Regular, sans-serif') }}",
+                                ga4_tracking_id: "{{ business_config.get('ga4_tracking_id', '') }}"
+        },
+        urls: {
+            index: "{{ url_for('main_routes.index') }}",
                 about: "{{ url_for('main_routes.about') }}",
-                services: "{{ url_for('main_routes.services') }}",
-                contact: "{{ url_for('main_routes.contact') }}",
-                login: "{{ url_for('auth.login') }}",
-                register: "{{ url_for('auth.register') }}",
-                logout: "{{ url_for('auth.logout') }}",
-                blogIndex: "{{ url_for('blog.show_blog') }}",
-                blogManage: "{{ url_for('blog.manage_posts') }}",
-                blogNew: "{{ url_for('blog.new_post') }}",
-                employeeDashboard: "{{ url_for('employee.dashboard') }}",
-                messaging: "{{ url_for('messaging.index') }}",
-                adminDashboard: "{{ url_for('admin.admin_dashboard') }}",
-                setLanguageEn: "{{ url_for('main_routes.set_language', language='en') }}",
-                setLanguageEs: "{{ url_for('main_routes.set_language', language='es') }}"
-            },
-            unreadNotificationsCount: {{ unread_notifications_count | default(0) }},
-            featureFlags: {
-                ecommerceEnabled: {{ feature_flags.ecommerce_enabled | tojson }},
-                bookingEnabled: {{ feature_flags.booking_enabled | tojson }}
-            },
-            pageEditor: {
-                contentType: "{{ page_editor_type | default('static') }}",
+                    services: "{{ url_for('main_routes.services') }}",
+                        contact: "{{ url_for('main_routes.contact') }}",
+                            login: "{{ url_for('auth.login') }}",
+                                register: "{{ url_for('auth.register') }}",
+                                    logout: "{{ url_for('auth.logout') }}",
+                                        blogIndex: "{{ url_for('blog.show_blog') }}",
+                                            blogManage: "{{ url_for('blog.manage_posts') }}",
+                                                blogNew: "{{ url_for('blog.new_post') }}",
+                                                    employeeDashboard: "{{ url_for('employee.dashboard') }}",
+                                                        messaging: "{{ url_for('messaging.index') }}",
+                                                            adminDashboard: "{{ url_for('admin.admin_dashboard') }}",
+                                                                setLanguageEn: "{{ url_for('main_routes.set_language', language='en') }}",
+                                                                    setLanguageEs: "{{ url_for('main_routes.set_language', language='es') }}"
+        },
+        unreadNotificationsCount: {{ unread_notifications_count | default(0) }},
+        featureFlags: {
+            ecommerceEnabled: {{ feature_flags.ecommerce_enabled | tojson }},
+            bookingEnabled: {{ feature_flags.booking_enabled | tojson }},
+            schedulingEnabled: {{ feature_flags.scheduling_enabled | tojson }}
+        },
+        pageEditor: {
+            contentType: "{{ page_editor_type | default('static') }}",
                 contentId: {{ page_editor_id | default(0) }},
-                canEdit: {% if current_user.is_authenticated and current_user.roles %}{{ (current_user.roles | selectattr('name', 'in', ['Admin', 'Manager', 'Marketing', 'Owner']) | list | length > 0) | tojson }}{% else %}false{% endif %}
-            },
-            year: new Date().getFullYear(),
+            canEdit: {% if current_user.is_authenticated and current_user.roles %} {{ (current_user.roles | selectattr('name', 'in', ['Admin', 'Manager', 'Marketing', 'Owner']) | list | length > 0) | tojson }} {% else %} false{% endif %}
+        },
+        year: new Date().getFullYear(),
             version: "{{ current_version }}",
-            currentLanguage: "{{ session.get('lang', 'en') }}"
+                currentLanguage: "{{ session.get('lang', 'en') }}"
         };
     </script>
     <title>{% block title %}DemoSite{% endblock %}</title>

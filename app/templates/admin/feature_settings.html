@@ -1,37 +1,185 @@
-{% extends "base.html" %}
+{% extends "admin_base.html" %}
 
-{% block additional_css %}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/admindash.css') }}">
+{% block title %}Feature Settings | Admin{% endblock %}
+
+{% block admin_css %}
 <style>
+    /* ====================================================================
+       Feature Settings Page - Premium Design
+       Uses base.css theme variables for consistency
+       ==================================================================== */
+
+    .feature-settings-page {
+        padding: 2rem;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    /* Page Header */
+    .feature-header-section {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 2rem;
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        border: 1px solid rgba(65, 105, 225, 0.2);
+        box-shadow: var(--shadow-light);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .feature-header-section::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: var(--pulse-effect);
+        opacity: 0.2;
+        z-index: 0;
+        animation: pulse 15s infinite ease-in-out;
+    }
+
+    .feature-header-section h1 {
+        font-family: 'Neon-Heavy', sans-serif;
+        font-size: 2rem;
+        color: var(--text-primary);
+        margin: 0 0 0.5rem 0;
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    .feature-header-section h1 i {
+        color: var(--accent-blue);
+        font-size: 1.75rem;
+    }
+
+    .feature-header-section p {
+        font-family: 'Neon-Regular', sans-serif;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 1rem;
+        margin: 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Feature Cards Container */
+    .feature-cards-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        margin-bottom: 2rem;
+    }
+
+    /* Individual Feature Card */
     .feature-toggle-card {
         background: var(--glass-bg);
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-lg);
-        padding: 1.5rem;
-        margin-bottom: 1rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(65, 105, 225, 0.15);
+        border-radius: 12px;
+        padding: 1.75rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
     }
 
-    .feature-toggle-card h3 {
-        margin: 0 0 0.5rem 0;
-        font-size: 1.1rem;
+    .feature-toggle-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(65, 105, 225, 0.05) 0%, transparent 50%);
+        pointer-events: none;
     }
 
-    .feature-toggle-card p {
-        color: var(--text-muted);
-        margin: 0 0 1rem 0;
+    .feature-toggle-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-hover);
+        border-color: rgba(65, 105, 225, 0.3);
+    }
+
+    .feature-toggle-card.enabled {
+        border-left: 4px solid var(--accent-blue);
+    }
+
+    .feature-toggle-card.disabled {
+        border-left: 4px solid rgba(255, 255, 255, 0.2);
+        opacity: 0.85;
+    }
+
+    /* Feature Header */
+    .feature-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 1.25rem;
+        margin-bottom: 1.25rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .feature-icon-wrapper {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        background: var(--btn-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(65, 105, 225, 0.3);
+    }
+
+    .feature-icon-wrapper i {
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .feature-info h3 {
+        font-family: 'Neon-Heavy', sans-serif;
+        font-size: 1.2rem;
+        color: var(--text-primary);
+        margin: 0 0 0.375rem 0;
+    }
+
+    .feature-info p {
+        font-family: 'Neon-Regular', sans-serif;
+        color: rgba(255, 255, 255, 0.6);
         font-size: 0.9rem;
+        margin: 0;
+        line-height: 1.5;
     }
 
+    /* Feature Toggle Control */
     .feature-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(65, 105, 225, 0.1);
+        position: relative;
+        z-index: 1;
+    }
+
+    .toggle-wrapper {
         display: flex;
         align-items: center;
         gap: 1rem;
     }
 
+    /* Custom Toggle Switch */
     .toggle-switch {
         position: relative;
-        width: 50px;
-        height: 26px;
+        width: 56px;
+        height: 30px;
+        cursor: pointer;
     }
 
     .toggle-switch input {
@@ -47,101 +195,323 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background-color: var(--secondary-color);
-        transition: 0.3s;
-        border-radius: 26px;
+        background: rgba(255, 255, 255, 0.15);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 30px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .toggle-slider:before {
         position: absolute;
         content: "";
-        height: 20px;
-        width: 20px;
-        left: 3px;
+        height: 22px;
+        width: 22px;
+        left: 4px;
         bottom: 3px;
-        background-color: white;
-        transition: 0.3s;
+        background: white;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         border-radius: 50%;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     }
 
     input:checked+.toggle-slider {
-        background-color: var(--primary-color);
+        background: var(--btn-gradient);
+        border-color: var(--accent-blue);
+        box-shadow: 0 0 20px rgba(65, 105, 225, 0.4);
     }
 
     input:checked+.toggle-slider:before {
-        transform: translateX(24px);
+        transform: translateX(26px);
     }
 
-    .toggle-label {
-        font-weight: 500;
+    input:focus+.toggle-slider {
+        box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.3);
     }
 
-    .feature-icon {
-        font-size: 2rem;
-        opacity: 0.7;
-        margin-right: 1rem;
+    /* Status Badge */
+    .status-badge {
+        font-family: 'Neon-Regular', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 600;
+        padding: 0.375rem 0.875rem;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
-    .feature-header {
+    .status-badge.enabled {
+        background: linear-gradient(90deg, rgba(46, 204, 113, 0.2), rgba(40, 167, 69, 0.2));
+        color: #2ecc71;
+        border: 1px solid rgba(46, 204, 113, 0.3);
+    }
+
+    .status-badge.disabled {
+        background: rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Feature Sub-info */
+    .feature-subinfo {
+        display: flex;
+        gap: 1.5rem;
+        margin-top: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .feature-subinfo span {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.5);
         display: flex;
         align-items: center;
+        gap: 0.375rem;
+    }
+
+    .feature-subinfo span i {
+        font-size: 0.75rem;
+        color: var(--accent-blue);
+    }
+
+    /* Action Buttons */
+    .feature-actions {
+        display: flex;
+        gap: 1rem;
+        padding: 1.5rem 2rem;
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        border: 1px solid rgba(65, 105, 225, 0.15);
+        justify-content: flex-end;
+    }
+
+    .btn-save {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        font-family: 'Neon-Heavy', sans-serif;
+        font-size: 0.95rem;
+        color: var(--text-primary);
+        background: var(--btn-gradient);
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: var(--shadow-light);
+        transition: all 0.3s ease;
+    }
+
+    .btn-save:hover {
+        background: linear-gradient(90deg, var(--accent-blue-dark), var(--accent-blue));
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .btn-save:active {
+        transform: translateY(0);
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        font-family: 'Neon-Regular', sans-serif;
+        font-size: 0.95rem;
+        color: rgba(255, 255, 255, 0.7);
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-back:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.3);
+        color: var(--text-primary);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .feature-settings-page {
+            padding: 1rem;
+        }
+
+        .feature-header-section {
+            padding: 1.5rem;
+        }
+
+        .feature-header-section h1 {
+            font-size: 1.5rem;
+        }
+
+        .feature-toggle-card {
+            padding: 1.25rem;
+        }
+
+        .feature-header {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .feature-icon-wrapper {
+            margin: 0 auto;
+        }
+
+        .feature-toggle {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .feature-actions {
+            flex-direction: column;
+            padding: 1rem;
+        }
+
+        .btn-save,
+        .btn-back {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    /* Pulse Animation (uses base.css animation) */
+    @keyframes pulse {
+        0% {
+            transform: scale(0.8);
+            opacity: 0.3;
+        }
+
+        50% {
+            transform: scale(1);
+            opacity: 0.5;
+        }
+
+        100% {
+            transform: scale(0.8);
+            opacity: 0.3;
+        }
     }
 </style>
 {% endblock %}
 
-{% block content %}
-<div class="admin-container">
-    <div class="admin-header">
+{% block admin_content %}
+<div class="feature-settings-page">
+    <!-- Page Header -->
+    <div class="feature-header-section">
         <h1><i class="fas fa-toggle-on"></i> Feature Settings</h1>
-        <p class="text-muted">Enable or disable major application features</p>
+        <p>Enable or disable major application features to customize your platform</p>
     </div>
 
     <form method="POST" action="{{ url_for('admin.feature_settings') }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-        <div class="feature-toggle-card">
-            <div class="feature-header">
-                <i class="fas fa-shopping-cart feature-icon"></i>
-                <div>
-                    <h3>E-commerce</h3>
-                    <p>Enable product catalog, shopping cart, checkout, and order management</p>
+        <div class="feature-cards-container">
+            <!-- E-commerce -->
+            <div class="feature-toggle-card {% if features.ecommerce_enabled %}enabled{% else %}disabled{% endif %}">
+                <div class="feature-header">
+                    <div class="feature-icon-wrapper">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="feature-info">
+                        <h3>E-commerce</h3>
+                        <p>Enable product catalog, shopping cart, checkout, and order management for your online store.
+                        </p>
+                        <div class="feature-subinfo">
+                            <span><i class="fas fa-box"></i> Products</span>
+                            <span><i class="fas fa-credit-card"></i> Payments</span>
+                            <span><i class="fas fa-truck"></i> Orders</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-toggle">
+                    <div class="toggle-wrapper">
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="ecommerce_enabled" {% if features.ecommerce_enabled %}checked{%
+                                endif %}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span
+                            class="status-badge {% if features.ecommerce_enabled %}enabled{% else %}disabled{% endif %}">
+                            {% if features.ecommerce_enabled %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </div>
                 </div>
             </div>
-            <div class="feature-toggle">
-                <label class="toggle-switch">
-                    <input type="checkbox" name="ecommerce_enabled" {% if features.ecommerce_enabled %}checked{% endif
-                        %}>
-                    <span class="toggle-slider"></span>
-                </label>
-                <span class="toggle-label">{% if features.ecommerce_enabled %}Enabled{% else %}Disabled{% endif
-                    %}</span>
+
+            <!-- Booking & Appointments -->
+            <div class="feature-toggle-card {% if features.booking_enabled %}enabled{% else %}disabled{% endif %}">
+                <div class="feature-header">
+                    <div class="feature-icon-wrapper">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="feature-info">
+                        <h3>Booking & Appointments</h3>
+                        <p>Enable the public booking page, appointment scheduling, and calendar management for your
+                            services.</p>
+                        <div class="feature-subinfo">
+                            <span><i class="fas fa-clock"></i> Scheduling</span>
+                            <span><i class="fas fa-user-clock"></i> Availability</span>
+                            <span><i class="fas fa-bell"></i> Reminders</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-toggle">
+                    <div class="toggle-wrapper">
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="booking_enabled" {% if features.booking_enabled %}checked{%
+                                endif %}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span
+                            class="status-badge {% if features.booking_enabled %}enabled{% else %}disabled{% endif %}">
+                            {% if features.booking_enabled %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Field Service Management -->
+            <div class="feature-toggle-card {% if features.scheduling_enabled %}enabled{% else %}disabled{% endif %}">
+                <div class="feature-header">
+                    <div class="feature-icon-wrapper">
+                        <i class="fas fa-hard-hat"></i>
+                    </div>
+                    <div class="feature-info">
+                        <h3>Field Service Management</h3>
+                        <p>Enable employee scheduling, time tracking, shift management, and leave request workflows.</p>
+                        <div class="feature-subinfo">
+                            <span><i class="fas fa-users"></i> Staff Scheduling</span>
+                            <span><i class="fas fa-clock"></i> Time Tracking</span>
+                            <span><i class="fas fa-exchange-alt"></i> Shift Swaps</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-toggle">
+                    <div class="toggle-wrapper">
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="scheduling_enabled" {% if features.scheduling_enabled
+                                %}checked{% endif %}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span
+                            class="status-badge {% if features.scheduling_enabled %}enabled{% else %}disabled{% endif %}">
+                            {% if features.scheduling_enabled %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="feature-toggle-card">
-            <div class="feature-header">
-                <i class="fas fa-calendar-alt feature-icon"></i>
-                <div>
-                    <h3>Booking & Appointments</h3>
-                    <p>Enable the public booking page, appointment scheduling, and calendar management</p>
-                </div>
-            </div>
-            <div class="feature-toggle">
-                <label class="toggle-switch">
-                    <input type="checkbox" name="booking_enabled" {% if features.booking_enabled %}checked{% endif %}>
-                    <span class="toggle-slider"></span>
-                </label>
-                <span class="toggle-label">{% if features.booking_enabled %}Enabled{% else %}Disabled{% endif %}</span>
-            </div>
-        </div>
-
-        <div class="mt-4">
-            <button type="submit" class="btn btn-primary">
-                <i class="fas fa-save"></i> Save Settings
-            </button>
-            <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-outline-secondary ms-2">
+        <!-- Action Buttons -->
+        <div class="feature-actions">
+            <a href="{{ url_for('admin.admin_dashboard') }}" class="btn-back">
                 <i class="fas fa-arrow-left"></i> Back to Dashboard
             </a>
+            <button type="submit" class="btn-save">
+                <i class="fas fa-save"></i> Save Settings
+            </button>
         </div>
     </form>
 </div>

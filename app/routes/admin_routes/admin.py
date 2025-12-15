@@ -667,10 +667,12 @@ def feature_settings():
             # Get feature toggles from form
             ecommerce_enabled = 'true' if request.form.get('ecommerce_enabled') else 'false'
             booking_enabled = 'true' if request.form.get('booking_enabled') else 'false'
+            scheduling_enabled = 'true' if request.form.get('scheduling_enabled') else 'false'
             
             settings = {
                 'ecommerce_enabled': ecommerce_enabled,
-                'booking_enabled': booking_enabled
+                'booking_enabled': booking_enabled,
+                'scheduling_enabled': scheduling_enabled
             }
             
             for name, value in settings.items():
@@ -696,7 +698,8 @@ def feature_settings():
     # Default to enabled for existing deployments
     features = {
         'ecommerce_enabled': configs.get('ecommerce_enabled', 'true') == 'true',
-        'booking_enabled': configs.get('booking_enabled', 'true') == 'true'
+        'booking_enabled': configs.get('booking_enabled', 'true') == 'true',
+        'scheduling_enabled': configs.get('scheduling_enabled', 'true') == 'true'
     }
     
     return render_template('admin/feature_settings.html', form=form, features=features)
